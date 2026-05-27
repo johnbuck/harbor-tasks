@@ -14,18 +14,15 @@ environment:
   type: docker
   force_build: false
   delete: true
+  # Forwarded into the sandbox where the agent CLI runs.
   env:
     - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 
 agents:
   - import_path: lib.openclaw_openrouter.OpenClawOpenRouter
     model_name: openrouter/anthropic/claude-sonnet-4-5
-    env:
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
   - name: hermes
     model_name: openrouter/anthropic/claude-sonnet-4-5
-    env:
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 
 datasets:
   # Point at parent dir; Harbor iterates child dirs looking for task.toml.
