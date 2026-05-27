@@ -1,0 +1,33 @@
+# First real-LLM trial: openclaw + hermes on one task, same model.
+# Inject OPENROUTER_API_KEY via `infisical run` — do NOT put it here.
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_openrouter.OpenClawOpenRouter
+    model_name: openrouter/anthropic/claude-sonnet-4-5
+    env:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+  - name: hermes
+    model_name: openrouter/anthropic/claude-sonnet-4-5
+    env:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+datasets:
+  # Point at parent dir; Harbor iterates child dirs looking for task.toml.
+  # Only one task there for now (fix-bug-with-failing-test-01).
+  - path: /home/trumble/harbor-tasks/tasks/code-editing
