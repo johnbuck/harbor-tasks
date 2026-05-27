@@ -1,0 +1,19 @@
+# Local secrets — never commit. Use `infisical run` to inject at runtime.
+.env
+.env.*
+!.env.template
+
+# Harbor job outputs (kept local; opt-in upload to Harbor Hub if needed)
+jobs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
