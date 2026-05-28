@@ -1,5 +1,10 @@
 # First real-LLM trial: openclaw + hermes on one task, same model.
-# Inject OPENROUTER_API_KEY via `infisical run` — do NOT put it here.
+# Inject ANTHROPIC_API_KEY via `infisical run` — do NOT put it here.
+#
+# We use anthropic/<model> rather than openrouter/anthropic/<model> because:
+#   1. Both adapters support 'anthropic' natively (no subclass workaround)
+#   2. Anthropic-direct billing is exact (no OpenRouter markup)
+#   3. Same underlying model + API endpoint
 
 jobs_dir: /tmp/harbor-jobs
 n_attempts: 1
@@ -14,17 +19,14 @@ environment:
   type: docker
   force_build: false
   delete: true
-  # Forwarded into the sandbox where the agent CLI runs.
   env:
-    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 
 agents:
-  - import_path: lib.openclaw_openrouter.OpenClawOpenRouter
-    model_name: openrouter/anthropic/claude-sonnet-4-5
-  - name: hermes
-    model_name: openrouter/anthropic/claude-sonnet-4-5
+  - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
+    model_name: anthropic/claude-sonnet-4-5
+  - import_path: lib.hermes_no_install:HermesNoInstall
+    model_name: anthropic/claude-sonnet-4-5
 
 datasets:
-  # Point at parent dir; Harbor iterates child dirs looking for task.toml.
-  # Only one task there for now (fix-bug-with-failing-test-01).
   - path: <repo>/tasks/code-editing
