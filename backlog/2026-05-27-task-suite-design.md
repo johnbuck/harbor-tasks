@@ -63,10 +63,57 @@ First-sweep shape per category + verifier types are in [`SHAPES.md`](../SHAPES.m
 - [x] First worked example shipped + validated:
       `tasks/code-editing/fix-bug-with-failing-test-01` (1.0 on both harnesses).
 
-## Status notes
+## Status notes (updated 2026-05-27 PM)
 
-- 1 of 17 first-sweep shapes authored (fix-bug-with-failing-test-01).
-- Remaining 16 shapes + their instances are the bulk of the open work.
+**Authored so far — all under `tasks/code-editing/`, 3 shapes:**
+
+- `fix-bug-with-failing-test` × 5 (01 wordcount, 02 running_total,
+  03 palindrome, 04 intervals, 05 flatten) — easy→medium.
+- `add-feature-with-tests` × 2 (01 LRU cache /medium, 02 infix evaluator /hard).
+- `refactor-multi-file` × 1 (01 geometry pkg, forces polymorphic refactor /hard).
+
+All 8 validate with `--agent oracle` (8/8 correctness 1.0).
+
+**Sweep results:**
+
+- `sweep-coding-5` (5 fix-bug × openclaw+hermes, Kimi K2.6 pinned Io Net):
+  10/10 correct. openclaw 166.8s/$0.219, hermes 179.8s/$0.211 — effectively
+  tied. Finding: `fix-bug-with-failing-test` is **too easy to differentiate**
+  these harnesses; the single-task "hermes 35% faster" was n=1 noise (washed
+  out across 5).
+- `sweep-coding-8` (adds the 3 harder tasks): **LAUNCHED, results pending**
+  (background job `b0i1rs36u`, log `/tmp/sweep.log`, results
+  `/tmp/harbor-jobs/sweep-coding-8/`). Open question this sweep answers: do the
+  harder shapes finally split openclaw vs hermes?
+
+**Remaining:** the other 14 first-sweep categories (1 shape each) + more
+instances per shape. Code-editing is the only category with tasks so far.
+
+## How to run a sweep (operational quickref)
+
+From landon, model = Kimi K2.6 pinned to Io Net (privacy-allowed, deterministic):
+
+```bash
+cd /tmp/harbor   # the Harbor checkout with uv env + bun-built viewer
+set -a; source ~/.config/infisical/agent-architect.env; set +a
+TOKEN=$(infisical login --method=universal-auth \
+  --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" \
+  --domain="$INFISICAL_SITE_URL/api" --plain --silent)
+PYTHONPATH=/home/trumble/harbor-tasks infisical run \
+  --projectId=7dadfcc8-2a6f-41f8-9678-49e9bbe204a5 --env=production --path=/proxy/ \
+  --domain="$INFISICAL_SITE_URL" --token="$TOKEN" \
+  -- uv run harbor run -c /home/trumble/harbor-tasks/configs/first-real-trial.yaml \
+       --job-name <NAME> --n-concurrent 3 -y
+```
+
+- Config (`configs/first-real-trial.yaml`) points its dataset at
+  `tasks/code-editing/` (picks up ALL task dirs there) — narrow it or add a
+  per-sweep config to target a subset.
+- Validate new tasks free with `--agent oracle` before spending tokens.
+- View: `harbor view /tmp/harbor-jobs --port 8089` (needs bun; already built).
+- Per-task breakdown: the analysis one-liner used in chat reads each trial's
+  `result.json` → `agent_info.name`, `agent_result.{cost_usd,n_*_tokens}`,
+  `agent_execution.{started_at,finished_at}`, `verifier_result.rewards`.
 
 ## Follow-up tickets
 
