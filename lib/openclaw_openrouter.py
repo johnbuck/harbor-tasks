@@ -21,33 +21,63 @@ Usage:
 Requires OPENROUTER_API_KEY in env.
 """
 
+import functools
+import json
+import urllib.request
+
 from harbor.agents.installed.openclaw import OpenClaw
 from harbor.models.agent.context import AgentContext
 
 
-# Per-million-token prices, USD. Add models as we run them.
-# Sources: Anthropic / OpenAI published pricing as of 2026-05-27.
-# OpenRouter adds a small markup (~5%); these are list prices.
-_PRICES_PER_MTOK = {
-    "openrouter/anthropic/claude-sonnet-4-5": {
-        "input": 3.00,
-        "output": 15.00,
-        "cache_read": 0.30,
-        "cache_write": 3.75,
-    },
-    "openrouter/anthropic/claude-opus-4-5": {
-        "input": 15.00,
-        "output": 75.00,
-        "cache_read": 1.50,
-        "cache_write": 18.75,
-    },
+_OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
+
+# Offline fallback, per-MILLION-token USD. Only consulted when the live
+# OpenRouter pricing fetch fails (no network, API down). Live pricing is
+# authoritative — do not hand-tune these for accuracy, they're a safety net.
+_FALLBACK_PRICES_PER_MTOK = {
     "anthropic/claude-sonnet-4-5": {
-        "input": 3.00,
-        "output": 15.00,
-        "cache_read": 0.30,
-        "cache_write": 3.75,
+        "input": 3.00, "output": 15.00, "cache_read": 0.30, "cache_write": 3.75,
+    },
+    "deepseek/deepseek-v4-pro": {
+        "input": 0.435, "output": 0.870, "cache_read": 0.003625, "cache_write": 0.0,
     },
 }
+
+
+@functools.lru_cache(maxsize=1)
+def _openrouter_pricing() -> dict[str, dict[str, float]]:
+    """Per-TOKEN USD pricing for every OpenRouter model. Fetched once per process.
+
+    Returns {model_id: {input, output, cache_read, cache_write}} with rates
+    already in USD-per-token (OpenRouter's native unit). Empty dict on failure.
+    """
+    try:
+        req = urllib.request.Request(
+            _OPENROUTER_MODELS_URL, headers={"User-Agent": "harbor-tasks/eval"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+    except Exception:
+        return {}
+    out: dict[str, dict[str, float]] = {}
+    for m in data.get("data", []):
+        p = m.get("pricing", {})
+        try:
+            out[m["id"]] = {
+                "input": float(p.get("prompt") or 0),
+                "output": float(p.get("completion") or 0),
+                "cache_read": float(p.get("input_cache_read") or 0),
+                "cache_write": float(p.get("input_cache_write") or 0),
+            }
+        except (TypeError, ValueError, KeyError):
+            continue
+    return out
+
+
+def _openrouter_slug(model_name: str) -> str:
+    """Strip our 'openrouter/' routing prefix to get the OpenRouter model id."""
+    prefix = "openrouter/"
+    return model_name[len(prefix):] if model_name.startswith(prefix) else model_name
 
 
 def _compute_cost_usd(
@@ -57,20 +87,33 @@ def _compute_cost_usd(
     cache_read_tokens: int,
     cache_write_tokens: int = 0,
 ) -> float | None:
-    """Return total cost in USD, or None if the model isn't priced.
+    """Return total cost in USD, or None if the model can't be priced.
 
-    Takes raw token counts as the agent reports them — NOT Harbor's
-    combined n_input_tokens convention. Callers must split the
-    real_input from cache_read themselves.
+    Live OpenRouter pricing is authoritative (per-token rates). Falls back to
+    the hardcoded per-MTok table only if the fetch failed.
+
+    Takes raw token counts as the agent reports them — NOT Harbor's combined
+    n_input_tokens convention. Callers split real_input from cache_read.
     """
-    prices = _PRICES_PER_MTOK.get(model_name)
-    if not prices:
+    slug = _openrouter_slug(model_name)
+
+    live = _openrouter_pricing().get(slug)
+    if live:
+        return (
+            real_input_tokens * live["input"]
+            + output_tokens * live["output"]
+            + cache_read_tokens * live["cache_read"]
+            + cache_write_tokens * live["cache_write"]
+        )
+
+    fb = _FALLBACK_PRICES_PER_MTOK.get(slug) or _FALLBACK_PRICES_PER_MTOK.get(model_name)
+    if not fb:
         return None
     return (
-        real_input_tokens * prices["input"] / 1_000_000
-        + output_tokens * prices["output"] / 1_000_000
-        + cache_read_tokens * prices["cache_read"] / 1_000_000
-        + cache_write_tokens * prices["cache_write"] / 1_000_000
+        real_input_tokens * fb["input"] / 1_000_000
+        + output_tokens * fb["output"] / 1_000_000
+        + cache_read_tokens * fb["cache_read"] / 1_000_000
+        + cache_write_tokens * fb["cache_write"] / 1_000_000
     )
 
 
