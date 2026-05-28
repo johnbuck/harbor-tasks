@@ -51,11 +51,17 @@ what a memory task measures.
    resets per step fails. Recall verifier is deterministic (grep for the exact
    facts), reward strategy `final`.
 
-2. **`multistep-memory-explicit`** (category: context-management).
-   Agent is **told** to persist what it will need (a notes file of its choice)
-   across steps; later steps require recalling/using it. Harness-agnostic —
-   measures *deliberate* context management. Deterministic recall verifier,
-   `final`.
+2. **`multistep-context-fill`** (category: context-management) — **replaced the
+   shallow 3-step `multistep-memory-explicit` (operator: "three steps is not
+   enough; fill the context").** A genuine long-session test: **11 ingest steps
+   (~24K-token document each, ~265K-token corpus, past a 200K window) + 1 recall
+   step.** Each chunk hides a non-guessable `MARKER-NN-<sha>` line; the per-step
+   verifier requires that marker in `/app/notes.md`, so the agent cannot skip
+   reading. The needle facts are planted in chunk_01; step 12 asks to recall
+   them "without re-reading" using the notes. A naive agent loses chunk_01 after
+   265K of material; a good context-manager (durable notes) recalls it. Corpus
+   generated at build (`gen_chunks.py`) so the repo stays lean. Deterministic
+   recall verifier, `final` strategy.
 
 3. **`multistep-plan-execute`** (category: tool-orchestration).
    Step 1 produce a plan; subsequent steps execute parts of it, each building on

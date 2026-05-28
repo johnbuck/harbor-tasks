@@ -1,0 +1,11 @@
+You are reviewing a large batch of documents one at a time. This is
+document **1 of 11**. The documents are long and mostly filler.
+
+Read `/app/chunks/chunk_01.txt`. Buried inside is exactly one line of the
+form `MARKER-01-XXXXXXXX`.
+
+Maintain a running notes file at `/app/notes.md`. For this document, append the
+marker code you found. You will NOT be able to re-read these documents at the
+end, so capture anything important now.
+
+This first document also contains a line beginning `IMPORTANT FACTS:` — record those facts in your notes verbatim; you will be quizzed on them at the very end.
