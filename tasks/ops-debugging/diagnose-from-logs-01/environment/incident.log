@@ -1,0 +1,25 @@
+2026-05-27 08:01:03 INFO  [server] Worker 1 started, listening on 0.0.0.0:8080
+2026-05-27 08:01:03 INFO  [server] Worker 2 started, listening on 0.0.0.0:8080
+2026-05-27 08:01:03 INFO  [server] Worker 3 started, listening on 0.0.0.0:8080
+2026-05-27 08:01:03 INFO  [server] Worker 4 started, listening on 0.0.0.0:8080
+2026-05-27 08:01:05 INFO  [db] Connection pool established (size=10, host=db.internal:5432)
+2026-05-27 08:01:05 INFO  [server] Ready to accept connections
+2026-05-27 08:03:12 INFO  [request] POST /api/session method=POST remote=10.0.1.44
+2026-05-27 08:03:12 INFO  [auth] Session created for user_id=1042
+2026-05-27 08:03:13 INFO  [request] GET /api/profile method=GET remote=10.0.1.44 user_id=1042
+2026-05-27 08:03:13 INFO  [profile] Loaded profile for user_id=1042
+2026-05-27 08:05:47 INFO  [request] POST /api/session method=POST remote=10.0.2.18
+2026-05-27 08:05:47 INFO  [auth] Session created for user_id=2291
+2026-05-27 08:05:48 INFO  [request] GET /api/items method=GET remote=10.0.2.18 user_id=2291
+2026-05-27 08:05:48 INFO  [items] Returned 14 items for user_id=2291
+2026-05-27 08:11:22 INFO  [request] POST /api/action method=POST remote=10.0.3.77 body={"action":"transfer","amount":250}
+2026-05-27 08:11:22 DEBUG [handler] Entering handle_request with payload={'action': 'transfer', 'amount': 250}
+2026-05-27 08:11:22 ERROR [handler] Unhandled exception in handle_request
+Traceback (most recent call last):
+  File "/app/server.py", line 84, in dispatch
+    result = handle_request(payload)
+  File "/app/server.py", line 112, in handle_request
+    user = db.get_user(payload['user_id'])
+KeyError: 'user_id'
+2026-05-27 08:11:22 ERROR [server] Request failed: POST /api/action status=500 remote=10.0.3.77
+2026-05-27 08:11:22 INFO  [server] Sending 500 Internal Server Error to 10.0.3.77

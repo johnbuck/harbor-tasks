@@ -1,0 +1,46 @@
+# Full first-sweep: openclaw vs hermes across all 17 decided categories.
+# Model = Kimi K2.6 via OpenRouter, pinned to "Io Net" in both adapters for
+# deterministic caching + price. Inject keys via `infisical run --path=/proxy/`
+# (OPENROUTER_API_KEY for the agents, ANTHROPIC_API_KEY for the judge verifiers).
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 3
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
+    model_name: openrouter/moonshotai/kimi-k2.6
+  - import_path: lib.hermes_no_install:HermesNoInstall
+    model_name: moonshotai/kimi-k2.6
+
+datasets:
+  - path: /home/trumble/harbor-tasks/tasks/code-editing
+  - path: /home/trumble/harbor-tasks/tasks/ops-debugging
+  - path: /home/trumble/harbor-tasks/tasks/research-rag
+  - path: /home/trumble/harbor-tasks/tasks/conversation-persona
+  - path: /home/trumble/harbor-tasks/tasks/building-prototypes
+  - path: /home/trumble/harbor-tasks/tasks/building-designs
+  - path: /home/trumble/harbor-tasks/tasks/insights-research
+  - path: /home/trumble/harbor-tasks/tasks/marketing
+  - path: /home/trumble/harbor-tasks/tasks/data-analytics
+  - path: /home/trumble/harbor-tasks/tasks/documentation
+  - path: /home/trumble/harbor-tasks/tasks/code-spec-review
+  - path: /home/trumble/harbor-tasks/tasks/test-authoring
+  - path: /home/trumble/harbor-tasks/tasks/tool-orchestration
+  - path: /home/trumble/harbor-tasks/tasks/skill-agent-authoring
+  - path: /home/trumble/harbor-tasks/tasks/migration
+  - path: /home/trumble/harbor-tasks/tasks/compliance-security
+  - path: /home/trumble/harbor-tasks/tasks/backup-dr

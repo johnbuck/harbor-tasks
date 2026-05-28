@@ -1,0 +1,33 @@
+# Established-benchmark runs. Uses the INSTALL-CAPABLE agent adapters
+# (OpenClawOpenRouter / HermesOpenRouter) because benchmark task images ship
+# their own environment and lack the prebaked agent — the adapters self-install
+# node/openclaw + hermes at trial time (~2-4 min each). Privacy provider pool +
+# accurate cost are inherited. Repoint `datasets[].path` per benchmark.
+# Run via `infisical run --path=/proxy/` for OPENROUTER_API_KEY (+ ANTHROPIC for
+# any judge-graded benchmark like simpleqa).
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 3
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_openrouter:OpenClawOpenRouter
+    model_name: openrouter/moonshotai/kimi-k2.6
+  - import_path: lib.hermes_no_install:HermesOpenRouter
+    model_name: moonshotai/kimi-k2.6
+
+datasets:
+  - path: /tmp/harbor-benchmarks/ds1000

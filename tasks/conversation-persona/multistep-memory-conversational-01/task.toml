@@ -1,0 +1,53 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/multistep-memory-conversational-01"
+description = "Multi-turn: facts given in an early step, recalled later with NO notes allowed — tests implicit session memory across steps."
+authors = [{name = "johnbuck"}]
+keywords = ["conversation-persona", "remember-facts", "multi-step", "memory"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "medium"
+category = "conversation-persona"
+shape = "multistep-memory-conversational"
+tags = ["conversation-persona", "multi-step", "memory-conversational"]
+
+multi_step_reward_strategy = "final"
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[agent]
+timeout_sec = 300.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-intro"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-recall"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
