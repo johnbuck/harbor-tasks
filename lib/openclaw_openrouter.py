@@ -25,11 +25,25 @@ import functools
 import json
 import urllib.request
 
+from harbor.agents.installed.base import CliFlag
 from harbor.agents.installed.openclaw import OpenClaw
 from harbor.models.agent.context import AgentContext
 
 
 _OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
+
+# Reasoning passthrough. openclaw's `--thinking` flag gates on its OWN model
+# registry, which is blind to the underlying model behind the OpenRouter
+# passthrough — so it rejects every level except "off" for OR-routed models
+# (confirmed kimi-k2.6 AND deepseek-v4-pro). We therefore force `--thinking off`
+# (so openclaw's flag never errors) and instead enable reasoning at the
+# OpenRouter layer via the documented `reasoning` body param, injected through
+# the same `models.providers.openrouter.params` extra-body passthrough we use
+# for `provider`. This makes reasoning work for ANY OR reasoning-capable model,
+# independent of openclaw's registry. Set to None to disable reasoning entirely.
+# `effort` low keeps cost sane; OpenRouter maps it to the model's native control
+# (reasoning_effort / thinking budget). Keep in sync with hermes' provider_routing.
+OPENROUTER_REASONING: dict | None = {"effort": "low"}
 
 # Privacy-floored OpenRouter pool. We route only to upstream hosts that do NOT
 # store or train on prompts (`data_collection: "deny"`) and allow fallback
@@ -138,6 +152,15 @@ class OpenClawOpenRouter(OpenClaw):
 
     _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
+    # Force openclaw's --thinking flag to "off" so it never errors on its stale
+    # registry for OpenRouter models. Reasoning is enabled separately via the
+    # `reasoning` body param (see OPENROUTER_REASONING + below).
+    CLI_FLAGS = [
+        CliFlag(kwarg="thinking", cli="--thinking", type="str", default="off")
+        if f.kwarg == "thinking" else f
+        for f in OpenClaw.CLI_FLAGS
+    ]
+
     def _merge_provider_base_url_from_env(self, cfg):
         super()._merge_provider_base_url_from_env(cfg)
         if self._model_provider() != "openrouter":
@@ -152,6 +175,10 @@ class OpenClawOpenRouter(OpenClaw):
         if isinstance(prov, dict):
             params = prov.setdefault("params", {})
             params["provider"] = dict(OPENROUTER_PROVIDER_ROUTING)
+            # Enable reasoning at the OpenRouter layer (bypasses openclaw's
+            # --thinking registry, which is forced to "off" via CLI_FLAGS).
+            if OPENROUTER_REASONING is not None:
+                params["reasoning"] = dict(OPENROUTER_REASONING)
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
