@@ -1,10 +1,13 @@
-# First real-LLM trial: openclaw + hermes on one task, same model.
-# Inject ANTHROPIC_API_KEY via `infisical run` — do NOT put it here.
+# First real-LLM trial: openclaw + hermes on one task, same model, via OpenRouter.
+# Inject OPENROUTER_API_KEY via `infisical run` — do NOT put it here.
 #
-# We use anthropic/<model> rather than openrouter/anthropic/<model> because:
-#   1. Both adapters support 'anthropic' natively (no subclass workaround)
-#   2. Anthropic-direct billing is exact (no OpenRouter markup)
-#   3. Same underlying model + API endpoint
+# Model is DeepSeek V4 Pro (non-Anthropic) on purpose: neither adapter treats
+# 'deepseek' as a native provider, so BOTH fall through to OpenRouter
+# automatically — no native-key-preference dance, no env restriction needed.
+#
+# openclaw gets the openrouter/ prefix (its subclass routes on it);
+# hermes gets the bare slug (it splits, sees non-native provider, uses
+# OPENROUTER_API_KEY). Same underlying model + endpoint either way.
 
 jobs_dir: /tmp/harbor-jobs
 n_attempts: 1
@@ -20,13 +23,13 @@ environment:
   force_build: false
   delete: true
   env:
-    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 
 agents:
   - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
-    model_name: anthropic/claude-sonnet-4-5
+    model_name: openrouter/deepseek/deepseek-v4-pro
   - import_path: lib.hermes_no_install:HermesNoInstall
-    model_name: anthropic/claude-sonnet-4-5
+    model_name: deepseek/deepseek-v4-pro
 
 datasets:
   - path: /home/trumble/harbor-tasks/tasks/code-editing
