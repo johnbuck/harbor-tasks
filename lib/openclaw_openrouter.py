@@ -31,13 +31,21 @@ from harbor.models.agent.context import AgentContext
 
 _OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 
-# Pin OpenRouter to one upstream host so caching + price are deterministic
-# across runs and across harnesses. None = let OpenRouter load-balance
-# (non-deterministic: cache misses + variable price). Set to a provider name
-# to force every call to that host. Must be privacy-guardrail-allowed on the
-# account. "Io Net" is the cheapest allowed host for moonshotai/kimi-k2.6.
+# Privacy-floored OpenRouter pool. We route only to upstream hosts that do NOT
+# store or train on prompts (`data_collection: "deny"`) and allow fallback
+# across all such hosts. This spreads load so a single low-rate-limit host
+# (we used to pin "Io Net") can't 429 the whole sweep, while still honoring the
+# privacy guardrail: no host retains data for training/storage.
+#
+# Trade-off vs a single pin: per-host KV caching and per-token price are no
+# longer deterministic (OpenRouter load-balances across compliant hosts). The
+# comparison stays fair because BOTH harnesses use the same pool, and cost is
+# computed from live per-token pricing per call regardless of host.
 # Keep in sync with lib/hermes_no_install.py.
-PINNED_OPENROUTER_PROVIDER: str | None = "Io Net"
+OPENROUTER_PROVIDER_ROUTING: dict = {
+    "data_collection": "deny",
+    "allow_fallbacks": True,
+}
 
 # Offline fallback, per-MILLION-token USD. Only consulted when the live
 # OpenRouter pricing fetch fails (no network, API down). Live pricing is
@@ -138,21 +146,21 @@ class OpenClawOpenRouter(OpenClaw):
         prov = providers.setdefault("openrouter", {})
         if isinstance(prov, dict) and "baseUrl" not in prov:
             prov["baseUrl"] = self._OPENROUTER_BASE_URL
-        # Pin upstream provider via OpenRouter's `provider` routing field,
-        # passed through openclaw's documented extra-body passthrough.
-        if isinstance(prov, dict) and PINNED_OPENROUTER_PROVIDER:
+        # Apply the privacy-floored provider pool via OpenRouter's `provider`
+        # routing field, passed through openclaw's documented extra-body
+        # passthrough.
+        if isinstance(prov, dict):
             params = prov.setdefault("params", {})
-            params["provider"] = {
-                "only": [PINNED_OPENROUTER_PROVIDER],
-                "allow_fallbacks": False,
-            }
+            params["provider"] = dict(OPENROUTER_PROVIDER_ROUTING)
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
-        # Fall-back cost calc when the subclass (or any other path) doesn't
-        # override with the cache_write-aware version. Approximate — assumes
-        # cache_write = 0. The NoInstall subclass overrides this with the
-        # accurate session-jsonl-based reader.
+        # Accurate cost from openclaw.session.jsonl (cache_write-aware). Works
+        # for both the install-capable path (this class, used for external
+        # benchmark task images) and the NoInstall subclass (prebaked image).
+        self._populate_from_session_jsonl(context)
+        # Fall-back if the session file was absent (e.g. run aborted before any
+        # turn completed): approximate from context totals, cache_write=0.
         if context.cost_usd is None and self.model_name:
             real_input = max(
                 0, (context.n_input_tokens or 0) - (context.n_cache_tokens or 0)
@@ -163,4 +171,42 @@ class OpenClawOpenRouter(OpenClaw):
                 output_tokens=context.n_output_tokens or 0,
                 cache_read_tokens=context.n_cache_tokens or 0,
                 cache_write_tokens=0,
+            )
+
+    def _populate_from_session_jsonl(self, context: AgentContext) -> None:
+        """Recompute cost from openclaw.session.jsonl with cache_write."""
+        session_path = self.logs_dir / "openclaw.session.jsonl"
+        if not session_path.exists():
+            return
+        totals = {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}
+        try:
+            for line in session_path.read_text().splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                msg = row.get("message")
+                if not isinstance(msg, dict):
+                    continue
+                usage = msg.get("usage")
+                if not isinstance(usage, dict):
+                    continue
+                for k in totals:
+                    totals[k] += int(usage.get(k) or 0)
+        except OSError:
+            return
+        if not any(totals.values()):
+            return
+        context.n_input_tokens = totals["input"] + totals["cacheRead"]
+        context.n_cache_tokens = totals["cacheRead"]
+        context.n_output_tokens = totals["output"]
+        if self.model_name:
+            context.cost_usd = _compute_cost_usd(
+                self.model_name,
+                real_input_tokens=totals["input"],
+                output_tokens=totals["output"],
+                cache_read_tokens=totals["cacheRead"],
+                cache_write_tokens=totals["cacheWrite"],
             )

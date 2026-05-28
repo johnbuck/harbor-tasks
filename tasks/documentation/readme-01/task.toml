@@ -1,0 +1,37 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/readme-01"
+description = "Write a README for a small CLI program; graded by an LLM judge."
+authors = [{name = "johnbuck"}]
+keywords = ["documentation", "readme", "llm-as-a-judge"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "documentation"
+shape = "readme"
+tags = ["documentation", "readme", "judge"]
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
+MODEL_NAME = "claude-opus-4-7"
+
+[environment.env]
+
+[solution.env]

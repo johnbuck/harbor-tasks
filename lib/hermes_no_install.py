@@ -18,34 +18,34 @@ from harbor.agents.installed.hermes import Hermes
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
-# Pin OpenRouter to one upstream host (deterministic caching + price).
-# Keep in sync with lib/openclaw_openrouter.py:PINNED_OPENROUTER_PROVIDER.
-PINNED_OPENROUTER_PROVIDER: str | None = "Io Net"
+# Privacy-floored OpenRouter pool: route only to hosts that do not store or
+# train on prompts (`data_collection: "deny"`) and allow fallback across all
+# such hosts. Spreads load to avoid single-host 429s while honoring the privacy
+# guardrail. Trade-off: per-host caching + price no longer deterministic (the
+# comparison stays fair — both harnesses use the same pool).
+# Keep in sync with lib/openclaw_openrouter.py:OPENROUTER_PROVIDER_ROUTING.
+OPENROUTER_PROVIDER_ROUTING: dict = {
+    "data_collection": "deny",
+    "allow_fallbacks": True,
+}
 
 
-class HermesNoInstall(Hermes):
+class HermesOpenRouter(Hermes):
+    """Install-capable Hermes with the privacy provider pool + accurate cost.
+
+    Use this for EXTERNAL benchmark task images (which lack the agent) — it
+    self-installs via Hermes' bundled installer. For OUR prebaked-image tasks
+    use HermesNoInstall (below), which skips the install.
+    """
+
     @staticmethod
     def _build_config_yaml(model: str) -> str:
         base = Hermes._build_config_yaml(model)
-        if not PINNED_OPENROUTER_PROVIDER:
-            return base
         cfg = yaml.safe_load(base)
         # Hermes passes provider_routing through as extra_body.provider on
         # every OpenRouter call (no effect on direct-provider connections).
-        cfg["provider_routing"] = {"only": [PINNED_OPENROUTER_PROVIDER]}
+        cfg["provider_routing"] = dict(OPENROUTER_PROVIDER_ROUTING)
         return yaml.dump(cfg, default_flow_style=False)
-
-    async def install(self, environment: BaseEnvironment) -> None:
-        await self.exec_as_agent(
-            environment,
-            command=(
-                "set -euo pipefail; "
-                'export HERMES_HOME="${HERMES_HOME:-/tmp/hermes}" && '
-                'mkdir -p "$HERMES_HOME" "$HERMES_HOME/sessions" "$HERMES_HOME/skills" "$HERMES_HOME/memories" && '
-                "hermes version"
-            ),
-            timeout_sec=30,
-        )
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
@@ -94,3 +94,19 @@ class HermesNoInstall(Hermes):
         context.n_output_tokens = agg_output
         # Prefer actual cost when hermes has it; otherwise estimated.
         context.cost_usd = cost_actual if cost_actual is not None else cost_estimate
+
+
+class HermesNoInstall(HermesOpenRouter):
+    """Fast path for OUR prebaked-image tasks: skip the full install/setup."""
+
+    async def install(self, environment: BaseEnvironment) -> None:
+        await self.exec_as_agent(
+            environment,
+            command=(
+                "set -euo pipefail; "
+                'export HERMES_HOME="${HERMES_HOME:-/tmp/hermes}" && '
+                'mkdir -p "$HERMES_HOME" "$HERMES_HOME/sessions" "$HERMES_HOME/skills" "$HERMES_HOME/memories" && '
+                "hermes version"
+            ),
+            timeout_sec=30,
+        )

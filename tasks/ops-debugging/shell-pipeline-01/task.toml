@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/shell-pipeline-01"
+description = "Use a shell pipeline to find the IP with the most HTTP 500 responses in an access log."
+authors = [{name = "johnbuck"}]
+keywords = ["ops-debugging", "shell-pipeline", "logs", "bash"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "ops-debugging"
+shape = "shell-pipeline"
+tags = ["ops-debugging", "shell-pipeline"]
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+
+[solution.env]

@@ -1,0 +1,53 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/multistep-plan-execute-03"
+description = "Plan → implement → test a Celsius-to-Fahrenheit CLI tool: c2f.py takes a Celsius value and prints the Fahrenheit equivalent to one decimal place."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "multi-step", "plan-execute", "temperature", "cli"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "tool-orchestration"
+shape = "multistep-plan-execute"
+tags = ["tool-orchestration", "multi-step", "plan-execute"]
+
+multi_step_reward_strategy = "mean"
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = false
+mcp_servers = []
+
+[agent]
+timeout_sec = 180.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-plan"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "02-implement"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "03-test"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 60.0

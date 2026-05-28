@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/secret-scan-01"
+description = "Scan a small repository for hardcoded secrets and write the list of offending files."
+authors = [{name = "johnbuck"}]
+keywords = ["compliance-security", "secret-scan", "python"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "medium"
+category = "compliance-security"
+shape = "secret-scan"
+tags = ["compliance-security", "secret-scan"]
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+
+[solution.env]

@@ -1,0 +1,58 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/multistep-scaffold-implement-document-01"
+description = "Three-step build: scaffold a Python package skeleton, implement the stub, then document it in a README — graded by structure checks and an LLM judge."
+authors = [{name = "johnbuck"}]
+keywords = ["building-prototypes", "scaffold", "python", "multi-step"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "building-prototypes"
+shape = "multistep-scaffold-implement-document"
+tags = ["building-prototypes", "multi-step"]
+
+multi_step_reward_strategy = "mean"
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[agent]
+timeout_sec = 300.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-scaffold"
+min_reward = 1.0
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-implement"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-document"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 60.0
+
+[steps.verifier.env]
+ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
+MODEL_NAME = "claude-opus-4-7"
