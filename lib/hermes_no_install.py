@@ -12,12 +12,29 @@ Two fixes over Harbor's bundled adapter:
 
 import json
 
+import yaml
+
 from harbor.agents.installed.hermes import Hermes
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
+# Pin OpenRouter to one upstream host (deterministic caching + price).
+# Keep in sync with lib/openclaw_openrouter.py:PINNED_OPENROUTER_PROVIDER.
+PINNED_OPENROUTER_PROVIDER: str | None = "Io Net"
+
 
 class HermesNoInstall(Hermes):
+    @staticmethod
+    def _build_config_yaml(model: str) -> str:
+        base = Hermes._build_config_yaml(model)
+        if not PINNED_OPENROUTER_PROVIDER:
+            return base
+        cfg = yaml.safe_load(base)
+        # Hermes passes provider_routing through as extra_body.provider on
+        # every OpenRouter call (no effect on direct-provider connections).
+        cfg["provider_routing"] = {"only": [PINNED_OPENROUTER_PROVIDER]}
+        return yaml.dump(cfg, default_flow_style=False)
+
     async def install(self, environment: BaseEnvironment) -> None:
         await self.exec_as_agent(
             environment,

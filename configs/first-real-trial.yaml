@@ -1,13 +1,17 @@
 # First real-LLM trial: openclaw + hermes on one task, same model, via OpenRouter.
 # Inject OPENROUTER_API_KEY via `infisical run` — do NOT put it here.
 #
-# Model is DeepSeek V4 Pro (non-Anthropic) on purpose: neither adapter treats
-# 'deepseek' as a native provider, so BOTH fall through to OpenRouter
+# Model is Kimi K2.6 (non-Anthropic) on purpose: neither adapter treats
+# 'moonshotai' as a native provider, so BOTH fall through to OpenRouter
 # automatically — no native-key-preference dance, no env restriction needed.
 #
 # openclaw gets the openrouter/ prefix (its subclass routes on it);
 # hermes gets the bare slug (it splits, sees non-native provider, uses
 # OPENROUTER_API_KEY). Same underlying model + endpoint either way.
+#
+# Both subclasses pin the OpenRouter upstream host to "Io Net" (cheapest
+# privacy-guardrail-allowed provider for this model) so caching + price are
+# deterministic across runs and across harnesses.
 
 jobs_dir: /tmp/harbor-jobs
 n_attempts: 1
@@ -27,9 +31,9 @@ environment:
 
 agents:
   - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
-    model_name: openrouter/deepseek/deepseek-v4-pro
+    model_name: openrouter/moonshotai/kimi-k2.6
   - import_path: lib.hermes_no_install:HermesNoInstall
-    model_name: deepseek/deepseek-v4-pro
+    model_name: moonshotai/kimi-k2.6
 
 datasets:
   - path: /home/trumble/harbor-tasks/tasks/code-editing
