@@ -1,15 +1,16 @@
-"""OpenClaw subclass adding OpenRouter as a supported provider + cost computation.
+"""OpenClaw subclass: OpenRouter provider + accurate cost computation.
 
-Harbor's bundled OpenClaw adapter:
-  * restricts the model-provider prefix to {anthropic, nvidia, openai}, and
-  * never sets cost_usd because openclaw's own JSON output doesn't include it.
+Harbor's bundled OpenClaw adapter has two gaps for our use case:
 
-This subclass:
-  1. Extends _SUPPORTED_PROVIDERS to include 'openrouter' and injects the
-     canonical OpenRouter base URL when OPENROUTER_BASE_URL isn't set.
-  2. Computes cost from tokens × per-model price after the trajectory is
-     populated. Uses a small in-class price table; replace with an
-     OpenRouter /generation/<id> lookup when ground-truth is needed.
+  1. Restricts the model-provider prefix to {anthropic, nvidia, openai}.
+  2. Never sets cost_usd — openclaw's own JSON doesn't include it.
+  3. Its FinalMetrics has no cache_write field, so even if cost computation
+     happens downstream it'd miss the 25%-premium cache-write tokens.
+
+This module fixes #1 (subclass below) and #2 (cost helper). The
+cache_write fix lives in lib/openclaw_no_install.py where we override
+populate_context_post_run to read the openclaw session.jsonl directly
+(parallel to HermesNoInstall reading hermes-session.jsonl).
 
 Usage:
 
@@ -32,41 +33,44 @@ _PRICES_PER_MTOK = {
         "input": 3.00,
         "output": 15.00,
         "cache_read": 0.30,
+        "cache_write": 3.75,
     },
     "openrouter/anthropic/claude-opus-4-5": {
         "input": 15.00,
         "output": 75.00,
         "cache_read": 1.50,
+        "cache_write": 18.75,
     },
     "anthropic/claude-sonnet-4-5": {
         "input": 3.00,
         "output": 15.00,
         "cache_read": 0.30,
+        "cache_write": 3.75,
     },
 }
 
 
 def _compute_cost_usd(
     model_name: str,
-    n_input_tokens: int,
-    n_output_tokens: int,
-    n_cache_tokens: int,
+    real_input_tokens: int,
+    output_tokens: int,
+    cache_read_tokens: int,
+    cache_write_tokens: int = 0,
 ) -> float | None:
     """Return total cost in USD, or None if the model isn't priced.
 
-    Harbor's openclaw adapter sets `n_input_tokens = real_input + cache_read`
-    and `n_cache_tokens = cache_read` separately. To bill correctly we charge
-    cache_read at the discounted cache-read rate and the remainder at the
-    full input rate.
+    Takes raw token counts as the agent reports them — NOT Harbor's
+    combined n_input_tokens convention. Callers must split the
+    real_input from cache_read themselves.
     """
     prices = _PRICES_PER_MTOK.get(model_name)
     if not prices:
         return None
-    non_cached_input = max(0, n_input_tokens - n_cache_tokens)
     return (
-        non_cached_input * prices["input"] / 1_000_000
-        + n_output_tokens * prices["output"] / 1_000_000
-        + n_cache_tokens * prices["cache_read"] / 1_000_000
+        real_input_tokens * prices["input"] / 1_000_000
+        + output_tokens * prices["output"] / 1_000_000
+        + cache_read_tokens * prices["cache_read"] / 1_000_000
+        + cache_write_tokens * prices["cache_write"] / 1_000_000
     )
 
 
@@ -86,10 +90,18 @@ class OpenClawOpenRouter(OpenClaw):
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
+        # Fall-back cost calc when the subclass (or any other path) doesn't
+        # override with the cache_write-aware version. Approximate — assumes
+        # cache_write = 0. The NoInstall subclass overrides this with the
+        # accurate session-jsonl-based reader.
         if context.cost_usd is None and self.model_name:
+            real_input = max(
+                0, (context.n_input_tokens or 0) - (context.n_cache_tokens or 0)
+            )
             context.cost_usd = _compute_cost_usd(
                 self.model_name,
-                context.n_input_tokens or 0,
-                context.n_output_tokens or 0,
-                context.n_cache_tokens or 0,
+                real_input_tokens=real_input,
+                output_tokens=context.n_output_tokens or 0,
+                cache_read_tokens=context.n_cache_tokens or 0,
+                cache_write_tokens=0,
             )

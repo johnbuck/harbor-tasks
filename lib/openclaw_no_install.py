@@ -1,29 +1,80 @@
-"""OpenClaw subclass that skips the install step.
+"""OpenClaw subclass that skips install + reports accurate cost.
 
-Assumes the task's environment Dockerfile FROM harbor-agents-prebaked,
-which has openclaw + node + nvm pre-installed. The default OpenClaw
-adapter re-runs apt-get update, curl-pipe-to-bash nvm install,
-nvm install 22, and npm install -g openclaw@latest on every trial,
-each of which is idempotent but still hits the network and adds 2-4
-minutes per trial.
+Two improvements over the bundled adapter:
 
-Combines with OpenClawOpenRouter to also add openrouter provider
-support.
+1. install() is a no-op verify (assumes harbor-agents-prebaked image),
+   saving ~2-4 minutes per trial of network-bound work.
+
+2. populate_context_post_run reads the raw openclaw.session.jsonl for
+   per-step usage and includes cache_write tokens in cost. Harbor's
+   FinalMetrics has no cache_write field; without this override the
+   reported cost misses the 25%-premium cache-write rate (which can
+   be the majority of a turn's cost for prompt-cached workflows).
 """
 
-from harbor.environments.base import BaseEnvironment
+import json
 
-from lib.openclaw_openrouter import OpenClawOpenRouter
+from harbor.environments.base import BaseEnvironment
+from harbor.models.agent.context import AgentContext
+
+from lib.openclaw_openrouter import OpenClawOpenRouter, _compute_cost_usd
 
 
 class OpenClawNoInstallOpenRouter(OpenClawOpenRouter):
-    """OpenClaw with OpenRouter + pre-baked-image fast-path install."""
-
     async def install(self, environment: BaseEnvironment) -> None:
-        # Verify the binary is present; fail fast if the image isn't
-        # what we expect.
         await self.exec_as_agent(
             environment,
             command="openclaw --version",
             timeout_sec=30,
         )
+
+    def populate_context_post_run(self, context: AgentContext) -> None:
+        super().populate_context_post_run(context)
+        self._populate_from_session_jsonl(context)
+
+    def _populate_from_session_jsonl(self, context: AgentContext) -> None:
+        """Recompute cost from openclaw.session.jsonl with cache_write."""
+        session_path = self.logs_dir / "openclaw.session.jsonl"
+        if not session_path.exists():
+            return
+
+        totals = {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}
+        try:
+            for line in session_path.read_text().splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                msg = row.get("message")
+                if not isinstance(msg, dict):
+                    continue
+                usage = msg.get("usage")
+                if not isinstance(usage, dict):
+                    continue
+                for k in totals:
+                    totals[k] += int(usage.get(k) or 0)
+        except OSError as exc:
+            self.logger.debug(
+                f"Failed to read openclaw.session.jsonl for cost data: {exc}"
+            )
+            return
+
+        if not any(totals.values()):
+            return
+
+        # Update context.* to reflect raw session totals (in case super's
+        # ATIF-derived values diverge), then recompute cost with cache_write.
+        # Harbor's convention: n_input_tokens = real_input + cache_read.
+        context.n_input_tokens = totals["input"] + totals["cacheRead"]
+        context.n_cache_tokens = totals["cacheRead"]
+        context.n_output_tokens = totals["output"]
+        if self.model_name:
+            context.cost_usd = _compute_cost_usd(
+                self.model_name,
+                real_input_tokens=totals["input"],
+                output_tokens=totals["output"],
+                cache_read_tokens=totals["cacheRead"],
+                cache_write_tokens=totals["cacheWrite"],
+            )
