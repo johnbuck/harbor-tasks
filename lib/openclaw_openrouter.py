@@ -31,6 +31,14 @@ from harbor.models.agent.context import AgentContext
 
 _OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 
+# Pin OpenRouter to one upstream host so caching + price are deterministic
+# across runs and across harnesses. None = let OpenRouter load-balance
+# (non-deterministic: cache misses + variable price). Set to a provider name
+# to force every call to that host. Must be privacy-guardrail-allowed on the
+# account. "Io Net" is the cheapest allowed host for moonshotai/kimi-k2.6.
+# Keep in sync with lib/hermes_no_install.py.
+PINNED_OPENROUTER_PROVIDER: str | None = "Io Net"
+
 # Offline fallback, per-MILLION-token USD. Only consulted when the live
 # OpenRouter pricing fetch fails (no network, API down). Live pricing is
 # authoritative — do not hand-tune these for accuracy, they're a safety net.
@@ -130,6 +138,14 @@ class OpenClawOpenRouter(OpenClaw):
         prov = providers.setdefault("openrouter", {})
         if isinstance(prov, dict) and "baseUrl" not in prov:
             prov["baseUrl"] = self._OPENROUTER_BASE_URL
+        # Pin upstream provider via OpenRouter's `provider` routing field,
+        # passed through openclaw's documented extra-body passthrough.
+        if isinstance(prov, dict) and PINNED_OPENROUTER_PROVIDER:
+            params = prov.setdefault("params", {})
+            params["provider"] = {
+                "only": [PINNED_OPENROUTER_PROVIDER],
+                "allow_fallbacks": False,
+            }
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
