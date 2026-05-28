@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/fix-bug-rk-01"
+description = "Rewardkit pilot: off-by-one wordcount fix, scored with multi-axis programmatic criteria."
+authors = [{name = "johnbuck"}]
+keywords = ["code-editing", "bug-fix", "rewardkit", "pilot"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "code-editing"
+shape = "fix-bug-with-failing-test"
+tags = ["code-editing", "rewardkit-pilot"]
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+
+[solution.env]

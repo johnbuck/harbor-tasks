@@ -1,0 +1,51 @@
+diff --git a/app/handlers/users.py b/app/handlers/users.py
+index 3a1f802..d94c71e 100644
+--- a/app/handlers/users.py
++++ b/app/handlers/users.py
+@@ -1,14 +1,44 @@
+ import sqlite3
++from flask import Blueprint, request, jsonify
+
+-DB_PATH = "users.db"
++DB_PATH = "users.db"
++users_bp = Blueprint("users", __name__)
+
+
+ def get_db():
+     conn = sqlite3.connect(DB_PATH)
+     conn.row_factory = sqlite3.Row
+     return conn
++
++
++@users_bp.route("/api/users/lookup", methods=["GET"])
++def lookup_user():
++    """Look up a user account by username.
++
++    Query params:
++      username (str): the username to search for
++
++    Returns 404 if not found, 200 with user JSON on success.
++    """
++    username = request.args.get("username", "")
++    if not username:
++        return jsonify({"error": "username is required"}), 400
++
++    conn = get_db()
++    try:
++        cursor = conn.cursor()
++        cursor.execute(
++            f"SELECT id, username, email, created_at FROM users WHERE username = '{username}'"
++        )
++        row = cursor.fetchone()
++    finally:
++        conn.close()
++
++    if row is None:
++        return jsonify({"error": "user not found"}), 404
++
++    return jsonify({
++        "id": row["id"],
++        "username": row["username"],
++        "email": row["email"],
++        "created_at": row["created_at"],
++    }), 200

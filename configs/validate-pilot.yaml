@@ -1,0 +1,23 @@
+# Oracle validation of the rewardkit pilot tasks. Run through
+# `infisical run --path=/proxy/` so the email judge gets ANTHROPIC_API_KEY.
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 2
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+  env:
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  - name: oracle
+
+datasets:
+  - path: <repo>/pilot

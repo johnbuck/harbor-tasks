@@ -1,0 +1,53 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/multistep-memory-explicit-01"
+description = "Multi-step explicit context-management: agent is told to persist API facts to a notes file, then asked to recall two of them after a distractor step."
+authors = [{name = "johnbuck"}]
+keywords = ["context-management", "memory-explicit", "multi-step", "memory"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "medium"
+category = "context-management"
+shape = "multistep-memory-explicit"
+tags = ["context-management", "multi-step", "memory-explicit"]
+
+multi_step_reward_strategy = "mean"
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[agent]
+timeout_sec = 300.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-record"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-recall"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0

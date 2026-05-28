@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/pandas-sql-from-nl-01"
+description = "Compute a grouped aggregate from a CSV using pandas and write the rounded total to a file."
+authors = [{name = "johnbuck"}]
+keywords = ["data-analytics", "pandas", "csv", "python"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "data-analytics"
+shape = "pandas-sql-from-nl"
+tags = ["data-analytics", "pandas-sql-from-nl"]
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+
+[solution.env]

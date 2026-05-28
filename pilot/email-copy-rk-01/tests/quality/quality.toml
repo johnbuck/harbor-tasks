@@ -1,0 +1,33 @@
+# Folder name "quality" -> reward key "quality" in reward.json (weighted_mean
+# of the criteria below). Graded likert criteria give a real 0-1 gradient
+# instead of a binary pass/fail.
+[judge]
+judge = "anthropic/claude-opus-4-7"
+files = ["/app/email.txt"]
+
+[[criterion]]
+description = "Does the first line start with exactly 'Subject: ' as a subject line?"
+type = "binary"
+weight = 1.0
+
+[[criterion]]
+description = "Does the email explicitly name the product 'Lumen Plus'?"
+type = "binary"
+weight = 1.0
+
+[[criterion]]
+description = "Does it clearly convey the privacy angle that data never leaves the device?"
+type = "binary"
+weight = 1.0
+
+[[criterion]]
+description = "How many concrete, compelling upgrade benefits does it give? Rate 0-5."
+type = "likert"
+points = 5
+weight = 2.0
+
+[[criterion]]
+description = "Overall persuasiveness and writing quality of the launch email."
+type = "likert"
+points = 5
+weight = 2.0
