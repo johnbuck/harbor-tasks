@@ -1,7 +1,30 @@
-# openclaw reasoning on OpenRouter — UNRESOLVED (do not trust openclaw reasoning yet)
+# openclaw reasoning on OpenRouter — RESOLVED 2026-05-28
 
 - **Date:** 2026-05-28
-- **Status:** UNRESOLVED / OPEN. Two attempts failed. Documented for next session.
+- **Status:** ✅ RESOLVED. Verified end-to-end: QuixBugs task → reward 1.0 with
+  `reasoning_tokens = 327` across 4 turns. openclaw reasoning runs ARE now
+  trustworthy when the recipe below is used (and the `reasoning_tokens > 0` gate
+  is checked).
+- **Canonical writeup:** `backlog/FOOTGUNS.md` #1 (+1a, #2, #3). This file is the
+  investigation log.
+
+## Resolution (the recipe)
+
+Four parts, all required (none sufficient alone):
+1. **Custom-named provider** `xrouter` (NOT built-in `openrouter`/`openai`) at
+   OpenRouter's OpenAI endpoint — built-ins ignore per-model reasoning config.
+2. **`reasoning: true`** on the model entry — THE gate. openclaw returns
+   off-only before reading `compat` when this is false (its default). This was
+   the actual root cause the two earlier attempts missed.
+3. **`compat.supportedReasoningEfforts`** declared (the level menu behind the gate).
+4. **`apiKey: "${XROUTER_API_KEY}"`** env-template SecretRef (custom providers get
+   no free env auth) + **`--thinking high`** (xhigh's payload is rejected by
+   deepseek-v4-pro's OpenRouter route).
+
+Implemented in `lib/openclaw_openrouter.py` (`OpenClawOpenRouter`).
+
+## Original investigation (kept for history)
+
 - **Supersedes:** the earlier `backlog/done/2026-05-28-openclaw-reasoning-passthrough.md`,
   which FALSELY claimed success — ignore/deleted.
 

@@ -102,8 +102,15 @@ class HermesNoInstall(HermesOpenRouter):
     async def install(self, environment: BaseEnvironment) -> None:
         await self.exec_as_agent(
             environment,
+            # In the prebaked image hermes lives at /usr/local/bin/hermes, but
+            # the stock Hermes.run() command only puts ~/.local/bin on PATH (where
+            # hermes' own installer would place it). Symlink it there so both this
+            # check AND the stock run command resolve `hermes`.
             command=(
                 "set -euo pipefail; "
+                'mkdir -p "$HOME/.local/bin"; '
+                "ln -sf /usr/local/bin/hermes \"$HOME/.local/bin/hermes\"; "
+                'export PATH="$HOME/.local/bin:$PATH"; '
                 'export HERMES_HOME="${HERMES_HOME:-/tmp/hermes}" && '
                 'mkdir -p "$HERMES_HOME" "$HERMES_HOME/sessions" "$HERMES_HOME/skills" "$HERMES_HOME/memories" && '
                 "hermes version"

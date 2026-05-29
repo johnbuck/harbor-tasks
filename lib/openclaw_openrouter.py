@@ -32,18 +32,31 @@ from harbor.models.agent.context import AgentContext
 
 _OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 
-# Reasoning passthrough. openclaw's `--thinking` flag gates on its OWN model
-# registry, which is blind to the underlying model behind the OpenRouter
-# passthrough — so it rejects every level except "off" for OR-routed models
-# (confirmed kimi-k2.6 AND deepseek-v4-pro). We therefore force `--thinking off`
-# (so openclaw's flag never errors) and instead enable reasoning at the
-# OpenRouter layer via the documented `reasoning` body param, injected through
-# the same `models.providers.openrouter.params` extra-body passthrough we use
-# for `provider`. This makes reasoning work for ANY OR reasoning-capable model,
-# independent of openclaw's registry. Set to None to disable reasoning entirely.
-# `effort` low keeps cost sane; OpenRouter maps it to the model's native control
-# (reasoning_effort / thinking budget). Keep in sync with hermes' provider_routing.
-OPENROUTER_REASONING: dict | None = {"effort": "low"}
+# Reasoning enablement (per openclaw docs https://docs.openclaw.ai/tools/thinking).
+#
+# openclaw gates `--thinking <level>` on each model's resolved reasoning profile.
+# CRITICAL: openclaw's BUILT-IN providers (`openrouter`, `openai`, `anthropic`)
+# resolve that profile from their OWN model catalog, NOT from the entry's
+# `compat`. A model the catalog doesn't recognize (e.g. `deepseek/deepseek-v4-pro`)
+# resolves to "off only", so `--thinking xhigh` is rejected with "Use one of: off".
+# Empirically verified 2026-05-28 on BOTH the `openrouter` and `openai` built-in
+# providers — same error, so switching built-in providers cannot fix it.
+#
+# The documented override `models.providers.<p>.models[].compat.supportedReasoningEfforts`
+# is honored ONLY for CUSTOM (non-built-in) OpenAI-compatible providers. So we
+# register OpenRouter under a CUSTOM provider name (`xrouter`) pointed at its
+# OpenAI-compatible endpoint, declare the supported efforts on each model entry,
+# and run `--thinking xhigh`. Reasoning is then genuinely ON (never "off").
+_PROVIDER = "xrouter"
+OPENROUTER_SUPPORTED_REASONING_EFFORTS = ["low", "medium", "high", "xhigh"]
+
+# Thinking level openclaw runs at. Must be one of the declared efforts above.
+# Use "high", NOT "xhigh": openclaw's `xhigh` emits a reasoning_effort value that
+# deepseek-v4-pro's OpenRouter route rejects (400 "reasoning_effort: Invalid
+# option"), whereas `high` is accepted and genuinely reasons. Verified
+# in-container 2026-05-28. Keep xhigh in the *declared* list above (it's the gate
+# menu) but run at high.
+OPENCLAW_THINKING_LEVEL = "high"
 
 # Privacy-floored OpenRouter pool. We route only to upstream hosts that do NOT
 # store or train on prompts (`data_collection: "deny"`) and allow fallback
@@ -105,9 +118,13 @@ def _openrouter_pricing() -> dict[str, dict[str, float]]:
 
 
 def _openrouter_slug(model_name: str) -> str:
-    """Strip our 'openrouter/' routing prefix to get the OpenRouter model id."""
-    prefix = "openrouter/"
-    return model_name[len(prefix):] if model_name.startswith(prefix) else model_name
+    """Strip the leading '<provider>/' segment to get the OpenRouter model id.
+
+    e.g. 'xrouter/deepseek/deepseek-v4-pro' -> 'deepseek/deepseek-v4-pro', which
+    is both what openclaw sends to the OpenAI endpoint and the OpenRouter
+    pricing-table key.
+    """
+    return model_name.split("/", 1)[1] if "/" in model_name else model_name
 
 
 def _compute_cost_usd(
@@ -148,37 +165,87 @@ def _compute_cost_usd(
 
 
 class OpenClawOpenRouter(OpenClaw):
-    _SUPPORTED_PROVIDERS = OpenClaw._SUPPORTED_PROVIDERS | {"openrouter"}
+    # Register OpenRouter under a CUSTOM provider name (NOT the built-in
+    # `openrouter`/`openai`), because only custom providers honor the
+    # `compat.supportedReasoningEfforts` override that turns thinking on.
+    _SUPPORTED_PROVIDERS = OpenClaw._SUPPORTED_PROVIDERS | {_PROVIDER}
 
     _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-    # Force openclaw's --thinking flag to "off" so it never errors on its stale
-    # registry for OpenRouter models. Reasoning is enabled separately via the
-    # `reasoning` body param (see OPENROUTER_REASONING + below).
+    # Run at a genuine thinking level (NOT off). openclaw accepts it because we
+    # declare the model's supported efforts in _normalize_provider_models_schema.
     CLI_FLAGS = [
-        CliFlag(kwarg="thinking", cli="--thinking", type="str", default="off")
+        CliFlag(kwarg="thinking", cli="--thinking", type="str",
+                default=OPENCLAW_THINKING_LEVEL)
         if f.kwarg == "thinking" else f
         for f in OpenClaw.CLI_FLAGS
     ]
 
+    @classmethod
+    def _provider_env_keys(cls, provider: str) -> tuple[str, ...]:
+        # The custom `xrouter` provider authenticates with the OpenRouter key.
+        # Harbor forwards these env vars into the container; openclaw resolves
+        # the provider apiKey/baseUrl from the `<PROVIDER>_*` convention.
+        if provider == _PROVIDER:
+            return ("XROUTER_API_KEY", "XROUTER_BASE_URL")
+        return super()._provider_env_keys(provider)
+
+    def _normalize_provider_models_schema(self, cfg) -> None:
+        super()._normalize_provider_models_schema(cfg)
+        if self._model_provider() != _PROVIDER:
+            return
+        prov = (
+            (cfg.get("models") or {}).get("providers") or {}
+        ).get(_PROVIDER)
+        if not isinstance(prov, dict):
+            return
+        # The catalog-entry id must be the BARE model slug (no provider prefix):
+        # openclaw selects "xrouter/deepseek/deepseek-v4-pro", resolves provider
+        # `xrouter` + model key `deepseek/deepseek-v4-pro`, then matches the entry
+        # by that bare key. Harbor's base fill uses the full prefixed name, which
+        # never matches — so the model resolves as unknown ("off only"). Rewrite
+        # the entry with the bare slug AND declare reasoning support, so the
+        # --thinking gate accepts xhigh and emits the OpenRouter reasoning_effort.
+        # `reasoning: true` is REQUIRED: openclaw's thinking resolver returns an
+        # off-only profile whenever a catalog row's `reasoning` is false (its
+        # default) — BEFORE it ever consults compat. Only with reasoning=true
+        # does it read `compat.supportedReasoningEfforts` and expose xhigh.
+        # (Verified against openclaw 2026.5.26 dist/thinking-*.js:387/400.)
+        slug = _openrouter_slug(self.model_name)
+        prov["models"] = [
+            {
+                "id": slug,
+                "name": slug,
+                "reasoning": True,
+                "compat": {
+                    "supportedReasoningEfforts": list(
+                        OPENROUTER_SUPPORTED_REASONING_EFFORTS
+                    )
+                },
+            }
+        ]
+
     def _merge_provider_base_url_from_env(self, cfg):
         super()._merge_provider_base_url_from_env(cfg)
-        if self._model_provider() != "openrouter":
+        if self._model_provider() != _PROVIDER:
             return
         providers = cfg.setdefault("models", {}).setdefault("providers", {})
-        prov = providers.setdefault("openrouter", {})
+        prov = providers.setdefault(_PROVIDER, {})
         if isinstance(prov, dict) and "baseUrl" not in prov:
             prov["baseUrl"] = self._OPENROUTER_BASE_URL
+        # A CUSTOM provider does NOT inherit openclaw's built-in env-var auth
+        # (that only maps OPENROUTER_API_KEY -> the built-in `openrouter`
+        # provider). Point apiKey at an env-template SecretRef so openclaw
+        # resolves XROUTER_API_KEY at runtime. This is a MARKER string, not the
+        # secret value, so it is safe to write into the config.
+        if isinstance(prov, dict):
+            prov.setdefault("apiKey", "${XROUTER_API_KEY}")
         # Apply the privacy-floored provider pool via OpenRouter's `provider`
         # routing field, passed through openclaw's documented extra-body
         # passthrough.
         if isinstance(prov, dict):
             params = prov.setdefault("params", {})
             params["provider"] = dict(OPENROUTER_PROVIDER_ROUTING)
-            # Enable reasoning at the OpenRouter layer (bypasses openclaw's
-            # --thinking registry, which is forced to "off" via CLI_FLAGS).
-            if OPENROUTER_REASONING is not None:
-                params["reasoning"] = dict(OPENROUTER_REASONING)
 
     def populate_context_post_run(self, context: AgentContext) -> None:
         super().populate_context_post_run(context)
