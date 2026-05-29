@@ -1,0 +1,50 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": ".",
+      "thinkingDefault": "high"
+    }
+  },
+  "gateway": { "mode": "local" },
+
+  "models": {
+    "providers": {
+      "xrouter": {
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "apiKey": "${XROUTER_API_KEY}",
+        "params": {
+          "provider": { "data_collection": "deny", "allow_fallbacks": true }
+        },
+        "models": [
+          {
+            "id": "deepseek/deepseek-v4-pro",
+            "name": "deepseek/deepseek-v4-pro",
+            "reasoning": true,
+            "compat": {
+              "supportedReasoningEfforts": ["low", "medium", "high", "xhigh"]
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "mcp": {
+    "servers": {
+      "recall": {
+        "transport": "streamable-http",
+        "url": "http://internal-host:8407/mcp",
+        "headers": {
+          "Host": "localhost:8407",
+          "X-Group-ID": "eval-openclaw"
+        }
+      },
+      "hindsight": {
+        "transport": "streamable-http",
+        "url": "http://internal-host:8888/mcp/eval-openclaw/"
+      }
+    }
+  },
+
+  "tools": { "deny": ["message"] }
+}
