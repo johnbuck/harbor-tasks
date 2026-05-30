@@ -2,7 +2,8 @@
   "agents": {
     "defaults": {
       "workspace": ".",
-      "thinkingDefault": "high"
+      "thinkingDefault": "high",
+      "skipBootstrap": true
     }
   },
   "gateway": { "mode": "local" },
@@ -11,7 +12,7 @@
     "providers": {
       "xrouter": {
         "baseUrl": "https://openrouter.ai/api/v1",
-        "apiKey": "${XROUTER_API_KEY}",
+        "apiKey": "${OPENROUTER_API_KEY}",
         "params": {
           "provider": { "data_collection": "deny", "allow_fallbacks": true }
         },
@@ -33,9 +34,8 @@
     "servers": {
       "recall": {
         "transport": "streamable-http",
-        "url": "http://wiley-pinkleberry.lan:8407/mcp",
+        "url": "http://wiley-pinkleberry.lan:8408/mcp",
         "headers": {
-          "Host": "localhost:8407",
           "X-Group-ID": "eval-openclaw"
         }
       },

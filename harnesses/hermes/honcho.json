@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "baseUrl": "http://wiley-pinkleberry.lan:8000",
+  "workspace": "eval-hermes",
+  "aiPeer": "eval-hermes",
+  "saveMessages": true
+}
