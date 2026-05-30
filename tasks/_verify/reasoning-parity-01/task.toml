@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/reasoning-parity-01"
+description = "Fix an off-by-one bug in a small word-count utility so the failing pytest passes."
+authors = [{name = "johnbuck"}]
+keywords = ["code-editing", "bug-fix", "python", "pytest"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "code-editing"
+shape = "fix-bug-with-failing-test"
+tags = ["code-editing", "fix-bug-with-failing-test"]
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+
+[solution.env]

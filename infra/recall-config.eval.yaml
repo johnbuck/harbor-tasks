@@ -1,0 +1,61 @@
+server:
+  transport: "http"
+  host: "0.0.0.0"
+  port: 8000
+
+llm:
+  provider: "openai"
+  model: "deepseek/deepseek-v4-flash"
+  max_tokens: 4096
+
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY}
+      api_url: "https://openrouter.ai/api/v1"
+      max_retries: 3
+
+embedder:
+  provider: "openai"
+  model: "BAAI/bge-m3"
+  dimensions: 1024
+
+  providers:
+    openai:
+      api_key: "tei-local-no-auth"
+      api_url: "http://mem-embed:80/v1"
+
+database:
+  provider: "neo4j"
+
+  providers:
+    neo4j:
+      uri: ${NEO4J_URI:bolt://recall-neo4j:7687}
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD}
+      database: ${NEO4J_DATABASE:neo4j}
+      use_parallel_runtime: false
+
+graphiti:
+  group_id: ${GRAPHITI_GROUP_ID:eval-default}
+  user_id: ${USER_ID:eval}
+  # Entity ontology tuned for the eval task domain (coding + research benchmarks:
+  # fix-bug, aider_polyglot, ds1000, swtbench, bfcl, simpleqa, sub-agent, research).
+  # Distinct from prod recall's agent-memory ontology (Preference/Requirement/
+  # Procedure/Location/Event/Organization/Document/Topic/Object).
+  entity_types:
+    - name: "Bug"
+      description: "A discovered defect, failure mode, or anti-pattern in code (root cause, symptom, or reproduction)"
+    - name: "TestCase"
+      description: "A specific test, especially failing ones that drive the fix (test name, file, assertion)"
+    - name: "API"
+      description: "A function, class, method, or interface signature being called or implemented"
+    - name: "Dependency"
+      description: "A library, package, or version constraint (e.g., requests==2.32, peer-dep tension)"
+    - name: "File"
+      description: "A specific source file referenced by path (src/foo.py, tests/bar_test.go)"
+    - name: "Concept"
+      description: "A domain idea, algorithm, or design pattern (e.g., quicksort, dependency injection, eventual consistency)"
+    - name: "Constraint"
+      description: "A performance, security, format, or environmental requirement (e.g., O(n log n), TLS-only, JSON output)"
+    - name: "Source"
+      description: "A reference document, paper, URL, or specification used for research-style tasks"

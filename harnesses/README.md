@@ -4,7 +4,12 @@ Fully-configured openclaw + hermes for the assessment. These are the harnesses'
 **own** configs (reasoning + skills + persona + memory baked in). The thin Harbor
 adapter only invokes the harness and reads results — it must NOT regenerate these.
 
-Design + rationale: `backlog/2026-05-28-prebuilt-rich-harnesses.md`.
+Design + rationale (shipped 2026-05-29):
+- [`backlog/done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md`](../backlog/done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md) — the original "stop using packaged harnesses" pivot.
+- [`backlog/done/2026-05-29-thin-adapters.md`](../backlog/done/2026-05-29-thin-adapters.md) — `OpenClawThin` / `HermesThin` design, one-key auth, persona staging, verification reproducer.
+- [`backlog/done/2026-05-29-memory-stack-deployment.md`](../backlog/done/2026-05-29-memory-stack-deployment.md) — the memory endpoints these harnesses target.
+- [`backlog/done/2026-05-29-hermes-dual-plugin-system.md`](../backlog/done/2026-05-29-hermes-dual-plugin-system.md) — investigation behind the activation accuracy in the dashboard.
+- [`backlog/done/2026-05-29-agent-status-dashboard.md`](../backlog/done/2026-05-29-agent-status-dashboard.md) — `tools/agent_status.py`.
 
 ## Files
 
@@ -37,7 +42,7 @@ on the first turn of a session (truncated per-file at
 | Persona | workspace `SOUL.md` (+ AGENTS/IDENTITY/USER) → Project Context | `$HERMES_HOME/SOUL.md` |
 | Skills | several (→ `~/.openclaw/skills/`) | several incl. honcho (preload) |
 | Subagents | openclaw subagents | `delegation` + `kanban` toolsets |
-| recall (Graphiti MCP) | ✅ group `eval-openclaw` | ✅ group `eval-hermes` |
+| recall (Graphiti MCP) | ✅ group `eval-openclaw` (23 tools post-hindsight-parity 2026-05-30) | ✅ group `eval-hermes` (23 tools) |
 | Hindsight (MCP) | ✅ bank `eval-openclaw` | ✅ bank `eval-hermes` |
 | Honcho | ✗ | ✅ native (`hermes honcho setup`) |
 
@@ -57,40 +62,77 @@ hermes (do NOT let the adapter redirect HERMES_HOME away from this):
 2. `pip install honcho-ai` then `hermes honcho setup` → local → base URL = our Honcho.
 3. Preload skill set incl. honcho (VERIFY: config key vs `-s` flag at invocation).
 
-## Memory endpoints (fill once the stack is up)
+## Memory endpoints — DEPLOYED + verified (2026-05-29)
 
-One docker-compose stack on the homelab (recall already exists; add Honcho + Hindsight):
+All three live on wiley, folded into the existing recall compose stack
+(`~/Docker/recall/docker-compose.yml`; source mirror in repo `infra/`). recall
+was NOT relocated. All share `pinkleberry_bridge`; eval agents reach them over
+the LAN.
 
 | Service | URL used in configs | Status |
 |---|---|---|
-| recall (Graphiti MCP) | `http://internal-host:8407/mcp` | EXISTS |
-| Hindsight MCP | `http://internal-host:8888/mcp/<bank>/` | port TBD on deploy |
-| Honcho API | `http://internal-host:8000` (hermes honcho setup) | TBD on deploy |
+| recall (Graphiti MCP) — prod ontology | `http://internal-host:8407/mcp` | LIVE — juliet/yui/akane groups |
+| recall-eval (Graphiti MCP) — coding ontology | `http://internal-host:8408/mcp` | LIVE — eval-openclaw/eval-hermes groups; both harnesses point here |
+| Hindsight MCP | `http://internal-host:8888/mcp/<bank>/` | LIVE (8888 API+MCP, 9999 UI) |
+| Honcho API | `http://internal-host:8000` | LIVE (hermes memory provider) |
+| mem-embed (shared bge-m3) | `http://mem-embed/v1` (bridge-internal) | LIVE — 1024-dim, serves recall + hindsight + honcho (2026-05-29 migration) |
 
-Per-agent isolation: recall `X-Group-ID` and Hindsight bank = `eval-openclaw` /
-`eval-hermes` — deliberately separate from prod groups (juliet/yui) so eval memory
-never pollutes production graphs.
+Memory-derivation LLM = OpenRouter `deepseek-v4-flash` (no-train at the OpenRouter
+account level) for **all three** stacks as of 2026-05-29 (recall was on
+`z-ai/glm-4.6` until then; swapped for eval-fairness). Embeddings = bge-m3
+(1024-dim) for all three — recall's bge-small/384 → bge-m3/1024 migration was
+done in-place (746 :Entity + 1,078 :RELATES_TO vectors re-embedded). See
+[`done/2026-05-29-recall-bge-m3-and-eval-ontology.md`](../backlog/done/2026-05-29-recall-bge-m3-and-eval-ontology.md).
 
-## VERIFY at test time (drafted best-effort from image inspection)
+**Recall agent surface** (post-hindsight-parity, 2026-05-30): 23 tools —
+the original 9 Graphiti CRUD (`add_memory`, `search_nodes`, `search_memory_facts`,
+`get_entity_edge`, `get_episodes`, `delete_entity_edge`, `delete_episode`,
+`clear_graph`, `get_status`) all carrying hindsight-style coaching descriptions,
+plus `reflect` (P2), `get_bank_config` / `update_bank_config` (P3 dispositions
++ mission + retain_mission), `list_directives` / `create_directive` /
+`delete_directive` (P3 stackable rules), `clear_bank_data` (P3 orphan cleanup),
+and 7 mental-model tools (P4: `list/get/create/update/refresh/delete/clear_mental_model`
++ daily 02:00 refresher cron + hourly retry timer). See
+[`done/2026-05-29-recall-hindsight-style-plugin.md`](../backlog/done/2026-05-29-recall-hindsight-style-plugin.md)
+for the design + 4-phase build + post-implementation review.
 
-- **openclaw `mcp.servers[].headers`** — confirm custom headers (esp. `X-Group-ID`,
-  `Host`) are honored. If not, fall back to a per-eval Caddy route or explicit
-  `group_id=` in calls. (hermes `mcp_servers` headers ARE documented-supported,
-  cli-config.yaml.example line ~779.)
-- **openclaw `agents.defaults.thinkingDefault`** — confirm it's read (else set on
-  `agents.main` or keep the thin adapter passing `--thinking high`).
-- **openclaw persona** — exact workspace-file → Project Context injection (docs
-  confirm SOUL/AGENTS/IDENTITY/USER; spot-check it renders in the system prompt).
-- **hermes skills preload** — config key vs `-s` invocation flag (default
-  `hermes-cli` already loads the skills toolset; preloading specific skills TBD).
-- **hermes honcho** — `hermes honcho setup` writes `~/.honcho/config.json`;
-  confirm the active memory path uses it.
+Per-agent isolation (verified): recall `X-Group-ID` (openclaw DOES forward custom
+MCP headers — confirmed), Hindsight bank, and Honcho workspace are all
+`eval-openclaw` / `eval-hermes` — separate from prod groups (juliet/yui) so eval
+memory never pollutes production graphs.
 
-(Resolved, no longer guesses: hermes reasoning = native `agent.reasoning_effort`;
-hermes privacy routing = native `provider_routing.data_collection`; both lifted
-straight from the shipped default `cli-config.yaml.example`.)
+## Resolved at test time (2026-05-29) — no longer guesses
 
-## MANDATORY gate after build
+- **openclaw forwards custom MCP headers** — CONFIRMED via a header-echo probe:
+  `X-Group-ID` (and arbitrary headers) ARE sent. Only `Host` is special (undici
+  derives it from the URL authority and ignores a `headers.Host`), which is why
+  the old `Host: localhost:8407` trick failed. Fix was server-side: recall's
+  DNS-rebind allowlist now permits `internal-host:*` (protection stays
+  ON). So recall per-agent isolation works for openclaw with NO juliet pollution.
+- **honcho on hermes** = native memory PROVIDER (not an MCP, not `honcho setup`):
+  `memory.provider: honcho` + `$HERMES_HOME/honcho.json` (`baseUrl` →
+  self-hosted, no apiKey since `AUTH_USE_AUTH=false`) + `honcho-ai` pip in the
+  image (installed via uv — the hermes venv has no pip). Verified: it does NOT
+  break hermes startup (0 exceptions).
+- **hermes reasoning** = native `agent.reasoning_effort: high`; **privacy routing**
+  = native `provider_routing.data_collection: deny` — straight from the shipped
+  `cli-config.yaml.example`.
+- **MCP-down tolerance** — both harnesses log a warning and continue when a memory
+  server is unreachable (non-fatal); a dead server adds a ~30s startup timeout.
+
+Still best-effort / open:
+- **openclaw `thinkingDefault`** — the thin adapter also passes `--thinking high`
+  belt-and-suspenders, so reasoning is on regardless.
+- **openclaw persona** — workspace files (SOUL/AGENTS/IDENTITY/USER) are copied
+  into the task cwd at run start (`skipBootstrap` suppresses the ritual); deep
+  spot-check of Project Context rendering still TODO.
+- **Browser/CDP** — not deployed yet (task #54).
+
+## MANDATORY gate after build — PASSED 2026-05-29
 
 Confirm `reasoning_tokens > 0` in BOTH harnesses' session logs on a real task
-before trusting any comparison (FOOTGUNS #1). Parity is only real when both reason.
+before trusting any comparison (FOOTGUNS #1). Verified on `reasoning-parity-01`:
+openclaw `reasoning_tokens=161`; hermes 8 `reasoning_content` blocks / 1870 chars
+(deepseek's OpenRouter route reports a 0 token counter but the reasoning content
+is present). Both reward 1.0, 0 exceptions, via the thin adapters off baked
+configs. Re-run this gate whenever the image or model changes.

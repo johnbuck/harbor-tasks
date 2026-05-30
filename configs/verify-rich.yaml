@@ -1,0 +1,37 @@
+# Reasoning-parity verification for the THIN adapters on the rich image.
+# Both harnesses run the SAME task from their OWN baked config (no rewrite):
+#   - openclaw: lib.openclaw_thin:OpenClawThin   (baked ~/.openclaw/openclaw.json)
+#   - hermes:   lib.hermes_thin:HermesThin       (baked /root/.hermes/config.yaml)
+# MANDATORY gate (FOOTGUNS #1): confirm reasoning_tokens > 0 for BOTH afterward.
+#
+# Run:
+#   infisical run --projectId INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
+#     harbor run -c configs/verify-rich.yaml
+# (XROUTER_API_KEY is the OpenRouter key under a custom-provider name — FOOTGUNS #2.)
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 2
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+    # Both thin adapters forward OPENROUTER_API_KEY from the harbor process env
+    # (infisical-injected) into the container; the baked configs resolve it.
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: tasks/_verify
