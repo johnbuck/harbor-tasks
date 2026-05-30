@@ -52,8 +52,20 @@ Optional but encouraged:
 - [2026-05-27 agent adapters](done/2026-05-27-agent-adapters.md) — pre-baked base image + NoInstall + OpenRouter subclasses
 - [2026-05-27 cost + token tracking](done/2026-05-27-cost-and-token-tracking.md) — per-trial usage + live OpenRouter pricing
 - [2026-05-27 deterministic provider routing](done/2026-05-27-deterministic-provider-routing.md) — pin OpenRouter upstream host
+- [2026-05-28 openclaw reasoning RESOLVED](done/2026-05-28-openclaw-reasoning-RESOLVED.md) — 4-part recipe to enable real reasoning over the OpenRouter passthrough
+- [2026-05-28 pre-built rich harnesses (SHIPPED)](done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md) — the "stop using packaged harnesses" pivot; baked configs + thin adapters
+- [2026-05-29 thin adapters](done/2026-05-29-thin-adapters.md) — `OpenClawThin` / `HermesThin`, one-key auth, persona staging, parity reproducer
+- [2026-05-29 memory stack deployment](done/2026-05-29-memory-stack-deployment.md) — mem-embed + hindsight + honcho folded into the recall compose on <memory-host>; recall allowlist fix
+- [2026-05-29 hermes dual plugin system](done/2026-05-29-hermes-dual-plugin-system.md) — the System 1 / System 2 finding behind `hermes plugins list` being incomplete
+- [2026-05-29 agent status dashboard](done/2026-05-29-agent-status-dashboard.md) — `tools/agent_status.py`; single-file HTML status board, dual-system aware
+- [2026-05-29 recall bge-m3 + eval ontology (SHIPPED 2026-05-29)](done/2026-05-29-recall-bge-m3-and-eval-ontology.md) — recall migrated to bge-m3 + deepseek-v4-flash; community-build daily cron; parallel `recall-mcp-eval` container with coding-domain ontology
+- [2026-05-29 recall hindsight-style plugin (SHIPPED 2026-05-30)](done/2026-05-29-recall-hindsight-style-plugin.md) — coaching descriptions + reflect + dispositions + directives + mental models; 4-phase build with adversarial reviews at design AND post-implementation, all findings folded back in (22 surfaced + 22 resolved including 9 deferred should-fixes resolved separately)
 
 ### Proposed / in progress
 
 - [2026-05-27 task suite design](2026-05-27-task-suite-design.md) — 17 categories × 67 shapes, first-sweep selection (IN PROGRESS)
 - [2026-05-27 context-management category](2026-05-27-context-management-category.md) — long-session behavior tests (DEFERRED)
+- [2026-05-28 multi-step tasks](2026-05-28-multi-step-tasks.md) — Harbor `steps/` shape
+- [2026-05-28 tau3-bench integration](2026-05-28-tau3-bench-integration.md) — external multi-turn benchmark
+- [2026-05-29 eval infra stack](2026-05-29-eval-infra-stack.md) — memory portion SHIPPED (see `done/2026-05-29-memory-stack-deployment.md`); browser/CDP still open (task #54)
+- [2026-05-29 new eval tasks: subagent + research](2026-05-29-new-eval-tasks-subagent-research.md) — tasks #55, #56

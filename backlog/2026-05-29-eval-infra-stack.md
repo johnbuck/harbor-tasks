@@ -1,13 +1,16 @@
 # Eval infrastructure stack — memory + browser (design)
 
 - **Date:** 2026-05-29
-- **Status:** DESIGN. Not deployed. Deploy NEEDS operator approval (homelab blast radius).
+- **Status:** **MEMORY portion SHIPPED 2026-05-29** (see
+  [`done/2026-05-29-memory-stack-deployment.md`](done/2026-05-29-memory-stack-deployment.md)
+  for the as-deployed reality, deploy reproducer, and gotchas captured during
+  the rollout). Browser/CDP portion still OPEN — tracked as task #54.
 - **Goal:** Give both harnesses the external capabilities they need to perform at
   their best, in **one docker-compose stack** on the homelab: persistent memory
   (recall + Hindsight + Honcho) and a shared headless browser (CDP). Per-agent
   isolation so eval memory never pollutes prod (<prod-group>/<prod-group>) graphs.
-- Companion: `backlog/2026-05-28-prebuilt-rich-harnesses.md` (harness configs that
-  consume these endpoints).
+- Companion (shipped):
+  [`done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md`](done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md).
 
 ## Why these (task-category alignment)
 - **Memory** serves 4 task categories that literally test it: `conversation-persona`,

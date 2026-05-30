@@ -17,3 +17,6 @@ __pycache__/
 .idea/
 *.swp
 .DS_Store
+
+# Generated artifacts (regenerable; keep out of git)
+agent-status.html

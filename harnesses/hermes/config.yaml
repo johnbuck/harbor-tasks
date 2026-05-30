@@ -459,6 +459,12 @@ prompt_caching:
 # Disabled by default in batch_runner.
 #
 memory:
+  # External memory provider: Honcho (self-hosted on <memory-host>). Built-in file
+  # memory (MEMORY.md/USER.md) stays active alongside it; recall + hindsight
+  # are separate MCP tools. Honcho config (baseUrl, workspace) is in
+  # $HERMES_HOME/honcho.json. Only ONE external provider may be active — honcho.
+  provider: honcho
+
   # Agent's personal notes: environment facts, conventions, things learned
   memory_enabled: true
   
@@ -775,12 +781,13 @@ platform_toolsets:
 #
 # Evaluation harness memory servers (HTTP MCP; per-agent isolation).
 mcp_servers:
-  # recall — Graphiti temporal-knowledge-graph memory. group via X-Group-ID header
-  # (Host rewrite required by the recall server's DNS-rebind guard).
+  # recall — Graphiti temporal-knowledge-graph memory. Per-agent isolation via
+  # the X-Group-ID header (recall's GroupIDMiddleware routes to that graph).
+  # No Host rewrite needed: recall's DNS-rebind allowlist now permits
+  # internal-host (see recall wrapper_main.py transport_security).
   recall:
-    url: "http://internal-host:8407/mcp"
+    url: "http://internal-host:8408/mcp"
     headers:
-      Host: "localhost:8407"
       X-Group-ID: "eval-hermes"
   # hindsight — learning memory. per-agent bank via URL path.
   hindsight:

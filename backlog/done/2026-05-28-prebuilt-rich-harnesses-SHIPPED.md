@@ -1,7 +1,17 @@
 # Pre-built rich harnesses — design + build spec
 
-- **Date:** 2026-05-28
-- **Status:** DESIGN (grounded in image inspection); build not started.
+- **Date:** 2026-05-28 (design); shipped 2026-05-29.
+- **Status:** **SHIPPED.** Rich image `harbor-agents-rich:latest` builds
+  from `environments/agent-rich/Dockerfile`; thin adapters are
+  `lib/openclaw_thin.py` and `lib/hermes_thin.py`. End-to-end parity
+  verified — both `Reward 1.0 / 0 exceptions` on
+  `tasks/_verify/reasoning-parity-01` via `configs/verify-rich.yaml`, with
+  `reasoning_tokens > 0` for both (the FOOTGUNS #1 mandatory gate).
+- **Companion shipped specs:**
+  - [2026-05-29-thin-adapters.md](2026-05-29-thin-adapters.md)
+  - [2026-05-29-memory-stack-deployment.md](2026-05-29-memory-stack-deployment.md)
+  - [2026-05-29-hermes-dual-plugin-system.md](2026-05-29-hermes-dual-plugin-system.md)
+  - [2026-05-29-agent-status-dashboard.md](2026-05-29-agent-status-dashboard.md)
 - **Origin:** Operator — "STOP USING THE PACKAGED HARNESSES." Stop letting Harbor's
   bundled `installed.openclaw`/`installed.hermes` adapters reconstruct a barebones
   config; bring **pre-built, fully-configured** harnesses whose own config carries
