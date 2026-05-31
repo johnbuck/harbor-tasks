@@ -789,6 +789,8 @@ rewards.per_file.int    Input should be a valid integer [input_value={...dict...
 
 **Lesson:** local oracle-validation (run solve.sh + test.sh, eyeball reward.json) does NOT catch this — only Harbor's Pydantic layer does. After authoring a verifier, grep its emission for `"key": {` / `"key": [` before trusting it. A cheap n=1 trial is the real validator (this is exactly what the focused n=1 caught).
 
+**Update 2026-05-31 — the LIST-valued variant.** The first sweep fixed nested-*dict* keys; the focused n=1 baseline then caught a second instance the dict-only grep missed: `skill-discovery-and-use-01` emitted `"skill_runs_logged": sorted(ran_files)` — a *list*, not a dict — and died with the same `ValidationError` (reward=None) on **both** harnesses. Fix: emit the scalar `len(ran_files)`. So the audit grep must catch **both** `"key": {` AND `"key": [` (plus `sorted(`/`list(`/`.split(`/`.keys()` value expressions). Any reward-dict value that isn't a bare float/int — dict OR list — fails the schema.
+
 ---
 
 ## 39. `/tmp` is tmpfs (RAM) on these boxes — never persist job results there; pin `jobs_dir` to an absolute path
