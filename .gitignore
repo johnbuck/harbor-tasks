@@ -20,3 +20,4 @@ __pycache__/
 
 # Generated artifacts (regenerable; keep out of git)
 agent-status.html
+task-catalog.html

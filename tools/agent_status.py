@@ -610,6 +610,10 @@ def render(data: dict, health: dict) -> str:
   .mcprow{{padding:4px 0;border-bottom:1px dashed #262b36}} .mcprow:last-child{{border:0}}
   .legend{{max-width:1100px;margin-top:18px;background:#171a22;border:1px solid #262b36;border-radius:10px;padding:14px}}
   .err{{background:#3a1616;color:#ef7a7a;padding:8px;border-radius:6px;margin-bottom:12px;max-width:1100px;white-space:pre-wrap}}
+  .nav{{display:flex;gap:10px;align-items:center;margin-bottom:14px}}
+  .nav a{{font-size:13px;text-decoration:none;border:1px solid #2f3645;border-radius:6px;padding:4px 12px;color:#9db4d6}}
+  .nav a:hover{{background:#1c2331}}
+  .nav a.active{{background:#1b2a1f;border-color:#3a5a44;color:#9fe0a5;font-weight:600}}
   /* modal */
   #ov{{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}}
   #mo{{display:none;position:fixed;top:5%;left:50%;transform:translateX(-50%);width:min(900px,92vw);max-height:88vh;
@@ -621,6 +625,10 @@ def render(data: dict, health: dict) -> str:
   #mo pre{{margin:0;padding:16px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12.5px/1.55 ui-monospace,Menlo,monospace;color:#cdd6e4}}
   #mo .path{{color:#6b7280;font:11px monospace;padding:0 16px 10px}}
 </style></head><body>
+<div class="nav">
+  <a href="agent-status.html" class="active">Agent status</a>
+  <a href="task-catalog.html">Task catalog</a>
+</div>
 <h1>Eval harness status</h1>
 <div class="ts">generated {ts} · source: {IMAGE} + live memory pings · re-run tools/agent_status.py to refresh</div>
 {err}
