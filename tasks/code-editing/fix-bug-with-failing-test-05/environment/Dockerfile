@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY flatten.py /app/flatten.py
 COPY tests/test_flatten.py /app/tests/test_flatten.py

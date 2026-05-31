@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/find-contradictions-01"
-description = "Read a quarterly business report and identify its internal contradiction; graded by an LLM judge."
+description = "Read a four-section annual operating review with eight planted internal contradictions (some subtle, spanning sections) plus two near-miss distractors; deterministically graded on fraction of genuine contradictions found minus false positives."
 authors = [{name = "johnbuck"}]
 keywords = ["insights-research", "find-contradictions", "llm-as-a-judge"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "insights-research"
 shape = "find-contradictions"
-tags = ["insights-research", "find-contradictions", "judge"]
+tags = ["insights-research", "find-contradictions", "multi-source", "graded", "harness-discriminating"]
 
 [verifier]
 timeout_sec = 300.0
@@ -28,10 +28,7 @@ gpus = 0
 allow_internet = true
 mcp_servers = []
 
-[verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
-
 [environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [solution.env]

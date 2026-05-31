@@ -2,22 +2,24 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/sub-agent-01"
-description = "Author a Claude Code subagent definition file for a code-review specialist; graded by an LLM judge."
+description = "Author 10 distinct specialist Claude Code subagent definition files. Each is independent work — harnesses with strong sub-agent/delegation support author more correctly. Verifier is deterministic and GRADED: reward = passed_subchecks / 40 (4 structural sub-checks per file)."
 authors = [{name = "johnbuck"}]
-keywords = ["skill-agent-authoring", "sub-agent", "llm-as-a-judge"]
+keywords = ["skill-agent-authoring", "sub-agent", "parallel", "delegation"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "skill-agent-authoring"
 shape = "sub-agent"
-tags = ["skill-agent-authoring", "sub-agent", "judge"]
+tags = ["skill-agent-authoring", "sub-agent", "harness-discriminating", "graded"]
 
 [verifier]
-timeout_sec = 300.0
+timeout_sec = 120.0
 
 [agent]
-timeout_sec = 300.0
+# Tight on purpose: 10 independent subagent files. A serial author is slow;
+# harnesses that fan the authoring out across sub-agents finish more under budget.
+timeout_sec = 600.0
 
 [environment]
 build_timeout_sec = 600.0
@@ -28,10 +30,7 @@ gpus = 0
 allow_internet = true
 mcp_servers = []
 
-[verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
-
 [environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [solution.env]

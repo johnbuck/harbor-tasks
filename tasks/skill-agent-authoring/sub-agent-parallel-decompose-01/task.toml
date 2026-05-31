@@ -1,0 +1,35 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/sub-agent-parallel-decompose-01"
+description = "20 independent CSV files need the same 3-stage transform (filter+sort+summary). Serial completion strains the turn budget; harnesses that delegate to sub-agents (openclaw sessions_spawn, hermes delegate_task) fan out and finish more correctly. Verifier is GRADED: reward = passed_subchecks / 60 (3 stages x 20 files) + a fan-out throughput bonus gated on correctness."
+authors = [{name = "johnbuck"}]
+keywords = ["skill-agent-authoring", "sub-agent", "delegation", "parallel", "graded"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "skill-agent-authoring"
+shape = "sub-agent-parallel-decompose"
+tags = ["skill-agent-authoring", "sub-agent", "delegation", "harness-discriminating"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+# Deliberately tight: a serial loop through 10 files at ~30s each = 5 min, blows
+# the budget. Harnesses that fan out via sub-agents complete in parallel time.
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

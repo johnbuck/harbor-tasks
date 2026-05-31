@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/factual-lookup-cited-01"
-description = "Look up the year of Apollo 11's Moon landing and write the answer with a source citation; graded by an LLM judge."
+description = "Answer eight independent factual questions, each requiring the correct value AND a valid source URL in its block; deterministically graded on the fraction of items where fact and citation are both correct."
 authors = [{name = "johnbuck"}]
 keywords = ["research-rag", "factual-lookup-cited", "llm-as-a-judge"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "research-rag"
 shape = "factual-lookup-cited"
-tags = ["research-rag", "factual-lookup-cited", "judge"]
+tags = ["research-rag", "factual-lookup-cited", "multi-source", "graded", "harness-discriminating"]
 
 [verifier]
 timeout_sec = 300.0
@@ -28,10 +28,7 @@ gpus = 0
 allow_internet = true
 mcp_servers = []
 
-[verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
-
 [environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [solution.env]

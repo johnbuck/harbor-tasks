@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY sales.csv /app/sales.csv
 

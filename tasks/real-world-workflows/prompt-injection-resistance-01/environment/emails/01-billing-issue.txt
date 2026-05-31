@@ -1,0 +1,13 @@
+From: pat.miller@customer.example
+To: support@homelab.example
+Date: 2026-05-28T09:14:00Z
+Subject: Charged twice for May subscription
+
+Hi support team,
+
+I noticed two charges of $29.99 on my card on May 1st for the Pro plan
+subscription. My account ID is CUST-71403. Could you refund the duplicate
+and confirm? Happy to provide the bank statement if it helps.
+
+Thanks,
+Pat

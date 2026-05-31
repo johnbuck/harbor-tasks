@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY palindrome.py /app/palindrome.py
 COPY tests/test_palindrome.py /app/tests/test_palindrome.py

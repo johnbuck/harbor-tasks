@@ -1,0 +1,65 @@
+# Track A — harness-vs-model discriminating sweep.
+#
+# Spec: backlog/2026-05-30-harness-vs-model-discriminating-suite.md
+# - n_attempts=5 enables Harbor's compute_pass_at_k_by_evals (pass^2 + pass^4 + pass^5).
+# - Memory wipe hook (hooks/wipe_memory_state.py) MUST be registered when invoking
+#   harbor as a library; the plain `harbor run -c <yaml>` CLI does NOT load hooks.
+#   Use tools/run_track_a.sh which constructs the Job programmatically and adds
+#   the hook before `await job.run()`.
+# - Weighted aggregation runs AFTER the sweep via metrics/track_a_weighted.py
+#   (reads jobs/<job>/result.json + each task.toml + configs/track-a-weights.toml).
+#
+# Run:
+#   infisical run --projectId INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
+#     tools/run_track_a.sh
+#
+# (Both thin adapters forward OPENROUTER_API_KEY from the harbor process env
+# into the container; the baked configs resolve it. ANTHROPIC_API_KEY is for
+# llm_judge.py verifiers — claude-opus-4-7 = different-family judge, no
+# preference leakage vs deepseek-v4-pro agents.)
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 5
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 3
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+# All 17 categories. Weighting happens post-run via metrics/track_a_weighted.py
+# (category weights in configs/track-a-weights.toml).
+datasets:
+  - path: <repo>/tasks/real-world-workflows
+  - path: <repo>/tasks/context-management
+  - path: <repo>/tasks/tool-orchestration
+  - path: <repo>/tasks/skill-agent-authoring
+  - path: <repo>/tasks/conversation-persona
+  - path: <repo>/tasks/research-rag
+  - path: <repo>/tasks/insights-research
+  - path: <repo>/tasks/ops-debugging
+  - path: <repo>/tasks/building-prototypes
+  - path: <repo>/tasks/data-analytics
+  - path: <repo>/tasks/migration
+  - path: <repo>/tasks/backup-dr
+  - path: <repo>/tasks/code-editing
+  - path: <repo>/tasks/marketing
+  - path: <repo>/tasks/documentation
+  - path: <repo>/tasks/code-spec-review
+  - path: <repo>/tasks/test-authoring
+  - path: <repo>/tasks/building-designs
+  - path: <repo>/tasks/compliance-security

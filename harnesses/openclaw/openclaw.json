@@ -30,6 +30,10 @@
     }
   },
 
+  "browser": {
+    "cdpUrl": "http://internal-host:9222"
+  },
+
   "mcp": {
     "servers": {
       "recall": {

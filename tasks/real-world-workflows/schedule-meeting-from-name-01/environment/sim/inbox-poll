@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Inbox simulator. Reads /var/log/inbox.jsonl (pre-seeded by task setup
+plus dynamically-templated replies based on what's in outbox.jsonl), filters
+by recipient (the task's user) and optionally by since-timestamp, and writes
+JSON lines to stdout.
+
+Usage:
+    inbox-poll                  # all messages for the task user
+    inbox-poll --from <addr>    # only messages from this sender
+    inbox-poll --since <iso>    # only messages newer than ISO timestamp
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+
+INBOX = Path("/var/log/inbox.jsonl")
+SENDER_FILE = Path("/etc/sim/user-email")
+
+
+def _user() -> str:
+    if SENDER_FILE.exists():
+        return SENDER_FILE.read_text().strip()
+    return "user@example.com"
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--from", dest="from_addr", default=None)
+    p.add_argument("--since", default=None)
+    args = p.parse_args()
+
+    me = _user()
+    since = datetime.fromisoformat(args.since) if args.since else None
+
+    if not INBOX.exists():
+        return 0
+
+    for line in INBOX.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            msg = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if msg.get("to") != me:
+            continue
+        if args.from_addr and msg.get("from") != args.from_addr:
+            continue
+        if since:
+            try:
+                ts = datetime.fromisoformat(msg.get("ts", "").rstrip("Z"))
+                if ts <= since:
+                    continue
+            except ValueError:
+                pass
+        print(json.dumps(msg))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

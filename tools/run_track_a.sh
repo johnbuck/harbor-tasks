@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# Track A sweep driver: loads the YAML, registers the memory-wipe hook, runs
+# the job, then runs the weighted-aggregation post-processor.
+#
+# Spec: backlog/2026-05-30-harness-vs-model-discriminating-suite.md
+#
+# Infisical-CLI footguns this wrapper handles for you:
+#   1. `infisical login` ignores INFISICAL_SITE_URL — needs explicit --domain.
+#   2. `infisical run` ditto.
+#   3. `--plain --silent` emits the token WITH a trailing newline; stashing
+#      that in INFISICAL_TOKEN unstripped breaks the next HTTP call with
+#      `invalid header field value for "Authorization"` (\n in header). Strip
+#      with `tr -d '\r\n'` before exporting.
+#
+# Usage:
+#   source ~/.config/infisical/infisical-identity.env
+#   tools/run_track_a.sh
+
+set -euo pipefail
+
+REPO="${REPO:-<repo>}"
+HARBOR="${HARBOR:-/tmp/harbor}"
+CONFIG="${CONFIG:-${REPO}/configs/track-a-harness.yaml}"
+WEIGHTS="${REPO}/configs/track-a-weights.toml"
+# Persistent jobs dir on the encrypted /home (327G), NOT /tmp — /tmp is tmpfs
+# (RAM-backed) so runs there are wiped on reboot and cost real money to redo.
+# harbor-tasks/jobs/ is gitignored, so it persists without bloating the repo.
+JOBS_DIR="${JOBS_DIR:-${REPO}/jobs}"
+JOB_NAME="${JOB_NAME:-track-a-$(date +%Y-%m-%d__%H-%M-%S)}"
+
+SITE_URL="${INFISICAL_SITE_URL:-http://internal-host:8380}"
+PROJECT_ID="${INFISICAL_PROJECT_ID:-INFISICAL_PROJECT_ID}"
+
+: "${INFISICAL_CLIENT_ID:?set INFISICAL_CLIENT_ID via ~/.config/infisical/infisical-identity.env}"
+: "${INFISICAL_CLIENT_SECRET:?set INFISICAL_CLIENT_SECRET via ~/.config/infisical/infisical-identity.env}"
+
+# Acquire token via universal-auth → tempfile (never echo). Strip trailing
+# newline before stashing in INFISICAL_TOKEN (HTTP-header safety).
+TOK_TMP="$(mktemp -t itok.XXXXXX)"
+chmod 600 "$TOK_TMP"
+trap 'rm -f "$TOK_TMP"' EXIT
+infisical login \
+    --method=universal-auth \
+    --client-id="$INFISICAL_CLIENT_ID" \
+    --client-secret="$INFISICAL_CLIENT_SECRET" \
+    --domain="$SITE_URL" \
+    --plain --silent >"$TOK_TMP" 2>/dev/null
+export INFISICAL_TOKEN="$(tr -d '\r\n' < "$TOK_TMP")"
+export INFISICAL_SITE_URL="$SITE_URL"
+export PATH="${HARBOR}/.venv/bin:${PATH}"
+
+# Inject secrets and run the sweep programmatically (so we can register the
+# memory-wipe TrialEvent.START hook — the `harbor run -c <yaml>` CLI does NOT
+# load hooks).
+infisical run \
+    --domain="$SITE_URL" \
+    --projectId="$PROJECT_ID" \
+    --env=production --path=/proxy/ \
+    -- env JOB_NAME="$JOB_NAME" REPO="$REPO" CONFIG="$CONFIG" \
+       N_ATTEMPTS="${N_ATTEMPTS:-}" JOBS_DIR="$JOBS_DIR" \
+       PYTHONPATH="${REPO}:${PYTHONPATH:-}" \
+       uv run --project "$HARBOR" python - <<'PY'
+import asyncio
+import os
+import sys
+from pathlib import Path
+
+import yaml
+from harbor.job import Job
+from harbor.models.job.config import JobConfig
+from harbor.trial.hooks import TrialEvent
+from hooks.wipe_memory_state import wipe_memory_state
+
+
+async def main() -> int:
+    cfg_path = Path(os.environ["CONFIG"])
+    raw = yaml.safe_load(cfg_path.read_text())
+
+    def _expand(v):
+        if isinstance(v, str):
+            return os.path.expandvars(v)
+        if isinstance(v, list):
+            return [_expand(x) for x in v]
+        if isinstance(v, dict):
+            return {k: _expand(x) for k, x in v.items()}
+        return v
+    raw = _expand(raw)
+    raw["job_name"] = os.environ.get("JOB_NAME", "track-a")
+    # Pin the ABSOLUTE jobs_dir so Harbor writes to the persistent /home dir
+    # regardless of CWD (default is CWD-relative "jobs", which caused runs to
+    # scatter between /tmp and the repo).
+    if os.environ.get("JOBS_DIR"):
+        raw["jobs_dir"] = os.environ["JOBS_DIR"]
+    # N_ATTEMPTS env overrides the YAML value (smoke=1 vs pass^k=5) without
+    # editing the config — avoids leaving a stale n=1 in the committed YAML.
+    if os.environ.get("N_ATTEMPTS"):
+        raw["n_attempts"] = int(os.environ["N_ATTEMPTS"])
+
+    # ONE JOB PER HARNESS — so each job's dashboard rollup is a single harness's
+    # scores and the two jobs compare directly (mixing both agents in one job
+    # forces per-task comparison, which defeats the rollup view). One invocation
+    # emits `<job_name>__openclaw` and `<job_name>__hermes`.
+    base_job_name = os.environ.get("JOB_NAME", "track-a")
+    agents = raw.pop("agents")
+
+    def _label(a):
+        cls = (a.get("import_path") or "").rsplit(":", 1)[-1].lower()
+        if "openclaw" in cls:
+            return "openclaw"
+        if "hermes" in cls:
+            return "hermes"
+        return cls or "agent"
+
+    for agent_cfg in agents:
+        label = _label(agent_cfg)
+        sub = dict(raw)
+        sub["agents"] = [agent_cfg]
+        sub["job_name"] = f"{base_job_name}__{label}"
+        config = JobConfig.model_validate(sub)
+        job = await Job.create(config)
+        job.add_hook(TrialEvent.START, wipe_memory_state)
+        print(f"[{label}] job={sub['job_name']} {len(job)} trials, "
+              f"n_attempts={config.n_attempts}", file=sys.stderr)
+        await job.run()
+    return 0
+
+
+sys.exit(asyncio.run(main()))
+PY
+
+# Post-run: weighted aggregate + split across the two per-harness job dirs.
+OC_DIR="${JOBS_DIR}/${JOB_NAME}__openclaw"
+HE_DIR="${JOBS_DIR}/${JOB_NAME}__hermes"
+if [[ -d "$OC_DIR" || -d "$HE_DIR" ]]; then
+    echo "computing Track A weighted report (both harness jobs)..." >&2
+    uv run --project "$HARBOR" "${REPO}/metrics/track_a_weighted.py" \
+        --job-dir "$OC_DIR" --job-dir "$HE_DIR" \
+        --tasks-root "${REPO}/tasks" \
+        --weights "$WEIGHTS"
+else
+    echo "WARNING: ${OC_DIR} / ${HE_DIR} not found; skipping weighted report" >&2
+fi

@@ -1,0 +1,33 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/update-record-with-cleanup-01"
+description = "User asks 'remove last month's grocery duplicates and split rent across the new roommate'. Tests multi-row file-edit precision, duplicate inference, arithmetic, preservation of unrelated history. Failure modes scored per the 11-mode taxonomy."
+authors = [{name = "johnbuck"}]
+keywords = ["real-world-workflows", "record-update", "data-cleanup", "goal-oriented"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "real-world-workflows"
+shape = "update-record-with-cleanup"
+tags = ["real-world-workflows", "data-cleanup", "harness-discriminating", "multi-axis"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

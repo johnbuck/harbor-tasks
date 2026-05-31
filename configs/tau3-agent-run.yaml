@@ -1,0 +1,42 @@
+# tau3-bench agent run: openclaw + hermes against the airline-domain slice.
+#
+# Spec: backlog/2026-05-28-tau3-bench-integration.md (oracle PASSED 2026-05-28;
+# this config is for the next step — actual agent runs).
+#
+# Sim-user + assertion-judge route through OpenRouter (data_collection: deny).
+# Per the spec's footgun: OPENAI_API_KEY/OPENAI_BASE_URL/TAU2_* MUST be in the
+# harbor process env (not just container env) because task.toml resolves
+# ${OPENAI_API_KEY} at config-load time. Use tools/run_tau3.sh.
+
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1   # multi-container per trial, keep concurrency low
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    # Agent's OpenRouter key (consumed by openclaw + hermes adapters)
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    # Sim-user + judge mapping (consumed by the tau3-runtime sidecar)
+    - OPENAI_API_KEY=${OPENROUTER_API_KEY}
+    - OPENAI_BASE_URL=https://openrouter.ai/api/v1
+    - TAU2_USER_MODEL=openai/gpt-5-nano
+    - TAU2_NL_ASSERTIONS_MODEL=openai/gpt-5-nano
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+# Use the local airline-domain slice generated 2026-05-28
+datasets:
+  - path: /tmp/harbor-benchmarks/tau3-bench

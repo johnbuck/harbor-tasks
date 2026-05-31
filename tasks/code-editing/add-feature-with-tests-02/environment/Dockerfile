@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY calc.py /app/calc.py
 COPY tests/test_calc.py /app/tests/test_calc.py

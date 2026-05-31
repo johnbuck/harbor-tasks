@@ -1,6 +1,7 @@
-You have now reviewed all 11 documents.
+All 11 documents **and any notes file have now been deleted** — there is
+nothing left on disk to read. Working **purely from memory**, write your
+answers to `/app/answer.md`:
 
-**Without re-reading any of the chunk files**, use your `/app/notes.md` to
-answer this question, writing the answer to `/app/answer.md`:
-
-What are the server room and the coolant type? (These were stated in the very first document.)
+1. List all **11 marker codes** you saw, one per line, in the form
+   `MARKER-01-XXXXXXXX` ... `MARKER-11-XXXXXXXX`.
+2. State the server room, the master key location, and the coolant type (these were in the very first document).

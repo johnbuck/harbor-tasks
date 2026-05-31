@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY geometry/ /app/geometry/
 COPY main.py /app/main.py

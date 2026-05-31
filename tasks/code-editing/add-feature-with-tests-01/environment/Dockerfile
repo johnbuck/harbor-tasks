@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY lru.py /app/lru.py
 COPY tests/test_lru.py /app/tests/test_lru.py

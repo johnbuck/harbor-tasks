@@ -1,0 +1,37 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/agentic-research-with-memory-01"
+description = "Agentic research over a sandboxed seeded corpus. Agent must navigate ~12 interlinked pages, gather specific facts about a fictional research lab, synthesize a grounded report with citations. Verifier checks deterministic fact presence + citation linking + LLM-judge synthesis quality. Distinguishes from existing research-rag-01 by being multi-source iterative (the agent decides what to fetch)."
+authors = [{name = "johnbuck"}]
+keywords = ["research-rag", "agentic-research", "synthesis", "citations"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "research-rag"
+shape = "agentic-research-with-memory"
+tags = ["research-rag", "agentic-research", "multi-source", "harness-discriminating"]
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
+MODEL_NAME = "claude-opus-4-7"
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

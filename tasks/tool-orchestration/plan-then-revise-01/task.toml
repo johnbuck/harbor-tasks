@@ -1,0 +1,55 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/plan-then-revise-01"
+description = "Agent declares a 4-step plan, executes 2 steps, environment then changes the requirements out from under it. Final step is graded on 8 independent sub-checks (functional + scrapped-plan cleanup + PLAN.md re-plan). Tests whether the harness re-plans cleanly vs blindly executing the original plan."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "plan-then-revise", "replan"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "plan-then-revise"
+tags = ["tool-orchestration", "plan-revise", "multi-step", "harness-discriminating"]
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-plan-and-implement-add"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-implement-multiply"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-revise-and-fix"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0

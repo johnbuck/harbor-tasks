@@ -11,9 +11,12 @@ author_name = "johnbuck"
 difficulty = "easy"
 category = "conversation-persona"
 shape = "remember-facts"
-# single-turn-proxy: the multi-turn conversation is embedded in the instruction
-# as a transcript rather than executed as live turns. True multi-turn deferred.
-tags = ["conversation-persona", "remember-facts", "judge", "single-turn-proxy"]
+# model-only: the multi-turn conversation is embedded in the instruction as a
+# transcript rather than executed as live turns, so the harness's memory write
+# path is never exercised. Kept in Track B for general-capability reporting.
+# Track A coverage of the same gap comes from the
+# `true-multi-turn-memory-write` shape (Harbor steps/ task).
+tags = ["conversation-persona", "remember-facts", "judge", "model-only"]
 
 [verifier]
 timeout_sec = 300.0
@@ -35,5 +38,6 @@ ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
 MODEL_NAME = "claude-opus-4-7"
 
 [environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [solution.env]

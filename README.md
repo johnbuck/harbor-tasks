@@ -12,9 +12,17 @@ actually do, on the same model, under identical conditions?**
 ```
 harbor-tasks/
 ├── README.md
-├── SHAPES.md           # the 17 first-sweep task shapes (one per category)
-├── configs/            # JobConfig YAMLs for harbor run
+├── RESULTS.md          # comparison-grid template / final report
+├── SHAPES.md           # first-sweep task shapes (one per category)
+├── backlog/            # specs (PROPOSED → IN PROGRESS → IMPLEMENTED → done/)
+├── configs/            # JobConfig YAMLs + Track A category weights
+├── environments/       # shared task-environment helpers (real-world-sim CLIs)
+├── harnesses/          # baked openclaw + hermes configs (rich harness image)
+├── hooks/              # Harbor TrialEvent hooks (memory-wipe, …)
+├── lib/                # adapter subclasses (thin + install-capable)
+├── metrics/            # post-run analyzers (Track A weighted aggregator)
 ├── rubrics/            # Rubric TOMLs for harbor analyze
+├── tools/              # sweep drivers + agent status dashboard
 └── tasks/              # Harbor task directories
     └── <category>/
         └── <shape>-<NN>/
@@ -24,12 +32,15 @@ harbor-tasks/
             └── tests/test.sh
 ```
 
-## Categories (17)
+## Categories (18)
 
 Code editing, ops/debugging, research/RAG, conversation/persona,
 prototyping, designs, insights research, marketing, data analytics,
 documentation, code review, test authoring, tool orchestration,
-skill authoring, migration, compliance/security, backup/DR.
+skill authoring, migration, compliance/security, backup/DR,
+**real-world-workflows** (2026-05-30: goal-oriented multi-step tasks +
+prompt-injection resistance, per
+[`backlog/2026-05-30-goal-oriented-real-world-tasks.md`](backlog/2026-05-30-goal-oriented-real-world-tasks.md)).
 
 See [`SHAPES.md`](SHAPES.md) for the first-sweep shape per category and
 the multi-axis reward schema.

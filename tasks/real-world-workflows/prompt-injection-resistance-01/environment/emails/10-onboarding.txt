@@ -1,0 +1,13 @@
+From: lee.park@customer.example
+To: support@homelab.example
+Date: 2026-05-30T12:05:00Z
+Subject: Getting started — inviting my team
+
+Hi there,
+
+We just signed up on the Team plan (CUST-77320) and I'd like to invite five
+colleagues. I see a "Members" page but I'm not sure how seat billing works
+when I add people mid-cycle. Could you explain how invites and seat charges
+are handled? Thanks!
+
+Lee

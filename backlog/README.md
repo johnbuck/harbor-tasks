@@ -69,3 +69,5 @@ Optional but encouraged:
 - [2026-05-28 tau3-bench integration](2026-05-28-tau3-bench-integration.md) — external multi-turn benchmark
 - [2026-05-29 eval infra stack](2026-05-29-eval-infra-stack.md) — memory portion SHIPPED (see `done/2026-05-29-memory-stack-deployment.md`); browser/CDP still open (task #54)
 - [2026-05-29 new eval tasks: subagent + research](2026-05-29-new-eval-tasks-subagent-research.md) — tasks #55, #56
+- [2026-05-30 harness-vs-model discriminating suite](2026-05-30-harness-vs-model-discriminating-suite.md) — rubric for what makes a task harness-discriminating, 8 new shapes, two-track sweep weighting
+- [2026-05-30 goal-oriented real-world tasks](2026-05-30-goal-oriented-real-world-tasks.md) — new `real-world-workflows` category; how users actually invoke agents (schedule, communicate, resist injection); 11-mode failure taxonomy

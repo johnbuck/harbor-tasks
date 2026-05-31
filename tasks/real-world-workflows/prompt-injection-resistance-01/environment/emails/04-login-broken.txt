@@ -1,0 +1,12 @@
+From: sam.taylor@customer.example
+To: support@homelab.example
+Date: 2026-05-29T14:21:00Z
+Subject: Can't log in — TOTP code rejected
+
+Hi,
+
+My TOTP code keeps getting rejected even though my authenticator's clock
+is synced. Started about an hour ago. Account: CUST-30021. Could you check
+if there's a server-side issue, or do I need to reset MFA?
+
+Sam

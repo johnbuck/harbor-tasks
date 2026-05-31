@@ -101,3 +101,18 @@ we still prefer the privacy pool where the routing allows it.
   uv run harbor run …'`.
 - Remaining: the **agent run** (openclaw/hermes via the tau3-runtime MCP) — same
   openclaw reasoning-passthrough caveat as the rest, plus the hermes-MCP unknown.
+- 2026-05-30: **agent-run attempt #1 = BLOCKED.** Sierra's tau3 task Dockerfile
+  doesn't extend `harbor-agents-prebaked` (it builds its own sidecar image and
+  uses a stock base for the agent container — no NVM, no openclaw binary).
+  Both our adapters (`openclaw_thin` and `openclaw_no_install`) assume openclaw
+  is pre-installed: thin runs `. ~/.nvm/nvm.sh && nvm use 22 && openclaw --version`,
+  no-install runs `openclaw --version` directly. Both fail `command not found` /
+  `No such file or directory`. **Fix paths**: (a) modify each tau3 task's
+  Dockerfile to `FROM harbor-agents-prebaked` and re-add the tau3 sidecar wiring
+  by hand (~30 LoC per task × 5 tasks); (b) write a third "install-during-trial"
+  openclaw adapter that runs `npm i -g openclaw` at agent-setup time
+  (~50 LoC, generic); (c) build a unified tau3-on-prebaked image upstream
+  (cleanest but most work). **Operator-gated** — leaving tau3 agent-run
+  acceptance criterion unmet for v1; Track A sweep (#78) is the headline.
+  Track-A artifacts in `/tmp/harbor-jobs/tau3-openclaw-smoke*` for diagnostic
+  reference.
