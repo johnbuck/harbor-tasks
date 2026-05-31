@@ -1,4 +1,5 @@
 schema_version = "1.1"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-memory-conversational-03"
@@ -8,12 +9,11 @@ keywords = ["conversation-persona", "remember-facts", "multi-step", "memory"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "conversation-persona"
 shape = "multistep-memory-conversational"
-tags = ["conversation-persona", "multi-step", "memory-conversational"]
+tags = ["conversation-persona", "multi-step", "memory-conversational", "harness-discriminating"]
 
-multi_step_reward_strategy = "final"
 
 [environment]
 build_timeout_sec = 600.0
@@ -25,6 +25,9 @@ gpus = 0
 allow_internet = true
 mcp_servers = []
 
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
 [agent]
 timeout_sec = 300.0
 
@@ -32,22 +35,51 @@ timeout_sec = 300.0
 timeout_sec = 60.0
 
 [[steps]]
-name = "01-intro"
+name = "01-intro-a"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
-name = "02-distractor"
+name = "02-intro-b"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
-name = "03-recall"
+name = "03-distractor"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
 timeout_sec = 30.0
+
+[[steps]]
+name = "04-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "07-recall"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+

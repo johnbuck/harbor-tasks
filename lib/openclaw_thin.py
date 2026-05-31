@@ -107,6 +107,10 @@ class OpenClawThin(OpenClawOpenRouter):
 
         cli_flags = self.build_cli_flags()
         cli_flags_arg = (cli_flags + " ") if cli_flags else ""
+        # build_cli_flags() already emits `--agent main` (and `--thinking high`)
+        # for the openclaw CLI; do NOT add another --agent or openclaw 2026.5.26+
+        # will silently fail with `Unknown model: xrouter/...` because the
+        # duplicated arg breaks model resolution.
         command = (
             ". ~/.nvm/nvm.sh && nvm use 22 && "
             f"openclaw agent --local --json {cli_flags_arg}"

@@ -306,6 +306,13 @@ browser:
   # after this period of no activity between agent loops (default: 120 = 2 minutes)
   inactivity_timeout: 120
 
+  # Local CDP endpoint — shared headless Chromium running on wiley
+  # (~/Docker/agent-cdp). Set instead of browser.cloud_provider so we use a
+  # self-hosted browser instead of Browserbase. Reachable from the rich-harness
+  # container via the homelab LAN (internal-host resolves via Pi-hole).
+  # Read by tools/browser_tool.py::_get_cdp_override → browser.cdp_url.
+  cdp_url: "http://internal-host:9222"
+
 # =============================================================================
 # Tool Loop Guardrails
 # =============================================================================

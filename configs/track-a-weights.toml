@@ -1,0 +1,31 @@
+# Track A — per-category weights for the harness-vs-model discriminating sweep.
+#
+# Spec: backlog/2026-05-30-harness-vs-model-discriminating-suite.md
+# Consumed by: metrics/track_a_weighted.py
+#
+# Weights are operator-judgment initial values. After the first Track A sweep
+# produces real data, refit from observed score variance (down-weight categories
+# that produced no harness split, up-weight ones that did).
+#
+# Category names must match each task.toml's [metadata].category field.
+
+[weights]
+"real-world-workflows"   = 3.0   # STRONG — goal-oriented multi-step + injection resistance
+"context-management"     = 3.0   # STRONG harness signal — compaction/window behavior
+"tool-orchestration"     = 3.0   # STRONG — tool selection + planning
+"skill-agent-authoring"  = 3.0   # STRONG — sub-agent + skill discovery
+"conversation-persona"   = 2.0   # MEDIUM today; promote to 3.0 once true-multi-turn ships
+"research-rag"           = 2.0   # MEDIUM — memory + retrieval
+"insights-research"      = 2.0   # MEDIUM — memory + reasoning
+"ops-debugging"          = 1.5   # MIXED — shell/MCP routing
+"building-prototypes"    = 1.5   # MIXED — MCP usage, but model writes code
+"data-analytics"         = 1.5   # MIXED — tool + analysis
+"migration"              = 1.5   # MIXED — multi-step
+"backup-dr"              = 1.5   # MIXED — runbook execution
+"code-editing"           = 0.5   # WEAK — model-dominated; keep for Track B
+"marketing"              = 0.5   # WEAK
+"documentation"          = 0.5   # WEAK
+"code-spec-review"       = 0.5   # WEAK
+"test-authoring"         = 0.5   # WEAK
+"building-designs"       = 0.5   # WEAK
+"compliance-security"    = 0.5   # WEAK

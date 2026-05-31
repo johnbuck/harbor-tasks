@@ -1,7 +1,10 @@
 # New eval tasks — sub-agent spawning + research (design)
 
 - **Date:** 2026-05-29
-- **Status:** DESIGN. Not built.
+- **Status:** IMPLEMENTED 2026-05-30 — both shapes shipped:
+  `tasks/skill-agent-authoring/sub-agent-parallel-decompose-01/` (#55) and
+  `tasks/research-rag/agentic-research-with-memory-01/` (#56). Oracle passes
+  1.0 on both. Move spec to `done/` after first agent-run completes.
 - **Origin:** Operator — "we don't have a test that involves spawning sub-agents…
   we need that," and "a test that demonstrates and emulates an agent doing some
   level of research."

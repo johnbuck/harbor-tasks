@@ -1,0 +1,76 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/true-multi-turn-memory-write-01"
+description = "Five conversation turns share personal facts; sixth turn asks a question requiring recall. Tests whether the harness PROACTIVELY writes to memory (recall + hindsight) without being told, and whether it retrieves the facts back. Replaces remember-facts-01's single-turn-proxy gap."
+authors = [{name = "johnbuck"}]
+keywords = ["conversation-persona", "true-multi-turn", "memory-write", "memory-retrieval"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "medium"
+category = "conversation-persona"
+shape = "true-multi-turn-memory-write"
+tags = ["conversation-persona", "true-multi-turn", "memory-proactivity", "harness-discriminating"]
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true   # needs to reach recall/hindsight on wiley LAN
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-share-diet"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-share-pet"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-share-timezone"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-share-allergy"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-share-hobby"
+[steps.agent]
+timeout_sec = 180.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-recall-question"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 60.0

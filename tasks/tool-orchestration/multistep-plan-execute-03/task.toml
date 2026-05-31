@@ -1,4 +1,5 @@
 schema_version = "1.1"
+multi_step_reward_strategy = "mean"
 
 [task]
 name = "johnbuck/multistep-plan-execute-03"
@@ -13,7 +14,6 @@ category = "tool-orchestration"
 shape = "multistep-plan-execute"
 tags = ["tool-orchestration", "multi-step", "plan-execute"]
 
-multi_step_reward_strategy = "mean"
 
 [environment]
 build_timeout_sec = 600.0
@@ -22,8 +22,11 @@ cpus = 1
 memory_mb = 2048
 storage_mb = 10240
 gpus = 0
-allow_internet = false
+allow_internet = true
 mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [agent]
 timeout_sec = 180.0

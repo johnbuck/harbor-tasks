@@ -1,5 +1,16 @@
 #!/bin/bash
 set -e
-cat > /app/answer.md <<'EOF'
-The server room is B12 and the coolant type is R-410A.
-EOF
+cat > /app/answer.md <<'ANS'
+MARKER-01-65f34746
+MARKER-02-9d6fc5c7
+MARKER-03-c1d448ca
+MARKER-04-28231e80
+MARKER-05-25b1b5db
+MARKER-06-4ab38c09
+MARKER-07-7fd4d03e
+MARKER-08-654693c8
+MARKER-09-43dd1f4c
+MARKER-10-fe1a88fd
+MARKER-11-3ba114f7
+ServerRoom: B12. MasterKeyLocation: Vault 7. CoolantType: R-410A.
+ANS

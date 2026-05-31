@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY running_total.py /app/running_total.py
 COPY tests/test_running_total.py /app/tests/test_running_total.py

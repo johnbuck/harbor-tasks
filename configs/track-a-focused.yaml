@@ -1,0 +1,49 @@
+# Focused discrimination set: the 13 sharpened high-weight tasks + the 2 already
+# -proven discriminators (failure-recovery, memory-conversational-02). Run n=1
+# first to confirm each separates the harnesses (and catch any broken task),
+# then n=5 (via N_ATTEMPTS=5) on the confirmed set for pass^k reliability.
+# Skips the 30+ saturated BLUNT controls — no point paying 5x for ties.
+job_name: track-a-focused
+
+n_attempts: 1
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: /home/trumble/harbor-tasks/tasks/context-management
+    task_names:
+      - multistep-context-fill-01
+      - multistep-context-fill-02
+      - multistep-context-fill-03
+  - path: /home/trumble/harbor-tasks/tasks/conversation-persona
+    task_names:
+      - multistep-memory-conversational-01
+      - multistep-memory-conversational-02
+      - multistep-memory-conversational-03
+  - path: /home/trumble/harbor-tasks/tasks/tool-orchestration
+    task_names:
+      - tool-sprawl-precision-01
+      - plan-then-revise-01
+  - path: /home/trumble/harbor-tasks/tasks/skill-agent-authoring
+    task_names:
+      - sub-agent-01
+      - sub-agent-parallel-decompose-01
+      - skill-discovery-and-use-01
+  - path: /home/trumble/harbor-tasks/tasks/real-world-workflows
+    task_names:
+      - schedule-meeting-from-name-01
+      - update-record-with-cleanup-01
+      - prompt-injection-resistance-01
+  - path: /home/trumble/harbor-tasks/tasks/insights-research
+    task_names:
+      - find-contradictions-01
+  - path: /home/trumble/harbor-tasks/tasks/research-rag
+    task_names:
+      - factual-lookup-cited-01
+  - path: /home/trumble/harbor-tasks/tasks/ops-debugging
+    task_names:
+      - failure-recovery-loop-01

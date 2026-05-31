@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY intervals.py /app/intervals.py
 COPY tests/test_intervals.py /app/tests/test_intervals.py

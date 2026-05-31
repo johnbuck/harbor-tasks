@@ -1,5 +1,16 @@
 #!/bin/bash
 set -e
-cat > /app/answer.md <<'EOF'
-The project codename is Helios and the launch window is 2027-Q3.
-EOF
+cat > /app/answer.md <<'ANS'
+MARKER-01-25ec9096
+MARKER-02-48ba5864
+MARKER-03-7961c596
+MARKER-04-57d53498
+MARKER-05-5fff0226
+MARKER-06-8c86ba15
+MARKER-07-60cb5028
+MARKER-08-fa38b5b7
+MARKER-09-9da83e08
+MARKER-10-896aef63
+MARKER-11-7f4af9f8
+ProjectCodename: Helios. PrimaryContact: Dr. Vance. LaunchWindow: 2027-Q3.
+ANS

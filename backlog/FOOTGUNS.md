@@ -510,3 +510,306 @@ The hindsight-plugin spec inherits the existing risk without amplifying it.
 
 **Operator decision pending**: switch to `neo4j-admin database dump` cron
 (separate from this spec). Spec backlog entry to be added if/when scheduled.
+
+---
+
+## 26. Infisical CLI: `--domain` is required on `login` AND `run` (env var ignored)
+
+**Symptom 1 (login):** `infisical login --method=universal-auth ...` succeeds (rc=0) but emits an error message about `domain ... Current domain ... https://app.infisical.com` instead of a JWT. The CLI is hitting the **cloud** endpoint, not the self-hosted one set by `INFISICAL_SITE_URL`.
+
+**Symptom 2 (run):** later, `infisical run --projectId ... -- <cmd>` returns:
+```
+CallGetRawSecretsV3: ... Get "https://app.infisical.com/api/v3/secrets/raw?...": ...
+```
+Same root cause — `run` also ignores `INFISICAL_SITE_URL`.
+
+**Fix:** pass `--domain="$INFISICAL_SITE_URL"` explicitly on **both** commands:
+```bash
+infisical login --method=universal-auth --client-id=... --client-secret=... \
+    --domain="http://internal-host:8380" --plain --silent >tokfile
+infisical run --domain="http://internal-host:8380" \
+    --projectId=... --env=production --path=/proxy/ -- <cmd>
+```
+
+`tools/run_track_a.sh` handles both for free.
+
+---
+
+## 27. Infisical `--plain --silent` JWT comes with a trailing newline → HTTP-header crash
+
+**Symptom:** after a clean login, the next CLI call fails with:
+```
+CallGetRawSecretsV3: ... net/http: invalid header field value for "Authorization"
+```
+
+**Cause:** `--plain --silent` writes the token **followed by `\n`**. If you do
+```bash
+export INFISICAL_TOKEN="$(cat /tmp/tok)"
+```
+or worse, `export INFISICAL_TOKEN=$(infisical login ...)`, the newline survives into the env var, then into the `Authorization: Bearer <jwt>\n` header, which the Go `net/http` library rejects.
+
+**Fix:** strip with `tr -d '\r\n'` before exporting:
+```bash
+export INFISICAL_TOKEN="$(tr -d '\r\n' < /tmp/tok)"
+```
+
+**Debug pattern (shape-only, never prints token bytes):**
+```bash
+printf 'bytes: '; wc -c < /tmp/tok
+printf 'ends_with_newline: '; tail -c 1 /tmp/tok | od -An -c | tr -d ' '
+printf 'starts_with: '; head -c 2 /tmp/tok | tr -c 'A-Za-z0-9' '?'; echo
+printf 'has_jwt_pattern: '; grep -cE '^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\s*$' /tmp/tok
+```
+A clean JWT shows `bytes: ~400`, `ends_with_newline: \n` (or empty after strip), `starts_with: ey`, `has_jwt_pattern: 1`, two dots.
+
+---
+
+## 28. `multi_step_reward_strategy` placed after `[metadata]` is silently scoped to metadata
+
+**Symptom:** Harbor's CLI reports `Correctness: 0.167` (= 1/6) on a multi-step task where the **final** step gets `correctness=1` and you set `multi_step_reward_strategy = "final"`. Per-step `reward.json` files all show `1.0`, but the trial-level rollup looks like a mean across steps.
+
+**Cause:** TOML scoping. In `task.toml` like:
+```toml
+[metadata]
+category = "..."
+tags = [...]
+
+multi_step_reward_strategy = "final"   # ← parsed as metadata.multi_step_reward_strategy
+```
+The blank line does NOT close the table. Once you enter `[metadata]`, every bare key belongs to it until another `[table]` header. So Harbor doesn't see your strategy override and defaults to `mean`.
+
+**Fix:** put `multi_step_reward_strategy` **at the very top of the file** (before any `[table]` header) so it's a true root-level key:
+```toml
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+...
+```
+
+Sanity check via `python3 -c "import tomllib; d=tomllib.loads(open('task.toml').read()); print('root=', d.get('multi_step_reward_strategy'), 'metadata=', d.get('metadata',{}).get('multi_step_reward_strategy'))"` — root should be set, metadata should be `None`.
+
+---
+
+## 29. Browserless v2 advertises `ws://0.0.0.0:3000/` by default; consumers time out
+
+**Symptom:** Hermes' `_resolve_cdp_override` (via `tools/browser_tool.py`) fetches `/json/version` from the CDP server, reads `webSocketDebuggerUrl`, and tries to connect. With browserless's default config, the URL is `ws://0.0.0.0:3000/` — which routes to nothing on the consumer side, leading to silent timeout.
+
+**Fix:** set `EXTERNAL=<routable-url>` in the browserless compose env so it advertises the address that consumers can actually reach:
+
+```yaml
+environment:
+  - EXTERNAL=http://internal-host:9222
+```
+
+Consumers then get back `ws://internal-host:9222/` and connect successfully. Verified at `~/Docker/agent-cdp/docker-compose.yml` on wiley.
+
+---
+
+## 30. Harbor's `harbor run` prompts interactively when verifier.env references host env
+
+**Symptom:** background `harbor run` hangs forever (no log output, no Docker activity). `ps` shows the harbor process is alive but doing nothing.
+
+**Cause:** when `task.toml` `[verifier.env]` references a host env var like `${ANTHROPIC_API_KEY}`, Harbor asks `Tasks in this run will load these from your environment. Proceed? (Y/n):` on stdin. In a non-tty context the prompt sits forever.
+
+**Fix:** pass `-y` (or `--yes`) to `harbor run` to auto-confirm. `tools/run_track_a.sh` does this implicitly via the programmatic `Job.create()` API; the CLI form needs the flag explicit.
+
+---
+
+## 31. `grep -cE PATTERN file` counts matching LINES, not match occurrences
+
+**Symptom:** a verifier requires "≥5 markdown links in the brief" and counts via `grep -cE '\[[^]]+\]\([^)]+\)' brief.md`. Oracle's brief actually has 5 links but the count comes back as 3 (or however many lines contain at least one link). Verifier fails legitimate output.
+
+**Cause:** `grep -c` is line-oriented — multiple matches on the same line collapse to 1.
+
+**Fix:** `grep -oE PATTERN file | wc -l` (extract each match on its own line, then count). Or `awk` with explicit per-match handling.
+
+```bash
+# wrong (counts lines)
+n=$(grep -cE '\[[^]]+\]\([^)]+\)' "$BRIEF")
+
+# right (counts matches)
+n=$(grep -oE '\[[^]]+\]\([^)]+\)' "$BRIEF" | wc -l)
+```
+
+---
+
+## 32. JobConfig YAML `environment.env` does NOT reach the trial container — only task.toml's `[environment.env]` does
+
+**Symptom:** Every trial in the Track A sweep fails with `FailoverError: Unknown model: xrouter/...`. A verifier-side env probe inside the container shows `OPENROUTER_API_KEY_LEN=0` even though `configs/track-a-harness.yaml` has the keys declared:
+```yaml
+environment:
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+```
+and the harbor process env (from infisical) clearly has them.
+
+**Cause:** Harbor's per-trial `EnvironmentConfig` is built from each **task.toml's** `[environment]` block, not from the YAML's top-level `environment:`. `resolve_env_vars()` runs against `task_env_config.env` only. The YAML-level env is used for compose-mode infrastructure variables (e.g. service env in docker-compose.yaml overlays), NOT propagated into the agent container.
+
+**Fix:** Add the keys to **each task.toml's** `[environment.env]` block:
+```toml
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+```
+For multi-step tasks that only have a top-level `[environment]` section (no `[environment.env]` yet), add the block before the next `[agent]` / `[verifier]` section. Verifier env stays in `[verifier.env]` separately.
+
+**Diagnostic pattern:** add `echo "OPENROUTER_API_KEY_LEN=${#OPENROUTER_API_KEY}" >&2` to a task's `tests/test.sh` and run as oracle. stderr captures what reaches the container.
+
+Affected all 48 task.tomls; bulk-patched 2026-05-30.
+
+---
+
+## 33. `lib/openclaw_thin.py` mis-added a duplicate `--agent main` → openclaw 2026.5.26 fails with "Unknown model"
+
+**Symptom:** "FailoverError: Unknown model: xrouter/deepseek/deepseek-v4-pro" from openclaw even after the env-propagation fix. The command line in the trial log shows `openclaw agent --local --json --agent main --agent main --thinking high --model ...` — the duplicate flag.
+
+**Cause:** `build_cli_flags()` (from `harbor.agents.installed.openclaw.OpenClaw.CLI_FLAGS`) already emits `--agent main` (it's the default of the `openclaw_agent_id` CliFlag). An interim adapter edit added a second `--agent main` thinking the first was missing. Two flags → openclaw 2026.5.26 parser silently mis-parses → reports "Unknown model" rather than "duplicate arg".
+
+**Fix:** never add `--agent` manually in the thin adapter — rely entirely on `cli_flags_arg = self.build_cli_flags()`. Clean command shape: `openclaw agent --local --json --agent main --thinking high --model xrouter/...` (one `--agent`).
+
+**Sanity probe** (manual docker run, confirms the clean command works):
+```bash
+docker run --rm -e OPENROUTER_API_KEY="$OPENROUTER_API_KEY" harbor-agents-rich:latest bash -c '
+    . ~/.nvm/nvm.sh && nvm use 22
+    openclaw agent --local --json --agent main --thinking high \
+        --model xrouter/deepseek/deepseek-v4-pro --message "say hi in 3 words"
+' 2>&1 | tail -5
+# Returns: completion stage with finishReason=stop
+```
+
+---
+
+## 34. `allow_internet = false` in task.toml silently breaks any task whose AGENT needs LLM connectivity
+
+**Symptom:** openclaw error `FailoverError: Unknown model: xrouter/deepseek/deepseek-v4-pro`. The model IS registered, the API key IS reaching the container (verified via in-container env probe = 73 chars), and the same openclaw command run via a fresh `docker run --rm` works fine. But Harbor-spawned trials all fail.
+
+**Cause:** Harbor enforces task-level network isolation. When `task.toml` has `[environment] allow_internet = false`, Harbor adds `docker-compose-no-network.yaml` (which sets `network_mode: none`) to the compose stack. The agent container literally has no network connection. openclaw tries to call `https://openrouter.ai/...`, the request fails, and openclaw's error formatter labels this as "Unknown model" rather than reporting the network failure.
+
+**Diagnostic pattern:** if openclaw says "Unknown model" but the env is verified correct:
+```bash
+# Inside the running trial container:
+curl -s -o /dev/null -w "%{http_code}\n" https://openrouter.ai/api/v1/models
+# Returns "000" (could not connect) → confirmed network-isolated
+# Returns "200" → not a network issue, look elsewhere
+```
+
+**Fix:** set `allow_internet = true` in any task whose agent uses a hosted LLM. Most existing tasks already have this. Newly authored shapes should default to `true` unless the task EXPLICITLY tests offline behavior. Bulk-fixed all 48 task.tomls 2026-05-30.
+
+**Side note:** since `allow_internet = true` removes the no-network override, agents can now also reach the recall/hindsight/honcho memory backends on `internal-host` — this is intended for memory-using tasks.
+
+---
+
+## 35. Task Dockerfiles `FROM harbor-agents-prebaked` miss the baked openclaw + persona config in `harbor-agents-rich`
+
+**Symptom:** every openclaw trial in the Track A sweep dies with `FailoverError: Unknown model: xrouter/deepseek/deepseek-v4-pro` — even though:
+- The harbor-agents-rich image has the baked openclaw.json with the `xrouter` custom provider
+- The OPENROUTER_API_KEY reaches the trial container (probe: 73 chars)
+- The container has internet (curl openrouter → 200)
+- The openclaw command line is exactly what works under a manual `docker run`
+
+**Root cause:** task Dockerfiles use `FROM harbor-agents-prebaked:latest` — that's the **base** image with just openclaw + nvm. The **rich** image (`harbor-agents-rich:latest`) is built ON TOP of prebaked and adds the baked openclaw.json (with xrouter), the workspace files at `/opt/harness/openclaw-workspace/`, hermes config, etc. Tasks built from prebaked never see those.
+
+**Diagnostic that nailed it (in-container probe via the adapter):**
+```bash
+# Before openclaw runs, inside the trial container:
+ls /root/.openclaw/
+# Expected (rich):    drwx... plugins  -rw... openclaw.json  drwx... logs
+# Observed (prebaked):drwx... plugins   ← no openclaw.json
+openclaw models list
+# Expected: shows xrouter/deepseek/deepseek-v4-pro
+# Observed: only built-in models (openai/gpt-5.5, claude-cli/*)
+```
+
+When openclaw runs without a usable config, it bootstraps a DEFAULT agent dir at `/root/.openclaw/agents/main/agent/models.json` containing only the built-in `openrouter` provider — not our `xrouter`. So `xrouter/deepseek/deepseek-v4-pro` resolves to nothing → "Unknown model".
+
+**Fix:** all task Dockerfiles must `FROM harbor-agents-rich:latest`, not `prebaked`. Bulk-patched 47 of 48 task Dockerfiles 2026-05-30. Re-run with `--force-build` so Harbor doesn't cache the prebaked-based image.
+
+**Long-term:** add a CI check that `grep -L 'FROM harbor-agents-rich' tasks/*/*/environment/Dockerfile` returns empty.
+
+---
+
+## Note on prior diagnoses (#32, #33, #34)
+
+While investigating #35, I cycled through three earlier hypotheses that turned out to be wrong or only contributing:
+- #32 (YAML env not propagating) → real signal, but adding env to task.toml didn't fix the model resolution (env was reaching the container fine, openclaw just had no config to use it with).
+- #33 (duplicate `--agent main`) → MY error in an interim adapter edit; reverted. Not a real bug.
+- #34 (`allow_internet=false`) → real issue for memory-using tasks but not the openclaw crash; the trial config showed `allow_internet=true` AND the network probe to OpenRouter returned 200 BEFORE openclaw failed.
+
+---
+
+## 36. `infisical-identity.env` uses bare assignments (no `export`) — `source` alone doesn't reach child scripts
+
+**Symptom:** `tools/run_track_a.sh` dies immediately with `INFISICAL_CLIENT_ID: set INFISICAL_CLIENT_ID via ~/.config/infisical/infisical-identity.env` — even though you just ran `source ~/.config/infisical/infisical-identity.env` in the same command.
+
+**Root cause:** `~/.config/infisical/infisical-identity.env` defines `INFISICAL_CLIENT_ID=...` etc. as **bare assignments without `export`**. Sourcing makes them shell variables in the current shell, but they are NOT exported, so the child process (`run_track_a.sh`) doesn't inherit them. The `: "${INFISICAL_CLIENT_ID:?...}"` guard inside the script then fails.
+
+**Fix:** wrap the source in auto-export: `set -a && source ~/.config/infisical/infisical-identity.env && set +a`. `set -a` marks every subsequently-assigned variable for export. (Do NOT `cat`/`grep` the file to "fix" it — that risks leaking secret values to context. Leave the file as-is; just auto-export at source time.) Verified the file holds exactly 3 keys (INFISICAL_CLIENT_ID / _CLIENT_SECRET / _SITE_URL) via shape-only `grep -oE '^[A-Za-z_]+=' | sed 's/=$//'` (key names only, no values).
+
+---
+
+## 37. `wipe_memory_state` hook crashes with `'NoneType' object has no attribute 'lower'` — AgentConfig.name is None for import_path agents
+
+**Symptom:** the very first `TrialEvent.START` aborts the whole sweep:
+```
+File ".../hooks/wipe_memory_state.py", line 58, in _resolve_group
+    key = agent_name.lower().replace("-", "").replace("_", "")
+AttributeError: 'NoneType' object has no attribute 'lower'
+```
+
+**Root cause:** Track A's YAML defines each agent by `import_path` + `model_name` only — no explicit `name`. Harbor's `AgentConfig.set_default_name` validator only falls back to `ORACLE` when BOTH `name` and `import_path` are None; with `import_path` set, `name` stays `None`. The hook read `event.config.agent.name` (None) and passed it straight into `.lower()`.
+
+**Fix:** derive the agent identity from `import_path` when `name` is None — `"lib.openclaw_thin:OpenClawThin".rsplit(":",1)[-1]` → `"OpenClawThin"` → normalized `"openclawthin"`, which is already a `GROUP_MAP` key. Also made `_resolve_group` null-safe (returns None for falsy input). Both `OpenClawThin`→`eval-openclaw` and `HermesThin`→`eval-hermes` verified.
+
+**Related wipe bugs found + fixed (2026-05-31, while the smoke ran):**
+- **honcho 409:** `DELETE /v3/workspaces/{id}` 409s with "active session(s) remain" — it never wiped anything. Fix: empty the workspace *in place* — page `conclusions/list` + `sessions/list` and DELETE each; do NOT delete the workspace (avoids a recreate race). Verified: seeded session 1→0.
+- **hindsight 405 silent no-op:** the old `_wipe_hindsight` DELETEd `/memories /entities /mental-models /directives /documents`, but only `/memories` supports DELETE — the other four are GET/POST-only and returned **405**, which the code *tolerated*, so entities/mental-models/directives/documents leaked across trials. Fix: bulk `DELETE /memories` + `DELETE /observations` (both exist), then list+per-id-delete `mental-models`/`directives`/`documents`. Bank shell + eval entity-type config (task #59) preserved. Verified: 1→0.
+
+**DATA-SAFETY hardening (operator-requested — recall/honcho are shared with real agents):**
+- recall, honcho, hindsight ALL share their backend with production agents (recall-neo4j holds prod groups `juliet`/`yui`/`akane`; both `recall-mcp` and `recall-mcp-eval` point at the same neo4j, isolated only by `group_id`).
+- The wipe targets are **exact-match** (`eval-openclaw`/`eval-hermes`), never wildcards, so they physically cannot match prod groups. Confirmed eval recall writes land in `eval-openclaw`/`eval-hermes` via the `X-Group-ID` header in `harnesses/openclaw/openclaw.json` + `harnesses/hermes/config.yaml` (the MCP's `GRAPHITI_GROUP_ID=eval-default` is only a no-header fallback).
+- Added `_assert_eval_scope(id)` — every destructive call raises `ValueError` unless `id` starts with `eval-`. Verified it rejects `juliet`/`yui`/`akane`/`''`/`None`/`prod-default` and accepts only `eval-*`. So even a future GROUP_MAP typo cannot wipe prod. gather() exceptions are now logged (no silent guard trips).
+- **NOTE:** these fixes landed AFTER the running n=1 smoke imported the hook, so the smoke still uses the old (contaminating) wipe — fine for grid/plumbing validation. The fixed hook is picked up by the next launch (the n=5 real run), where memory-axis fidelity matters.
+
+Keeping all four entries because each chase produced a real lesson about Harbor's env / network / config-propagation paths.
+
+---
+
+## 38. Harbor rejects non-scalar reward values — `reward.json` must be a flat dict of float/int
+
+**Symptom:** a task's trials all error with no reward:
+```
+ValidationError: 2 validation errors for VerifierResult
+rewards.per_file.float  Input should be a valid number [input_value={...dict...}]
+rewards.per_file.int    Input should be a valid integer [input_value={...dict...}]
+```
+
+**Root cause:** Harbor's `VerifierResult.rewards` is typed `dict[str, float|int]` — **every value must be a scalar.** A verifier that writes a rich debug structure (`"per_file": {…nested…}`, `"checks": {k:v}`, `"done_slot": [a,b]`) into `/logs/verifier/reward.json` passes its own bash/python logic but fails Harbor's schema at result-collection time — so the trial errors AFTER doing all the work. Bit 6 subagent-authored verifiers at once (they each added a nested per-item breakdown).
+
+**Fix:** emit ONLY scalar fields. Keep `reward`, `correctness`, and flat scalar counts (`matched`, `found`, `recalled`, …); drop any dict/list value. If you want per-item detail, flatten it (`item1_ok`, `item2_ok`) or write it to a *separate* file the verifier doesn't return.
+
+**Lesson:** local oracle-validation (run solve.sh + test.sh, eyeball reward.json) does NOT catch this — only Harbor's Pydantic layer does. After authoring a verifier, grep its emission for `"key": {` / `"key": [` before trusting it. A cheap n=1 trial is the real validator (this is exactly what the focused n=1 caught).
+
+---
+
+## 39. `/tmp` is tmpfs (RAM) on these boxes — never persist job results there; pin `jobs_dir` to an absolute path
+
+**Symptom:** expensive run results (a $13 sweep) silently at risk of vanishing; also runs scattered between `/tmp/harbor-jobs` and `<repo>/jobs` so the post-run report + dashboard couldn't find them.
+
+**Root cause (two parts):**
+1. `/tmp` on landon is **tmpfs** (`findmnt -no FSTYPE /tmp` → `tmpfs`, 31G RAM-backed) — wiped on reboot AND consuming RAM. 142M of trajectory data lived there.
+2. Harbor's `JobConfig.jobs_dir` defaults to `Path("jobs")` — **CWD-relative**, not absolute. So where output lands depends on the launch CWD, and the wrapper's separate `JOBS_DIR` (for the post-report) defaulted to `/tmp/harbor-jobs`, diverging from where Harbor actually wrote.
+
+**Fix:** pin `jobs_dir` to an ABSOLUTE persistent path. `run_track_a.sh` now sets `JOBS_DIR="${REPO}/jobs"` AND passes it into the JobConfig (`raw["jobs_dir"]`), so Harbor + the report + the dashboard all agree. `harbor-tasks/jobs/` is on the encrypted `/home` (327G) and is gitignored (`.gitignore:7`) — persists without bloating the repo. Moved all 84 existing runs there.
+
+---
+
+## 40. `harbor view` dashboard is a foreground process — it dies silently; runs on a chosen port over the jobs folder
+
+**Symptom:** "the dashboard isn't loading anymore." No error — the process just wasn't running.
+
+**Notes:**
+- `harbor view <folder> --port <P> --host 0.0.0.0 [--no-build]` starts a uvicorn server browsing job dirs. It is NOT a daemon — it dies when its shell/session ends or on reboot, and does not auto-restart.
+- `--no-build` reuses prebuilt static viewer files (fast); drop it / use `--build` only if the viewer assets are missing.
+- It does **not** follow symlinks in the jobs folder — symlinking run dirs in makes them invisible (and briefly broke the listing). Use real dirs (move, don't link).
+- `/api/jobs` returns `{"items":[...]}` (not a bare list); a brief "0 items" right after startup is just the initial scan, not a failure.
+- The viewer points at ONE folder — keep all runs under the single pinned `jobs_dir` (see #39) so one dashboard shows everything.

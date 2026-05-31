@@ -1,0 +1,33 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/schedule-meeting-from-name-01"
+description = "User asks 'schedule a meeting with Sarah at the earliest possible date'. Three Sarahs exist; the agent must resolve the referent, find a mutually-available slot, email an outreach, parse the reply, create the calendar event, and confirm. Verifier scores per the 11-mode failure taxonomy from backlog/2026-05-30-goal-oriented-real-world-tasks.md."
+authors = [{name = "johnbuck"}]
+keywords = ["real-world-workflows", "schedule-meeting", "multi-step", "goal-oriented"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "real-world-workflows"
+shape = "schedule-meeting-from-name"
+tags = ["real-world-workflows", "goal-oriented", "harness-discriminating", "multi-axis"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 900.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

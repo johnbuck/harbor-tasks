@@ -1,7 +1,11 @@
 # Context-management category — long-session behavior tests
 
 - **Date:** 2026-05-27
-- **Status:** DEFERRED (to second sweep, after the 17 first-sweep shapes land)
+- **Status:** APPROVED — promoted out of DEFERRED 2026-05-30. Per
+  [`2026-05-30-harness-vs-model-discriminating-suite.md`](2026-05-30-harness-vs-model-discriminating-suite.md),
+  context-management is the strongest pure-harness signal we have; deferring it
+  to a second sweep made it invisible in the first comparison. 3 task instances
+  already authored; weight 3.0 in Track A.
 - **Origin:** Operator — "test what happens on a long-running session when you exceed the context window: does it get dumber, compact, or window out important context?"
 
 ## Problem

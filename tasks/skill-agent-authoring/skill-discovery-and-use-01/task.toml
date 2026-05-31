@@ -1,0 +1,37 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/skill-discovery-and-use-01"
+description = "The ONE correct skill (csv-structure-summary) is buried among NINE plausible decoy skills with adjacent names/purposes. The agent must read SKILL.md descriptions to discover the right one and invoke it on all 8 target CSVs. Verifier is GRADED: reward = passed_subchecks / 16 (per file: output-correct + correct-skill-actually-ran via breadcrumb). Decoys defeat name-only guessing; breadcrumb defeats from-scratch reimplementation."
+authors = [{name = "johnbuck"}]
+keywords = ["skill-agent-authoring", "skill-discovery", "decoys", "graded"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "skill-agent-authoring"
+shape = "skill-discovery-and-use"
+tags = ["skill-agent-authoring", "skill-discovery", "harness-discriminating", "graded"]
+# Discrimination: 9 decoy skills require real description-reading discovery
+# discipline; a breadcrumb log per correct invocation proves the RIGHT skill ran
+# (not a decoy, not a from-scratch reimplementation). Graded across 8 files x 2
+# sub-checks so partial discovery/use earns a fractional, gradient reward.
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

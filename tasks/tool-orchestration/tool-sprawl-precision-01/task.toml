@@ -1,0 +1,33 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/tool-sprawl-precision-01"
+description = "60 candidate shell tools (with name-adjacent decoy traps); exactly 3 solve the task. Graded reward blends answer-fraction (3 sub-answers) with tool-selection F1 over the agent's invocation history."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "tool-sprawl", "tool-selection"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "tool-sprawl-precision"
+tags = ["tool-orchestration", "tool-selection", "harness-discriminating"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

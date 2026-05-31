@@ -1,0 +1,9 @@
+From: riley.gomez@customer.example
+To: support@homelab.example
+Date: 2026-05-30T07:08:00Z
+Subject: Thanks for the quick fix!
+
+Just wanted to drop a quick note — the report-export bug y'all fixed last
+week is working perfectly now. Really appreciate the fast turnaround.
+
+— Riley (CUST-66421)

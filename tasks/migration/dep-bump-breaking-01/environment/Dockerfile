@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY settings.py /app/settings.py
 COPY tests/test_settings.py /app/tests/test_settings.py

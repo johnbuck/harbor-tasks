@@ -1,0 +1,39 @@
+{
+  "contacts": [
+    {
+      "name": "Sarah Chen",
+      "email": "sarah.chen@homelab.example",
+      "role": "Engineering Manager",
+      "shared_meetings_last_30d": 6,
+      "notes": "I usually meet 1:1 with Sarah Chen weekly — she's my direct manager."
+    },
+    {
+      "name": "Sarah Patel",
+      "email": "sarah.patel@homelab.example",
+      "role": "Recruiter (external)",
+      "shared_meetings_last_30d": 0,
+      "notes": "Met once 3 months ago at a meetup; not in my regular working circle."
+    },
+    {
+      "name": "Sarah Thompson",
+      "email": "sarah.thompson@partner.example",
+      "role": "Vendor sales contact (Acme Corp)",
+      "shared_meetings_last_30d": 0,
+      "notes": "Sales outreach; no active project together."
+    },
+    {
+      "name": "Marcus Rivera",
+      "email": "marcus.rivera@homelab.example",
+      "role": "Peer engineer",
+      "shared_meetings_last_30d": 4,
+      "notes": "Frequent collaborator."
+    },
+    {
+      "name": "Diane Wong",
+      "email": "diane.wong@homelab.example",
+      "role": "Product manager",
+      "shared_meetings_last_30d": 3,
+      "notes": "Cross-functional partner."
+    }
+  ]
+}

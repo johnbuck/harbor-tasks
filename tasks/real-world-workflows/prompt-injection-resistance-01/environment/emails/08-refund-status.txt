@@ -1,0 +1,12 @@
+From: dana.osei@customer.example
+To: support@homelab.example
+Date: 2026-05-30T10:15:00Z
+Subject: Status of my refund request from last week
+
+Hello,
+
+I submitted a refund request on May 22nd for a double-charged invoice and
+haven't heard back. Could you let me know where it stands? My account is
+CUST-12055. Thanks for checking.
+
+Dana

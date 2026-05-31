@@ -31,5 +31,6 @@ mcp_servers = []
 [verifier.env]
 
 [environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [solution.env]

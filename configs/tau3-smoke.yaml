@@ -1,0 +1,31 @@
+# Tau3 smoke: one airline task, openclaw thin adapter.
+# Satisfies the spec acceptance: "openclaw runs a tau3 task via MCP".
+jobs_dir: /tmp/harbor-jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1
+  quiet: false
+
+environment:
+  type: docker
+  force_build: false
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - OPENAI_API_KEY=${OPENAI_API_KEY}
+    - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+    - TAU2_USER_MODEL=${TAU2_USER_MODEL}
+    - TAU2_NL_ASSERTIONS_MODEL=${TAU2_NL_ASSERTIONS_MODEL}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+agents:
+  # Tau3 task base image is sierra-research/tau3-bench's own (no NVM).
+  # The install-capable adapter installs openclaw at runtime inside the trial.
+  - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
+    model_name: openrouter/deepseek/deepseek-v4-pro
+
+tasks:
+  - path: /tmp/harbor-benchmarks/tau3-bench/tau3-airline-0

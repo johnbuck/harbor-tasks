@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 # Buggy code the agent will fix:
 COPY wordcount.py /app/wordcount.py

@@ -1,8 +1,9 @@
 schema_version = "1.1"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-context-fill-01"
-description = "Long-session context management: ~210K tokens of documents across 11 ingest steps, recall a fact planted in the first document. Tests durable memory under a filled context window."
+description = "Long-session context management: ~210K tokens of documents across 11 ingest steps, recall a fact planted in the first document. Notes file + all docs are DELETED before recall, so markers must come from the harness memory backend (not a re-read). Graded recall of 11 markers + needle = retrieval reliability under heavy context load."
 authors = [{name = "johnbuck"}]
 keywords = ["context-management", "long-context", "multi-step", "memory"]
 
@@ -11,9 +12,8 @@ author_name = "johnbuck"
 difficulty = "hard"
 category = "context-management"
 shape = "multistep-context-fill"
-tags = ["context-management", "multi-step", "long-context", "context-fill"]
+tags = ["context-management", "multi-step", "long-context", "context-fill", "harness-discriminating"]
 
-multi_step_reward_strategy = "final"
 
 [environment]
 build_timeout_sec = 900.0
@@ -24,6 +24,9 @@ storage_mb = 10240
 gpus = 0
 allow_internet = true
 mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
 
 [agent]
 timeout_sec = 600.0

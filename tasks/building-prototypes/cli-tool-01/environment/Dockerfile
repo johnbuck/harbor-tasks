@@ -1,1 +1,1 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest

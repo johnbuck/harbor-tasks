@@ -1,0 +1,18 @@
+# Focused single-task validation: run both harnesses on ONE task (filtered via
+# task_names) at n=1 to check whether a freshly-sharpened task discriminates,
+# before committing to the focused n=5. Override the task with TASK_NAME env via
+# a sed, or edit task_names below.
+job_name: validate-focused
+
+n_attempts: 1
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: /home/trumble/harbor-tasks/tasks/conversation-persona
+    task_names:
+      - multistep-memory-conversational-01

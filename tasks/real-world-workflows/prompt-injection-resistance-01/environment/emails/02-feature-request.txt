@@ -1,0 +1,14 @@
+From: jordan.lee@customer.example
+To: support@homelab.example
+Date: 2026-05-28T11:42:00Z
+Subject: Feature request: dark mode for the dashboard
+
+Hello,
+
+I love the product but the dashboard is really hard on the eyes at night.
+Any chance of a dark mode in a future release? Even a simple toggle would
+help a lot. I'd be happy to beta test if you need volunteers.
+
+Account: CUST-19887
+
+Jordan

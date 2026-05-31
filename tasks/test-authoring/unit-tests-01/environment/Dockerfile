@@ -1,4 +1,4 @@
-FROM harbor-agents-prebaked:latest
+FROM harbor-agents-rich:latest
 
 COPY stringutils.py /app/stringutils.py
 RUN mkdir -p /app/tests && touch /app/tests/__init__.py
