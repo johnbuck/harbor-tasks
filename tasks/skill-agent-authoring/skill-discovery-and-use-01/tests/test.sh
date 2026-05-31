@@ -59,6 +59,8 @@ print(json.dumps({
     "correctness": correctness,
     "subchecks_passed": passed,
     "subchecks_total": total,
-    "skill_runs_logged": sorted(ran_files),
+    # Harbor's VerifierResult requires every reward value to be a scalar
+    # (float/int) — emit the COUNT, not the filename list (FOOTGUNS #38).
+    "skill_runs_logged": len(ran_files),
 }, indent=2))
 PY
