@@ -1,3 +1,5 @@
 #!/bin/bash
-set -e
-grep -o "MARKER-15-[a-f0-9]*" /app/chunks/chunk_15.txt | head -1 >> /app/notes.md
+# Oracle ingest: an attentive analyst reads the week's report. No file artefact
+# is produced (notes are forbidden); the final recall step supplies the answers.
+cat /app/reports/week_15.txt > /dev/null 2>&1 || true
+exit 0

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Ingest step: not scored (task uses multi_step_reward_strategy="final"; only the
+# recall step's reward aggregates). Emit a neutral scalar so the step completes.
 mkdir -p /logs/verifier
-if grep -q "MARKER-10-896aef63" /app/notes.md 2>/dev/null; then c=1; else c=0; fi
-echo "{\"reward\": ${c}, \"correctness\": ${c}}" > /logs/verifier/reward.json
+echo '{"reward": 1.0}' > /logs/verifier/reward.json

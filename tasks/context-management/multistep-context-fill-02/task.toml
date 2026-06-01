@@ -3,7 +3,7 @@ multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-context-fill-02"
-description = 'Long-session context management: ~340K tokens of documents across 18 ingest steps, recall facts planted in the first document. Notes file + all docs are DELETED before recall, so markers must come from the harness memory backend (not a re-read). Graded recall of 18 markers + 3 needle facts, with an UPDATE-TRAP (the coolant type is corrected R-410A -> R-32 in a later doc; only the latest value scores) and 2 DRAFT decoy markers that cost a point if listed = retrieval reliability + update-tracking under heavy context load.'
+description = 'Context-window SATURATION test, ladder rung 2 = UPDATE-CHURN (PROJECT VEGA datacenter migration). 18 weekly reports, ~72K tokens each / ~1.3M cumulative = ~1.25x the deepseek-v4-pro 1M window, so it overflows before recall. Meaningful evolving prose. Stressor: nearly every one of 12 tracked facts is CORRECTED two or three times across the quarter (lead Reyes->Tanaka->Okafor; target 08-01->09-15->10-30; nodes 48->64->32; region us-east-1->us-west-2->eu-central-1; db PG14->PG16->Aurora; cutover big-bang->phased->blue-green; etc). The analyst must report the FINAL value of record, never an intermediate one. Reports+notes DELETED before recall. Graded /12: +1 per final value, -1 per stale (up to TWO per fact), -1 for the DRAFT GCP decoy. Isolates stale-value surfacing under a full window. Oracle=1.0, intermediate-value=low, first-value=0.0.'
 authors = [{name = "johnbuck"}]
 keywords = ["context-management", "long-context", "multi-step", "memory"]
 
@@ -37,132 +37,132 @@ timeout_sec = 60.0
 [[steps]]
 name = "01-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "02-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "03-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "04-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "05-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "06-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "07-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "08-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "09-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "10-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "11-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "12-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "13-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "14-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "15-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "16-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "17-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "18-ingest"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
 name = "19-recall"
 [steps.agent]
-timeout_sec = 300.0
+timeout_sec = 600.0
 [steps.verifier]
 timeout_sec = 30.0

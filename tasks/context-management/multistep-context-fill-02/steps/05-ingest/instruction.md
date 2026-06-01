@@ -1,10 +1,9 @@
-You are reviewing a large batch of documents one at a time. This is
-document **5 of 18**. The documents are long and mostly filler.
+**PROJECT VEGA** — weekly platform review. This is **week 5 of 18**.
+Read `/app/reports/week_05.txt` in full and update your picture of the project's
+**current state**.
 
-Read `/app/chunks/chunk_05.txt`. Buried inside is exactly one line of the
-form `MARKER-05-XXXXXXXX`.
-
-**Commit this marker code to your memory — do NOT write it to `/app/notes.md`
-or any other file.** Before the final quiz, all documents AND any notes file
-will be DELETED; only what you have committed to your own memory will remain.
-You will be asked to recall every marker at the end.
+Decisions change often: the **latest** stated value always supersedes earlier
+ones (a fact may be revised more than once). **DRAFT / unapproved** items are not
+the plan of record, and you may **not** write notes to disk — all reports will be
+archived before the final review, so retain the current values in your own memory.
+You will be quizzed on the final state after week 18.

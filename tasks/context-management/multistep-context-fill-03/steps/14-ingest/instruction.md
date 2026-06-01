@@ -1,12 +1,9 @@
-You are reviewing a large batch of documents one at a time. This is
-document **14 of 18**. The documents are long and mostly filler.
+**Portfolio review — PROJECTS ORION & LYRA**. This is **week 14 of
+18**. Read `/app/reports/week_14.txt` in full. It covers both projects; keep
+each project's attributes (lead, budget, site, vendor, headcount, go-live)
+attributed to the **correct** project.
 
-Read `/app/chunks/chunk_14.txt`. Buried inside is exactly one line of the
-form `MARKER-14-XXXXXXXX`.
-
-**Commit this marker code to your memory — do NOT write it to `/app/notes.md`
-or any other file.** Before the final quiz, all documents AND any notes file
-will be DELETED; only what you have committed to your own memory will remain.
-You will be asked to recall every marker at the end.
-
-This document also contains a line beginning `CORRECTION TO IMPORTANT FACTS:` — it **updates** one of the facts you recorded from document 1. Commit the corrected value to memory; at the final quiz you must report the **corrected** value, not the original.
+You may **not** write notes to disk — all reports will be archived before the
+final review, so retain both projects' values in your own memory. DRAFT /
+unapproved items are not part of the portfolio of record. You will be quizzed,
+per project, after week 18.

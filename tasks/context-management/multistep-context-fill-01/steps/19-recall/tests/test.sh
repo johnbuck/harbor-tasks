@@ -1,40 +1,54 @@
 #!/bin/bash
-# Graded recall from memory: 18 markers + 3 needle facts = 21 checks (total).
-# Difficulty levers:
-#   - 18 random marker codes retained across 18 long-context turns.
-#   - UPDATE-TRAP: the 3rd needle fact (LaunchWindow) is stated as
-#     "2027-Q3" in chunk 1 then CORRECTED to "2027-Q4" in chunk 14.
-#     Credit is given ONLY for the latest value; the stale value earns nothing.
-#   - DECOY penalty: two MARKER-D1/D2 codes in chunk 16 are labelled DRAFT;
-#     listing either subtracts a point (clamped at 0).
+# CONTEXT-SATURATION recall scorer for PROJECT HELIOS.
+# 12 current-state facts. Precision+recall with stale + decoy penalties:
+#   +1 per correct CURRENT value
+#   -1 per superseded (stale) value reported  -> stale-memory surfacing
+#   -1 for the DRAFT decoy (2028-Q1)          -> reporting an unapproved proposal
+# Two fact classes:
+#   STABLE-EARLY (site B12 wk4, software wk8, integrator wk5, kickoff wk1) are
+#   stated once early and never repeated -> evicted from a raw 1M window, so they
+#   probe whether the harness externalises to memory.
+#   UPDATE-TRAP (lead/vendor/launch/budget/sats/ops/retention/coolant) corrected
+#   late -> the LATEST value is correct; the original earns a penalty.
 mkdir -p /logs/verifier
 a="$(tr '[:upper:]' '[:lower:]' < /app/answer.md 2>/dev/null)"
+hit() { printf '%s' "$a" | grep -qE "$1"; }
 s=0
-echo "$a" | grep -q "25ec9096" && s=$((s+1))
-echo "$a" | grep -q "48ba5864" && s=$((s+1))
-echo "$a" | grep -q "7961c596" && s=$((s+1))
-echo "$a" | grep -q "57d53498" && s=$((s+1))
-echo "$a" | grep -q "5fff0226" && s=$((s+1))
-echo "$a" | grep -q "8c86ba15" && s=$((s+1))
-echo "$a" | grep -q "60cb5028" && s=$((s+1))
-echo "$a" | grep -q "fa38b5b7" && s=$((s+1))
-echo "$a" | grep -q "9da83e08" && s=$((s+1))
-echo "$a" | grep -q "896aef63" && s=$((s+1))
-echo "$a" | grep -q "7f4af9f8" && s=$((s+1))
-echo "$a" | grep -q "fdb6ba57" && s=$((s+1))
-echo "$a" | grep -q "6a5479cd" && s=$((s+1))
-echo "$a" | grep -q "ccffd399" && s=$((s+1))
-echo "$a" | grep -q "9dc71ea9" && s=$((s+1))
-echo "$a" | grep -q "8aa6f206" && s=$((s+1))
-echo "$a" | grep -q "4231e66c" && s=$((s+1))
-echo "$a" | grep -q "ae12be76" && s=$((s+1))
-if echo "$a" | grep -q "helios"; then s=$((s+1)); fi
-if echo "$a" | grep -q "vance"; then s=$((s+1)); fi
-if echo "$a" | grep -q "2027-q4" || echo "$a" | grep -q "2027 q4"; then s=$((s+1)); fi
-echo "$a" | grep -q "21ff7951" && s=$((s-1))
-echo "$a" | grep -q "55e7694b" && s=$((s-1))
+# Q1 project lead  (Vance -> Okonkwo)
+hit "okonkwo" && s=$((s+1))
+hit "\bvance\b" && s=$((s-1))
+# Q2 awarded antenna vendor  (... -> Brightpath -> Cardinal)
+hit "cardinal" && s=$((s+1))
+hit "brightpath" && s=$((s-1))
+# Q3 launch window  (2027-Q3 -> 2027-Q4 ; decoy 2028-Q1)
+hit "2027[ -]q4|q4[ -]2027|q4 of 2027" && s=$((s+1))
+hit "2027[ -]q3|q3[ -]2027|q3 of 2027" && s=$((s-1))
+hit "2028[ -]q1|q1[ -]2028|q1 of 2028" && s=$((s-1))
+# Q4 budget  ($4.2M -> $5.1M)
+hit "5\.1" && s=$((s+1))
+hit "4\.2" && s=$((s-1))
+# Q5 satellites  (6 -> 4)
+hit "(4|four) satellite" && s=$((s+1))
+hit "(6|six) satellite" && s=$((s-1))
+# Q6 primary site  (B12, stable/evicted)
+hit "b12" && s=$((s+1))
+# Q7 ground software  (OrbitOS 3.1, stable/evicted)
+hit "orbitos ?3\.1" && s=$((s+1))
+# Q8 integration partner  (Northwind, stable/evicted)
+hit "northwind" && s=$((s+1))
+# Q9 data retention  (12 -> 7 years)
+hit "(7|seven) year" && s=$((s+1))
+hit "(12|twelve) year" && s=$((s-1))
+# Q10 kickoff date  (2026-03-15, stable/evicted)
+hit "2026-03-15" && s=$((s+1))
+# Q11 operations center  (Denver -> Phoenix)
+hit "phoenix" && s=$((s+1))
+hit "denver" && s=$((s-1))
+# Q12 coolant spec  (R-410A -> R-32)
+hit "r-?32" && s=$((s+1))
+hit "r-?410a" && s=$((s-1))
 if [ "$s" -lt 0 ]; then s=0; fi
-total=21
+total=12
 r=$(python3 -c "print(round(${s}/${total}, 4))")
 if [ "$s" -eq "$total" ]; then corr=1; else corr=0; fi
-echo "{\"reward\": ${r}, \"correctness\": ${corr}, \"recalled\": ${s}}" > /logs/verifier/reward.json
+echo "{\"reward\": ${r}, \"correctness\": ${corr}, \"current_facts\": ${s}}" > /logs/verifier/reward.json

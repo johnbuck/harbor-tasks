@@ -1,4 +1,4 @@
 FROM harbor-agents-rich:latest
 WORKDIR /app
-COPY gen_chunks.py /tmp/gen_chunks.py
-RUN python3 /tmp/gen_chunks.py && rm /tmp/gen_chunks.py
+COPY gen_reports.py /tmp/gen_reports.py
+RUN python3 /tmp/gen_reports.py && rm /tmp/gen_reports.py

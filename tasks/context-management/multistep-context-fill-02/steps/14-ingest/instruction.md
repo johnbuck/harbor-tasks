@@ -1,12 +1,9 @@
-You are reviewing a large batch of documents one at a time. This is
-document **14 of 18**. The documents are long and mostly filler.
+**PROJECT VEGA** — weekly platform review. This is **week 14 of 18**.
+Read `/app/reports/week_14.txt` in full and update your picture of the project's
+**current state**.
 
-Read `/app/chunks/chunk_14.txt`. Buried inside is exactly one line of the
-form `MARKER-14-XXXXXXXX`.
-
-**Commit this marker code to your memory — do NOT write it to `/app/notes.md`
-or any other file.** Before the final quiz, all documents AND any notes file
-will be DELETED; only what you have committed to your own memory will remain.
-You will be asked to recall every marker at the end.
-
-This document also contains a line beginning `CORRECTION TO IMPORTANT FACTS:` — it **updates** one of the facts you recorded from document 1. Commit the corrected value to memory; at the final quiz you must report the **corrected** value, not the original.
+Decisions change often: the **latest** stated value always supersedes earlier
+ones (a fact may be revised more than once). **DRAFT / unapproved** items are not
+the plan of record, and you may **not** write notes to disk — all reports will be
+archived before the final review, so retain the current values in your own memory.
+You will be quizzed on the final state after week 18.
