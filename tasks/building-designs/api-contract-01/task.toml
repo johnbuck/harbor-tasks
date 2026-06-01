@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["building-designs", "api-contract", "openapi", "graded"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Model spec-filling: 16 OpenAPI criteria enumerated in prompt; saturates 1.0 for both."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "medium"
 category = "building-designs"

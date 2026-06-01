@@ -204,6 +204,8 @@ def scan_tasks(weights: dict, focused: set) -> list:
                 "graded": is_graded(verifiers),
                 "discriminating": "harness-discriminating" in tags,
                 "focused": task_dir.name in focused,
+                "status": md.get("status", "active"),
+                "deprecation_reason": md.get("deprecation_reason", ""),
                 "files": files,
             })
     return tasks
@@ -241,6 +243,8 @@ def render(tasks: list, weights: dict) -> str:
     n_graded = sum(1 for t in real if t["graded"])
     n_disc = sum(1 for t in real if t["discriminating"])
     n_focus = sum(1 for t in real if t["focused"])
+    n_retired = sum(1 for t in real if t.get("status") == "deprecated")
+    n_active = n_total - n_retired
 
     diff_bits = " · ".join(
         f"{k}: {diff_hist[k]}" for k in sorted(diff_hist, key=lambda d: DIFF_ORDER.get(d, 9))
@@ -249,8 +253,9 @@ def render(tasks: list, weights: dict) -> str:
     summary = f"""
     <div class="summary">
       <div class="stat"><b>{n_total}</b><span>tasks</span></div>
+      <div class="stat"><b>{n_active}</b><span>active</span></div>
+      <div class="stat"><b>{n_retired}</b><span>retired (review)</span></div>
       <div class="stat"><b>{n_cats}</b><span>categories</span></div>
-      <div class="stat"><b>{n_multi}</b><span>multi-step</span></div>
       <div class="stat"><b>{n_graded}</b><span>graded</span></div>
       <div class="stat"><b>{n_disc}</b><span>discriminating</span></div>
       <div class="stat"><b>{n_focus}</b><span>in focused set</span></div>
@@ -296,7 +301,10 @@ def render_card(t: dict) -> str:
     dcls = {"easy": "ok", "medium": "mid", "hard": "bad"}.get(diff, "muted")
     grade_badge = (badge("graded", "ok") if t["graded"]
                    else badge("binary", "bad"))
+    retired = t.get("status") == "deprecated"
     flags = []
+    if retired:
+        flags.append(badge("RETIRED — pending review", "retired"))
     if t["discriminating"]:
         flags.append(badge("discriminating", "disc"))
     if t["focused"]:
@@ -333,16 +341,23 @@ def render_card(t: dict) -> str:
     data = (f'data-cat="{escape(t["category"])}" data-diff="{escape(diff)}" '
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
             f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
+            f'data-status="{"retired" if retired else "active"}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
 
+    retired_banner = ""
+    if retired:
+        retired_banner = (f'<div class="retired-note"><b>RETIRED (pending operator review — not deleted).</b> '
+                          f'{escape(t["deprecation_reason"] or "Excluded from the harness-discrimination grid.")}</div>')
+
     return f"""
-    <div class="card" {data}>
+    <div class="card{' card-retired' if retired else ''}" {data}>
       <div class="chead">
         <span class="tname">{escape(t["dir"])}</span>
         <span class="badge {dcls}">{escape(diff)}</span>
         {grade_badge}
         {"".join(flags)}
       </div>
+      {retired_banner}
       <div class="meta">
         <span class="mono muted">{escape(t["name"])}</span>
         <span class="shape">shape: {escape(t["shape"] or "—")}</span>
@@ -405,6 +420,10 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .badge.mid{{background:#3a2f16;color:#e6c98a}} .badge.muted{{background:#222734;color:#9aa1ad}}
   .badge.disc{{background:#2a1f3a;color:#c39ae6}} .badge.focus{{background:#16303a;color:#5fd0d0}}
   .badge.step{{background:#1c2331;color:#9db4d6}}
+  .badge.retired{{background:#4a1010;color:#ff9b9b;border:1px solid #7a2222}}
+  .card-retired{{opacity:.62;border-color:#5a2020;background:#1a1212}}
+  .card-retired:hover{{opacity:1}}
+  .retired-note{{background:#2a1414;border:1px solid #5a2020;color:#f0a8a8;border-radius:6px;padding:7px 9px;margin:6px 0;font-size:12px;line-height:1.4}}
   .err{{background:#3a1616;color:#ef7a7a;padding:8px;border-radius:6px;margin-bottom:12px;max-width:1200px;white-space:pre-wrap;font-size:12px}}
   .hidden{{display:none!important}}
   /* modal (shared with agent-status) */

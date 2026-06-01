@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["code-editing", "add-feature", "python", "pytest", "graded-rubric"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Model-dominated: implement-a-class with full contract; one-shot, saturates 1.0 for both."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "medium"
 category = "code-editing"

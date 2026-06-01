@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["marketing", "email-copy", "llm-as-a-judge"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Model-only deliverable; LLM judge scores artifact quality (= model), no harness spread. Move to Track B."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "medium"
 category = "marketing"

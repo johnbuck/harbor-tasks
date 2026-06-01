@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["documentation", "readme", "graded"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Read-one-file-write-README; deterministic grader saturates 1.0 for both; no harness surface."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "medium"
 category = "documentation"

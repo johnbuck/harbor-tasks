@@ -8,6 +8,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["building-prototypes", "scaffold", "python", "multi-step"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Same shell, toy textkit lib; model-dominated one-shot; saturates 1.0."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "hard"
 category = "building-prototypes"
