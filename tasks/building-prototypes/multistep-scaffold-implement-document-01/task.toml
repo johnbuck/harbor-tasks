@@ -1,18 +1,18 @@
 schema_version = "1.1"
-multi_step_reward_strategy = "mean"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-scaffold-implement-document-01"
-description = "Three-step build: scaffold a Python package skeleton, implement the stub, then document it in a README — graded by structure checks and an LLM judge."
+description = "Three-step build: scaffold a four-function `calc` arithmetic package (add/sub/mul/divide), implement it (divide returns a float and raises ZeroDivisionError on a zero divisor), then write a README that MATCHES the implementation. GRADED final step: 12 independent sub-checks — files present, agent pytest suite (>=5 tests) passing, add/sub/mul correct, divide float, divide-by-zero raise, no debug cruft, README documents all four functions + the float/ZeroDivisionError contract, and a runnable usage example whose inline '# expected' comments must equal the code's real stdout. Difficulty/doc-matching wrinkle: the naive single-add scaffold and an under-documented README each lose points; the README is graded against what was actually built."
 authors = [{name = "johnbuck"}]
 keywords = ["building-prototypes", "scaffold", "python", "multi-step"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "building-prototypes"
 shape = "multistep-scaffold-implement-document"
-tags = ["building-prototypes", "multi-step"]
+tags = ["building-prototypes", "multi-step", "harness-discriminating"]
 
 
 [environment]
@@ -55,7 +55,3 @@ name = "03-document"
 timeout_sec = 180.0
 [steps.verifier]
 timeout_sec = 60.0
-
-[steps.verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"

@@ -1,18 +1,18 @@
 schema_version = "1.1"
-multi_step_reward_strategy = "mean"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-scaffold-implement-document-02"
-description = "Three-step build: scaffold a Python package skeleton, implement the stub, then document it in a README — graded by structure checks and an LLM judge."
+description = "Three-step build: scaffold a three-function `textkit` package (slugify/truncate/word_count), implement it (truncate is suffix-aware: returned length is at most n INCLUDING the suffix), then write a README that MATCHES the implementation. GRADED final step: 12 independent sub-checks — files present, agent pytest suite (>=5 tests) passing, slugify (incl empty), suffix-aware truncate long+short cases, whitespace word_count (incl empty), no debug cruft, README documents all three functions + the suffix-aware length rule, and a runnable usage example whose inline '# expected' comments must equal real stdout. Difficulty/doc-matching wrinkle: the naive `s[:n]+suffix` truncate over-runs the length budget, and an under-documented README is graded against what was actually built."
 authors = [{name = "johnbuck"}]
 keywords = ["building-prototypes", "scaffold", "python", "multi-step"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "building-prototypes"
 shape = "multistep-scaffold-implement-document"
-tags = ["building-prototypes", "multi-step"]
+tags = ["building-prototypes", "multi-step", "harness-discriminating"]
 
 
 [environment]
@@ -55,7 +55,3 @@ name = "03-document"
 timeout_sec = 180.0
 [steps.verifier]
 timeout_sec = 60.0
-
-[steps.verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"

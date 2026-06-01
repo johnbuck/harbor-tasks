@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/cli-tool-01"
-description = "Write a Python CLI tool that prints the number of lines in a file."
+description = "Write `/app/linecount.py`, a wc-style line/character counter. GRADED: 12 independent sub-checks — single-file line count, empty file, the missing-trailing-newline wrinkle ('a\\nb' counts as 2 lines), -c/--chars mode, multi-file '<count> <name>' lines + a '<total> total' line, stdin mode (no file arg), and missing-file handling (error to stderr, non-zero exit, NO Python traceback). reward = satisfied/12. Difficulty wrinkle: the naive sum(1 for _ in f) handles only single-file line mode; it misses char mode, the multi-file/total format, stdin, and graceful missing-file errors."
 authors = [{name = "johnbuck"}]
 keywords = ["building-prototypes", "cli-tool", "python"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "building-prototypes"
 shape = "cli-tool"
-tags = ["building-prototypes", "cli-tool"]
+tags = ["building-prototypes", "cli-tool", "harness-discriminating"]
 
 [verifier]
 timeout_sec = 120.0
