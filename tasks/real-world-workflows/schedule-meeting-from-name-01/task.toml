@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/schedule-meeting-from-name-01"
-description = "User asks 'schedule a meeting with Sarah at the earliest possible date'. Three Sarahs exist; the agent must resolve the referent, find a mutually-available slot, email an outreach, parse the reply, create the calendar event, and confirm. Verifier scores per the 11-mode failure taxonomy from backlog/2026-05-30-goal-oriented-real-world-tasks.md."
+description = "User asks 'schedule a meeting with Sarah at the earliest possible date'. Three Sarahs exist; the agent must resolve the referent, compute the earliest valid slot across a FRAGMENTED calendar with decoy short gaps (a tempting 28-minute window that is too short), email an outreach, parse a COUNTER-PROPOSAL reply, re-validate and book the AGREED slot, and send a confirmation that names the agreed date+time. GRADED: reward = fraction of 16 independent sub-checks passed."
 authors = [{name = "johnbuck"}]
 keywords = ["real-world-workflows", "schedule-meeting", "multi-step", "goal-oriented"]
 

@@ -1,12 +1,12 @@
 #!/bin/bash
 # Graded verifier for sub-agent-parallel-decompose-01.
 #
-# 20 files x 3 independent stages each = 60 sub-checks:
+# 32 files x 3 independent stages each = 96 sub-checks:
 #   stage 1 (filter):  the set of kept data rows == expected set (order-free)
 #   stage 2 (sort):    the kept data rows are in the exact expected order
 #   stage 3 (summary): the SUMMARY,<count>,<sum> footer is present and correct
 #
-# base_reward = passed_subchecks / 60  (graded fraction; NOT binary)
+# base_reward = passed_subchecks / 96  (graded fraction; NOT binary)
 # parallelism bonus: scaled by observed max-concurrency from /var/log/work.log.
 #   Serial run (max_concurrent<=1) gets no bonus; genuine fan-out earns up to
 #   +0.15, but only multiplied by how much of the work is actually correct
@@ -57,7 +57,7 @@ passed = 0
 total = 0
 per_file = {}
 
-for i in range(1, 21):
+for i in range(1, 33):
     name = f"data_{i:02d}"
     exp = read_csv(f"/app/expected/{name}.filtered.csv")
     act = read_csv(f"/app/{name}.filtered.csv")
