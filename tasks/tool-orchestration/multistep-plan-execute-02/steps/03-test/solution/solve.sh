@@ -5,28 +5,40 @@ import subprocess
 import tempfile
 import os
 
-def run_wordfreq(text):
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-        f.write(text)
-        path = f.name
+BIN = "/app/wordfreq.py"
+
+
+def run(text, *flags):
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write(text); path = f.name
     try:
-        result = subprocess.run(
-            ["python", "/app/wordfreq.py", path],
-            capture_output=True, text=True, check=True
-        )
-        return result.stdout.strip()
+        r = subprocess.run(["python", BIN, path, *flags],
+                           capture_output=True, text=True, check=True)
+        return r.stdout.strip()
     finally:
         os.unlink(path)
 
+
 def test_clear_winner():
-    result = run_wordfreq("apple banana apple cherry apple banana apple grape apple")
-    assert result == "apple"
+    assert run("apple apple apple banana cherry") == "apple"
 
-def test_lowercase_normalization():
-    result = run_wordfreq("Dog dog DOG cat")
-    assert result == "dog"
 
-def test_single_word():
-    result = run_wordfreq("hello")
-    assert result == "hello"
+def test_punctuation_stripped():
+    # "dog" appears 3x once punctuation is stripped.
+    assert run("dog, dog. dog! cat") == "dog"
+
+
+def test_alphabetical_tiebreak():
+    # fox and dog tie at 2; "dog" < "fox".
+    assert run("fox fox dog dog") == "dog"
+
+
+def test_stopwords_and_minlen():
+    out = run("the the the cat cat dog", "--stopwords", "the", "--min-len", "3")
+    assert out == "cat"
+
+
+def test_top_format():
+    out = run("a a a b b c", "--top", "2")
+    assert out.splitlines() == ["a 3", "b 2"]
 EOF

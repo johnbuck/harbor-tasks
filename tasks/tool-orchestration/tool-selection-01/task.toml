@@ -2,25 +2,26 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/tool-selection-01"
-description = "Choose the right tool for a live-data retrieval task; graded by an LLM judge."
+description = "18 helper tools with name-adjacent decoy traps; exactly 3 solve the task and each sub-goal has an obvious-but-wrong adjacent tool (lexicographic vs semantic-version max, naive-float vs currency-aware sum, json-array vs jsonl count). Graded reward blends answer correctness (3 sub-answers) with tool-selection precision/recall F1 read from the invocation log."
 authors = [{name = "johnbuck"}]
-keywords = ["tool-orchestration", "tool-selection", "llm-as-a-judge"]
+keywords = ["tool-orchestration", "tool-selection", "tool-sprawl", "decoys"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "tool-orchestration"
 shape = "tool-selection"
-tags = ["tool-orchestration", "tool-selection", "judge"]
+tags = ["tool-orchestration", "tool-selection", "harness-discriminating"]
 
 [verifier]
-timeout_sec = 300.0
+timeout_sec = 60.0
 
 [agent]
 timeout_sec = 300.0
 
 [environment]
 build_timeout_sec = 600.0
+workdir = "/app"
 cpus = 1
 memory_mb = 2048
 storage_mb = 10240
@@ -28,11 +29,5 @@ gpus = 0
 allow_internet = true
 mcp_servers = []
 
-[verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
-
 [environment.env]
 OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
-
-[solution.env]

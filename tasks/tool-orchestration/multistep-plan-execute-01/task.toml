@@ -1,18 +1,18 @@
 schema_version = "1.1"
-multi_step_reward_strategy = "mean"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-plan-execute-01"
-description = "Plan → implement → test a CSV-to-JSON CLI tool: csv2json.py reads a CSV file and prints a JSON array of row objects."
+description = "Plan → implement → test a CSV-to-JSON CLI tool with typed coercion, row filtering, and sorting (csv2json.py with --int/--filter/--sort flags). GRADED final step: 12 independent sub-checks covering base conversion, header-only empty case, --int JSON-integer coercion, --filter, --sort (numeric vs lexicographic), flag composition, and a passing pytest suite. Difficulty wrinkles: the naive DictReader+dumps approach passes only the base case; --int must emit JSON numbers (not strings), and --sort must be numeric for integer columns."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "multi-step", "plan-execute", "csv", "json", "cli"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "tool-orchestration"
 shape = "multistep-plan-execute"
-tags = ["tool-orchestration", "multi-step", "plan-execute"]
+tags = ["tool-orchestration", "multi-step", "plan-execute", "harness-discriminating"]
 
 
 [environment]

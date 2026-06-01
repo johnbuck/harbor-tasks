@@ -1,18 +1,18 @@
 schema_version = "1.1"
-multi_step_reward_strategy = "mean"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-plan-execute-02"
-description = "Plan → implement → test a word-frequency CLI tool: wordfreq.py reads a text file and prints the single most-common whitespace-delimited word (lowercased)."
+description = "Plan → implement → test a word-frequency CLI tool with punctuation stripping, deterministic alphabetical tie-break, stopwords, min-length, and --top N (wordfreq.py). GRADED final step: 12 independent sub-checks. Difficulty wrinkles: the naive split()+Counter.most_common approach skips punctuation normalization, gives nondeterministic tie-breaks, and ignores --stopwords/--min-len/--top."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "multi-step", "plan-execute", "word-frequency", "cli"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "tool-orchestration"
 shape = "multistep-plan-execute"
-tags = ["tool-orchestration", "multi-step", "plan-execute"]
+tags = ["tool-orchestration", "multi-step", "plan-execute", "harness-discriminating"]
 
 
 [environment]
