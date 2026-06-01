@@ -3,7 +3,7 @@ multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-context-fill-02"
-description = "Long-session context management: ~210K tokens of documents across 11 ingest steps, recall a fact planted in the first document. Notes file + all docs are DELETED before recall, so markers must come from the harness memory backend (not a re-read). Graded recall of 11 markers + needle = retrieval reliability under heavy context load."
+description = 'Long-session context management: ~340K tokens of documents across 18 ingest steps, recall facts planted in the first document. Notes file + all docs are DELETED before recall, so markers must come from the harness memory backend (not a re-read). Graded recall of 18 markers + 3 needle facts, with an UPDATE-TRAP (the coolant type is corrected R-410A -> R-32 in a later doc; only the latest value scores) and 2 DRAFT decoy markers that cost a point if listed = retrieval reliability + update-tracking under heavy context load.'
 authors = [{name = "johnbuck"}]
 keywords = ["context-management", "long-context", "multi-step", "memory"]
 
@@ -112,7 +112,56 @@ timeout_sec = 300.0
 timeout_sec = 30.0
 
 [[steps]]
-name = "12-recall"
+name = "12-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "13-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "14-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "15-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "16-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "17-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "18-ingest"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "19-recall"
 [steps.agent]
 timeout_sec = 300.0
 [steps.verifier]
