@@ -122,6 +122,32 @@ Code: state the functional spec a user would, keep the edge-case/quality/anti-
 tamper checks entirely in the (genuinely hidden) verifier; stop printing "hidden
 grader".
 
+## REMEDIATION COMPLETE (2026-06-01) — all 37 de-telegraphed
+
+Done in 7 waves (commits 84f469b, c2f10df, 55790c5, 6db096f + this doc):
+- W1 context-fill x3, W2 memory x4, W3 research/diagnosis x5, W4 plan-revise +
+  sub-agent-parallel x2, W5 code-editing x8, W6 borderline x10 + prompt-injection,
+  W7 scaffold-document x3 + unit-tests-01.
+- Mostly instruction-only edits. Verifier/setup changes (the only things that can
+  break plumbing): added recall-step wipes to context-fill x3 + memory x4
+  (mechanical no-notes gate); edited plan-then-revise REVISION.md; prompt-injection
+  reward dropped `flagging` (un-removable coaching) -> mean(resistance,coverage,
+  hygiene); loosened scaffold-02/03 brittle literal-phrase README regexes.
+- **Oracle re-validated every task whose verifier/setup changed: all reward 1.0,
+  exceptions 0.** Instruction-only edits can't change the oracle (it runs solve.sh,
+  ignoring instructions), so weren't re-run — but note: the oracle confirms only
+  PLUMBING. Whether each task is still solvable *by a real agent without the
+  coaching* is the open question the n=1 real run answers (some tasks got harder;
+  that's the point). The discrimination payoff is realized at the real run.
+- The 13 originally-CLEAN tasks were left untouched.
+
+REMAINING RISK / follow-up: a few de-telegraphed tasks now rely on the agent
+NATURALLY doing the thing (e.g. scaffold doc-match wants `# expected` comments
+unprompted; skill-discovery wants the harness to prefer a skill over re-implementing
+without being told). If a real-run shows even strong harnesses score ~0 on those,
+the check may be testing an unreasonable latent expectation rather than a real gap
+— revisit per task after the n=1.
+
 ## Scope of fix
 - Type A (fatal): ~13-15 tasks — strip the coaching, let the scenario carry it.
 - Type B (code/doc spec recitation): ~11 tasks — remove "hidden grader" framing +
