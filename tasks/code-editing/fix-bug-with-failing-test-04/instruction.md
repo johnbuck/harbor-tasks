@@ -21,22 +21,11 @@ Merge a list of closed integer intervals `[start, end]`:
 7. Empty input returns `[]`.
 
 The visible tests cover rules 1, 2, 4 and 7. Rules 3, 5 and 6 are part of the
-contract and are checked by a hidden grader — implement the whole contract,
-not just enough to make the visible tests green.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_intervals.py`.
-- Do **not** change the signature
-  `def merge_intervals(intervals: list[list[int]]) -> list[list[int]]`.
-- Keep the code clean: no debug `print()`s, no leftover scratch output.
+contract too — implement the whole contract, not just enough to make the
+visible tests green.
 
 You can run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_intervals.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit —
-the hidden grader also checks containment, no-mutation, and the `ValueError`
-validation rule.

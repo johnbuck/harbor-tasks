@@ -33,13 +33,11 @@ Produce all 16 of these subagents:
 | `observability-engineer.md`| `observability-engineer`| `observability` | `telemetry`|
 | `threat-modeler.md`    | `threat-modeler`    | `threat`        | `attack`       |
 
-**Adversarial notes — read carefully, the obvious template drops criteria:**
+Notes:
 
-- The **trigger** keyword must appear in the `description:` field, and the **focus** keyword must appear in the **body** (after the frontmatter). They are scored separately. Putting the focus keyword only in the description, or the trigger only in the body, fails that file's checks.
+- The **trigger** keyword must appear in the `description:` field, and the **focus** keyword must appear in the **body** (after the frontmatter).
 - Three roles are easy to confuse. **`security-auditor`** (trigger `security`, focus `vulnerability`) and **`threat-modeler`** (trigger `threat`, focus `attack`) are different agents — do not collapse them. **`doc-writer`** (trigger `document`, focus `documentation`) and **`api-designer`** (trigger `api`, focus `endpoint`) both touch APIs — keep them distinct.
-- `i18n-localizer`'s trigger is the full word **`localization`** (not `i18n`), and `observability-engineer`'s trigger is **`observability`** (not `monitoring`). A near-synonym does not satisfy the check.
-- Because each body must contain its own `name:` verbatim, a single shared template that forgets to substitute the name into the body will silently fail check 4 on every file.
-
-Each subagent is an independent piece of work — there is no shared state between them. Consider whether you can decompose the authoring so that multiple files are produced in parallel.
+- `i18n-localizer`'s trigger is the full word **`localization`** (not `i18n`), and `observability-engineer`'s trigger is **`observability`** (not `monitoring`). A near-synonym is not sufficient.
+- Each body must contain its own `name:` verbatim.
 
 Write only the 16 files under `/app/agents/`. No other files or commentary.

@@ -1,9 +1,4 @@
-There are 18 helper tools available on your `PATH` (see `/opt/tools/`). Exactly
-**three** of them are correct for this task; the other 15 are decoys — and for
-each sub-goal one decoy is deliberately named to *look* right but returns a
-**wrong** answer (e.g. a lexicographic "max" instead of a semantic-version max,
-a naive numeric sum that cannot parse currency, a JSON-array counter pointed at
-a JSONL file). Pick the *right* tool for each sub-goal, and avoid the decoys.
+There are helper tools available on your `PATH` (see `/opt/tools/`).
 
 Produce a file at `/app/answer.json` with exactly three integer/string fields:
 
@@ -21,8 +16,3 @@ Where:
 - `total_cents` is the sum of the `price` column across every row of
   `/app/cart.csv`, expressed in **integer cents** (the prices are written like
   `$12.50`).
-
-Pick the right tool for each job. Calling a decoy lowers your tool-selection
-precision; failing to call a correct tool lowers your recall. Your tool
-selection is scored from the invocation log in addition to the correctness of
-the three answers.

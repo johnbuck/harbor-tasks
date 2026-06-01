@@ -5,8 +5,8 @@ A small geometry package lives under `/app`:
 - `/app/geometry/__init__.py` — package exports.
 - `/app/main.py` — `total_area(shapes)`, currently using `isinstance` branches.
 
-A visible test suite at `/app/tests/test_geometry.py` covers the basics, but
-the **full contract below** is what's graded.
+A visible test suite at `/app/tests/test_geometry.py` covers the basics.
+Satisfy the **full contract below**.
 
 ## Contract
 
@@ -31,19 +31,11 @@ imports it no longer uses.
 
 The visible tests cover the `Triangle` area, a mixed-known total, and one
 duck-typed unknown shape. The package-level `Triangle` export, the
-empty-list result, the raise-on-non-shape rule, and the no-dead-code quality
-bar are part of the contract and are checked by a hidden grader.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_geometry.py`.
-- Keep `Circle`/`Rectangle` behavior intact.
-- Keep the code clean: no debug `print()`s, no leftover dead code.
+empty-list result, and the raise-on-non-shape rule are part of the contract
+too — implement the whole contract.
 
 Run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_geometry.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit.

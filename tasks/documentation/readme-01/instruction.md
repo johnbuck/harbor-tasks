@@ -16,7 +16,4 @@ code actually does:
 5. **At least one example invocation with its expected output**, and the example
    output must match the real `"<greeting>, <name>!"` format the program prints.
 
-Do **not** document flags or behaviors that don't exist in the code — inventing
-options or wrong defaults counts against you.
-
 Write only the README to `/app/README.md`. Do not add commentary outside the file.

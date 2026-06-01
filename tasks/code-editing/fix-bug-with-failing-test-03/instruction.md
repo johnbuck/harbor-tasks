@@ -23,20 +23,12 @@ Return `True` if `s` reads the same forwards and backwards after normalization:
 
 The visible tests cover only ASCII letters with spaces/punctuation. The
 digit, no-alphanumeric, and Unicode case-**folding** rules are part of the
-contract and are checked by a hidden grader — implement the whole contract.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_palindrome.py`.
-- Do **not** change the signature `def is_palindrome(s: str) -> bool`.
-- Keep the code clean: no debug `print()`s, no leftover scratch output.
+contract too — implement the whole contract. Note that case-insensitive
+comparison across the full Unicode range requires case folding (`str.casefold`,
+not `str.lower`).
 
 You can run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_palindrome.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit —
-the hidden grader also checks digits, no-alphanumeric input, and Unicode
-case-folding (`str.casefold`, not `str.lower`).

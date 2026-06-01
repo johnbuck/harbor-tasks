@@ -39,6 +39,3 @@ Constraints:
 
 - Do not modify `/app/access.log`.
 - `/app/answer.txt` must contain exactly the five `KEY=value` lines above.
-
-Each `KEY=value` line is graded independently — a partly-correct answer scores a
-fraction.

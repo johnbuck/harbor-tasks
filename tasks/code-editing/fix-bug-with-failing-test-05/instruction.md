@@ -21,21 +21,11 @@ left-to-right order:
 
 The visible tests cover only lists and strings-as-atoms (rules 1, 3, 6). The
 tuple-flattening, non-string-iterable-as-atom, and no-mutation rules are part
-of the contract and are checked by a hidden grader — implement the whole
-contract, not just enough to make the visible tests green.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_flatten.py`.
-- Do **not** change the signature `def flatten(items: list) -> list`.
-- Keep the code clean: no debug `print()`s, no leftover scratch output.
+of the contract too — implement the whole contract, not just enough to make
+the visible tests green.
 
 You can run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_flatten.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit —
-the hidden grader also checks tuple flattening and that non-list/tuple
-iterables (strings, dicts, sets) are preserved as atoms.
