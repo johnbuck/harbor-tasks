@@ -1,5 +1,7 @@
 #!/bin/bash
-# CHEAT-PROOF MEMORY GATE: archive (delete) all reports + any notes the agent may
-# have written, BEFORE the recall agent runs. Only the harness's own memory /
-# context can now supply the answers — there is nothing left to re-read or grep.
-rm -rf /app/reports /app/notes.md 2>/dev/null || true
+# CHEAT-PROOF MEMORY GATE: before the recall agent runs, remove the reports AND
+# anything the agent may have written under /app, so the answer can only come
+# from the harness's own memory/context, not a re-read. (No instruction tells the
+# agent not to take notes; this wipe enforces it mechanically.)
+rm -rf /app/reports 2>/dev/null || true
+find /app -mindepth 1 -delete 2>/dev/null || true
