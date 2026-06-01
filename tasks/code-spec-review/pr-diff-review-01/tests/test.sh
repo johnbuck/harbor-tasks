@@ -1,5 +1,5 @@
 #!/bin/bash
-# Verifier — runs the LLM judge, which writes /logs/verifier/reward.json.
+# Deterministic graded verifier: precision+recall over the planted issue set.
 set -e
 mkdir -p /logs/verifier
-python /tests/llm_judge.py
+python /tests/grade.py

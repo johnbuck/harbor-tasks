@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/api-contract-01"
-description = "Author an OpenAPI 3 contract for a described Todo API; graded structurally + by an LLM judge."
+description = "Author an OpenAPI 3 contract for a Todo API (CRUD + 400/404 error responses, Error schema, create-input schema that omits server-assigned id); graded deterministically per endpoint/status-code/schema-rule (N=16)."
 authors = [{name = "johnbuck"}]
-keywords = ["building-designs", "api-contract", "openapi", "mixed"]
+keywords = ["building-designs", "api-contract", "openapi", "graded"]
 
 [metadata]
 author_name = "johnbuck"
 difficulty = "medium"
 category = "building-designs"
 shape = "api-contract"
-tags = ["building-designs", "api-contract", "mixed"]
+tags = ["building-designs", "api-contract", "graded", "deterministic"]
 
 [verifier]
 timeout_sec = 300.0
@@ -29,8 +29,6 @@ allow_internet = true
 mcp_servers = []
 
 [verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
 
 [environment.env]
 OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

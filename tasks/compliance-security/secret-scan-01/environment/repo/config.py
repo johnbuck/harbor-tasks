@@ -1,4 +1,8 @@
 DEBUG = True
 APP_NAME = "myapp"
+
+# Real AWS credentials hardcoded — must be flagged.
+AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
 AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+
 MAX_RETRIES = 3

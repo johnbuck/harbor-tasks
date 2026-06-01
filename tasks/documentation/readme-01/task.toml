@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/readme-01"
-description = "Write a README for a small CLI program; graded by an LLM judge."
+description = "Write an accurate README for a multi-arg CLI (greet.py: 1+ names, --times/--greeting/--shout); graded deterministically on coverage of real facts MINUS a penalty for documenting nonexistent flags/defaults (N=9)."
 authors = [{name = "johnbuck"}]
-keywords = ["documentation", "readme", "llm-as-a-judge"]
+keywords = ["documentation", "readme", "graded"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "medium"
 category = "documentation"
 shape = "readme"
-tags = ["documentation", "readme", "judge"]
+tags = ["documentation", "readme", "graded", "deterministic"]
 
 [verifier]
 timeout_sec = 300.0
@@ -29,8 +29,6 @@ allow_internet = true
 mcp_servers = []
 
 [verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
 
 [environment.env]
 OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

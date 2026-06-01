@@ -1,5 +1,5 @@
 #!/bin/bash
-# Verifier — runs the LLM judge, which writes /logs/verifier/reward.json.
+# Deterministic graded verifier: README coverage vs actual greet.py + fabrication penalty.
 set -e
 mkdir -p /logs/verifier
-python /tests/llm_judge.py
+python /tests/grade.py

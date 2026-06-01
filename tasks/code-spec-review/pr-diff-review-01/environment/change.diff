@@ -2,13 +2,16 @@ diff --git a/app/handlers/users.py b/app/handlers/users.py
 index 3a1f802..d94c71e 100644
 --- a/app/handlers/users.py
 +++ b/app/handlers/users.py
-@@ -1,14 +1,44 @@
+@@ -1,14 +1,84 @@
  import sqlite3
 +from flask import Blueprint, request, jsonify
 
 -DB_PATH = "users.db"
 +DB_PATH = "users.db"
 +users_bp = Blueprint("users", __name__)
++
++# Example placeholder shown in the docs; replace with a real key in production.
++EXAMPLE_API_KEY = "your-api-key-here"
 
 
  def get_db():
@@ -34,7 +37,7 @@ index 3a1f802..d94c71e 100644
 +    try:
 +        cursor = conn.cursor()
 +        cursor.execute(
-+            f"SELECT id, username, email, created_at FROM users WHERE username = '{username}'"
++            f"SELECT id, username, email, password_hash, created_at FROM users WHERE username = '{username}'"
 +        )
 +        row = cursor.fetchone()
 +    finally:
@@ -47,5 +50,32 @@ index 3a1f802..d94c71e 100644
 +        "id": row["id"],
 +        "username": row["username"],
 +        "email": row["email"],
++        "password_hash": row["password_hash"],
 +        "created_at": row["created_at"],
 +    }), 200
++
++
++@users_bp.route("/api/users/<int:user_id>", methods=["DELETE"])
++def delete_user(user_id):
++    """Delete a user account by id."""
++    conn = get_db()
++    try:
++        cursor = conn.cursor()
++        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
++        conn.commit()
++    finally:
++        conn.close()
++    return jsonify({"deleted": user_id}), 200
++
++
++@users_bp.route("/api/users/count", methods=["GET"])
++def count_users():
++    """Return the total number of registered users."""
++    conn = get_db()
++    try:
++        cursor = conn.cursor()
++        cursor.execute("SELECT COUNT(*) AS n FROM users")
++        n = cursor.fetchone()["n"]
++    finally:
++        conn.close()
++    return jsonify({"count": n}), 200

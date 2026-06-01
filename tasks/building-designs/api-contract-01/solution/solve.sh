@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reference solution — used by the `oracle` agent to sanity-check the task.
+# Reference solution — scores 1.0 under the deterministic graded verifier.
 set -e
 
 cat > /app/openapi.yaml <<'EOF'
@@ -27,7 +27,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Todo'
+              $ref: '#/components/schemas/TodoCreate'
       responses:
         '201':
           description: Created
@@ -35,15 +35,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Todo'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /todos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
     get:
       summary: Get a todo by id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
       responses:
         '200':
           description: The requested todo
@@ -53,19 +59,21 @@ paths:
                 $ref: '#/components/schemas/Todo'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
       summary: Delete a todo by id
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
       responses:
         '204':
           description: Deleted
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Todo:
@@ -81,4 +89,20 @@ components:
         - id
         - title
         - done
+    TodoCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        done:
+          type: boolean
+      required:
+        - title
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
 EOF
