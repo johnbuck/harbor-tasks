@@ -3,7 +3,7 @@ multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-memory-conversational-03"
-description = "Multi-turn: facts given in an early step, recalled later with NO notes allowed — tests implicit session memory across steps."
+description = "Multi-turn memory under PRECISION pressure: 13 of my personal facts planted across 2 early steps, then 4 distractor turns that each do a small unrelated task AND plant a confusable fact about someone ELSE (a brother-in-law's bee-sting allergy & beagle, a friend's black Corolla & Arrival, a neighbor's Reno hometown & Sunday runs, a manager's maroon color & 3rd floor), then graded recall of 12 of MY facts with NO notes/files — one fact (the car) requires make+model+colour+year, so detail matters. A harness that confuses others' facts for mine, or recalls vaguely, scores a fraction (validated: confused=0.3333, vague=0.5, precise=1.0). Stresses session-memory precision + detail retention, not just gross recall."
 authors = [{name = "johnbuck"}]
 keywords = ["conversation-persona", "remember-facts", "multi-step", "memory"]
 
