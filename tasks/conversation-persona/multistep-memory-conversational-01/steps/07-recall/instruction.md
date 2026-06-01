@@ -1,9 +1,11 @@
-Earlier in our conversation — before the four unrelated tasks — I told you
-several personal facts about myself.
+Earlier in our conversation — before the unrelated tasks — I told you a number
+of personal facts about **me** (Dana). Along the way I also mentioned facts about
+other people (Sam, Jess, Pat, my brother-in-law) specifically to test whether you
+keep them straight.
 
 **Without re-reading any notes or files (there are none — you were told not to
-write the facts down), recall them from memory** and write the answers to
-`/app/answer.md`:
+write anything down), recall MY facts from memory** and write the answers to
+`/app/answer.md`. Be specific where asked:
 
 1. What are the names of my two cats?
 2. What am I allergic to?
@@ -11,3 +13,9 @@ write the facts down), recall them from memory** and write the answers to
 4. What is my profession?
 5. What is my favorite book?
 6. What is my hometown?
+7. What car do I drive? (give colour, year, make, and model)
+8. What is my sister's name?
+9. What is my favorite colour?
+10. What is my usual coffee order?
+11. Which day do I go to the gym?
+12. When is my wedding anniversary?

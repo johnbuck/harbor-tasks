@@ -11,5 +11,10 @@ RUN touch /app/tests/__init__.py
 RUN mkdir -p /opt/canonical
 COPY tests/test_wordcount.py /opt/canonical/test_wordcount.py
 
+# Hidden contract grader (NOT under /app — the agent can't see or game it).
+# The verifier runs it to score the punctuation/hyphenation rules that the
+# visible tests don't enforce.
+COPY hidden_grader.py /opt/canonical/hidden_grader.py
+
 # Pytest for the verifier (and for the agent if it wants to run it).
 RUN pip install --no-cache-dir pytest==8.4.1
