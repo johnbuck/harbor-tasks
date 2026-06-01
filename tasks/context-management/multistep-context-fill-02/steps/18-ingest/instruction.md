@@ -1,9 +1,4 @@
-**PROJECT VEGA** — weekly platform review. This is **week 18 of 18**.
-Read `/app/reports/week_18.txt` in full and update your picture of the project's
-**current state**.
-
-Decisions change often: the **latest** stated value always supersedes earlier
-ones (a fact may be revised more than once). **DRAFT / unapproved** items are not
-the plan of record, and you may **not** write notes to disk — all reports will be
-archived before the final review, so retain the current values in your own memory.
-You will be quizzed on the final state after week 18.
+**PROJECT VEGA** — weekly platform review, **week 18 of 18**. Read
+`/app/reports/week_18.txt` in full and keep track of the project. You will be
+asked about the project's current state after week 18, when the reports are no
+longer available.

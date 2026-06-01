@@ -1,9 +1,4 @@
-**PROJECT HELIOS** — weekly engineering review. This is **week 16 of
-18**. Read `/app/reports/week_16.txt` in full and update your picture of the
-project's **current state**.
-
-Remember: the **latest** stated value supersedes earlier ones; **DRAFT /
-unapproved** items are not the plan of record; and you may **not** write notes to
-disk — all reports will be archived before the final review, so retain what
-matters in your own memory. You will be quizzed on the current state after
-week 18.
+**PROJECT HELIOS** — weekly engineering review, **week 16 of 18**. Read
+`/app/reports/week_16.txt` in full and keep track of the project. You will be
+asked about the project's current state after week 18, when the reports are no
+longer available.

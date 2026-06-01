@@ -1,9 +1,6 @@
-All 18 weekly portfolio reports have now been **archived and
-deleted** — there is nothing left on disk to read. Working **purely from memory**,
-write each project's values to `/app/answer.md`, **correctly attributed**.
-
-Write **exactly 12 lines**, one slot per line, each naming the project and the
-attribute, in this format:
+The weekly reports are no longer available. Based on everything you read
+across the 18 weeks, write each project's values to `/app/answer.md`. Write
+**exactly 12 lines**, one per line, in this format:
 
 ```
 Orion - Lead: <value>
@@ -19,5 +16,3 @@ Lyra - Headcount: <value>
 Orion - Go-live: <value>
 Lyra - Go-live: <value>
 ```
-
-Do not report any DRAFT / unapproved project.
