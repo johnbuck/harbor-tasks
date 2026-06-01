@@ -1,10 +1,7 @@
 Earlier in our conversation — before the unrelated tasks — I told you a number
-of personal facts about **me** (Priya). Along the way I also mentioned facts
-about other people (Tomas, Anjali, Greg) specifically to test whether you keep
-them straight.
+of personal facts about **me** (Priya).
 
-**Without re-reading any notes or files (there are none — you were told not to
-write anything down), recall MY facts from memory** and write the answers to
+Now please answer the following questions about me and write the answers to
 `/app/answer.md`. Be specific where asked:
 
 1. What are the names of my two dogs?

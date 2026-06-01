@@ -1,4 +1,4 @@
-A few more facts (again: **memorize only, do not write the facts to disk**):
+A few more facts:
 
 - I work as a structural engineer.
 - I drive a red 2018 Toyota Tacoma.

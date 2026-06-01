@@ -15,22 +15,8 @@ Write your answers to `/app/answer.md`, one numbered block per question, e.g.:
    Source: http://localhost:8780/<path>.html
 ```
 
-## The catch: archived / near-duplicate pages
-
-The knowledge base contains **current** pages AND **archived/legacy** pages that
-look similar but state **outdated or superseded** values (an old press profile,
-a 2018 team page, a legacy products page, an old changelog, a prior fiscal year,
-an old contact page, an old regions page, a deprecated v1 API page). The landing
-page marks which sections are current and which are archive/history.
-
-You earn credit for a question **only when BOTH**:
-1. the answer value is the **current/correct** one, AND
-2. the cited source URL is the **authoritative page** for that fact — **not** an
-   archived/legacy near-duplicate.
-
-Citing an archived page (even if you happen to write the correct value) does **not**
-earn credit. Each item is graded independently; partial credit is the fraction of
-items you get fully right.
+Give the **current** value for each question, and cite the **authoritative page**
+that states it. Each item is graded independently.
 
 ## Questions
 

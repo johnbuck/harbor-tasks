@@ -31,7 +31,7 @@ All 32 outputs must exist. The verifier scores each file across THREE independen
 - **Ties:** some files contain several rows with the *same* score. The required order for a tie group is the **original input order** (a stable sort). A sort that reorders ties fails the sort stage for that file.
 - **Empty results:** a couple of files have no rows at or above the threshold. Their output is just the header plus `SUMMARY,0,0`.
 
-**Important:** The agent timeout is 10 minutes. Thirty-two files processed serially is tight — fan the work out so that multiple files are processed in parallel.
+**Important:** The agent timeout is 10 minutes, and there are 32 files to process.
 
 **Telemetry:** for each file you process, append two lines to `/var/log/work.log` in this exact format so we can observe parallelism:
 
@@ -40,4 +40,4 @@ All 32 outputs must exist. The verifier scores each file across THREE independen
 <ISO-8601-timestamp> END data_NN
 ```
 
-Example: `2026-05-30T17:42:13Z BEGIN data_03`. Produce these timestamps however you like (shell `date -Iseconds`, Python `datetime.utcnow().isoformat()+"Z"`, etc.). The verifier reads this log to detect concurrent execution; genuinely parallel processing earns a throughput bonus on top of per-file correctness.
+Example: `2026-05-30T17:42:13Z BEGIN data_03`. Produce these timestamps however you like (shell `date -Iseconds`, Python `datetime.utcnow().isoformat()+"Z"`, etc.).

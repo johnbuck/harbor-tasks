@@ -12,15 +12,15 @@ Schedule a meeting with **Sarah** at the earliest possible 30-minute slot. You'r
 
 1. **Resolve the referent.** There are three Sarahs in my contact list. Pick the one most likely to be the intended person based on the context in `contacts.json`. If you're genuinely unsure, ask me before sending any messages — but if there's a clear best match, just go.
 
-2. **Propose the earliest slot — carefully.** Find the earliest 30-minute window from now (treat "now" as `2026-06-01T17:00:00Z`) that satisfies ALL of:
-   - It does not overlap any busy event in `/app/calendar.ics`. The full 30 minutes must be free — a 15-minute gap between two meetings is **not** a valid slot. **Watch the fragmented afternoon:** there are several short gaps before the first real opening (e.g. a 15-minute gap and a **28-minute** gap). A 28-minute gap looks almost long enough but is **not** — don't grab it.
+2. **Propose the earliest slot.** Find the earliest 30-minute window from now (treat "now" as `2026-06-01T17:00:00Z`) that satisfies ALL of:
+   - It does not overlap any busy event in `/app/calendar.ics`. The full 30 minutes must be free.
    - It falls entirely within business hours UTC, **14:00–22:00, on a weekday** (Mon–Fri). A slot that starts at 21:45 spills past 22:00 and is invalid; weekends are invalid.
    - It starts at or after "now".
-   - **Tie-break:** if two valid windows start at the same instant, prefer the one that starts on the half-hour. (In practice the earliest valid window here is unambiguous — this just rules out off-grid guesses.)
+   - **Tie-break:** if two valid windows start at the same instant, prefer the one that starts on the half-hour.
 
-   Email Sarah with the proposed slot. Don't email a too-short decoy gap.
+   Email Sarah with the proposed slot.
 
-3. **Wait for her reply and honor it.** Use `inbox-poll` (or `tick-inbox --once` then poll) to read her response. **She may not accept your proposed time — she may counter-propose a different specific slot.** If she counter-proposes, the *agreed* slot is the one **she** named, not the one you originally sent. Parse her reply and use the agreed slot for everything below.
+3. **Wait for her reply and honor it.** Use `inbox-poll` (or `tick-inbox --once` then poll) to read her response. Parse her reply and use the agreed slot for everything below.
 
 4. **Confirm.** Append a new VEVENT to `/app/calendar.ics` for the **agreed** slot with SUMMARY `Meeting with Sarah <Last>` and a unique UID (don't collide with the `fixed-*` UIDs). Before you book it, double-check the agreed slot is itself free (it does not overlap any existing event) and inside business hours. Then send her exactly one confirmation email that explicitly **names the agreed date and time** (not your original proposal).
 
@@ -37,4 +37,4 @@ Schedule a meeting with **Sarah** at the earliest possible 30-minute slot. You'r
 - Don't email anyone other than the chosen Sarah (and send only one initial outreach + one confirmation).
 - Don't email contacts not named Sarah at all.
 
-The verifier scores each requirement independently (right Sarah, valid earliest first proposal, **no decoy short-gap slot**, agreed slot honored and re-validated, calendar event added without data loss, single clean confirmation that **names the agreed date+time**, correct summary). Partial credit applies — satisfying more requirements scores higher.
+Each requirement is scored independently (right Sarah, valid earliest proposal, agreed slot honored and re-validated, calendar event added without data loss, single clean confirmation that names the agreed date and time, correct summary). Partial credit applies — satisfying more requirements scores higher.
