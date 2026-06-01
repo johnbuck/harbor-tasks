@@ -89,9 +89,13 @@ check("readme_present", bool(rm.strip()))
 check("readme_all_funcs",
       all(re.search(rf"\b{fn}\b", rm) for fn in ("c_to_f", "f_to_c", "round_temp")))
 
-# 10: README documents the absolute-zero ValueError
+# 10: README documents the below-absolute-zero ValueError. Accept any phrasing of
+# the temperature floor (don't require the leaked exact phrase "absolute zero") —
+# "absolute zero", the -273.15 / -459.67 thresholds, or "below the minimum
+# temperature" all count, as long as ValueError is named.
 check("readme_abs_zero",
-      bool(re.search(r"ValueError", rm)) and bool(re.search(r"absolute zero", rm, re.I)))
+      bool(re.search(r"ValueError", rm)) and
+      bool(re.search(r"absolute zero|-?273(\.15)?|-?459(\.67)?|minimum temperature|physically (im)?possible|below.*(zero|minimum)", rm, re.I)))
 
 # extract first python fence
 fences = re.findall(r"```python\s*\n(.*?)```", rm, re.DOTALL)

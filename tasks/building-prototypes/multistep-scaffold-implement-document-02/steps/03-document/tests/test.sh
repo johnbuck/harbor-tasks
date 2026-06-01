@@ -83,10 +83,14 @@ check("readme_present", bool(rm.strip()))
 check("readme_all_funcs",
       all(re.search(rf"\b{fn}\b", rm) for fn in ("slugify", "truncate", "word_count")))
 
-# 10: README states the suffix-aware "including the suffix" length rule
+# 10: README documents the suffix-aware length behaviour of truncate. Accept any
+# phrasing that ties the suffix to the length limit (don't require a leaked exact
+# phrase) — e.g. "...including the suffix", "the suffix counts toward the limit",
+# "result length (with the suffix) is at most n".
 check("readme_truncate_rule",
       bool(re.search(r"truncate", rm)) and
-      bool(re.search(r"includ\w*\s+the\s+suffix|including the suffix|including suffix", rm, re.I)))
+      bool(re.search(r"suffix", rm, re.I)) and
+      bool(re.search(r"length|character|limit|at most|within|count", rm, re.I)))
 
 # extract first python fence
 fences = re.findall(r"```python\s*\n(.*?)```", rm, re.DOTALL)
