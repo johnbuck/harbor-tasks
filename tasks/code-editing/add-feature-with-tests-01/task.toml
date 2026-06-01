@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/add-feature-with-tests-01"
-description = "Implement an LRU cache from a stub so the provided pytest suite passes."
+description = "Implement an LRUCache to satisfy a full contract (get/-1, put eviction, recency on get and put, capacity validation, peek that does not refresh, correctness under heavy churn), not just the visible pytest. Graded completeness+quality rubric: 0.4 visible tests + 0.4 hidden contract edge-cases + 0.2 quality (no test tampering / class present / no debug cruft). A minimal dict-only implementation passes the visible tests but fails the validation/peek/churn cases and scores a clear fraction; the full contract scores 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["code-editing", "add-feature", "python", "pytest"]
+keywords = ["code-editing", "add-feature", "python", "pytest", "graded-rubric"]
 
 [metadata]
 author_name = "johnbuck"
 difficulty = "medium"
 category = "code-editing"
 shape = "add-feature-with-tests"
-tags = ["code-editing", "add-feature-with-tests"]
+tags = ["code-editing", "add-feature-with-tests", "graded-rubric", "completeness-quality"]
 
 [verifier]
 timeout_sec = 120.0

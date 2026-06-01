@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/fix-bug-with-failing-test-03"
-description = "Fix a normalization bug in a palindrome checker so the failing pytest passes."
+description = "Fix a palindrome checker to satisfy a full contract (alphanumeric-only normalization, digits count, no-alphanumeric input is a palindrome, Unicode case-FOLDING via str.casefold not str.lower), not just the visible pytest. Graded completeness+quality rubric: 0.4 visible tests + 0.4 hidden contract edge-cases + 0.2 quality (no test tampering / signature intact / no debug cruft). A str.lower() fix passes the visible ASCII tests but fails the casefold cases and scores a clear fraction; the full contract scores 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["code-editing", "bug-fix", "python", "pytest"]
+keywords = ["code-editing", "bug-fix", "python", "pytest", "graded-rubric"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "medium"
 category = "code-editing"
 shape = "fix-bug-with-failing-test"
-tags = ["code-editing", "fix-bug-with-failing-test"]
+tags = ["code-editing", "fix-bug-with-failing-test", "graded-rubric", "completeness-quality"]
 
 [verifier]
 timeout_sec = 120.0

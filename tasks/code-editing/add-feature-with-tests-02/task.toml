@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/add-feature-with-tests-02"
-description = "Implement an infix arithmetic evaluator (precedence + parens) from a stub."
+description = "Implement an infix arithmetic evaluator (recursive descent, no eval/exec) to satisfy a full contract (precedence, parentheses, unary minus, left-associativity, decimals, and ValueError on malformed input), not just the visible pytest. Graded completeness+quality rubric: 0.4 visible tests + 0.4 hidden contract edge-cases + 0.2 quality (no test tampering / signature intact / no eval-exec / no debug cruft). A loose parser passes the visible tests but fails the error-raising and associativity cases and scores a clear fraction; the full contract scores 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["code-editing", "add-feature", "python", "pytest", "parsing"]
+keywords = ["code-editing", "add-feature", "python", "pytest", "graded-rubric"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "hard"
+difficulty = "medium"
 category = "code-editing"
 shape = "add-feature-with-tests"
-tags = ["code-editing", "add-feature-with-tests"]
+tags = ["code-editing", "add-feature-with-tests", "graded-rubric", "completeness-quality"]
 
 [verifier]
 timeout_sec = 120.0
