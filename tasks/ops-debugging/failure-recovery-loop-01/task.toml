@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["ops-debugging", "failure-recovery", "retry"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Deterministic fail-1-3/succeed-4 → fixed retry loop is optimal; no adaptive recovery tested."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "hard"
 category = "ops-debugging"

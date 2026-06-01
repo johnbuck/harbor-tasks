@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["backup-dr", "restore-runbook", "llm-as-a-judge"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "One-shot runbook; coarse/lenient LLM judge; model-dominated. Move to Track B."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "medium"
 category = "backup-dr"

@@ -7,6 +7,10 @@ authors = [{name = "johnbuck"}]
 keywords = ["building-prototypes", "cli-tool", "python"]
 
 [metadata]
+status = "deprecated"
+deprecation_date = "2026-06-01"
+deprecation_reason = "Model-dominated: fully-specced wc clone; deterministic checks any model one-shots."
+deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "hard"
 category = "building-prototypes"
