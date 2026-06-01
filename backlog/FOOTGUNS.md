@@ -176,7 +176,7 @@ the runtime LLMs — not the harness you're evaluating. For harness eval, point
 `[[environment.mcp_servers]]` runtime in natively); the sim-user/judge model is a
 fixed environment constant, identical for both harnesses. Its `${OPENAI_*}` env
 must be EXPORTED in the harbor process (task.toml `[verifier.env]` resolves
-`${...}` at config-load), via `infisical run -- bash -c 'export ...; harbor run'`.
+`${...}` at config-load), via `infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- bash -c 'export ...; harbor run'` (self-hosted only — see §26).
 
 ---
 
@@ -514,6 +514,12 @@ The hindsight-plugin spec inherits the existing risk without amplifying it.
 ---
 
 ## 26. Infisical CLI: `--domain` is required on `login` AND `run` (env var ignored)
+
+**HARD RULE: this project NEVER uses Infisical Cloud. The only instance is the
+self-hosted `http://internal-host:8380`.** Any `infisical login`/`run`
+WITHOUT an explicit `--domain=http://internal-host:8380` silently
+defaults to cloud (`app.infisical.com`) and is WRONG — every command must carry
+`--domain`, or use the `tools/run_*.sh` wrappers which do.
 
 **Symptom 1 (login):** `infisical login --method=universal-auth ...` succeeds (rc=0) but emits an error message about `domain ... Current domain ... https://app.infisical.com` instead of a JWT. The CLI is hitting the **cloud** endpoint, not the self-hosted one set by `INFISICAL_SITE_URL`.
 

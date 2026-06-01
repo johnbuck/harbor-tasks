@@ -10,7 +10,7 @@
 #   (reads jobs/<job>/result.json + each task.toml + configs/track-a-weights.toml).
 #
 # Run:
-#   infisical run --projectId INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
+#   infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
 #     tools/run_track_a.sh
 #
 # (Both thin adapters forward OPENROUTER_API_KEY from the harbor process env

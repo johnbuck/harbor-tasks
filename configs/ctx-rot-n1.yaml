@@ -1,0 +1,39 @@
+# Real n=1 on the context-ROT family (rot-01 positional + rot-02 multi-hop),
+# both harnesses, same model deepseek-v4-pro, via their OWN baked thin configs.
+# Goal: read the per-harness EARLY/MIDDLE/LATE rot curve to see whether a
+# harness's context management moves the middle bucket (= discrimination) or both
+# harnesses behave identically (= blunt).
+#
+# Run (key injected by Infisical, never written to disk or context):
+#   infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
+#     harbor run -c configs/ctx-rot-n1.yaml
+#
+# CAVEAT: uses the CURRENT harbor-agents-rich:latest (provider-pin rebuild still
+# outstanding). The EARLY/MIDDLE/LATE accuracy split is readable regardless; the
+# token/cost/cache numbers are NOT trustworthy until the pin rebuild + /generation
+# fairness check land.
+
+jobs_dir: /home/trumble/harbor-tasks/jobs/ctx-rot-n1
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 2
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: tasks/context-rot

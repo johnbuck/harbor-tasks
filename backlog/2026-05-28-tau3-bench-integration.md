@@ -97,8 +97,8 @@ we still prefer the privacy pool where the routing allows it.
   these fine. **These must be exported in the harbor PROCESS env** (not just
   the container env list) because task.toml `[verifier.env]` resolves
   `${OPENAI_API_KEY}`/`${OPENAI_BASE_URL}` at config-load; run via
-  `infisical run -- bash -c 'export OPENAI_API_KEY="$OPENROUTER_API_KEY"; …;
-  uv run harbor run …'`.
+  `infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- bash -c 'export OPENAI_API_KEY="$OPENROUTER_API_KEY"; …;
+  uv run harbor run …'` (self-hosted only — NEVER Infisical Cloud).
 - Remaining: the **agent run** (openclaw/hermes via the tau3-runtime MCP) — same
   openclaw reasoning-passthrough caveat as the rest, plus the hermes-MCP unknown.
 - 2026-05-30: **agent-run attempt #1 = BLOCKED.** Sierra's tau3 task Dockerfile

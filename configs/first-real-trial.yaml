@@ -1,5 +1,8 @@
 # First real-LLM trial: openclaw + hermes on one task, same model, via OpenRouter.
-# Inject OPENROUTER_API_KEY via `infisical run` — do NOT put it here.
+# Inject OPENROUTER_API_KEY via the SELF-HOSTED infisical — do NOT put it here.
+# NEVER Infisical Cloud. Always: infisical run --domain=http://internal-host:8380
+# --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- harbor run ...
+# (or use the tools/run_*.sh wrappers, which do this correctly via infisical-identity).
 #
 # Model is Kimi K2.6 (non-Anthropic) on purpose: neither adapter treats
 # 'moonshotai' as a native provider, so BOTH fall through to OpenRouter

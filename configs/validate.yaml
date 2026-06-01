@@ -1,6 +1,6 @@
 # Free task validation via the built-in oracle agent (runs solution/solve.sh,
 # no LLM agent cost). For judge tasks the VERIFIER still calls Anthropic, so
-# run this through `infisical run --path=/proxy/` to inject ANTHROPIC_API_KEY.
+# run this through `infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/` to inject ANTHROPIC_API_KEY.
 # Point `datasets[].path` at whichever category dir you're validating.
 
 jobs_dir: /tmp/harbor-jobs
