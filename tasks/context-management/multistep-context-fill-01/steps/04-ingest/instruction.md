@@ -1,5 +1,5 @@
 You are reviewing a large batch of documents one at a time. This is
-document **4 of 11**. The documents are long and mostly filler.
+document **4 of 18**. The documents are long and mostly filler.
 
 Read `/app/chunks/chunk_04.txt`. Buried inside is exactly one line of the
 form `MARKER-04-XXXXXXXX`.

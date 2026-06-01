@@ -2,13 +2,13 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/failure-recovery-loop-01"
-description = "Tool returns transient errors before succeeding; agent must retry, not give up. Verifier inspects how many tries it took + whether the agent completed."
+description = "Tool returns transient errors before succeeding; agent must retry, not give up. Verifier grades EFFICIENCY of recovery, not just eventual success: reward = 0.6*correctness + 0.4*efficiency, where efficiency is clamped on a retry budget (ideal 4 invocations = clean recovery, ceiling 15 = flailing). A harness that recovers in the minimum attempts scores ~1.0; one that burns a dozen retries scores ~0.7; never-recovered scores ~0. Attempts counted from /var/log/fetch.counter, incremented by flaky-fetch on every call."
 authors = [{name = "johnbuck"}]
 keywords = ["ops-debugging", "failure-recovery", "retry"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "ops-debugging"
 shape = "failure-recovery-loop"
 tags = ["ops-debugging", "failure-recovery", "harness-discriminating"]
