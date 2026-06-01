@@ -12,7 +12,5 @@ find. For EACH contradiction:
    numbers or names from each side, e.g. "41.3%" vs "39.1%").
 3. Briefly explain why the two cannot both be true.
 
-Be precise: the document also contains figures that look conflicting at first
-glance but are actually consistent (for example, a current value versus a future
-target, or a forecast that was explicitly revised and superseded). Do NOT report
-those as contradictions — false positives count against you.
+Be precise — report only genuine contradictions, where two statements cannot
+both be true.

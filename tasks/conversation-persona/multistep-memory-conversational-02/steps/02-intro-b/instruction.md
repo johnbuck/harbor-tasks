@@ -1,5 +1,4 @@
-A few more facts about me to remember (again: **memorize only, do not write the
-facts to any file**):
+A few more facts about me to remember:
 
 - I work as an architect.
 - I drive a green 2021 Mazda CX-5.

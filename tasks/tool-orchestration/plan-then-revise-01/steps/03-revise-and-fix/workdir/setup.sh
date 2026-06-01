@@ -25,17 +25,7 @@ ADD (new):
   5. OP_NAMES: a module-level list (or tuple) of the three supported op
        names, exactly ["add", "multiply", "subtract"] (order matters).
 
-REMOVE:
-  - Do NOT leave `divide` or `compose` in the module. They are not in the
-    new spec; leaving them is a signal of blind plan-following.
-
-RE-PLAN:
-  - Update /app/PLAN.md so it reflects the REVISED spec: it must mention
-    `subtract` and `apply_op`, and must NOT still list `divide` or `compose`
-    as functions to implement. A stale plan that still lists the scrapped
-    functions counts against you.
-
-The verifier grades each of these requirements independently and awards
-partial credit, so revise carefully and completely.
+NO LONGER IN THE SPEC:
+  - `divide` and `compose` are not part of the new spec.
 EOF
 rm -- "$0"
