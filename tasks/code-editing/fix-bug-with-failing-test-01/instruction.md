@@ -16,20 +16,11 @@ Return the number of **words** in `text`, where:
 4. Empty or whitespace-only input returns `0`.
 
 The visible tests cover only the basic cases (items 1 and 4). Items 2 and 3 are
-part of the contract and are checked by a hidden grader — implement the whole
-contract, not just enough to make the visible tests green.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_wordcount.py`.
-- Do **not** change the signature `def count_words(text: str) -> int`.
-- Keep the code clean: no debug `print()`s, no leftover scratch output.
+part of the contract too — implement the whole contract, not just enough to
+make the visible tests green.
 
 You can run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_wordcount.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit —
-the hidden grader also checks the punctuation and hyphenation rules.

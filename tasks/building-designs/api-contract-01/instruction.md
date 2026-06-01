@@ -26,9 +26,6 @@ Contract rules the design must satisfy:
 - The `{id}` path parameter must be declared (`in: path`, `required: true`,
   integer schema) on both `/todos/{id}` operations.
 - `POST /todos` must declare a **`requestBody`** (`required: true`) referencing
-  a schema — the create input. The server assigns `id`, so the create-input
-  body must **not** require the client to supply `id` (i.e. don't reuse the full
-  `Todo` schema, which requires `id`, as the request body; use a separate
-  create-input schema or make `id` optional on the input).
+  a schema — the create input.
 
 Write only the YAML to `/app/openapi.yaml`.

@@ -1,6 +1,6 @@
 Implement `evaluate(expr: str) -> float` in `/app/calc.py`. The stub raises
 `NotImplementedError`; a visible test suite at `/app/tests/test_calc.py` defines
-the basic behavior, but the **full contract below** is what's graded.
+the basic behavior. Implement the **full contract below**.
 
 ## Contract for `evaluate(expr: str) -> float`
 
@@ -22,25 +22,14 @@ The evaluator handles infix arithmetic:
 7. Division by zero raises `ZeroDivisionError` (Python's natural behavior; do
    not swallow it).
 
-You may **not** use Python's built-in `eval` or `exec`.
-
 The visible tests cover valid expressions (precedence, parens, unary minus,
 decimals, associativity). The **malformed-input → `ValueError`** rule (item 6)
-is part of the contract and is checked by a hidden grader — a parser that only
-handles well-formed input passes the visible tests but mis-handles the error
-cases and scores partially.
-
-## Constraints
-
-- Do **not** modify the test file `/app/tests/test_calc.py`.
-- Do **not** use Python's built-in `eval` or `exec`.
-- Keep the code clean: no debug `print()`s, no leftover scratch output.
+is part of the contract too — a parser that only handles well-formed input
+passes the visible tests but mis-handles the error cases. Implement the whole
+contract.
 
 Run the visible tests with:
 
 ```
 cd /app && python -m pytest tests/test_calc.py -v
 ```
-
-Passing the visible tests is necessary but **not** sufficient for full credit —
-the hidden grader also checks that malformed input raises `ValueError`.
