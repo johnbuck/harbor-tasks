@@ -1,24 +1,28 @@
 #!/bin/bash
-# Reference solution — used by the `oracle` agent to sanity-check the task.
+# Reference solution — scores 1.0 under the deterministic graded verifier.
 set -e
 
 cat > /app/README.md <<'EOF'
 # greet.py
 
-A simple command-line program that prints a greeting for a given name.
+A simple command-line program that prints a greeting for one or more given names.
 
 ## Usage
 
 ```
-python greet.py <name> [--times N]
+python greet.py NAME [NAME ...] [--times N] [--greeting WORD] [--shout]
 ```
 
 ## Arguments
 
-| Argument | Type | Required | Default | Description |
-|----------|------|----------|---------|-------------|
-| `name` | positional | yes | — | The name of the person to greet. |
-| `--times N` | option | no | `1` | How many times to print the greeting. Must be at least 1. |
+| Argument | Kind | Default | Description |
+|----------|------|---------|-------------|
+| `name` | positional (one or more) | — | One or more names of the people to greet. Accepts multiple names. |
+| `--times N` | option | `1` | How many times to print each greeting (default: 1). |
+| `--greeting WORD` | option | `Hello` | The greeting word to use (default: Hello). |
+| `--shout` | flag | off | Print the greeting in uppercase. |
+
+The program prints one line per greeting in the form `<greeting>, <name>!`.
 
 ## Examples
 
@@ -29,12 +33,20 @@ $ python greet.py Alice
 Hello, Alice!
 ```
 
-Repeat the greeting multiple times:
+Multiple names, repeated, with a custom greeting:
 
 ```
-$ python greet.py Alice --times 3
-Hello, Alice!
-Hello, Alice!
-Hello, Alice!
+$ python greet.py Alice Bob --times 2 --greeting Hi
+Hi, Alice!
+Hi, Alice!
+Hi, Bob!
+Hi, Bob!
+```
+
+Shout:
+
+```
+$ python greet.py Alice --shout
+HELLO, ALICE!
 ```
 EOF

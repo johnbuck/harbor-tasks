@@ -3,9 +3,9 @@ FROM harbor-agents-rich:latest
 COPY stringutils.py /app/stringutils.py
 RUN mkdir -p /app/tests && touch /app/tests/__init__.py
 
-# Pristine impl (tamper check) + planted mutant (used by the verifier only).
-RUN mkdir -p /opt/canonical
+# Pristine impl (tamper check) + planted mutants (used by the verifier only).
+RUN mkdir -p /opt/canonical/mutants
 COPY stringutils.py /opt/canonical/stringutils.py
-COPY mutant_stringutils.py /opt/canonical/mutant_stringutils.py
+COPY mutants/ /opt/canonical/mutants/
 
-RUN pip install --no-cache-dir pytest==8.4.1 "anthropic>=0.40.0"
+RUN pip install --no-cache-dir pytest==8.4.1

@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/secret-scan-01"
-description = "Scan a small repository for hardcoded secrets and write the list of offending files."
+description = "Scan a repo for hardcoded secrets (API key, AWS key pair, JWT, RSA private key, DB connection string) across 4 files while NOT flagging a placeholder-only decoy; graded on precision+recall (found - false_positive)/4."
 authors = [{name = "johnbuck"}]
 keywords = ["compliance-security", "secret-scan", "python"]
 

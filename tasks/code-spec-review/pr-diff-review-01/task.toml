@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/pr-diff-review-01"
-description = "Review a pull request diff that introduces a SQL injection bug; graded by an LLM judge."
+description = "Review a PR diff with THREE planted security issues (SQL injection, password-hash exposure, missing-auth delete) and ONE red-herring placeholder; graded deterministically on precision+recall (found - false_positive)/3."
 authors = [{name = "johnbuck"}]
-keywords = ["code-spec-review", "pr-diff-review", "security", "llm-as-a-judge"]
+keywords = ["code-spec-review", "pr-diff-review", "security", "graded"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "hard"
+difficulty = "medium"
 category = "code-spec-review"
 shape = "pr-diff-review"
-tags = ["code-spec-review", "pr-diff-review", "security", "judge"]
+tags = ["code-spec-review", "pr-diff-review", "security", "graded", "deterministic"]
 
 [verifier]
 timeout_sec = 300.0
@@ -29,8 +29,6 @@ allow_internet = true
 mcp_servers = []
 
 [verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
 
 [environment.env]
 OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

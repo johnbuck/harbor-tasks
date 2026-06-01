@@ -1,6 +1,13 @@
-Scan the files under `/app/repo/` for hardcoded secrets (API keys, secret
-access keys, private keys).
+Scan the files under `/app/repo/` for hardcoded secrets. A secret is real
+credential material accidentally committed to source — e.g. an API key, an AWS
+access key / secret access key, a JWT/session token, a private key, or a
+database connection string that embeds a real password.
 
-Write to `/app/findings.txt` the path — relative to `/app/repo/` — of each
-file that contains a hardcoded secret, one per line, sorted alphabetically.
-A file with no secret must NOT be listed.
+Be precise: **placeholder / example / template values are NOT secrets** (e.g.
+`<your-api-key-here>`, `YOUR_AWS_SECRET_HERE`, `USER:PASSWORD@HOST`). A file
+that contains only placeholders must NOT be listed — flagging it counts against
+you.
+
+Write to `/app/findings.txt` the path — relative to `/app/repo/` — of each file
+that contains at least one **real** hardcoded secret, one per line, sorted
+alphabetically. A file with no real secret must NOT be listed.
