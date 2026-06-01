@@ -1,63 +1,31 @@
 #!/bin/bash
-# Write a fixture CSV, run csv2json.py, parse output, compare to expected.
+# Implement-step gate (informational; only the FINAL step counts toward reward).
+# Spot-checks base conversion + --int integer coercion.
 mkdir -p /logs/verifier
+if [ ! -f /app/csv2json.py ]; then
+    echo '{"reward": 0, "correctness": 0}' > /logs/verifier/reward.json
+    exit 0
+fi
 cat > /tmp/fixture.csv <<'EOF'
 name,age,city
 Alice,30,London
 Bob,25,Paris
 EOF
 
-if [ ! -f /app/csv2json.py ]; then
-    echo '{"reward": 0, "correctness": 0}' > /logs/verifier/reward.json
-    exit 0
-fi
-
-output=$(python /app/csv2json.py /tmp/fixture.csv 2>/dev/null)
-
-result=$(python3 - <<'PYEOF'
-import json, sys
-
-output = """PLACEHOLDER"""
+python /app/csv2json.py /tmp/fixture.csv --int age > /tmp/out.json 2>/dev/null
+result=$(python3 - <<'PY'
+import json
 try:
-    data = json.loads(output)
-except Exception as e:
-    print("FAIL: json parse error:", e)
-    sys.exit(1)
-
-expected = [
-    {"name": "Alice", "age": "30", "city": "London"},
-    {"name": "Bob",   "age": "25", "city": "Paris"},
+    data = json.load(open("/tmp/out.json"))
+except Exception:
+    print("FAIL"); raise SystemExit
+exp = [
+    {"name": "Alice", "age": 30, "city": "London"},
+    {"name": "Bob",   "age": 25, "city": "Paris"},
 ]
-if data == expected:
-    print("PASS")
-else:
-    print("FAIL: got", json.dumps(data))
-PYEOF
+print("PASS" if data == exp else "FAIL")
+PY
 )
-
-# Re-run properly passing the output via env to avoid shell escaping issues
-result=$(OUTPUT="$output" python3 - <<'PYEOF'
-import json, sys, os
-
-output = os.environ.get("OUTPUT", "")
-try:
-    data = json.loads(output.strip())
-except Exception as e:
-    print("FAIL: json parse error:", e)
-    sys.exit(1)
-
-expected = [
-    {"name": "Alice", "age": "30", "city": "London"},
-    {"name": "Bob",   "age": "25", "city": "Paris"},
-]
-if data == expected:
-    print("PASS")
-else:
-    print("FAIL: got", json.dumps(data))
-    sys.exit(1)
-PYEOF
-)
-
 if [ "$result" = "PASS" ]; then
     echo '{"reward": 1, "correctness": 1}' > /logs/verifier/reward.json
 else

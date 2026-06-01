@@ -1,18 +1,18 @@
 schema_version = "1.1"
-multi_step_reward_strategy = "mean"
+multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-plan-execute-03"
-description = "Plan → implement → test a Celsius-to-Fahrenheit CLI tool: c2f.py takes a Celsius value and prints the Fahrenheit equivalent to one decimal place."
+description = "Plan → implement → test a multi-mode temperature converter CLI (tempconv.py: c2f/f2c/c2k/k2c). GRADED final step: 12 independent sub-checks across conversion correctness, 2-decimal rounding, absolute-zero validation (exit 2 + stderr), bad-mode handling, and a real pytest suite. Difficulty wrinkles: the obvious single-formula approach misses 3 modes, the absolute-zero guard, and the exit-code contract."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "multi-step", "plan-execute", "temperature", "cli"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "tool-orchestration"
 shape = "multistep-plan-execute"
-tags = ["tool-orchestration", "multi-step", "plan-execute"]
+tags = ["tool-orchestration", "multi-step", "plan-execute", "harness-discriminating"]
 
 
 [environment]
