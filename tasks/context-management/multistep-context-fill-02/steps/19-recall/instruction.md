@@ -1,11 +1,20 @@
-All 18 documents **and any notes file have now been deleted** — there is
-nothing left on disk to read. Working **purely from memory**, write your
-answers to `/app/answer.md`:
+All 18 weekly reports have now been **archived and deleted** —
+there is nothing left on disk to read. Working **purely from memory**, write the
+project's **final current state** to `/app/answer.md`, one item per line.
 
-1. List all **18 marker codes** you saw, one per line, in the form
-   `MARKER-01-XXXXXXXX` ... `MARKER-18-XXXXXXXX`. Do **NOT** list the two
-   `MARKER-D1-...` / `MARKER-D2-...` DRAFT decoy codes — listing a decoy will
-   cost you a point.
-2. State the three IMPORTANT FACTS from the first document. **One fact was
-   corrected by a later document — report the CORRECTED value, not the
-   original.**
+Many items were revised more than once; report the **last** value of record for
+each (never an intermediate value). **DRAFT / unapproved** proposals must **NOT**
+be reported:
+
+1. Current migration lead (full name)
+2. Migration target date
+3. Approved migration budget
+4. Target cluster size (number of nodes)
+5. Primary region
+6. Target database engine
+7. Cutover strategy
+8. Rollback window
+9. Replication topology
+10. Monitoring stack
+11. Compliance tier
+12. Disaster-recovery site

@@ -1,40 +1,45 @@
 #!/bin/bash
-# Graded recall from memory: 18 markers + 3 needle facts = 21 checks (total).
-# Difficulty levers:
-#   - 18 random marker codes retained across 18 long-context turns.
-#   - UPDATE-TRAP: the 3rd needle fact (RetentionYears) is stated as
-#     "12" in chunk 1 then CORRECTED to "7" in chunk 14.
-#     Credit is given ONLY for the latest value; the stale value earns nothing.
-#   - DECOY penalty: two MARKER-D1/D2 codes in chunk 16 are labelled DRAFT;
-#     listing either subtracts a point (clamped at 0).
+# CROSS-TALK PRECISION recall scorer for PROJECTS ORION & LYRA (ladder rung 3).
+# 12 slots = 6 attributes x 2 projects. Line-anchored per (project, attribute):
+#   +1 if the correct value appears on that slot's line
+#   -1 if the SIBLING project's value appears there (cross-attribution)
+# Tests attribution under heavy interleaving across a saturated window.
 mkdir -p /logs/verifier
 a="$(tr '[:upper:]' '[:lower:]' < /app/answer.md 2>/dev/null)"
+# line(project, attr_regex) -> the agent's line(s) for that slot
+line() { printf '%s\n' "$a" | grep -E "$1" | grep -E "$2"; }
+on() { printf '%s' "$1" | grep -qE "$2"; }
 s=0
-echo "$a" | grep -q "ff82c4be" && s=$((s+1))
-echo "$a" | grep -q "fc02dce8" && s=$((s+1))
-echo "$a" | grep -q "423c1bd0" && s=$((s+1))
-echo "$a" | grep -q "537a41d3" && s=$((s+1))
-echo "$a" | grep -q "0478efaa" && s=$((s+1))
-echo "$a" | grep -q "323f111f" && s=$((s+1))
-echo "$a" | grep -q "b940a57c" && s=$((s+1))
-echo "$a" | grep -q "6f4a1c6d" && s=$((s+1))
-echo "$a" | grep -q "da31711d" && s=$((s+1))
-echo "$a" | grep -q "c1944814" && s=$((s+1))
-echo "$a" | grep -q "2116526c" && s=$((s+1))
-echo "$a" | grep -q "8b17075d" && s=$((s+1))
-echo "$a" | grep -q "2b55c626" && s=$((s+1))
-echo "$a" | grep -q "03fd9a32" && s=$((s+1))
-echo "$a" | grep -q "c34032b5" && s=$((s+1))
-echo "$a" | grep -q "3b9db9d1" && s=$((s+1))
-echo "$a" | grep -q "4d9ceef6" && s=$((s+1))
-echo "$a" | grep -q "93cb2420" && s=$((s+1))
-if echo "$a" | grep -q "8842"; then s=$((s+1)); fi
-if echo "$a" | grep -q "meridian"; then s=$((s+1)); fi
-if echo "$a" | grep -q "retentionyears: 7" || echo "$a" | grep -q "retention years: 7" || echo "$a" | grep -q "retentionyears:7"; then s=$((s+1)); fi
-echo "$a" | grep -q "30e9d4da" && s=$((s-1))
-echo "$a" | grep -q "413b3c9c" && s=$((s-1))
+
+score() {  # $1=slot line  $2=correct regex  $3=sibling regex
+  on "$1" "$2" && s=$((s+1))
+  on "$1" "$3" && s=$((s-1))
+}
+
+# Leadership: Orion=Marsh, Lyra=Crane
+score "$(line 'orion' 'lead')"      "marsh"          "crane"
+score "$(line 'lyra' 'lead')"       "crane"          "marsh"
+# Budget: Orion=$7.4M, Lyra=$3.6M
+score "$(line 'orion' 'budget')"    "7\.4"           "3\.6"
+score "$(line 'lyra' 'budget')"     "3\.6"           "7\.4"
+# Site: Orion=K9, Lyra=Frankfurt
+score "$(line 'orion' 'site')"      "k9"             "frankfurt"
+score "$(line 'lyra' 'site')"       "frankfurt"      "k9"
+# Vendor: Orion=Heliosat, Lyra=Brightlink
+score "$(line 'orion' 'vendor|partner')"  "heliosat"  "brightlink"
+score "$(line 'lyra' 'vendor|partner')"   "brightlink" "heliosat"
+# Headcount: Orion=38, Lyra=52
+score "$(line 'orion' 'headcount|engineer')"  "\b38"   "\b52"
+score "$(line 'lyra' 'headcount|engineer')"   "\b52"   "\b38"
+# Go-live: Orion=2027-Q2, Lyra=2026-Q4
+score "$(line 'orion' 'go-live|schedule|launch')"  "2027[ -]?q2|q2[ -]?2027"  "2026[ -]?q4|q4[ -]?2026"
+score "$(line 'lyra' 'go-live|schedule|launch')"   "2026[ -]?q4|q4[ -]?2026"  "2027[ -]?q2|q2[ -]?2027"
+
+# DRAFT decoy: Project Nova must not appear
+on "$a" "nova|reykjavik|9\.9" && s=$((s-1))
+
 if [ "$s" -lt 0 ]; then s=0; fi
-total=21
+total=12
 r=$(python3 -c "print(round(${s}/${total}, 4))")
 if [ "$s" -eq "$total" ]; then corr=1; else corr=0; fi
-echo "{\"reward\": ${r}, \"correctness\": ${corr}, \"recalled\": ${s}}" > /logs/verifier/reward.json
+echo "{\"reward\": ${r}, \"correctness\": ${corr}, \"current_facts\": ${s}}" > /logs/verifier/reward.json

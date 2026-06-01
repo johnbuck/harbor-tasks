@@ -163,6 +163,54 @@ coverage (a test suite that kills no mutant scores 0), efficiency budgets (retry
 count), and decoy/red-herring items. Several latent bugs were fixed along the way
 (a `grep -c` "00" reward-corruption, a regex self-collision, oracle output bugs).
 
+## CONTEXT-MANAGEMENT REDESIGN — 1M-window saturation ladder (2026-06-01)
+
+Operator review found the old `multistep-context-fill-01/02/03` were **not real
+context tests**: telemetry filler explicitly labelled "long and mostly filler,
+ignore it" + 18 random hex markers buried in it. That measures needle-search +
+hex regurgitation, not "how does the agent behave when the context window fills
+up." And 02/03 were structural clones of 01 (same engine, different marker
+values) — three samples of one weak probe.
+
+**Reframe:** context management = behaviour under context-window SATURATION. The
+target model `deepseek/deepseek-v4-pro` has a **1,048,576-token (1M) window**
+(confirmed via OpenRouter `context_length` + `top_provider.context_length`), so
+the corpus is sized to **~1.3M cumulative tokens (~72K/report × 18) = ~1.25× the
+window** — it overflows *before* recall, forcing each harness to compact /
+externalise / truncate. That divergence-under-pressure is the harness signal.
+
+Rebuilt as a **differentiated 3-rung ladder** (meaningful evolving project prose,
+no "filler/ignore" framing; reports + notes deleted before recall; graded
+precision+recall with stale/decoy penalties; generator `environment/gen_reports.py`):
+
+- **01 — EVICTION** (PROJECT HELIOS, ground-station rollout). 12 current-state
+  facts; STABLE-EARLY facts (kickoff/site/integrator/software, stated once wk1-8,
+  never repeated) are evicted from a raw window → only a memory-externalising
+  harness recalls them; UPDATE-TRAP facts corrected late. /12: +1 current, -1
+  stale, -1 for the 2028-Q1 DRAFT decoy. Local gradient: oracle 1.0 / stale 0.0 /
+  partial 0.33 / decoy 0.917.
+- **02 — UPDATE-CHURN** (PROJECT VEGA, datacenter migration). Same saturation;
+  nearly every fact corrected 2-3× (lead Reyes→Tanaka→Okafor; nodes 48→64→32;
+  db PG14→PG16→Aurora; …). Must report the FINAL value, never an intermediate.
+  /12: +1 final, -1 per stale (up to TWO/fact), -1 GCP decoy. Gradient: oracle
+  1.0 / first-value 0.0 / intermediate 0.0.
+- **03 — CROSS-TALK PRECISION** (PROJECTS ORION + LYRA interleaved). Both projects
+  in every report with confusable parallel attributes, re-stated so both stay
+  in-window. Line-anchored /12: +1 correct value on the slot line, -1 if the
+  SIBLING project's value appears there (cross-attribution); Project-Nova DRAFT
+  decoy. Gradient: oracle 1.0 / fully-swapped 0.0 / decoy 0.917.
+
+**Validation:** local fixtures confirm each gradient; **Harbor oracle run
+(`configs/validate-ctx.yaml`, Docker build + 19-step plumbing + reward schema, no
+LLM) → all 3 reward 1.0, exceptions 0.** The oracle run caught a TOML bug that
+local checks missed (03's description had `Lyra''s` inside a single-quoted TOML
+literal → `''` terminated the string → 03 was *silently dropped* from the run;
+FOOTGUNS #38 in action). Fixed; re-validated 1.0.
+
+**Cost note:** these are now the most expensive tasks (cumulative ~1.3M-token
+context per trial; with prompt caching ~$1-3/trial, ~$10-30 for the n=5×2 grid on
+the three combined). Dial `LINES_PER_SECTION` in each `gen_reports.py` to resize.
+
 ## Remaining work (TODO after /clear)
 
 - **Run the sharpened suite on both harnesses** — everything is locally validated

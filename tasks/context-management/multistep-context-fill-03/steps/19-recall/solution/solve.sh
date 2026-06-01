@@ -1,23 +1,17 @@
 #!/bin/bash
+# Oracle recall: each project's correct values, correctly attributed, one slot/line.
 set -e
 cat > /app/answer.md <<'ANS'
-MARKER-01-ff82c4be
-MARKER-02-fc02dce8
-MARKER-03-423c1bd0
-MARKER-04-537a41d3
-MARKER-05-0478efaa
-MARKER-06-323f111f
-MARKER-07-b940a57c
-MARKER-08-6f4a1c6d
-MARKER-09-da31711d
-MARKER-10-c1944814
-MARKER-11-2116526c
-MARKER-12-8b17075d
-MARKER-13-2b55c626
-MARKER-14-03fd9a32
-MARKER-15-c34032b5
-MARKER-16-3b9db9d1
-MARKER-17-4d9ceef6
-MARKER-18-93cb2420
-VaultPin: 8842. BackupCourier: Meridian Logistics. RetentionYears: 7.
+Orion - Lead: Dr. Elena Marsh
+Lyra - Lead: Dr. Victor Crane
+Orion - Budget: $7.4M
+Lyra - Budget: $3.6M
+Orion - Site: Site K9
+Lyra - Site: Frankfurt
+Orion - Vendor: Heliosat
+Lyra - Vendor: Brightlink
+Orion - Headcount: 38 engineers
+Lyra - Headcount: 52 engineers
+Orion - Go-live: 2027-Q2
+Lyra - Go-live: 2026-Q4
 ANS

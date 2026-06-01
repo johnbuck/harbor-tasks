@@ -1,11 +1,20 @@
-All 18 documents **and any notes file have now been deleted** — there is
-nothing left on disk to read. Working **purely from memory**, write your
-answers to `/app/answer.md`:
+All 18 weekly reports have now been **archived and deleted** —
+there is nothing left on disk to read. Working **purely from memory**, write the
+project's **current state** to `/app/answer.md`, one item per line.
 
-1. List all **18 marker codes** you saw, one per line, in the form
-   `MARKER-01-XXXXXXXX` ... `MARKER-18-XXXXXXXX`. Do **NOT** list the two
-   `MARKER-D1-...` / `MARKER-D2-...` DRAFT decoy codes — listing a decoy will
-   cost you a point.
-2. State the three IMPORTANT FACTS from the first document. **One fact was
-   corrected by a later document — report the CORRECTED value, not the
-   original.**
+Report the **latest** value for each (a value that was corrected later must be
+given as the corrected value; **DRAFT / unapproved** proposals must **NOT** be
+reported):
+
+1. Current project lead (full name)
+2. Awarded antenna vendor
+3. Approved launch window (year and quarter)
+4. Approved total program budget
+5. Number of satellites in the current plan
+6. Primary ground station site code
+7. Ground software version
+8. Systems integration partner
+9. Approved data retention period (years)
+10. Project kickoff date
+11. Operations center city
+12. Approved coolant specification

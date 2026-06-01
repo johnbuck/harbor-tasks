@@ -1,23 +1,18 @@
 #!/bin/bash
+# Oracle recall: the correct CURRENT state after all 18 weeks (latest values,
+# no superseded values, decoy excluded).
 set -e
 cat > /app/answer.md <<'ANS'
-MARKER-01-25ec9096
-MARKER-02-48ba5864
-MARKER-03-7961c596
-MARKER-04-57d53498
-MARKER-05-5fff0226
-MARKER-06-8c86ba15
-MARKER-07-60cb5028
-MARKER-08-fa38b5b7
-MARKER-09-9da83e08
-MARKER-10-896aef63
-MARKER-11-7f4af9f8
-MARKER-12-fdb6ba57
-MARKER-13-6a5479cd
-MARKER-14-ccffd399
-MARKER-15-9dc71ea9
-MARKER-16-8aa6f206
-MARKER-17-4231e66c
-MARKER-18-ae12be76
-ProjectCodename: Helios. PrimaryContact: Dr. Vance. LaunchWindow: 2027-Q4.
+1. Current project lead: Dr. Samuel Okonkwo
+2. Awarded antenna vendor: Cardinal
+3. Approved launch window: 2027-Q4
+4. Approved total program budget: $5.1M
+5. Number of satellites: 4 satellites
+6. Primary ground station site: Site B12
+7. Ground software version: OrbitOS 3.1
+8. Systems integration partner: Northwind Systems
+9. Approved data retention period: 7 years
+10. Project kickoff date: 2026-03-15
+11. Operations center city: Phoenix
+12. Approved coolant specification: R-32
 ANS

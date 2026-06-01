@@ -1,11 +1,23 @@
-All 18 documents **and any notes file have now been deleted** — there is
-nothing left on disk to read. Working **purely from memory**, write your
-answers to `/app/answer.md`:
+All 18 weekly portfolio reports have now been **archived and
+deleted** — there is nothing left on disk to read. Working **purely from memory**,
+write each project's values to `/app/answer.md`, **correctly attributed**.
 
-1. List all **18 marker codes** you saw, one per line, in the form
-   `MARKER-01-XXXXXXXX` ... `MARKER-18-XXXXXXXX`. Do **NOT** list the two
-   `MARKER-D1-...` / `MARKER-D2-...` DRAFT decoy codes — listing a decoy will
-   cost you a point.
-2. State the three IMPORTANT FACTS from the first document. **One fact was
-   corrected by a later document — report the CORRECTED value, not the
-   original.**
+Write **exactly 12 lines**, one slot per line, each naming the project and the
+attribute, in this format:
+
+```
+Orion - Lead: <value>
+Lyra - Lead: <value>
+Orion - Budget: <value>
+Lyra - Budget: <value>
+Orion - Site: <value>
+Lyra - Site: <value>
+Orion - Vendor: <value>
+Lyra - Vendor: <value>
+Orion - Headcount: <value>
+Lyra - Headcount: <value>
+Orion - Go-live: <value>
+Lyra - Go-live: <value>
+```
+
+Do not report any DRAFT / unapproved project.
