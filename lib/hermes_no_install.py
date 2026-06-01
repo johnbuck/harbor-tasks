@@ -18,15 +18,16 @@ from harbor.agents.installed.hermes import Hermes
 from harbor.environments.base import BaseEnvironment
 from harbor.models.agent.context import AgentContext
 
-# Privacy-floored OpenRouter pool: route only to hosts that do not store or
-# train on prompts (`data_collection: "deny"`) and allow fallback across all
-# such hosts. Spreads load to avoid single-host 429s while honoring the privacy
-# guardrail. Trade-off: per-host caching + price no longer deterministic (the
-# comparison stays fair — both harnesses use the same pool).
-# Keep in sync with lib/openclaw_openrouter.py:OPENROUTER_PROVIDER_ROUTING.
+# DETERMINISTIC SINGLE-HOST PIN — both harnesses pin to ONE upstream host so any
+# token/cost/cache delta is the HARNESS, not OpenRouter load-balancer luck. An
+# unpinned pool is NOT fair: the two harnesses load-balance independently and hit
+# different hosts run-to-run. `require_parameters` keeps reasoning_effort intact.
+# MUST stay byte-identical to lib/openclaw_openrouter.py and the two baked configs.
 OPENROUTER_PROVIDER_ROUTING: dict = {
     "data_collection": "deny",
-    "allow_fallbacks": True,
+    "only": ["deepseek"],
+    "allow_fallbacks": False,
+    "require_parameters": True,
 }
 
 

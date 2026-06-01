@@ -14,7 +14,7 @@
         "baseUrl": "https://openrouter.ai/api/v1",
         "apiKey": "${OPENROUTER_API_KEY}",
         "params": {
-          "provider": { "data_collection": "deny", "allow_fallbacks": true }
+          "provider": { "data_collection": "deny", "only": ["deepseek"], "allow_fallbacks": false, "require_parameters": true }
         },
         "models": [
           {
