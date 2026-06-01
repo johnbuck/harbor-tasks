@@ -2,13 +2,13 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/dep-bump-breaking-01"
-description = "Migrate a Pydantic v1 BaseSettings import to pydantic-settings so the existing test passes under Pydantic v2."
+description = "Migrate a multi-site Pydantic v1 settings module (BaseSettings, @validator, pre=True validator, @root_validator, Field(env=), class Config, .dict()/.parse_obj()) to Pydantic v2 + pydantic-settings. Graded per migration site: reward = fraction of pinned behavioral tests passing."
 authors = [{name = "johnbuck"}]
 keywords = ["migration", "dep-bump-breaking", "python", "pydantic"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "migration"
 shape = "dep-bump-breaking"
 tags = ["migration", "dep-bump-breaking"]

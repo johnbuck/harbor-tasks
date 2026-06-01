@@ -2,13 +2,13 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/shell-pipeline-01"
-description = "Use a shell pipeline to find the IP with the most HTTP 500 responses in an access log."
+description = "Extract five independent statistics from an Nginx access log via shell pipelines (most-500 IP with a volume tie-break, 5xx counts, distinct-IP count, top 4xx path with query-string stripped, 2xx byte sum with '-' edge case). Graded per sub-result: reward = fraction of the five KEY=value answers exactly correct."
 authors = [{name = "johnbuck"}]
 keywords = ["ops-debugging", "shell-pipeline", "logs", "bash"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "ops-debugging"
 shape = "shell-pipeline"
 tags = ["ops-debugging", "shell-pipeline"]
