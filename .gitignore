@@ -18,6 +18,6 @@ __pycache__/
 *.swp
 .DS_Store
 
-# Generated artifacts (regenerable; keep out of git)
-agent-status.html
-task-catalog.html
+# Generated dashboards are COMMITTED (so the suite is human-reviewable straight
+# from the repo, the whole point of the catalog). Regenerate before committing
+# task changes: `python3 tools/task_catalog.py` / `python3 tools/agent_status.py`.
