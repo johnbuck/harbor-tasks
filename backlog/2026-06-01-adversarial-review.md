@@ -108,6 +108,42 @@ collapse to 1.0 anyway.
   proposal across a poll/reply loop) — the cleanest real discriminator found.
 - _verify/reasoning-parity-01 — KEEP as an infra smoke test only; exclude from grid.
 
+## STATUS / next-session pickup (2026-06-01)
+
+**Phase 1 — provider contamination: FIXED** (commit b11f743). Both harnesses pinned
+to one shared upstream `deepseek`, byte-identical in all 4 spots:
+`harnesses/openclaw/openclaw.json`, `harnesses/hermes/config.yaml`,
+`lib/openclaw_openrouter.py`, `lib/hermes_no_install.py` →
+`{data_collection:deny, only:[deepseek], allow_fallbacks:false, require_parameters:true}`.
+NOT YET PROVEN: (a) configs are baked into `harbor-agents-rich`
+(`environments/agent-rich/Dockerfile`) → **rebuild the image** for the pin to take
+effect; (b) run the fairness gate — confirm 100% of BOTH harnesses' calls hit
+`deepseek` via OpenRouter `/generation`, and compute both costs through the same path.
+
+**Phase 2 — deprecate + catalog 23 KILL tasks: DONE, non-destructive** (commit f1e6bd7).
+Each KILL task.toml has `[metadata] status="deprecated"` + reason/date/doc. Nothing
+deleted/moved. `task_catalog.py` surfaces them (26 active / 23 retired, red badge +
+reason banner). **Operator must REVIEW the retired set before any removal.**
+GAP: run configs (`configs/track-a-*.yaml`) select by category PATH, so a sweep
+still picks up deprecated tasks — Harbor doesn't read `status`. Before any run,
+exclude `status=deprecated` (active-only allowlist, or move after review) and have
+`metrics/track_a_weighted.py` skip them.
+
+**Phase 3 — rework ~22 salvageable: NOT STARTED** (task #89). Priority order:
+1. CONTAINED SCORING FIXES first (stop the false 1.0s): memory-conversational-01/02/03
+   (penalize sibling value on a labeled answer line), sub-agent-parallel-decompose-01
+   (concurrency bonus is inert — make budget infeasible serially + score concurrency
+   as a separate non-clamped dim), context-fill-02/03 (line-anchor the grep).
+2. MEDIUM: remove residual telegraphing + undate decoys (agentic-research,
+   factual-lookup-cited, find-contradictions), require legitimate sends
+   (prompt-injection), remove edge-case coaching (shell-pipeline).
+3. LARGE REBUILDS: scale past the 1M window (research corpora 150+ pages,
+   shell-pipeline 100k lines, secret-scan 200 files, pandas 50k rows), multi-file
+   repos + failing loops (refactor, pr-diff, unit-tests, dep-bump).
+Each rework: validate via Harbor oracle (Docker build + plumbing). KEEP set
+(context-fill-01, proactive-preference-01, true-multi-turn-write-01,
+schedule-meeting-01) stays; reasoning-parity-01 = infra probe, exclude from grid.
+
 ## Cross-cutting design principles for a real harness discriminator
 1. The answer must be **uncomputable without the harness-mediated path** (memory,
    tool, sub-agent, long-context). If `python3 -c` or a single read solves it, it's
