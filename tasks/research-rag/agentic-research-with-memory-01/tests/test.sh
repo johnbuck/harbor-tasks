@@ -1,83 +1,118 @@
 #!/bin/bash
-# Verifier: deterministic fact + citation scoring + optional LLM-judge for synthesis.
+# Deterministic graded verifier for agentic-research-with-memory-01 (HARD).
 #
-# Axes:
-#   founded_2024            — brief contains "2024" near founding language
-#   nsf_4_2m                — brief contains "4.2" million NSF figure
-#   climate_lead_holm       — brief names Petra Holm as climate lead
-#   pubs_18                 — brief states 18 publications in 2025
-#   two_partners            — brief names at least 2 of (UCSF, BioGen, NCAR)
-#   cited_each              — each of the 5 facts has a citation in markdown-link form
-#   citations_valid         — cited URLs actually exist in the corpus
-#   no_hallucination        — no obviously-fabricated facts (proxy: brief doesn't mention
-#                              a publication count >25 or a $-amount way outside [1, 10]M)
+# Eight facts about Mirador Labs. Each fact earns credit ONLY when, within the
+# same sentence/paragraph, the brief states the CORRECT value AND carries a
+# markdown citation to the AUTHORITATIVE page that supports it.
 #
-# Per-fact citation check: for each load-bearing claim, the same paragraph (or
-# adjacent paragraph) must contain a markdown link to the corresponding page.
+# Difficulty wrinkles:
+#   - press.html is a third-party profile with plausible-but-WRONG values
+#     (founded 2021, Berkeley HQ, climate lead "Chen", $4.2M NSF total, 40 staff,
+#     24 GPUs, "twenty+" pubs). Citing press.html (or stating its wrong value)
+#     earns no credit for that fact.
+#   - publications/drafts.html lists a 23-item pipeline tally; the published
+#     count is 18.
+#   - The 2025 NSF total is a SYNTHESIS: $4.2M (climate) + $1.1M (neural) = $5.3M.
+#     The DOE $2.5M quantum award and the 2024 NSF $3.0M award must be excluded.
+#
+# Scoring (graded fraction, NOT binary):
+#   matched     = # of the 8 facts where (correct value AND correct-page citation
+#                  appear in the same paragraph)
+#   reward      = round(matched / 8, 4)           (float 0..1)
+#   correctness = 1 iff matched == 8 else 0
+#
+# A small no-hallucination guard: parroting the press page's wrong founding year
+# (2021) or wrong NSF total ($4.2M total / $40 staff) does not match the
+# corresponding fact regex, so it scores 0 for that fact automatically.
 
 set -u
 mkdir -p /logs/verifier
-
 BRIEF=/app/brief.md
-[ ! -f "$BRIEF" ] && {
-    cat > /logs/verifier/reward.json <<'EOF'
-{"reward": 0.0, "correctness": 0.0, "missing_brief": 1}
-EOF
-    exit 0
+
+if [ ! -f "$BRIEF" ]; then
+  echo '{"reward": 0.0, "correctness": 0, "matched": 0, "total": 8, "missing_brief": 1}' > /logs/verifier/reward.json
+  exit 0
+fi
+
+python3 - "$BRIEF" <<'PY'
+import json, re, sys
+
+text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+if not text.strip():
+    json.dump({"reward": 0.0, "correctness": 0, "matched": 0, "total": 8, "empty_brief": 1},
+              open("/logs/verifier/reward.json", "w"))
+    sys.exit(0)
+
+low = text.lower()
+
+# Split into paragraphs on blank lines; also treat each markdown bullet / line as
+# its own unit so a single dense paragraph still yields per-sentence locality.
+para_blocks = re.split(r'\n\s*\n', text)
+units = []
+for blk in para_blocks:
+    units.append(blk)
+    # Also add sentence-ish splits to tighten value<->citation locality.
+    for sent in re.split(r'(?<=[.!?])\s+', blk):
+        units.append(sent)
+units = [u for u in units if u.strip()]
+
+def md_links(s):
+    # returns set of cited paths like /about.html
+    return set(m.lower() for m in re.findall(r'\]\((/[^)]+?)\)', s))
+
+# A fact matches if SOME unit contains the value regex AND a markdown link whose
+# path is in `good_paths` AND (if bad_paths given) does NOT rely solely on a
+# bad-path link for that same unit.
+def fact_match(value_rx, good_paths, bad_value_rx=None):
+    vrx = re.compile(value_rx, re.I)
+    good = set(p.lower() for p in good_paths)
+    badrx = re.compile(bad_value_rx, re.I) if bad_value_rx else None
+    for u in units:
+        if not vrx.search(u):
+            continue
+        if badrx and badrx.search(u):
+            # the unit also asserts a known-wrong value -> ambiguous, skip
+            continue
+        links = md_links(u)
+        if links & good:
+            return 1
+    return 0
+
+# ---- 8 facts ----
+# 1. founded 2024 (NOT 2021)
+f1 = fact_match(r'\b2024\b', ['/about.html'], bad_value_rx=r'\b2021\b')
+# 2. HQ San Francisco (NOT Berkeley)
+f2 = fact_match(r'san francisco', ['/about.html'], bad_value_rx=r'berkeley')
+# 3. climate lead Petra Holm (NOT Chen) — cite people.html or climate.html
+f3 = fact_match(r'petra holm|holm', ['/people.html', '/research/climate.html'],
+                bad_value_rx=r'yusra chen|chen')
+# 4. total NSF 2025 == 5.3M (synthesis). Accept "5.3" million; reject 4.2-only / 9.8 / 3.0
+f4 = fact_match(r'\$?\s*5\.3\s*(m|million)', ['/funding.html', '/research/climate.html', '/research/neural.html'])
+# 5. 18 publications (NOT 23 / twenty)
+f5 = fact_match(r'\b18\b', ['/publications/2025.html'], bad_value_rx=r'\b23\b|twenty')
+# 6. two partners — require partners.html link AND >=2 of UCSF/BioGen/NCAR in same unit
+def partners_match():
+    for u in units:
+        ul = u.lower()
+        cnt = sum(1 for p in ('ucsf', 'biogen', 'ncar') if p in ul)
+        if cnt >= 2 and ('/partners.html' in md_links(u)):
+            return 1
+    return 0
+f6 = partners_match()
+# 7. 23 full-time staff (NOT 40) — cite careers.html
+f7 = fact_match(r'\b23\b', ['/careers.html'], bad_value_rx=r'\b40\b|forty')
+# 8. 12 H100 GPUs (NOT 24) — cite research/neural.html
+f8 = fact_match(r'\b12\b', ['/research/neural.html'], bad_value_rx=r'\b24\b|twenty[- ]?four')
+
+matched = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8
+reward = round(matched / 8.0, 4)
+correctness = 1 if matched == 8 else 0
+
+out = {
+    "reward": reward, "correctness": correctness, "matched": matched, "total": 8,
+    "f1_founded": f1, "f2_hq": f2, "f3_climate_lead": f3, "f4_nsf_total": f4,
+    "f5_pubs": f5, "f6_partners": f6, "f7_staff": f7, "f8_gpus": f8,
 }
-
-lower=$(tr '[:upper:]' '[:lower:]' < "$BRIEF")
-
-# Fact presence
-founded_2024=$(echo "$lower" | grep -qE 'found(ed)?\s.*2024|2024.*found' && echo 1 || echo 0)
-nsf_4_2m=$(echo "$lower" | grep -qE '\$?4\.2[[:space:]]*(m|million)' && echo 1 || echo 0)
-climate_lead_holm=$(echo "$lower" | grep -qE 'petra holm|holm.*climate|climate.*holm' && echo 1 || echo 0)
-pubs_18=$(echo "$lower" | grep -qE '18[[:space:]]*(publication|paper|peer)' && echo 1 || echo 0)
-
-# Partners: at least two of (UCSF, BioGen, NCAR)
-p_ucsf=$(echo "$lower"   | grep -qE 'ucsf' && echo 1 || echo 0)
-p_biogen=$(echo "$lower" | grep -qE 'biogen' && echo 1 || echo 0)
-p_ncar=$(echo "$lower"   | grep -qE 'ncar|national center for atmospheric' && echo 1 || echo 0)
-p_count=$((p_ucsf + p_biogen + p_ncar))
-two_partners=$([ $p_count -ge 2 ] && echo 1 || echo 0)
-
-# Citation density: count link MATCHES (not lines — a paragraph can hold many).
-n_links=$(grep -oE '\[[^]]+\]\(/[^)]+\)' "$BRIEF" 2>/dev/null | wc -l | tr -dc '0-9')
-[ -z "$n_links" ] && n_links=0
-cited_each=$([ $n_links -ge 5 ] && echo 1 || echo 0)
-
-# Citation validity: every linked URL must exist in the corpus directory
-citations_valid=1
-invalid_count=0
-for url in $(grep -oE '\([^)]+\)' "$BRIEF" | tr -d '()' | grep -E '^/' | sort -u); do
-    # Strip query/anchor; turn /foo/bar.html into /opt/corpus/foo/bar.html
-    path="/opt/corpus${url%%[?#]*}"
-    if [ ! -f "$path" ]; then
-        invalid_count=$((invalid_count + 1))
-        citations_valid=0
-    fi
-done
-
-# Anti-hallucination heuristic: no impossible numbers
-no_hallucination=1
-echo "$lower" | grep -qE '(\$[2-9][0-9]+|\$[1-9][0-9]{2,})[[:space:]]*(m|million)' && no_hallucination=0  # >$20M
-echo "$lower" | grep -qE '\b(50|[6-9][0-9]|[1-9][0-9]{2,})[[:space:]]*publication' && no_hallucination=0  # >50 pubs
-
-# Correctness = all 5 facts + valid citations
-fact_total=$((founded_2024 + nsf_4_2m + climate_lead_holm + pubs_18 + two_partners))
-correctness=$(python3 -c "print($fact_total / 5.0)")
-all_facts=$([ $fact_total -eq 5 ] && echo 1 || echo 0)
-
-# Reward = correctness * citation-credit, with hallucination penalty
-reward=$(python3 -c "
-cor = $correctness
-ce = $cited_each
-cv = $citations_valid
-nh = $no_hallucination
-base = cor * (0.7 + 0.2 * ce + 0.1 * cv)
-print(max(0.0, base if nh else base - 0.3))
-")
-
-cat > /logs/verifier/reward.json <<EOF
-{"reward": ${reward}, "correctness": ${correctness}, "founded_2024": ${founded_2024}, "nsf_4_2m": ${nsf_4_2m}, "climate_lead_holm": ${climate_lead_holm}, "pubs_18": ${pubs_18}, "two_partners": ${two_partners}, "partner_count": ${p_count}, "n_links": ${n_links}, "cited_each": ${cited_each}, "citations_valid": ${citations_valid}, "invalid_citations": ${invalid_count}, "no_hallucination": ${no_hallucination}, "all_facts": ${all_facts}}
-EOF
+json.dump(out, open("/logs/verifier/reward.json", "w"))
+print(json.dumps(out))
+PY

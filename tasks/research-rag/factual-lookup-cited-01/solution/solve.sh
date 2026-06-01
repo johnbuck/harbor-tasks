@@ -1,31 +1,38 @@
 #!/bin/bash
-# Reference solution — all 8 facts, each with a valid source URL in its block.
+# Reference solution — all 10 facts with the CURRENT value and a citation to the
+# AUTHORITATIVE page (never an archived/legacy near-duplicate).
 set -e
 
 cat > /app/answer.md <<'EOF'
-# Factual Lookups with Citations
+# Halcyon Systems — factual lookups (cited)
 
-1. Answer: 1969 (Apollo 11 landed humans on the Moon on July 20, 1969).
-   Source: https://en.wikipedia.org/wiki/Apollo_11
+1. Answer: 2013 (Halcyon Systems was founded in 2013).
+   Source: http://localhost:8780/about.html
 
-2. Answer: Au is the chemical symbol for gold.
-   Source: https://en.wikipedia.org/wiki/Gold
+2. Answer: Priya Nandakumar is the current CEO.
+   Source: http://localhost:8780/team/leadership.html
 
-3. Answer: 206 bones in the adult human body.
-   Source: https://en.wikipedia.org/wiki/Human_skeleton
+3. Answer: Tallinn, Estonia.
+   Source: http://localhost:8780/about.html
 
-4. Answer: 1989 (the Berlin Wall fell on November 9, 1989).
-   Source: https://en.wikipedia.org/wiki/Berlin_Wall
+4. Answer: Aperture is the current flagship product.
+   Source: http://localhost:8780/products/index.html
 
-5. Answer: 299,792,458 metres per second (the exact defined speed of light).
-   Source: https://en.wikipedia.org/wiki/Speed_of_light
+5. Answer: 7.2 is the current GA version of Aperture.
+   Source: http://localhost:8780/products/aperture/releases.html
 
-6. Answer: William Shakespeare wrote "Romeo and <prod-group>".
-   Source: https://en.wikipedia.org/wiki/Romeo_and_<prod-group>
+6. Answer: 480 employees.
+   Source: http://localhost:8780/about.html
 
-7. Answer: Mount Everest is the tallest mountain on Earth above sea level.
-   Source: https://en.wikipedia.org/wiki/Mount_Everest
+7. Answer: €62 million (FY2025 annual revenue).
+   Source: http://localhost:8780/investors/fy2025.html
 
-8. Answer: 2007 (the first iPhone was released June 29, 2007).
-   Source: https://en.wikipedia.org/wiki/IPhone_(1st_generation)
+8. Answer: support@halcyon.example
+   Source: http://localhost:8780/contact.html
+
+9. Answer: Frankfurt (eu-central) is the current primary production region.
+   Source: http://localhost:8780/infra/regions.html
+
+10. Answer: 1000 requests per day (free tier, current v2 API).
+    Source: http://localhost:8780/docs/api/limits.html
 EOF

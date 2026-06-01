@@ -1,27 +1,28 @@
 #!/bin/bash
-# Deterministic graded verifier for factual-lookup-cited-01.
+# Deterministic graded verifier for factual-lookup-cited-01 (HARD, corpus-based).
 #
-# Eight independent factual questions, each requiring BOTH a correct answer AND a
-# valid source URL (http:// or https://) in the SAME numbered block. The harness
-# signal is multi-source retrieval + per-item citation discipline: a strong
-# harness lands all eight facts each with its own citation; weaker scaffolding
-# drops citations or facts, producing a fractional score.
+# Ten factual questions about the fictional "Halcyon Systems" knowledge base
+# (served at localhost:8780). Each fact has a CURRENT authoritative page and an
+# ARCHIVED/legacy near-duplicate page that states a superseded/wrong value.
+#
+# An item earns credit ONLY when, within its numbered block, BOTH:
+#   (a) the CURRENT/correct value appears, AND
+#   (b) a source URL cites the AUTHORITATIVE page path AND does NOT rely on the
+#       archived near-duplicate path.
+# Citing the archive page (even with the right value) scores 0 for that item.
+# Stating the archive's wrong value scores 0 for that item.
 #
 # Scoring (graded fraction, NOT binary):
-#   found   = # of items where (answer correct AND a valid URL is present in block)
-#   reward  = found / 8                       (float 0..1)
-#   correctness = 1 iff found == 8, else 0
-#
-# Per-item blocks are delimited by leading "<n>." / "<n>)" markers. The value
-# regex for each item must match within that item's block AND the block must
-# contain at least one http(s) URL.
+#   found       = # items fully correct (value + authoritative citation)
+#   reward      = round(found / 10, 4)
+#   correctness = 1 iff found == 10 else 0
 
 set -u
 mkdir -p /logs/verifier
 TARGET=/app/answer.md
 
 if [ ! -f "$TARGET" ]; then
-  echo '{"reward": 0.0, "correctness": 0, "found": 0, "total": 8, "missing_answer": 1}' > /logs/verifier/reward.json
+  echo '{"reward": 0.0, "correctness": 0, "found": 0, "total": 10, "missing_answer": 1}' > /logs/verifier/reward.json
   exit 0
 fi
 
@@ -29,48 +30,62 @@ python3 - "$TARGET" <<'PY'
 import json, re, sys
 
 text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
-low = text.lower()
-if not low.strip():
-    json.dump({"reward": 0.0, "correctness": 0, "found": 0, "total": 8, "empty_answer": 1},
+if not text.strip():
+    json.dump({"reward": 0.0, "correctness": 0, "found": 0, "total": 10, "empty_answer": 1},
               open("/logs/verifier/reward.json", "w"))
     sys.exit(0)
 
-# Split into per-item blocks on leading "N." or "N)" markers (1..8).
-# Anything before item 1 is discarded.
-parts = re.split(r'(?m)^\s*([1-8])[\.\)]\s', text)
+# Split into per-item blocks on leading "N." / "N)" markers (1..10).
+parts = re.split(r'(?m)^\s*(10|[1-9])[\.\)]\s', text)
 blocks = {}
-# parts = [pre, '1', body1, '2', body2, ...]
 for i in range(1, len(parts) - 1, 2):
     n = int(parts[i])
-    blocks[n] = parts[i + 1].lower()
+    blocks[n] = parts[i + 1]
+
+# (value_regex, good_path_substr, bad_path_substr, bad_value_regex)
+# good_path must appear in some URL in the block; bad_path must NOT be the only
+# cited source; bad_value (the archive's wrong value), if present, voids the item.
+checks = {
+    1:  (r'\b2013\b',            '/about.html',                          '/press/2019-profile.html',          r'\b2011\b'),
+    2:  (r'priya|nandakumar',    '/team/leadership.html',                '/archive/team-2018.html',           r'tom reyes|reyes'),
+    3:  (r'tallinn',             '/about.html',                          '/press/2019-profile.html',          r'helsinki'),
+    4:  (r'aperture',            '/products/index.html',                 '/products/legacy.html',             r'\bbeacon\b'),
+    5:  (r'\b7\.2\b',            '/products/aperture/releases.html',     '/products/aperture/changelog-archive.html', r'\b5\.4\b'),
+    6:  (r'\b480\b',             '/about.html',                          '/press/2019-profile.html',          r'\b300\b'),
+    7:  (r'\b62\b',              '/investors/fy2025.html',               '/investors/fy2023.html',            r'\b41\b'),
+    8:  (r'support@halcyon',     '/contact.html',                        '/archive/contact-old.html',         r'help@halcyon'),
+    9:  (r'frankfurt',           '/infra/regions.html',                  '/infra/regions-2020.html',          r'dublin'),
+    10: (r'\b1000\b|1,000',      '/docs/api/limits.html',                '/docs/api/limits-v1.html',          r'\b500\b'),
+}
 
 URL = re.compile(r'https?://\S+')
 
-# (value_regex, ...) — answer is correct if ANY regex matches in the block.
-checks = {
-    1: [r'\b1969\b'],                                  # Apollo 11 Moon landing
-    2: [r'\bau\b'],                                    # gold symbol Au
-    3: [r'\b206\b'],                                   # bones in adult human body
-    4: [r'\b1989\b'],                                  # Berlin Wall fell
-    5: [r'299[,.\s]?792[,.\s]?458'],                   # speed of light m/s
-    6: [r'shakespeare'],                               # Romeo & <prod-group> author
-    7: [r'mount everest|everest'],                     # tallest mountain
-    8: [r'\b2007\b'],                                  # first iPhone
-}
-
 per = {}
 found = 0
-for n in range(1, 9):
+for n in range(1, 11):
     body = blocks.get(n, "")
-    val_ok = any(re.search(rx, body) for rx in checks[n])
-    url_ok = bool(URL.search(body))
-    ok = 1 if (val_ok and url_ok) else 0
-    per[f"item{n}"] = {"value": int(val_ok), "url": int(url_ok), "ok": ok}
+    low = body.lower()
+    vrx, good, bad, badval = checks[n]
+    val_ok = bool(re.search(vrx, low))
+    badval_present = bool(re.search(badval, low))
+    urls = [u.lower().rstrip('.,);') for u in URL.findall(body)]
+    cites_good = any(good in u for u in urls)
+    cites_bad  = any(bad in u for u in urls)
+    # Credit requires: correct value, NOT asserting the wrong archived value,
+    # cites the authoritative page, and does not cite ONLY the archive page.
+    ok = 1 if (val_ok and not badval_present and cites_good and not (cites_bad and not cites_good)) else 0
+    # Note: cites_good already true means at least the right page is cited; if the
+    # block also cites the bad page that's tolerated as long as the good page is
+    # present AND the wrong value isn't asserted.
+    if cites_bad and not cites_good:
+        ok = 0
+    per[f"item{n}"] = ok
     found += ok
 
-reward = round(found / 8.0, 4)
-correctness = 1 if found == 8 else 0
-out = {"reward": reward, "correctness": correctness, "found": found, "total": 8}
+reward = round(found / 10.0, 4)
+correctness = 1 if found == 10 else 0
+out = {"reward": reward, "correctness": correctness, "found": found, "total": 10}
+out.update(per)
 json.dump(out, open("/logs/verifier/reward.json", "w"))
 print(json.dumps(out))
 PY

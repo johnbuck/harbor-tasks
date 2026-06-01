@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reference solution — identifies all 8 genuine contradictions, avoids the 2
+# Reference solution — identifies all 12 genuine contradictions, avoids the 4
 # distractor near-misses.
 set -e
 
@@ -36,8 +36,7 @@ The headcount figure and its YoY direction directly conflict.
 
 ## 6. Largest Fulfillment Center
 - Executive Summary: the Reno, Nevada hub is the company's largest by throughput.
-- Operations Report: the Columbus, Ohio hub is the largest by throughput, more
-  than Reno and Phoenix combined.
+- Operations Report: the Columbus, Ohio hub is the largest by throughput.
 Only one hub can be the largest.
 
 ## 7. Customer Acquisition Cost (CAC) Direction
@@ -50,10 +49,34 @@ CAC cannot have both fallen and risen by 6% in the same quarter.
 - Investor Outlook: names the founder and current CEO as Marcus Whitfield.
 The document gives two different names for the current CEO.
 
+## 9. Sales Channel Mix
+- Executive Summary: online channels now account for 55% of total sales,
+  overtaking brick-and-mortar.
+- Operations Report: in-store remained the majority channel at 58% of total
+  sales.
+Both online (55%) and in-store (58%) cannot be the majority of total sales.
+
+## 10. Store Count
+- Executive Summary: the company operates 412 retail stores.
+- Investor Outlook: "we now operate a 388-store footprint."
+412 stores vs a 388-store footprint conflict for the same period.
+
+## 11. Net Promoter Score (NPS)
+- Executive Summary: NPS climbing to 71, a record.
+- Operations Report: NPS slipped to 54 in Q4.
+An NPS of 71 and 54 for the same year cannot both be correct.
+
+## 12. Public-Listing / IPO Year
+- Finance Appendix: the company has been "publicly traded since its 2014 listing."
+- Investor Outlook: "Since our 2016 IPO..."
+2014 vs 2016 give two different years for going public.
+
 ---
 
-Note: the "4.7 million members now / 6 million by end of FY2026" pairing is a
-current value versus a future target (not a contradiction), and the
-"$455–$470M / $420–$435M" Q4 figures are an explicitly-superseded forecast
-revision (not a contradiction). Neither is reported above.
+Excluded (these are reconcilable, so they are not reported above): the 4.7M
+current members and the 6M FY2026 target describe a present value and a future
+goal; the $455–470M and $420–435M Q4 numbers are an earlier deck that was
+explicitly revised and superseded; the Home & Garden $120M is a portion of the
+$412M Q3 total (a subset of the whole); and the $58M FY2025 capex and the ~$70M
+FY2026 capex guidance refer to two different fiscal years.
 EOF
