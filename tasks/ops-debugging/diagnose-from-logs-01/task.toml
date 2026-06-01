@@ -2,19 +2,19 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/diagnose-from-logs-01"
-description = "Read an incident log, identify the root cause of the crash, and write a diagnosis with a recommended fix; graded by an LLM judge."
+description = "Read a noisy incident log with multiple contributing causes plus a red herring, write a diagnosis (root cause(s), evidence, red-herring call-out, fix). Graded deterministically: reward = fraction of the required root-cause + evidence findings identified, with a penalty for blaming the red herring."
 authors = [{name = "johnbuck"}]
-keywords = ["ops-debugging", "diagnose-from-logs", "llm-as-a-judge"]
+keywords = ["ops-debugging", "diagnose-from-logs", "root-cause", "evidence"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "ops-debugging"
 shape = "diagnose-from-logs"
-tags = ["ops-debugging", "diagnose-from-logs", "judge"]
+tags = ["ops-debugging", "diagnose-from-logs"]
 
 [verifier]
-timeout_sec = 300.0
+timeout_sec = 120.0
 
 [agent]
 timeout_sec = 300.0
@@ -29,8 +29,6 @@ allow_internet = true
 mcp_servers = []
 
 [verifier.env]
-ANTHROPIC_API_KEY = "${ANTHROPIC_API_KEY}"
-MODEL_NAME = "claude-opus-4-7"
 
 [environment.env]
 OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

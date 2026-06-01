@@ -2,13 +2,13 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/pandas-sql-from-nl-01"
-description = "Compute a grouped aggregate from a CSV using pandas and write the rounded total to a file."
+description = "Answer six pandas analysis questions over a messy sales CSV (filtered sums, distinct counts, groupby-mean/sum argmax, a join to a products CSV) where exact-duplicate rows and null amounts must be handled per the stated rules. Graded per question: reward = fraction of the six KEY=value answers correct."
 authors = [{name = "johnbuck"}]
 keywords = ["data-analytics", "pandas", "csv", "python"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "hard"
 category = "data-analytics"
 shape = "pandas-sql-from-nl"
 tags = ["data-analytics", "pandas-sql-from-nl"]

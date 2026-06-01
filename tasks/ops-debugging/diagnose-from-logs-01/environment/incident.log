@@ -1,25 +1,45 @@
-2026-05-27 08:01:03 INFO  [server] Worker 1 started, listening on 0.0.0.0:8080
-2026-05-27 08:01:03 INFO  [server] Worker 2 started, listening on 0.0.0.0:8080
-2026-05-27 08:01:03 INFO  [server] Worker 3 started, listening on 0.0.0.0:8080
-2026-05-27 08:01:03 INFO  [server] Worker 4 started, listening on 0.0.0.0:8080
-2026-05-27 08:01:05 INFO  [db] Connection pool established (size=10, host=db.internal:5432)
-2026-05-27 08:01:05 INFO  [server] Ready to accept connections
-2026-05-27 08:03:12 INFO  [request] POST /api/session method=POST remote=10.0.1.44
-2026-05-27 08:03:12 INFO  [auth] Session created for user_id=1042
-2026-05-27 08:03:13 INFO  [request] GET /api/profile method=GET remote=10.0.1.44 user_id=1042
-2026-05-27 08:03:13 INFO  [profile] Loaded profile for user_id=1042
-2026-05-27 08:05:47 INFO  [request] POST /api/session method=POST remote=10.0.2.18
-2026-05-27 08:05:47 INFO  [auth] Session created for user_id=2291
-2026-05-27 08:05:48 INFO  [request] GET /api/items method=GET remote=10.0.2.18 user_id=2291
-2026-05-27 08:05:48 INFO  [items] Returned 14 items for user_id=2291
-2026-05-27 08:11:22 INFO  [request] POST /api/action method=POST remote=10.0.3.77 body={"action":"transfer","amount":250}
-2026-05-27 08:11:22 DEBUG [handler] Entering handle_request with payload={'action': 'transfer', 'amount': 250}
-2026-05-27 08:11:22 ERROR [handler] Unhandled exception in handle_request
+2026-05-27 08:00:01 INFO  [server] Starting api-gateway v4.7.2 (pid=1, commit=9f3ac21)
+2026-05-27 08:00:01 INFO  [config] Loaded config from /etc/api/config.yaml
+2026-05-27 08:00:01 INFO  [db] SQLAlchemy engine created: postgresql://app@db.internal:5432/orders
+2026-05-27 08:00:01 INFO  [db] Pool config: pool_size=5, max_overflow=0, pool_timeout=30, pool_recycle=-1
+2026-05-27 08:00:02 INFO  [cache] Redis connected (redis.internal:6379)
+2026-05-27 08:00:02 INFO  [server] Listening on 0.0.0.0:8080 (workers=4)
+2026-05-27 08:00:02 INFO  [server] Health check endpoint /healthz registered
+2026-05-27 08:02:14 INFO  [request] GET /healthz 200 1ms
+2026-05-27 08:02:44 INFO  [request] GET /healthz 200 1ms
+2026-05-27 08:03:10 INFO  [request] GET /api/orders?limit=20 200 38ms
+2026-05-27 08:03:11 INFO  [request] GET /api/orders?limit=20 200 41ms
+2026-05-27 08:03:14 INFO  [request] GET /healthz 200 1ms
+2026-05-27 08:04:02 WARN  [disk] Volume /var/log at 82% capacity (threshold 80%)
+2026-05-27 08:04:30 INFO  [request] POST /api/orders 201 120ms
+2026-05-27 08:05:00 INFO  [report] Scheduled job 'nightly_revenue_report' triggered
+2026-05-27 08:05:00 DEBUG [db] Acquired connection conn#1 from pool (in_use=1/5)
+2026-05-27 08:05:00 DEBUG [report] Executing query: SELECT * FROM orders o JOIN line_items li ON li.order_id = o.id  -- no WHERE clause, full table scan
+2026-05-27 08:05:12 INFO  [request] GET /api/orders?limit=20 200 39ms
+2026-05-27 08:05:40 WARN  [disk] Volume /var/log at 83% capacity (threshold 80%)
+2026-05-27 08:06:03 DEBUG [db] Acquired connection conn#2 from pool (in_use=2/5)
+2026-05-27 08:06:03 INFO  [request] GET /api/orders/4471 (handler opened a tx)
+2026-05-27 08:06:30 WARN  [db] Connection conn#1 has been checked out for 90s (report job still running)
+2026-05-27 08:07:01 DEBUG [db] Acquired connection conn#3 from pool (in_use=3/5)
+2026-05-27 08:07:02 DEBUG [db] Acquired connection conn#4 from pool (in_use=4/5)
+2026-05-27 08:07:03 DEBUG [db] Acquired connection conn#5 from pool (in_use=5/5)  -- pool now fully checked out
+2026-05-27 08:07:03 WARN  [db] Connection pool exhausted: 5/5 in use, 0 available, max_overflow=0
+2026-05-27 08:07:05 INFO  [request] GET /api/orders?limit=20 (waiting for a free DB connection...)
+2026-05-27 08:07:30 WARN  [db] Connection conn#1 has been checked out for 150s (report job still running, query not finished)
+2026-05-27 08:07:35 ERROR [handler] Request handler failed while awaiting a pooled connection
 Traceback (most recent call last):
-  File "/app/server.py", line 84, in dispatch
-    result = handle_request(payload)
-  File "/app/server.py", line 112, in handle_request
-    user = db.get_user(payload['user_id'])
-KeyError: 'user_id'
-2026-05-27 08:11:22 ERROR [server] Request failed: POST /api/action status=500 remote=10.0.3.77
-2026-05-27 08:11:22 INFO  [server] Sending 500 Internal Server Error to 10.0.3.77
+  File "/app/api/routes.py", line 211, in get_orders
+    with db.session() as s:
+  File "/app/api/db.py", line 64, in session
+    conn = engine.connect()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/pool/base.py", line 1203, in _do_get
+    raise exc.TimeoutError(
+sqlalchemy.exc.TimeoutError: QueuePool limit of size 5 overflow 0 reached, connection timed out, timeout 30.00 (Background on this error at: https://sqlalche.me/e/20/3o7r)
+2026-05-27 08:07:35 ERROR [server] GET /api/orders?limit=20 -> 500 Internal Server Error (remote=10.0.4.55)
+2026-05-27 08:07:36 ERROR [server] GET /api/orders/4490 -> 500 Internal Server Error (remote=10.0.4.61)
+2026-05-27 08:07:36 ERROR [server] POST /api/orders -> 500 Internal Server Error (remote=10.0.4.61)
+2026-05-27 08:07:40 WARN  [disk] Volume /var/log at 84% capacity (threshold 80%)
+2026-05-27 08:07:55 INFO  [report] Job 'nightly_revenue_report' completed in 175s, released conn#1
+2026-05-27 08:07:56 INFO  [db] Pool recovered: 1/5 in use, 4 available
+2026-05-27 08:07:58 INFO  [request] GET /api/orders?limit=20 200 44ms
+2026-05-27 08:08:30 INFO  [server] Error rate back to baseline
