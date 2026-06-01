@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/find-contradictions-01"
-description = "Read a four-section annual operating review with eight planted internal contradictions (some subtle, spanning sections) plus two near-miss distractors; deterministically graded on fraction of genuine contradictions found minus false positives."
+description = "Read a four-section annual operating review with TWELVE planted internal contradictions (several subtle, spanning sections that appear pages apart) plus FOUR near-miss distractors that are NOT contradictions (current-vs-future target, explicitly-superseded forecast, subtotal-vs-total, and different fiscal years). Deterministically graded as precision+recall: reward = (genuine found − distractors wrongly flagged) / 12, so an over-flagging harness loses points."
 authors = [{name = "johnbuck"}]
 keywords = ["insights-research", "find-contradictions", "llm-as-a-judge"]
 

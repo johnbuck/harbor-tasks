@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/agentic-research-with-memory-01"
-description = "Agentic research over a sandboxed seeded corpus. Agent must navigate ~12 interlinked pages, gather specific facts about a fictional research lab, synthesize a grounded report with citations. Verifier checks deterministic fact presence + citation linking + LLM-judge synthesis quality. Distinguishes from existing research-rag-01 by being multi-source iterative (the agent decides what to fetch)."
+description = "Agentic research over a sandboxed seeded corpus of ~16 interlinked pages about a fictional research lab. The agent must gather EIGHT facts — two of which require cross-document synthesis (summing two 2025 NSF awards while excluding a DOE award and a prior-year grant) — and cite each to its AUTHORITATIVE source. A planted press page and a draft-tracker page carry plausible-but-wrong figures (founding year, HQ, climate lead, NSF total, headcount, GPU count, publication count); citing a distractor or parroting its value earns no credit. Deterministically graded on the fraction of the 8 facts stated correctly AND cited to the right page."
 authors = [{name = "johnbuck"}]
 keywords = ["research-rag", "agentic-research", "synthesis", "citations"]
 

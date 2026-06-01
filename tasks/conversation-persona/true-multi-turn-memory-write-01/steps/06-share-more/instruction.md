@@ -1,0 +1,3 @@
+A couple more small things about me, for context. My usual coffee order is an **oat-milk latte** (I don't do dairy in coffee even though I'm fine with dairy otherwise). And I have a daughter — her name is **Mira**, she's 7. Just sharing so you have the full picture. Acknowledge and we'll continue.
+
+(As before: these are stable personal facts worth saving so you can reuse them later.)

@@ -1,11 +1,24 @@
 #!/bin/bash
-# Oracle: recalls all five facts and produces an answer that satisfies the
-# verifier. Vegetarian + peanut-free + acknowledges the Tuesday/climbing context.
+# Oracle: recaps all eight fields using the LATEST values (Mountain Time;
+# Mon/Wed/Fri), then a vegetarian, peanut-free dinner for 5 PM on a climbing day.
 cat > /app/answer.md <<'EOF'
-A quick chickpea-and-spinach stir-fry over jasmine rice with a side of roasted
-sweet potato. It's vegetarian (eggs + dairy welcome but not needed here),
-peanut-free (uses cashew or sunflower seed garnish instead), and light enough
-that a 5 PM Pacific dinner won't sit heavy before your Tuesday-evening climbing
-session — the carbs from the rice and sweet potato fuel the workout, and the
-chickpeas give you sustained protein for recovery afterward.
+## Part A — Profile recap
+
+- Diet: vegetarian (lacto-ovo — eats dairy and eggs, not vegan)
+- Pet: a cat named Sushi (tortie, ~3 years old)
+- Timezone: Mountain Time (America/Denver)
+- Allergy: peanut allergy (mild; avoids peanuts entirely)
+- Hobby: bouldering / climbing
+- Climbing nights: Monday, Wednesday, and Friday evenings
+- Coffee order: oat-milk latte
+- Daughter's name: Mira (age 7)
+
+## Part B — Dinner plan
+
+A chickpea-and-spinach stir-fry over jasmine rice with a side of roasted sweet
+potato. It's vegetarian and completely peanut-free (garnish with toasted
+sunflower seeds instead of any nuts), and it's light enough to eat at 5 PM
+Mountain Time before a Monday/Wednesday/Friday climbing session — the rice and
+sweet potato give carbs to fuel the workout, and the chickpeas provide protein
+for recovery afterward.
 EOF

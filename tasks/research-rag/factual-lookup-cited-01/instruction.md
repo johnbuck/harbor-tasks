@@ -1,27 +1,51 @@
-Answer the following eight factual questions. For EACH question you must provide
-both the correct answer AND a source URL citation (the URL must start with
-`http://` or `https://` and should point to a page that supports the answer).
+A company knowledge base — **Halcyon Systems** — is served locally at
+`http://localhost:8780/`. Start at the landing page (`index.html`) and explore.
 
-Write your answers to `/app/answer.md`. Format each item as a numbered block
-that contains the answer value and its source URL, for example:
+Answer the following **ten** factual questions about Halcyon Systems. For EACH
+question you must provide both:
+
+- the **correct current answer**, and
+- a **source URL citation** that points to the **authoritative page** stating it
+  (a URL like `http://localhost:8780/<path>`).
+
+Write your answers to `/app/answer.md`, one numbered block per question, e.g.:
 
 ```
 1. Answer: <value>
-   Source: https://example.org/...
+   Source: http://localhost:8780/<path>.html
 ```
 
-Questions:
+## The catch: archived / near-duplicate pages
 
-1. In what year did the Apollo 11 mission first land humans on the Moon?
-2. What is the chemical symbol for the element gold?
-3. How many bones are in the adult human body?
-4. In what year did the Berlin Wall fall?
-5. What is the speed of light in a vacuum, in metres per second (the exact
-   defined value)?
-6. Who wrote the play "Romeo and Juliet"?
-7. What is the tallest mountain on Earth above sea level?
-8. In what year was the first iPhone released?
+The knowledge base contains **current** pages AND **archived/legacy** pages that
+look similar but state **outdated or superseded** values (an old press profile,
+a 2018 team page, a legacy products page, an old changelog, a prior fiscal year,
+an old contact page, an old regions page, a deprecated v1 API page). The landing
+page marks which sections are current and which are archive/history.
 
-Each item is graded independently: you earn credit for an item only when BOTH
-the answer is correct AND a valid source URL is present for that item. Partial
-credit is awarded for the fraction of items you get fully right.
+You earn credit for a question **only when BOTH**:
+1. the answer value is the **current/correct** one, AND
+2. the cited source URL is the **authoritative page** for that fact — **not** an
+   archived/legacy near-duplicate.
+
+Citing an archived page (even if you happen to write the correct value) does **not**
+earn credit. Each item is graded independently; partial credit is the fraction of
+items you get fully right.
+
+## Questions
+
+1. In what **year was Halcyon Systems founded**?
+2. Who is the **current CEO**?
+3. In what **city is the company headquartered**?
+4. What is the name of the company's **current flagship product**?
+5. What is the **current GA version** of that flagship product?
+6. **How many employees** does the company currently have?
+7. What was the company's **annual revenue for the most recent fiscal year (FY2025)**?
+8. What is the **current product-support email address**?
+9. What is the **current primary production data-center region**?
+10. What is the **free-tier API rate limit** (current API version), in requests per day?
+
+## Tooling
+
+- `fetch <path>` — GETs `http://localhost:8780/<path>` (e.g. `fetch about.html`).
+- Or `curl http://localhost:8780/<path>` directly. No external network.

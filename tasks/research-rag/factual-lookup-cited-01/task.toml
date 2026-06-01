@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/factual-lookup-cited-01"
-description = "Answer eight independent factual questions, each requiring the correct value AND a valid source URL in its block; deterministically graded on the fraction of items where fact and citation are both correct."
+description = "Answer ten factual questions about a fictional company knowledge base (Halcyon Systems, served locally), each requiring the CURRENT/correct value AND a citation to the AUTHORITATIVE page. The corpus seeds an archived/legacy near-duplicate for every fact (old press profile, prior fiscal year, deprecated v1 API page, etc.) stating a superseded value; citing the archive — or parroting its value — earns no credit. Deterministically graded on the fraction of items where value and authoritative citation are both correct."
 authors = [{name = "johnbuck"}]
 keywords = ["research-rag", "factual-lookup-cited", "llm-as-a-judge"]
 

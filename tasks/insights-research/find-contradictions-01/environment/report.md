@@ -3,9 +3,11 @@
 This packet consolidates four independently-authored sections: the Executive
 Summary, the Finance Appendix, the Operations Report, and the Investor Outlook.
 Because the sections were drafted by different teams and merged without a final
-reconciliation pass, the document contains several internal contradictions.
+reconciliation pass, the document contains numerous internal contradictions.
 Some are blatant; others require cross-referencing figures that appear pages
-apart.
+apart in different sections. A few figure pairs may look conflicting but are
+actually consistent (a current value vs a future target, an explicitly-superseded
+forecast, or a subtotal vs its total) — those are not contradictions.
 
 ---
 
@@ -28,6 +30,11 @@ reflecting confidence in recurring free cash flow.
 Headcount stood at **5,200 employees** at year end, flat versus the prior year.
 The flagship distribution hub in **Reno, Nevada** remained the company's largest
 fulfillment center by throughput.
+
+Digital momentum continued: **online channels now account for 55% of total
+sales**, overtaking brick-and-mortar for the first time. The company operates
+**412 retail stores** nationwide. Customer satisfaction reached a record, with
+**Net Promoter Score (NPS) climbing to 71**.
 
 ---
 
@@ -54,6 +61,11 @@ revolver capacity.
 Total loyalty membership at year end was **4.7 million**, consistent with the
 figure cited in the Executive Summary.
 
+For context, the company has been **publicly traded since its 2014 listing**.
+Of the $412 million in Q3 net revenue, the **Home & Garden segment contributed
+$120 million** — a useful breakdown for understanding the sequential softness in
+that category.
+
 ---
 
 ## Section 3 — Operations Report
@@ -78,6 +90,11 @@ both Google and Meta channels.
 Same-day delivery now reaches **62% of the addressable metropolitan population**,
 consistent with the coverage expansion noted above.
 
+Despite the e-commerce push, **in-store remained the majority channel at 58% of
+total sales** this year, reflecting the resilience of the physical footprint.
+Service metrics softened, however: **NPS slipped to 54** in Q4 amid longer
+fulfillment times during the peak season.
+
 ---
 
 ## Section 4 — Investor Outlook
@@ -98,6 +115,11 @@ target of reaching **6 million enrolled members by the end of FY2026**.
 Our founder and current CEO, **Marcus Whitfield**, will host the FY2025 earnings
 call. The flagship distribution hub in **Reno, Nevada** will receive a
 $12 million automation upgrade in H1 FY2026.
+
+Since our **2016 IPO**, we have steadily expanded the store base; we now operate
+a **388-store footprint** and continue to optimize underperforming locations.
+Capital expenditure guidance for **FY2026 is approximately $70 million**, a
+step-up from FY2025 to fund the automation roadmap.
 
 Return rates are expected to normalize toward **11.4%**, in line with the FY2025
 figure.
