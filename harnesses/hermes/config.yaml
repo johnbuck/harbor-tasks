@@ -115,10 +115,13 @@ provider_routing:
   # Require the routed provider to support all request params (e.g. reasoning_effort),
   # so reasoning isn't silently dropped by a provider that doesn't support it.
   require_parameters: true
-  # sort: "throughput"
-  # only: ["anthropic", "google"]
-  # ignore: ["deepinfra", "fireworks"]
-  # order: ["anthropic", "google", "together"]
+  # DETERMINISTIC PIN (must be byte-identical to openclaw.json provider block):
+  # both harnesses pin to ONE upstream host so per-host KV-cache + per-token price
+  # are identical and any token/cost/behaviour delta is the HARNESS, not OpenRouter
+  # load-balancer luck. A pinned-host outage failing the trial is an honest failure;
+  # see backlog/2026-06-01-adversarial-review.md (provider contamination finding).
+  only: ["deepseek"]
+  allow_fallbacks: false
 
 # =============================================================================
 # OpenRouter Response Caching (only applies when using OpenRouter)

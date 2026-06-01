@@ -58,20 +58,21 @@ OPENROUTER_SUPPORTED_REASONING_EFFORTS = ["low", "medium", "high", "xhigh"]
 # menu) but run at high.
 OPENCLAW_THINKING_LEVEL = "high"
 
-# Privacy-floored OpenRouter pool. We route only to upstream hosts that do NOT
-# store or train on prompts (`data_collection: "deny"`) and allow fallback
-# across all such hosts. This spreads load so a single low-rate-limit host
-# (we used to pin "Io Net") can't 429 the whole sweep, while still honoring the
-# privacy guardrail: no host retains data for training/storage.
-#
-# Trade-off vs a single pin: per-host KV caching and per-token price are no
-# longer deterministic (OpenRouter load-balances across compliant hosts). The
-# comparison stays fair because BOTH harnesses use the same pool, and cost is
-# computed from live per-token pricing per call regardless of host.
-# Keep in sync with lib/hermes_no_install.py.
+# DETERMINISTIC SINGLE-HOST PIN. OpenRouter load-balances each call across many
+# upstream hosts for a model; an UNPINNED pool is NOT fair even when both harnesses
+# share the pool definition, because they load-balance INDEPENDENTLY — they hit
+# different hosts run-to-run, with different per-host KV-cache and per-token price
+# (the v9 confound: "openclaw 0 cache hits vs hermes 21,504 on the same model").
+# So we pin BOTH harnesses to one host. Any token/cost/cache delta is then the
+# HARNESS, not load-balancer luck. A pinned-host outage failing the trial is an
+# honest failure. `require_parameters` keeps reasoning_effort from being dropped.
+# MUST stay byte-identical to lib/hermes_no_install.py and the two baked configs
+# (harnesses/openclaw/openclaw.json, harnesses/hermes/config.yaml).
 OPENROUTER_PROVIDER_ROUTING: dict = {
     "data_collection": "deny",
-    "allow_fallbacks": True,
+    "only": ["deepseek"],
+    "allow_fallbacks": False,
+    "require_parameters": True,
 }
 
 # Offline fallback, per-MILLION-token USD. Only consulted when the live
