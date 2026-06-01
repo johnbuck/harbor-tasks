@@ -1,4 +1,7 @@
 #!/bin/bash
+# Reference solution — adds Triangle (exported from the package both ways) and
+# refactors total_area to a polymorphic sum over .area() with NO isinstance
+# dispatch and no dead imports. Scores 1.0.
 set -e
 
 cat > /app/geometry/shapes.py <<'EOF'
@@ -35,6 +38,8 @@ EOF
 
 cat > /app/geometry/__init__.py <<'EOF'
 from geometry.shapes import Circle, Rectangle, Triangle
+
+__all__ = ["Circle", "Rectangle", "Triangle"]
 EOF
 
 cat > /app/main.py <<'EOF'

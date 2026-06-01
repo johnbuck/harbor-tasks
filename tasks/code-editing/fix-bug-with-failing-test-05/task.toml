@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/fix-bug-with-failing-test-05"
-description = "Fix a recursion bug in a nested-list flattener so the failing pytest passes."
+description = "Fix a recursive list flattener to satisfy a full contract (recurse into lists AND tuples, preserve strings/bytes as atoms, handle arbitrary depth, do not mutate input), not just the visible pytest. Graded completeness+quality rubric: 0.4 visible tests + 0.4 hidden contract edge-cases + 0.2 quality (no test tampering / signature intact / no debug cruft). A list-only recursion passes the visible tests but fails the tuple/atom cases and scores a clear fraction; the full contract scores 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["code-editing", "bug-fix", "python", "pytest"]
+keywords = ["code-editing", "bug-fix", "python", "pytest", "graded-rubric"]
 
 [metadata]
 author_name = "johnbuck"
 difficulty = "medium"
 category = "code-editing"
 shape = "fix-bug-with-failing-test"
-tags = ["code-editing", "fix-bug-with-failing-test"]
+tags = ["code-editing", "fix-bug-with-failing-test", "graded-rubric", "completeness-quality"]
 
 [verifier]
 timeout_sec = 120.0

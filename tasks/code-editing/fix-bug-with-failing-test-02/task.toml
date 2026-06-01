@@ -2,16 +2,16 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/fix-bug-with-failing-test-02"
-description = "Fix an off-by-one in a cumulative-sum utility so the failing pytest passes."
+description = "Fix a cumulative-sum utility to satisfy a full contract (off-by-one fixed, input not mutated, None entries treated as 0-contribution gaps), not just the visible pytest. Graded completeness+quality rubric: 0.4 visible tests + 0.4 hidden contract edge-cases + 0.2 quality (no test tampering / signature intact / no debug cruft). A naive off-by-one-only fix passes the visible tests but crashes on None gaps and scores a clear fraction; the full contract scores 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["code-editing", "bug-fix", "python", "pytest"]
+keywords = ["code-editing", "bug-fix", "python", "pytest", "graded-rubric"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "easy"
+difficulty = "medium"
 category = "code-editing"
 shape = "fix-bug-with-failing-test"
-tags = ["code-editing", "fix-bug-with-failing-test"]
+tags = ["code-editing", "fix-bug-with-failing-test", "graded-rubric", "completeness-quality"]
 
 [verifier]
 timeout_sec = 120.0
