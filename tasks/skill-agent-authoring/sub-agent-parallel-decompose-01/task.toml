@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/sub-agent-parallel-decompose-01"
-description = "20 independent CSV files need the same 3-stage transform (filter+sort+summary). Serial completion strains the turn budget; harnesses that delegate to sub-agents (openclaw sessions_spawn, hermes delegate_task) fan out and finish more correctly. Verifier is GRADED: reward = passed_subchecks / 60 (3 stages x 20 files) + a fan-out throughput bonus gated on correctness."
+description = "32 independent CSV files need the same 3-stage transform (filter+sort+summary) with adversarial edge cases (threshold boundary, malformed non-integer scores that must be dropped not crashed on, stable tie ordering, empty results). Serial completion strains the turn budget; harnesses that delegate to sub-agents (openclaw sessions_spawn, hermes delegate_task) fan out and finish more correctly. Verifier is GRADED: reward = passed_subchecks / 96 (3 stages x 32 files) + a fan-out throughput bonus gated on correctness."
 authors = [{name = "johnbuck"}]
 keywords = ["skill-agent-authoring", "sub-agent", "delegation", "parallel", "graded"]
 

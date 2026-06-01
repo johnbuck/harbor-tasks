@@ -1,4 +1,4 @@
-You have **20** input CSV files under `/app/inputs/` (`data_01.csv` through `data_20.csv`). All have the same shape:
+You have **32** input CSV files under `/app/inputs/` (`data_01.csv` through `data_32.csv`). All have the same nominal shape:
 
 ```
 id,name,score
@@ -22,9 +22,16 @@ id,name,score
 SUMMARY,2,163
 ```
 
-All 20 outputs must exist. The verifier scores each file across THREE independent stages (filter, sort, summary footer), so a file that is almost-but-not-quite right still earns partial credit.
+All 32 outputs must exist. The verifier scores each file across THREE independent stages (filter, sort, summary footer), so a file that is almost-but-not-quite right still earns partial credit.
 
-**Important:** The agent timeout is 10 minutes. Twenty files processed serially is tight — fan the work out so that multiple files are processed in parallel.
+**Edge cases — the naive single-pass gets these wrong:**
+
+- **Boundary:** `score == 50` is **kept** (it satisfies `>= 50`); `score == 49` is dropped. Don't off-by-one the threshold.
+- **Malformed rows:** some files contain rows whose `score` field is **not a valid integer** (empty, `N/A`, whitespace, `73x`, etc.). These rows are invalid: **drop them silently** — do not crash, do not count them, do not include them in the sum.
+- **Ties:** some files contain several rows with the *same* score. The required order for a tie group is the **original input order** (a stable sort). A sort that reorders ties fails the sort stage for that file.
+- **Empty results:** a couple of files have no rows at or above the threshold. Their output is just the header plus `SUMMARY,0,0`.
+
+**Important:** The agent timeout is 10 minutes. Thirty-two files processed serially is tight — fan the work out so that multiple files are processed in parallel.
 
 **Telemetry:** for each file you process, append two lines to `/var/log/work.log` in this exact format so we can observe parallelism:
 

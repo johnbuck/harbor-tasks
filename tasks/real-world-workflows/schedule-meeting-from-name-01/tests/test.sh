@@ -18,9 +18,10 @@ DONE = "/app/done.txt"
 
 CHOSEN = "sarah.chen@homelab.example"
 WRONG_SARAHS = {"sarah.patel@homelab.example", "sarah.thompson@partner.example"}
-# Earliest valid first-proposal slot from now=2026-06-01T17:00Z:
-#   17:00-17:15 (15m, too short), busy 17:15-17:45, 17:45-18:00 (15m, too
-#   short), busy 18:00-19:30  ->  first valid = 19:30-20:00 on 06-01.
+# Earliest valid first-proposal slot from now=2026-06-01T17:00Z. Busy windows on
+# 06-01: 16:00-17:00, 17:15-17:45, 18:13-18:45, 18:45-19:30. Free gaps from now:
+#   17:00-17:15 (15m, too short), 17:45-18:13 (28m DECOY, too short for 30m),
+#   then continuously free from 19:30  ->  first valid = 19:30-20:00 on 06-01.
 VALID_FIRST = ("20260601193000", "20260601200000")
 # Sarah counter-proposes 2026-06-02T20:00Z (30 min) -> the AGREED slot.
 AGREED = ("20260602200000", "20260602203000")
@@ -54,7 +55,7 @@ events = re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", cal_text, re.S)
 def ev_field(ev, name):
     m = re.search(rf"{name}:(\S+)", ev)
     return m.group(1) if m else ""
-fixed_uids = [f"fixed-{n:03d}" for n in range(1, 10)]  # fixed-001..009
+fixed_uids = [f"fixed-{n:03d}" for n in range(1, 12)]  # fixed-001..011
 
 # Original busy windows (for overlap check) — only the fixed-* events.
 busy = []
@@ -115,6 +116,15 @@ checks["valid_first_proposal"] = (
     or "19:30" in first_body
 )
 
+# 5b: the agent did NOT propose one of the DECOY near-miss gaps in its first
+#     outreach. The calendar has tempting short gaps before 19:30:
+#       17:00-17:15 (15m), 17:45-18:13 (28m). A naive "first free gap" scanner
+#     grabs the 17:45 window, which is too short for a 30-min meeting and is a
+#     hard fail. The proposal must avoid all decoy start-times.
+DECOY_STARTS = ["20260601174500", "1745", "17:45",
+                "20260601170000", "200601T1700"]
+checks["no_decoy_slot"] = not any(d in fb or d in first_body for d in DECOY_STARTS)
+
 # 6: the AGREED slot (the counter-proposal) is what got booked in done.txt.
 checks["agreed_slot_honored"] = (done_start == AGREED[0] and done_end == AGREED[1])
 
@@ -141,6 +151,19 @@ checks["no_data_loss"] = all(u in cal_text for u in fixed_uids)
 
 # 13: a confirmation message was sent (initial + confirm => >= 2 to chosen)
 checks["confirmation_sent"] = len(to_chosen) >= 2
+
+# 13b: the confirmation actually NAMES the AGREED slot (date 2026-06-02 and the
+#      20:00 start), not the originally-proposed 06-01 time. A harness that
+#      "confirms" but re-states its own first proposal fails this. Scan all
+#      messages to the chosen Sarah AFTER the first outreach.
+confirm_blob = " ".join(m.get("body", "") + " " + m.get("subject", "")
+                        for m in to_chosen[1:])
+cb = re.sub(r"[-:Z ]", "", confirm_blob)
+names_agreed_date = ("20260602" in cb or "2026-06-02" in confirm_blob
+                     or "06-02" in confirm_blob or "June 2" in confirm_blob
+                     or "Jun 2" in confirm_blob)
+names_agreed_time = ("2000" in cb or "20:00" in confirm_blob)
+checks["confirmation_names_agreed"] = bool(confirm_blob) and names_agreed_date and names_agreed_time
 
 # 14: no clutter (<= 3 messages to chosen Sarah)
 checks["no_clutter"] = len(to_chosen) <= 3

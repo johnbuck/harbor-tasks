@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/sub-agent-01"
-description = "Author 10 distinct specialist Claude Code subagent definition files. Each is independent work — harnesses with strong sub-agent/delegation support author more correctly. Verifier is deterministic and GRADED: reward = passed_subchecks / 40 (4 structural sub-checks per file)."
+description = "Author 16 distinct specialist Claude Code subagent definition files. Each is independent work — harnesses with strong sub-agent/delegation support author more correctly. Adversarial wrinkles (collidable roles, full-word triggers vs near-synonyms, body must echo its own name) make a sloppy decomposition drop criteria. Verifier is deterministic and GRADED: reward = passed_subchecks / 64 (4 structural sub-checks per file)."
 authors = [{name = "johnbuck"}]
 keywords = ["skill-agent-authoring", "sub-agent", "parallel", "delegation"]
 

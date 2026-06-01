@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reference solution — authors all 10 specialist subagent files.
+# Reference solution — authors all 16 specialist subagent files.
 set -e
 mkdir -p /app/agents
 
@@ -13,21 +13,28 @@ description: >
   $2-related requests and nothing else.
 ---
 
-You are the $1 specialist. Your sole purpose is to handle $2 tasks for the
-user, focusing tightly on $3 concerns. You are not a general-purpose assistant:
-if asked to do anything outside your specialty you politely decline and redirect
-to your purpose. For every request, produce structured, actionable findings that
-center on $3 and the user's $2 goal, and stop there.
+You are the $1 specialist (agent id: $1). Your sole purpose is to handle $2
+tasks for the user, focusing tightly on $3 concerns. You are not a
+general-purpose assistant: if asked to do anything outside your specialty you
+politely decline and redirect to your purpose. For every request, produce
+structured, actionable findings that center on $3 and the user's $2 goal, and
+stop there.
 EOF
 }
 
-emit code-reviewer      "review"      "bug"
-emit security-auditor   "security"    "vulnerability"
-emit test-writer        "test"        "coverage"
-emit doc-writer         "document"    "documentation"
-emit refactorer         "refactor"    "readability"
-emit perf-profiler      "performance" "latency"
-emit dependency-auditor "dependency"  "version"
-emit migration-planner  "migration"   "rollback"
-emit api-designer       "api"         "endpoint"
-emit db-modeler         "schema"      "index"
+emit code-reviewer          "review"        "bug"
+emit security-auditor       "security"      "vulnerability"
+emit test-writer            "test"          "coverage"
+emit doc-writer             "document"      "documentation"
+emit refactorer             "refactor"      "readability"
+emit perf-profiler          "performance"   "latency"
+emit dependency-auditor     "dependency"    "version"
+emit migration-planner      "migration"     "rollback"
+emit api-designer           "api"           "endpoint"
+emit db-modeler             "schema"        "index"
+emit incident-responder     "incident"      "postmortem"
+emit accessibility-auditor  "accessibility" "wcag"
+emit i18n-localizer         "localization"  "translation"
+emit release-manager        "release"       "changelog"
+emit observability-engineer "observability" "telemetry"
+emit threat-modeler         "threat"        "attack"

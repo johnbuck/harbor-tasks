@@ -1,15 +1,16 @@
 #!/bin/bash
 # Graded verifier for sub-agent-01.
 #
-# 10 specialist subagent files, each scored on 4 independent sub-checks:
+# 16 specialist subagent files, each scored on 4 independent sub-checks:
 #   (1) file exists with valid YAML frontmatter (--- ... ---)
 #   (2) frontmatter `name:` matches the filename stem
 #   (3) `description:` (in frontmatter) contains the required trigger keyword
 #   (4) body (after frontmatter) is >=40 words, mentions the focus keyword,
-#       AND contains a scope-limiting phrase (not a general-purpose assistant)
+#       contains the agent's own `name:` verbatim, AND contains a
+#       scope-limiting phrase (not a general-purpose assistant)
 #
-# reward = passed_subchecks / 40  (graded fraction; NOT binary).
-# correctness = 1 iff all 40 pass.
+# reward = passed_subchecks / 64  (graded fraction; NOT binary).
+# correctness = 1 iff all 64 pass.
 set -u
 mkdir -p /logs/verifier
 
@@ -17,17 +18,23 @@ python3 - <<'PY' > /logs/verifier/reward.json
 import json, re, os
 
 AGENTS = [
-    # name,             trigger,       focus
-    ("code-reviewer",     "review",      "bug"),
-    ("security-auditor",  "security",    "vulnerability"),
-    ("test-writer",       "test",        "coverage"),
-    ("doc-writer",        "document",    "documentation"),
-    ("refactorer",        "refactor",    "readability"),
-    ("perf-profiler",     "performance", "latency"),
-    ("dependency-auditor","dependency",  "version"),
-    ("migration-planner", "migration",   "rollback"),
-    ("api-designer",      "api",         "endpoint"),
-    ("db-modeler",        "schema",      "index"),
+    # name,                   trigger,         focus
+    ("code-reviewer",          "review",        "bug"),
+    ("security-auditor",       "security",      "vulnerability"),
+    ("test-writer",            "test",          "coverage"),
+    ("doc-writer",             "document",      "documentation"),
+    ("refactorer",             "refactor",      "readability"),
+    ("perf-profiler",          "performance",   "latency"),
+    ("dependency-auditor",     "dependency",    "version"),
+    ("migration-planner",      "migration",     "rollback"),
+    ("api-designer",           "api",           "endpoint"),
+    ("db-modeler",             "schema",        "index"),
+    ("incident-responder",     "incident",      "postmortem"),
+    ("accessibility-auditor",  "accessibility", "wcag"),
+    ("i18n-localizer",         "localization",  "translation"),
+    ("release-manager",        "release",       "changelog"),
+    ("observability-engineer", "observability", "telemetry"),
+    ("threat-modeler",         "threat",        "attack"),
 ]
 
 SCOPE_PHRASES = ["not a general-purpose", "sole purpose", "only", "solely",
@@ -66,11 +73,13 @@ for name, trigger, focus in AGENTS:
         desc = dm.group(1) if dm else ""
         if trigger.lower() in desc.lower():
             checks["description"] = 1
-        # (4) body: >=40 words AND mentions focus AND has a scope-limiting phrase
+        # (4) body: >=40 words AND mentions focus AND mentions own name
+        #     AND has a scope-limiting phrase
         words = len(re.findall(r"\w+", body))
         has_focus = focus.lower() in body.lower()
+        has_self_name = name.lower() in body.lower()
         has_scope = any(p in body.lower() for p in SCOPE_PHRASES)
-        if words >= 40 and has_focus and has_scope:
+        if words >= 40 and has_focus and has_self_name and has_scope:
             checks["body"] = 1
     per_file[name] = checks
     passed += sum(checks.values())
