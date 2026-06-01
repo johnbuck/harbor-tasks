@@ -3,16 +3,16 @@ multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-memory-conversational-02"
-description = "Multi-turn: facts given in an early step, recalled later with NO notes allowed — tests implicit session memory across steps."
+description = "Multi-turn memory under PRECISION pressure: 12 of my personal facts planted across 2 early steps, then 3 distractor turns that each do a small unrelated task AND plant a confusable fact about someone ELSE (a colleague's lactose allergy & terrier, a cousin's silver Mazda & November birthday, a tenant's Denver hometown & yoga day), then graded recall of 12 of MY facts with NO notes/files — one fact (the car) requires make+model+colour+year, so detail matters. A harness that confuses others' facts for mine, or recalls vaguely, scores a fraction (validated: confused=0.5, vague=0.5833, precise=1.0). Stresses session-memory precision + detail retention, not just gross recall."
 authors = [{name = "johnbuck"}]
 keywords = ["conversation-persona", "remember-facts", "multi-step", "memory"]
 
 [metadata]
 author_name = "johnbuck"
-difficulty = "medium"
+difficulty = "hard"
 category = "conversation-persona"
 shape = "multistep-memory-conversational"
-tags = ["conversation-persona", "multi-step", "memory-conversational"]
+tags = ["conversation-persona", "multi-step", "memory-conversational", "harness-discriminating"]
 
 
 [environment]
@@ -35,21 +35,42 @@ timeout_sec = 300.0
 timeout_sec = 60.0
 
 [[steps]]
-name = "01-intro"
+name = "01-intro-a"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
-name = "02-distractor"
+name = "02-intro-b"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
 timeout_sec = 30.0
 
 [[steps]]
-name = "03-recall"
+name = "03-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-recall"
 [steps.agent]
 timeout_sec = 120.0
 [steps.verifier]
