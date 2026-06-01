@@ -132,15 +132,44 @@ Jobs persist in `jobs/` (gitignored). Dashboard: `harbor view jobs --port 8089`
 - Task Dockerfiles MUST `FROM harbor-agents-rich:latest` (baked openclaw.json +
   xrouter); prebaked silently boots default config.
 
+## FULL-SUITE SHARPENING — COMPLETE (2026-06-01)
+
+The entire suite has now been hardened (local validation only — oracle→1.0,
+degraded→fractional for every task; no Docker/LLM runs). Catalog after:
+**49 tasks, 48 graded / 1 binary-by-design, 33 hard + 15 medium, 0 errors.**
+The lone "binary" is `multistep-stale-memory-vs-file-01` (read-fresh 1.0 / stale 0
+/ hallucination 0 is a discrete probe, correct by design).
+
+Commits (all on `main`, pushed) — each carries the per-task validated gradients:
+- 51ea4ed memory-conversational-02/03 (precision distractors)
+- 130625b tool-orchestration ×4 (binary→graded: plan-execute-01/02/03,
+  tool-selection-01)
+- 886c27e skill-authoring + real-world ×4 (sub-agent-01, sub-agent-parallel-
+  decompose-01, schedule-meeting, prompt-injection)
+- 19bc0af building-prototypes ×4 (scaffold-implement-document ×3 + cli-tool;
+  dropped LLM judges for deterministic doc-matching graders)
+- f8c1bde research/insights ×4 (agentic-research, factual-lookup-cited,
+  find-contradictions, true-multi-turn-memory-write)
+- 9f8facc migration/ops/data ×4 (dep-bump, diagnose-from-logs, pandas-sql,
+  shell-pipeline)
+- 128c0a0 code-editing ×7 (fix-bug 02–05, add-feature ×2, refactor)
+- 4b826c8 api-contract, pr-diff-review, readme, secret-scan, unit-tests
+
+Recurring sharpening techniques used: precision distractors (confusable
+other-person facts), update-traps (value stated then corrected → require latest),
+hidden contract graders baked at `/opt/canonical` (ungameable), precision+recall
+scoring (over-flagging penalized via false-positive subtraction), mutation
+coverage (a test suite that kills no mutant scores 0), efficiency budgets (retry
+count), and decoy/red-herring items. Several latent bugs were fixed along the way
+(a `grep -c` "00" reward-corruption, a regex self-collision, oracle output bugs).
+
 ## Remaining work (TODO after /clear)
 
-- **Sharpen the rest of the suite** (in progress): apply the difficulty-raise
-  pattern to remaining flat tasks — `multistep-memory-conversational-02` (weak
-  3-step binary) + `-03` (precision-distractor treatment like -01); the binary
-  high-weight tasks (`multistep-plan-execute-*`, `multistep-scaffold-implement-
-  document-*`); tool-orchestration deeper load; etc. Document + commit each.
-- **Run the two new memory tests on both harnesses** to evaluate (the proactive
-  + stale-memory tests are built + locally validated but not yet LLM-run).
-- **n=5 pass^k grid** on the sharpened focused set → publish `RESULTS.md` verdict
-  (#79 → #81). The deferred money step (~$25–60).
-- `multistep-memory-conversational-02/03` difficulty raise (not yet done).
+- **Run the sharpened suite on both harnesses** — everything is locally validated
+  (oracle/degraded) but FOOTGUNS #38 says only a cheap n=1 trial confirms the
+  pydantic schema layer per task. Run `track-a-focused` (or the full suite) at
+  n=1 first to catch any schema/heredoc surprise, then n=5 for the pass^k grid.
+- **Run the two new memory tests** (proactive-preference, stale-memory-vs-file)
+  on both harnesses to evaluate proactive application + stale-vs-ground-truth.
+- **n=5 pass^k grid** → publish `RESULTS.md` verdict (#79 → #81). Deferred money
+  step. With the suite now hard + graded, expect real spread + reliability gaps.
