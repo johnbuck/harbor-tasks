@@ -1,6 +1,6 @@
 # Free validation of every authored task via the built-in oracle agent.
 # Judge/mixed verifiers call Anthropic, so run through
-# `infisical run --path=/proxy/` to inject ANTHROPIC_API_KEY + OPENROUTER_API_KEY.
+# `infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/` to inject ANTHROPIC_API_KEY + OPENROUTER_API_KEY.
 # Oracle runs each task's solution/solve.sh; objective tasks should score
 # correctness=1, judge tasks should score high.
 

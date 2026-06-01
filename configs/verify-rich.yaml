@@ -5,7 +5,7 @@
 # MANDATORY gate (FOOTGUNS #1): confirm reasoning_tokens > 0 for BOTH afterward.
 #
 # Run:
-#   infisical run --projectId INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
+#   infisical run --domain=http://internal-host:8380 --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ -- \
 #     harbor run -c configs/verify-rich.yaml
 # (XROUTER_API_KEY is the OpenRouter key under a custom-provider name — FOOTGUNS #2.)
 
