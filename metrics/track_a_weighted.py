@@ -52,6 +52,65 @@ from typing import Any
 # (1.0) is the default bar for the binary pass^k. Mean reward is reported too.
 DEFAULT_PASS_THRESHOLD = 1.0
 
+# ---- Effective-reward policy (operator-set 2026-05-31) ---------------------
+# A crashed or timed-out agent did NOT cleanly succeed, even if the verifier
+# happened to read good filesystem state. The raw verifier reward is too
+# lenient (a SIGABRT that still scores 1.0 hides a real reliability failure).
+# Penalize by COMPLETION:
+#   crash / timeout  +  work COMPLETE   -> 0.5  (deliverable landed, process died)
+#   crash / timeout  +  work INCOMPLETE -> 0.0  (failed run)
+# "complete" = the verifier still scored a full pass (raw reward >= threshold).
+# A 0.5 is below the pass threshold, so it correctly fails pass^k — that is the
+# reliability signal. Clean (no-exception) trials keep their raw reward.
+CRASH_OR_TIMEOUT_COMPLETE_REWARD = 0.5
+
+# Exception types that mean the agent PROCESS failed (vs. the model just doing
+# poorly). NonZeroAgentExitCode covers SIGABRT/segfault (exit 134/139).
+_CRASH_EXC = {"NonZeroAgentExitCodeError", "AgentCrashError"}
+_TIMEOUT_EXC = {"AgentTimeoutError"}
+
+
+def _trial_exception_types(tr: dict[str, Any]) -> set[str]:
+    """All exception types in a trial — top-level and every step."""
+    types: set[str] = set()
+    top = tr.get("exception_info")
+    if top and top.get("exception_type"):
+        types.add(top["exception_type"])
+    for s in tr.get("step_results") or []:
+        e = (s or {}).get("exception_info")
+        if e and e.get("exception_type"):
+            types.add(e["exception_type"])
+    return types
+
+
+def _classify_trial(tr: dict[str, Any], pass_threshold: float) -> dict[str, Any]:
+    """Return {raw, effective, status} applying the crash/timeout penalty.
+
+    status ∈ clean | partial | fail | crash_complete | crash_incomplete |
+            timeout_complete | timeout_incomplete | no_reward
+    """
+    raw = _reward_value((tr.get("verifier_result") or {}).get("rewards"))
+    if raw is None and (tr.get("step_results") or []):  # multi-step "final"
+        raw = _reward_value(
+            ((tr["step_results"][-1].get("verifier_result")) or {}).get("rewards"))
+
+    types = _trial_exception_types(tr)
+    crashed = bool(types & _CRASH_EXC)
+    timed_out = bool(types & _TIMEOUT_EXC)
+    complete = raw is not None and raw >= pass_threshold
+
+    if crashed or timed_out:
+        kind = "crash" if crashed else "timeout"
+        if complete:
+            return {"raw": raw, "effective": CRASH_OR_TIMEOUT_COMPLETE_REWARD,
+                    "status": f"{kind}_complete"}
+        return {"raw": raw, "effective": 0.0, "status": f"{kind}_incomplete"}
+
+    if raw is None:  # no usable score (e.g. verifier ValidationError) and no crash
+        return {"raw": None, "effective": 0.0, "status": "no_reward"}
+    status = "clean" if complete else ("partial" if raw > 0 else "fail")
+    return {"raw": raw, "effective": raw, "status": status}
+
 
 def _canonical_agent(name: str | None) -> str:
     """Normalize runtime agent names to a stable harness label."""
@@ -164,17 +223,25 @@ def analyze(
         raise FileNotFoundError(f"no <trial>/result.json files under {existing}")
 
     # Collect per-trial rewards + efficiency keyed by (agent, task); also
-    # remember each task's category + difficulty.
+    # remember each task's category + difficulty. We track the EFFECTIVE reward
+    # (post crash/timeout penalty) for scoring AND the RAW reward so the report
+    # can show how much the penalty moved each harness.
     attempts: dict[tuple[str, str], list[float]] = defaultdict(list)
+    raw_attempts: dict[tuple[str, str], list[float]] = defaultdict(list)
     eff_attempts: dict[tuple[str, str], list[dict[str, float]]] = defaultdict(list)
+    # Per-agent reliability tally: status -> count.
+    reliability: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     task_meta: dict[str, dict[str, str]] = {}
     for tr in trial_results:
         agent = _canonical_agent((tr.get("agent_info") or {}).get("name"))
         task_name = tr.get("task_name") or ""
-        reward = _reward_value((tr.get("verifier_result") or {}).get("rewards"))
-        if reward is None:
-            continue
-        attempts[(agent, task_name)].append(reward)
+        cls = _classify_trial(tr, pass_threshold)
+        reliability[agent][cls["status"]] += 1
+        # Every trial counts now — a crash/no_reward is a real failed attempt,
+        # not something to silently drop (dropping hid the reliability gap).
+        attempts[(agent, task_name)].append(cls["effective"])
+        raw_attempts[(agent, task_name)].append(
+            cls["raw"] if cls["raw"] is not None else 0.0)
         eff_attempts[(agent, task_name)].append(_trial_efficiency(tr))
         if task_name not in task_meta:
             td = _resolve_task_dir(task_name, tasks_root)
@@ -190,11 +257,13 @@ def analyze(
         c = sum(1 for r in rewards if r >= pass_threshold)
         meta = task_meta.get(task, {})
         effs = eff_attempts[(agent, task)]
+        raws = raw_attempts[(agent, task)]
         mean_cost = sum(e["cost_usd"] for e in effs) / len(effs) if effs else 0.0
         mean_tokens = sum(e["total_tokens"] for e in effs) / len(effs) if effs else 0.0
         task_stats[agent][task] = {
-            "mean": sum(rewards) / n,
-            "pass1": c / n,                       # = pass^1
+            "mean": sum(rewards) / n,             # EFFECTIVE (post-penalty)
+            "mean_raw": sum(raws) / len(raws) if raws else 0.0,  # pre-penalty
+            "pass1": c / n,                       # = pass^1 (on effective)
             "passk": _pass_at_k(n, c, n),         # all-k-pass (k=n): strict reliability
             "n": n,
             "mean_cost_usd": mean_cost,
@@ -215,6 +284,23 @@ def analyze(
         num = sum(weights[s["category"]] * s["mean"] for s in rows)
         den = sum(weights[s["category"]] for s in rows)
         weighted = num / den if den else 0.0
+        # Same aggregate on RAW rewards — the gap to `weighted` is the penalty.
+        raw_num = sum(weights[s["category"]] * s["mean_raw"] for s in rows)
+        raw_weighted = raw_num / den if den else 0.0
+
+        # Reliability tally → rates. error_rate = any non-clean execution.
+        rel = dict(reliability[agent])
+        n_tr = sum(rel.values()) or 1
+        n_crash = rel.get("crash_complete", 0) + rel.get("crash_incomplete", 0)
+        n_timeout = rel.get("timeout_complete", 0) + rel.get("timeout_incomplete", 0)
+        n_noreward = rel.get("no_reward", 0)
+        rel_block = {
+            "counts": rel,
+            "n_trials": sum(rel.values()),
+            "crash_rate": n_crash / n_tr,
+            "timeout_rate": n_timeout / n_tr,
+            "error_rate": (n_crash + n_timeout + n_noreward) / n_tr,
+        }
 
         per_cat: dict[str, dict[str, float]] = {}
         cat_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -241,6 +327,9 @@ def analyze(
 
         report["agents"][agent] = {
             "weighted_aggregate": weighted,
+            "weighted_aggregate_raw": raw_weighted,
+            "penalty_delta": raw_weighted - weighted,  # how much crashes cost it
+            "reliability": rel_block,
             "passk_aggregate": (sum(s["passk"] for s in rows) / len(rows)) if rows else 0.0,
             "n_tasks": len(rows),
             "n_trials": sum(s["n"] for s in rows),
@@ -342,10 +431,23 @@ def _print_summary(report: dict[str, Any]) -> None:
         print(f"[split] {split.get('note','(incomplete)')}", file=sys.stderr)
         return
     lead = split["leader"]
+    # Reliability first — crashes/timeouts now penalize the effective score.
+    agents = report.get("agents", {})
+    for name in ("openclaw", "hermes"):
+        a = agents.get(name)
+        if not a:
+            continue
+        rel = a.get("reliability", {})
+        print(f"[RELIABILITY] {name:9s} error_rate={rel.get('error_rate',0):.0%} "
+              f"(crash {rel.get('crash_rate',0):.0%}, timeout {rel.get('timeout_rate',0):.0%}) "
+              f"| raw={a['weighted_aggregate_raw']:.3f} → "
+              f"effective={a['weighted_aggregate']:.3f} "
+              f"(−{a['penalty_delta']:.3f} from crashes) | "
+              f"counts={dict(rel.get('counts',{}))}", file=sys.stderr)
     print(f"\n[SPLIT] overall Δ = {split['overall_delta']:+.3f} "
           f"(|Δ| {split['abs_overall_delta']:.3f}, "
           f"{'MEETS' if split['meets_10pct'] else 'below'} 10% bar) "
-          f"— leader: {lead}", file=sys.stderr)
+          f"— leader: {lead}  [on EFFECTIVE reward]", file=sys.stderr)
     eff = split.get("efficiency", {})
     tr = eff.get("token_ratio_oc_over_he")
     cr = eff.get("cost_ratio_oc_over_he")
