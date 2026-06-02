@@ -18,6 +18,10 @@
 # content-correct bare list as 0 (a false zero that fabricated discrimination).
 # Anti-dump is preserved: each question still maps to a single distinct line.
 mkdir -p /logs/verifier
+# Archive the raw recall answer so a 0 is auditable: distinguishes "agent never
+# persisted /app/answer.md" (a harness/plumbing VOID) from "answer present but
+# wrong" (a genuine miss). See the 2026-06-02 ctx-02 false-zero finding.
+cp /app/answer.md /logs/verifier/answer.md 2>/dev/null || true
 python3 - <<'PY' > /logs/verifier/reward.json
 import json, re
 
@@ -39,8 +43,10 @@ PATTERNS = [
 
 try:
     with open("/app/answer.md") as f:
-        lines = [ln.rstrip("\n") for ln in f]
+        raw = f.read()
+    lines = raw.split("\n")
 except FileNotFoundError:
+    raw = ""
     lines = []
 
 # Positional answer lines: non-empty, excluding obvious preamble/header lines
@@ -88,5 +94,7 @@ corr = 1 if s == total else 0
 print(json.dumps({
     "reward": reward, "correctness": corr, "facts": s,
     "early": buckets["early"], "middle": buckets["middle"], "late": buckets["late"],
+    "answer_present": bool(nonempty), "answer_chars": len(raw),
+    "status": "scored" if nonempty else "no_answer_file",
 }))
 PY

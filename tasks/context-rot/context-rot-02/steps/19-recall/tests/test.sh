@@ -15,6 +15,11 @@
 # chains correctly as a bare list and was scored 0.0 (a false zero that
 # fabricated an 0.875-vs-0.0 "gap"). Anti-dump preserved: one line per question.
 mkdir -p /logs/verifier
+# Archive the raw recall answer so a 0 is auditable: distinguishes "agent never
+# persisted /app/answer.md" (a harness/plumbing VOID) from "answer present but
+# wrong" (a genuine miss). 2026-06-02: hermes solved all 8 chains but its staged
+# diff-write never landed in /app -> scored 0; openclaw's direct write landed -> 0.875.
+cp /app/answer.md /logs/verifier/answer.md 2>/dev/null || true
 python3 - <<'PY' > /logs/verifier/reward.json
 import json, re
 
@@ -32,8 +37,10 @@ PATTERNS = [
 
 try:
     with open("/app/answer.md") as f:
-        lines = [ln.rstrip("\n") for ln in f]
+        raw = f.read()
+    lines = raw.split("\n")
 except FileNotFoundError:
+    raw = ""
     lines = []
 
 def is_preamble(ln):
@@ -78,5 +85,7 @@ corr = 1 if s == total else 0
 print(json.dumps({
     "reward": reward, "correctness": corr, "chains": s,
     "early": buckets["early"], "middle": buckets["middle"], "late": buckets["late"],
+    "answer_present": bool(nonempty), "answer_chars": len(raw),
+    "status": "scored" if nonempty else "no_answer_file",
 }))
 PY
