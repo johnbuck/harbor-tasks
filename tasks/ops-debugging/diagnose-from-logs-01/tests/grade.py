@@ -76,9 +76,19 @@ CRITERIA = {
         r"full[\s-]?(table\s+)?scan",
         r"no\s+where\s+clause",
         r"unbounded\s+(query|join|scan)",
-        r"(150|175)\s*s(econds)?",
         r"held\s+(the\s+)?(connection|conn#?1)",
         r"long[\s-]?running\s+(query|job|report|transaction)",
+    ],
+    # ANTI-KEYWORD-DUMP GATE: the connection-hold duration is printed NOWHERE in
+    # the log (the old "checked out for 150s" narration line was removed). The
+    # agent must COMPUTE it by subtracting timestamps — conn#1 acquired 08:05:00,
+    # first 500 at 08:07:34 -> ~154-155s (~2.5 min). A keyword dump can't produce
+    # this; only an agent that traced the chain across the 100k-line log can.
+    "HOLD_duration_computed": [
+        r"\b1(5[0-9]|6[0-9]|7[0-5])\s*(s\b|sec|second)",
+        r"\b2\.[3-9]\s*min",
+        r"(two|2)\s+and\s+a\s+half\s+min",
+        r"~?\s*2[.,]5\s*min",
     ],
     "C4_pool_config_undersized": [
         r"pool_size\s*=?\s*5",
@@ -106,7 +116,7 @@ CRITERIA = {
     "E3_cites_hog_evidence": [
         r"nightly_revenue_report",
         r"conn#?1",
-        r"(150|175)\s*s(econds)?",
+        r"08:05:00",
         r"select\s+\*\s+from\s+orders",
         r"line_items",
         r"no\s+where",
