@@ -627,7 +627,7 @@ def render(data: dict, health: dict) -> str:
 </style></head><body>
 <div class="nav">
   <a href="agent-status.html" class="active">Agent status</a>
-  <a href="task-catalog.html">Task catalog</a>
+  <a href="task-catalog.html">Task Suite</a>
   <a href="roadmap.html">Roadmap</a>
 </div>
 <h1>Eval harness status</h1>

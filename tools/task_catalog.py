@@ -206,6 +206,7 @@ def scan_tasks(weights: dict, focused: set) -> list:
                 "focused": task_dir.name in focused,
                 "status": md.get("status", "active"),
                 "deprecation_reason": md.get("deprecation_reason", ""),
+                "work_status_override": md.get("work_status", ""),
                 "files": files,
             })
     return tasks
@@ -218,6 +219,35 @@ DIFF_ORDER = {"easy": 0, "medium": 1, "hard": 2, "?": 3}
 
 def badge(text, cls="muted"):
     return f'<span class="badge {cls}">{escape(str(text))}</span>'
+
+
+# Per-task WORK status — what's left to do on this task as a Task-Suite item.
+# Derived from existing signals (heuristic, like the graded badge) unless the
+# task.toml sets `[metadata] work_status = "..."` explicitly. Order = work queue
+# priority. key -> (label, badge-class, meaning).
+WORK = {
+    "discriminating":   ("discriminating", "disc",    "Tagged as a harness discriminator — an intended instrument. Authoring is done; the actual gap is still pending confirmation in the pass^k grid (gated on the E2 provider-pin + browser fixes)."),
+    "needs-validation": ("needs validation", "mid",   "Graded but NOT tagged as discriminating — run it and prove it separates the harnesses, or sharpen it until it does."),
+    "needs-hardening":  ("needs hardening", "bad",     "Binary / likely BLUNT — make it graded + raise difficulty, or graduate it to a real discriminator."),
+    "retired":          ("retired — rework", "retired", "Deprecated by the adversarial review; pending operator review or rework (task #89) before it can re-enter the grid."),
+}
+WORK_ORDER = ["discriminating", "needs-validation", "needs-hardening", "retired"]
+
+
+def work_state(t: dict) -> tuple:
+    """Return (key, label, badge_class, meaning) for a task's work status."""
+    if t.get("status") == "deprecated":
+        key = "retired"
+    elif t.get("work_status_override") in WORK:
+        key = t["work_status_override"]
+    elif t.get("discriminating"):
+        key = "discriminating"
+    elif t.get("graded"):
+        key = "needs-validation"
+    else:
+        key = "needs-hardening"
+    label, cls, meaning = WORK[key]
+    return key, label, cls, meaning
 
 
 def render(tasks: list, weights: dict) -> str:
@@ -246,6 +276,12 @@ def render(tasks: list, weights: dict) -> str:
     n_retired = sum(1 for t in real if t.get("status") == "deprecated")
     n_active = n_total - n_retired
 
+    # Work breakdown — the granular "what's done vs. what's left" tracker.
+    work_hist = {k: 0 for k in WORK_ORDER}
+    for t in real:
+        work_hist[work_state(t)[0]] += 1
+    n_todo = work_hist["needs-validation"] + work_hist["needs-hardening"] + work_hist["retired"]
+
     diff_bits = " · ".join(
         f"{k}: {diff_hist[k]}" for k in sorted(diff_hist, key=lambda d: DIFF_ORDER.get(d, 9))
     )
@@ -254,13 +290,19 @@ def render(tasks: list, weights: dict) -> str:
     <div class="summary">
       <div class="stat"><b>{n_total}</b><span>tasks</span></div>
       <div class="stat"><b>{n_active}</b><span>active</span></div>
-      <div class="stat"><b>{n_retired}</b><span>retired (review)</span></div>
+      <div class="stat work-done"><b>{work_hist['discriminating']}</b><span>discriminating (tagged)</span></div>
+      <div class="stat work-todo"><b>{work_hist['needs-validation']}</b><span>needs validation</span></div>
+      <div class="stat work-todo"><b>{work_hist['needs-hardening']}</b><span>needs hardening</span></div>
+      <div class="stat work-todo"><b>{n_retired}</b><span>retired — rework</span></div>
+      <div class="stat"><b>{n_todo}</b><span>work remaining</span></div>
       <div class="stat"><b>{n_cats}</b><span>categories</span></div>
       <div class="stat"><b>{n_graded}</b><span>graded</span></div>
-      <div class="stat"><b>{n_disc}</b><span>discriminating</span></div>
-      <div class="stat"><b>{n_focus}</b><span>in focused set</span></div>
+      <div class="stat"><b>{n_focus}</b><span>focused n=5</span></div>
       <div class="stat wide"><b>difficulty</b><span>{escape(diff_bits)}</span></div>
     </div>"""
+
+    work_select = "".join(
+        f'<option value="{k}">{WORK[k][0]}</option>' for k in WORK_ORDER)
 
     # Category sections, ordered by weight desc then name.
     cats = sorted({t["category"] for t in real},
@@ -273,7 +315,7 @@ def render(tasks: list, weights: dict) -> str:
         ctasks.sort(key=lambda t: (DIFF_ORDER.get(t["difficulty"], 9), t["dir"]))
         w = weights.get(cat, 1.0)
         wcls = "ok" if w >= 3.0 else ("mid" if w >= 1.5 else "bad")
-        cards = "".join(render_card(t) for t in ctasks)
+        rows = "".join(render_card(t) for t in ctasks)
         sections.append(f"""
         <section class="catsec" data-cat="{escape(cat)}">
           <div class="cathead">
@@ -281,7 +323,7 @@ def render(tasks: list, weights: dict) -> str:
             <span class="badge {wcls}">weight {w:g}</span>
             <span class="muted">{len(ctasks)} task{'s' if len(ctasks) != 1 else ''}</span>
           </div>
-          <div class="cards">{cards}</div>
+          <div class="acc-list">{rows}</div>
         </section>""")
 
     errs = [t for t in tasks if "_error" in t]
@@ -292,27 +334,30 @@ def render(tasks: list, weights: dict) -> str:
 
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return PAGE.format(summary=summary, sections="".join(sections),
-                       cat_select=cat_select, files_js=files_js, ts=ts,
+                       cat_select=cat_select, work_select=work_select,
+                       files_js=files_js, ts=ts,
                        err_html=err_html, n_total=n_total)
 
 
 def render_card(t: dict) -> str:
+    """Render one task as an accordion row: a collapsed header (name + status
+    badges) that expands to the full detail (description, steps, tags, files)."""
     diff = t["difficulty"]
     dcls = {"easy": "ok", "medium": "mid", "hard": "bad"}.get(diff, "muted")
     grade_badge = (badge("graded", "ok") if t["graded"]
                    else badge("binary", "bad"))
     retired = t.get("status") == "deprecated"
+    wkey, wlabel, wcls, wmeaning = work_state(t)
+
+    # Header badges: WORK status first (the headline), then difficulty/grading/flags.
+    head_badges = [badge(wlabel, wcls)]
     flags = []
-    if retired:
-        flags.append(badge("RETIRED — pending review", "retired"))
-    if t["discriminating"]:
+    if t["discriminating"] and wkey != "discriminating":
         flags.append(badge("discriminating", "disc"))
     if t["focused"]:
         flags.append(badge("focused n=5", "focus"))
-    if t["multistep"]:
-        flags.append(badge(f"{t['n_steps']} steps", "step"))
-    else:
-        flags.append(badge("single-step", "muted"))
+    flags.append(badge(f"{t['n_steps']} steps", "step") if t["multistep"]
+                 else badge("single-step", "muted"))
 
     # File chips grouped by kind.
     chip_groups = [("instruction", "instruction"), ("setup", "setup"),
@@ -341,7 +386,7 @@ def render_card(t: dict) -> str:
     data = (f'data-cat="{escape(t["category"])}" data-diff="{escape(diff)}" '
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
             f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
-            f'data-status="{"retired" if retired else "active"}" '
+            f'data-status="{"retired" if retired else "active"}" data-work="{wkey}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
 
     retired_banner = ""
@@ -350,28 +395,33 @@ def render_card(t: dict) -> str:
                           f'{escape(t["deprecation_reason"] or "Excluded from the harness-discrimination grid.")}</div>')
 
     return f"""
-    <div class="card{' card-retired' if retired else ''}" {data}>
-      <div class="chead">
+    <div class="task{' task-retired' if retired else ''}" {data}>
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <span class="caret">▶</span>
         <span class="tname">{escape(t["dir"])}</span>
         <span class="badge {dcls}">{escape(diff)}</span>
         {grade_badge}
+        {"".join(head_badges)}
         {"".join(flags)}
       </div>
-      {retired_banner}
-      <div class="meta">
-        <span class="mono muted">{escape(t["name"])}</span>
-        <span class="shape">shape: {escape(t["shape"] or "—")}</span>
+      <div class="acc-body">
+        <div class="work-note"><b>Work:</b> {escape(wmeaning)}</div>
+        {retired_banner}
+        <div class="meta">
+          <span class="mono muted">{escape(t["name"])}</span>
+          <span class="shape">shape: {escape(t["shape"] or "—")}</span>
+        </div>
+        <div class="desc">{escape(t["description"])}</div>
+        {steps_html}
+        <div class="tags">{tags_html}</div>
+        <div class="sec">Files <span class="muted">(click to view)</span></div>
+        <div class="chips">{chips_html}</div>
       </div>
-      <div class="desc">{escape(t["description"])}</div>
-      {steps_html}
-      <div class="tags">{tags_html}</div>
-      <div class="sec">Files <span class="muted">(click to view)</span></div>
-      <div class="chips">{chips_html}</div>
     </div>"""
 
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
-<title>Task catalog</title>
+<title>Task Suite</title>
 <style>
   body{{font:14px/1.5 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}}
   a{{color:#9db4d6}}
@@ -393,10 +443,16 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .catsec{{max-width:1200px;margin-bottom:26px}}
   .cathead{{display:flex;gap:10px;align-items:center;margin-bottom:10px;border-bottom:1px solid #262b36;padding-bottom:6px}}
   .catname{{font-size:15px;font-weight:700;text-transform:capitalize}}
-  .cards{{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}}
-  .card{{background:#171a22;border:1px solid #262b36;border-radius:10px;padding:14px;display:flex;flex-direction:column}}
-  .chead{{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}}
-  .tname{{font-size:14px;font-weight:700;margin-right:auto;font-family:ui-monospace,Menlo,monospace}}
+  .acc-list{{display:flex;flex-direction:column;gap:6px}}
+  .task{{background:#171a22;border:1px solid #262b36;border-radius:9px;overflow:hidden}}
+  .acc-head{{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:9px 12px;cursor:pointer}}
+  .acc-head:hover{{background:#1c2129}}
+  .caret{{color:#717a88;font-size:10px;transition:transform .12s;flex-shrink:0}}
+  .task.open .caret{{transform:rotate(90deg)}}
+  .acc-body{{display:none;padding:2px 14px 13px 14px;border-top:1px solid #20242e}}
+  .task.open .acc-body{{display:block}}
+  .work-note{{font-size:12px;color:#c4ccd8;background:#10131a;border:1px solid #222734;border-radius:6px;padding:7px 10px;margin:10px 0 8px}}
+  .tname{{font-size:13.5px;font-weight:700;margin-right:auto;font-family:ui-monospace,Menlo,monospace}}
   .meta{{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-bottom:8px}}
   .shape{{color:#9db4d6}}
   .desc{{font-size:12.5px;color:#cdd6e4;margin-bottom:8px}}
@@ -406,7 +462,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .tags{{margin-bottom:8px}}
   .tag{{display:inline-block;background:#1a1c22;border:1px solid #262b36;border-radius:5px;padding:0 6px;margin:2px 3px 0 0;font-size:10.5px;color:#8a8f98}}
   .sec{{color:#8a8f98;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;margin:4px 0 6px;border-top:1px solid #262b36;padding-top:7px}}
-  .chips{{margin-top:auto}}
+  .chips{{margin-top:6px}}
   .chip{{display:inline-block;border:1px solid #2f3645;border-radius:6px;padding:1px 7px;margin:2px;font-size:11.5px;cursor:pointer;background:#222734}}
   .chip:hover{{filter:brightness(1.25)}}
   .chip.instruction{{background:#1c2331;color:#9db4d6}}
@@ -421,8 +477,11 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .badge.disc{{background:#2a1f3a;color:#c39ae6}} .badge.focus{{background:#16303a;color:#5fd0d0}}
   .badge.step{{background:#1c2331;color:#9db4d6}}
   .badge.retired{{background:#4a1010;color:#ff9b9b;border:1px solid #7a2222}}
-  .card-retired{{opacity:.62;border-color:#5a2020;background:#1a1212}}
-  .card-retired:hover{{opacity:1}}
+  .task-retired{{opacity:.66;border-color:#5a2020;background:#1a1212}}
+  .task-retired:hover{{opacity:1}}
+  .stat.work-done b{{color:#5fd07e}} .stat.work-todo b{{color:#e6c98a}}
+  .toolbtn{{background:#10131a;color:#9db4d6;border:1px solid #2f3645;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}}
+  .toolbtn:hover{{background:#1c2331}}
   .retired-note{{background:#2a1414;border:1px solid #5a2020;color:#f0a8a8;border-radius:6px;padding:7px 9px;margin:6px 0;font-size:12px;line-height:1.4}}
   .err{{background:#3a1616;color:#ef7a7a;padding:8px;border-radius:6px;margin-bottom:12px;max-width:1200px;white-space:pre-wrap;font-size:12px}}
   .hidden{{display:none!important}}
@@ -437,16 +496,17 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 </style></head><body>
 <div class="nav">
   <a href="agent-status.html">Agent status</a>
-  <a href="task-catalog.html" class="active">Task catalog</a>
+  <a href="task-catalog.html" class="active">Task Suite</a>
   <a href="roadmap.html">Roadmap</a>
 </div>
-<h1>Task catalog — every eval task, in detail</h1>
+<h1>Task Suite — every eval task + its work status</h1>
 <div class="ts">generated {ts} · source: tasks/ + configs/ · re-run tools/task_catalog.py to refresh ·
-  shows what each task asks, how it's graded, the oracle, and the environment</div>
+  click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do</div>
 {err_html}
 {summary}
 <div class="filterbar">
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
+  <select id="f-work"><option value="">any work status</option>{work_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
@@ -454,6 +514,8 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <label><input type="checkbox" id="f-focus"> focused set</label>
   <label><input type="checkbox" id="f-multi"> multi-step</label>
   <input type="search" id="f-search" placeholder="search name / shape / description / tags">
+  <button class="toolbtn" onclick="expandAll(1)">expand all</button>
+  <button class="toolbtn" onclick="expandAll(0)">collapse all</button>
   <span class="count" id="count"></span>
 </div>
 {sections}
@@ -481,16 +543,25 @@ function hideFile(){{
 }}
 document.addEventListener('keydown', e=>{{ if(e.key==='Escape') hideFile(); }});
 
+function toggleAcc(head){{ head.parentElement.classList.toggle('open'); }}
+function expandAll(on){{
+  document.querySelectorAll('.task').forEach(t=>{{
+    if(t.classList.contains('hidden')) return;
+    t.classList.toggle('open', !!on);
+  }});
+}}
+
 const F = id => document.getElementById(id);
 function applyFilters(){{
-  const cat=F('f-cat').value, diff=F('f-diff').value,
+  const cat=F('f-cat').value, work=F('f-work').value, diff=F('f-diff').value,
         graded=F('f-graded').checked, disc=F('f-disc').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
-  document.querySelectorAll('.card').forEach(c=>{{
+  document.querySelectorAll('.task').forEach(c=>{{
     let ok=true;
     if(cat && c.dataset.cat!==cat) ok=false;
+    if(work && c.dataset.work!==work) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
     if(graded && c.dataset.graded!=='1') ok=false;
     if(disc && c.dataset.disc!=='1') ok=false;
@@ -500,14 +571,14 @@ function applyFilters(){{
     c.classList.toggle('hidden', !ok);
     if(ok) shown++;
   }});
-  // hide category sections with no visible cards
+  // hide category sections with no visible tasks
   document.querySelectorAll('.catsec').forEach(s=>{{
-    const any=[...s.querySelectorAll('.card')].some(c=>!c.classList.contains('hidden'));
+    const any=[...s.querySelectorAll('.task')].some(c=>!c.classList.contains('hidden'));
     s.classList.toggle('hidden', !any);
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-cat','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
+['f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>

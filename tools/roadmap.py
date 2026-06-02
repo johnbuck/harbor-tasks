@@ -266,7 +266,7 @@ def render() -> str:
 <style>{CSS}</style></head><body>
 <div class="nav">
   <a href="agent-status.html">Agent status</a>
-  <a href="task-catalog.html">Task catalog</a>
+  <a href="task-catalog.html">Task Suite</a>
   <a href="roadmap.html" class="active">Roadmap</a>
 </div>
 <div class="wrap">
