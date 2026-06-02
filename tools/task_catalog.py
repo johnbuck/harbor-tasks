@@ -207,6 +207,10 @@ def scan_tasks(weights: dict, focused: set) -> list:
                 "status": md.get("status", "active"),
                 "deprecation_reason": md.get("deprecation_reason", ""),
                 "work_status_override": md.get("work_status", ""),
+                # Operator sign-off. A task is approved ONLY if task.toml sets
+                # [metadata] approved = true. Absence ⇒ "needs review" (the
+                # operator hasn't personally vetted it yet).
+                "approved": bool(md.get("approved", False)),
                 "files": files,
             })
     return tasks
@@ -281,6 +285,8 @@ def render(tasks: list, weights: dict) -> str:
     for t in real:
         work_hist[work_state(t)[0]] += 1
     n_todo = work_hist["needs-validation"] + work_hist["needs-hardening"] + work_hist["retired"]
+    n_approved = sum(1 for t in real if t.get("approved"))
+    n_review = n_total - n_approved
 
     diff_bits = " · ".join(
         f"{k}: {diff_hist[k]}" for k in sorted(diff_hist, key=lambda d: DIFF_ORDER.get(d, 9))
@@ -289,6 +295,8 @@ def render(tasks: list, weights: dict) -> str:
     summary = f"""
     <div class="summary">
       <div class="stat"><b>{n_total}</b><span>tasks</span></div>
+      <div class="stat work-todo"><b>{n_review}</b><span>NEEDS REVIEW</span></div>
+      <div class="stat work-done"><b>{n_approved}</b><span>approved</span></div>
       <div class="stat"><b>{n_active}</b><span>active</span></div>
       <div class="stat work-done"><b>{work_hist['discriminating']}</b><span>discriminating (tagged)</span></div>
       <div class="stat work-todo"><b>{work_hist['needs-validation']}</b><span>needs validation</span></div>
@@ -348,8 +356,12 @@ def render_card(t: dict) -> str:
                    else badge("binary", "bad"))
     retired = t.get("status") == "deprecated"
     wkey, wlabel, wcls, wmeaning = work_state(t)
+    approved = t.get("approved", False)
 
-    # Header badges: WORK status first (the headline), then difficulty/grading/flags.
+    # Approval is the headline: NEEDS REVIEW until the operator signs off.
+    approval_badge = (badge("approved ✓", "approved") if approved
+                      else badge("NEEDS REVIEW", "review"))
+    # Then WORK status, then difficulty/grading/flags.
     head_badges = [badge(wlabel, wcls)]
     flags = []
     if t["discriminating"] and wkey != "discriminating":
@@ -387,6 +399,7 @@ def render_card(t: dict) -> str:
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
             f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
             f'data-status="{"retired" if retired else "active"}" data-work="{wkey}" '
+            f'data-approved="{int(approved)}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
 
     retired_banner = ""
@@ -399,6 +412,7 @@ def render_card(t: dict) -> str:
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">{escape(t["dir"])}</span>
+        {approval_badge}
         <span class="badge {dcls}">{escape(diff)}</span>
         {grade_badge}
         {"".join(head_badges)}
@@ -477,6 +491,8 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .badge.disc{{background:#2a1f3a;color:#c39ae6}} .badge.focus{{background:#16303a;color:#5fd0d0}}
   .badge.step{{background:#1c2331;color:#9db4d6}}
   .badge.retired{{background:#4a1010;color:#ff9b9b;border:1px solid #7a2222}}
+  .badge.review{{background:#3a2a10;color:#f0b860;border:1px solid #6a4a18}}
+  .badge.approved{{background:#163a22;color:#5fd07e;border:1px solid #2f5238}}
   .task-retired{{opacity:.66;border-color:#5a2020;background:#1a1212}}
   .task-retired:hover{{opacity:1}}
   .stat.work-done b{{color:#5fd07e}} .stat.work-todo b{{color:#e6c98a}}
@@ -501,10 +517,12 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 </div>
 <h1>Task Suite — every eval task + its work status</h1>
 <div class="ts">generated {ts} · source: tasks/ + configs/ · re-run tools/task_catalog.py to refresh ·
-  click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do</div>
+  click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do<br>
+  every task is <b>NEEDS REVIEW</b> until the operator signs off — approve one by setting <span class="mono">[metadata] approved = true</span> in its <span class="mono">task.toml</span></div>
 {err_html}
 {summary}
 <div class="filterbar">
+  <select id="f-approval"><option value="">any approval</option><option value="0">needs review</option><option value="1">approved</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
   <select id="f-work"><option value="">any work status</option>{work_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
@@ -554,12 +572,14 @@ function expandAll(on){{
 const F = id => document.getElementById(id);
 function applyFilters(){{
   const cat=F('f-cat').value, work=F('f-work').value, diff=F('f-diff').value,
+        approval=F('f-approval').value,
         graded=F('f-graded').checked, disc=F('f-disc').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
   document.querySelectorAll('.task').forEach(c=>{{
     let ok=true;
+    if(approval && c.dataset.approved!==approval) ok=false;
     if(cat && c.dataset.cat!==cat) ok=false;
     if(work && c.dataset.work!==work) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
@@ -578,7 +598,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
+['f-approval','f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>
