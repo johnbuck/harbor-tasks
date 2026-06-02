@@ -1,0 +1,38 @@
+# Hermes-only re-run of the context-ROT family (rot-01 positional + rot-02
+# multi-hop). The 2026-06-01 combined run completed openclaw cleanly (results
+# captured in 2026-06-01-session-status.md) but the hermes job was killed by the
+# session compact mid-flight (rot-01 stalled at step 16, rot-02 reached recall
+# but never graded). hermes was working correctly when killed (step 15 = reward
+# 1.0) — this is a clean re-run, NOT a fix for a hermes failure.
+#
+# Accuracy (EARLY/MIDDLE/LATE split) is the only thing the discriminate-or-blunt
+# verdict needs, so the unpinned :latest is fine here — keeps hermes symmetric
+# with openclaw's already-captured :latest results. Pin promotion happens AFTER
+# the verdict.
+#
+# Run:
+#   source ~/.config/infisical/infisical-identity.env
+#   CONFIG=configs/ctx-rot-n1-hermes.yaml JOB_NAME=ctx-rot-n1-hermes tools/run_track_a.sh
+
+jobs_dir: /home/trumble/harbor-tasks/jobs/ctx-rot-n1-hermes
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 2
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+agents:
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: tasks/context-rot

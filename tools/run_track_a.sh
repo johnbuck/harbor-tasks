@@ -96,6 +96,41 @@ async def main() -> int:
     if os.environ.get("N_ATTEMPTS"):
         raw["n_attempts"] = int(os.environ["N_ATTEMPTS"])
 
+    # EXCLUDE status="deprecated" tasks. Harbor selects local tasks by directory
+    # path and does NOT read the task.toml [metadata] status, so a category-path
+    # dataset still sweeps in retired tasks. We scan each local dataset dir for
+    # task.tomls carrying `status = "deprecated"` and inject their DIRECTORY
+    # names (what Harbor's exclude_task_names fnmatches against — LocalTaskId.
+    # get_name() returns the dir basename) into that dataset's
+    # exclude_task_names. Keeps the config declarative (just category paths)
+    # while guaranteeing no run scores a deprecated task. Set
+    # INCLUDE_DEPRECATED=1 to opt out (e.g. to re-validate a retired task).
+    import re as _re
+    if not os.environ.get("INCLUDE_DEPRECATED"):
+        _dep_re = _re.compile(r'(?m)^\s*status\s*=\s*["\']deprecated["\']')
+        excluded = []
+        for ds in raw.get("datasets", []):
+            if not isinstance(ds, dict) or not ds.get("path"):
+                continue
+            ds_path = Path(os.path.expanduser(ds["path"]))
+            if not ds_path.is_dir():
+                continue
+            deprecated_dirs = []
+            for child in sorted(ds_path.iterdir()):
+                toml = child / "task.toml"
+                if toml.is_file() and _dep_re.search(toml.read_text()):
+                    deprecated_dirs.append(child.name)
+            if deprecated_dirs:
+                patterns = list(ds.get("exclude_task_names") or [])
+                for name in deprecated_dirs:
+                    if name not in patterns:
+                        patterns.append(name)
+                ds["exclude_task_names"] = patterns
+                excluded.extend(deprecated_dirs)
+        if excluded:
+            print(f"[deprecation-filter] excluding {len(excluded)} deprecated "
+                  f"task(s): {', '.join(sorted(excluded))}", file=sys.stderr)
+
     # ONE JOB PER HARNESS — so each job's dashboard rollup is a single harness's
     # scores and the two jobs compare directly (mixing both agents in one job
     # forces per-task comparison, which defeats the rollup view). One invocation
