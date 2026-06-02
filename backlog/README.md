@@ -85,3 +85,4 @@ Status is each spec's frontmatter badge; the epic tag is its `Epic:` line.
 - [2026-06-01 session status](2026-06-01-session-status.md) — pre-compact pickup log (not an epic spec)
 - [2026-06-02 browser + provider-pin findings](2026-06-02-browser-and-pin-findings.md) — broken pin + openclaw browser not surfacing; the E2/E3 blockers (E3)
 - [2026-06-02 roadmap page](2026-06-02-roadmap-page.md) — `tools/roadmap.py`; the by-epic plan view; the E4/E5 epic merge (IMPLEMENTED · E5)
+- [2026-06-02 viewer subscription auth](2026-06-02-viewer-subscription-auth.md) — `harbor view` analyze button + `harbor check` on the `claude` CLI subscription; fork made canonical + `tools/view.sh` launcher (IMPLEMENTED · E5)
