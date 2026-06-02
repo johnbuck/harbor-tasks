@@ -31,6 +31,7 @@
   },
 
   "browser": {
+    "enabled": true,
     "cdpUrl": "http://internal-host:9222"
   },
 
