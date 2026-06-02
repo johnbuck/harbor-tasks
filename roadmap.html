@@ -1,0 +1,61 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Roadmap</title>
+<style>
+  body{font:14px/1.6 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}
+  a{color:#9db4d6}
+  .nav{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+  .nav a{font-size:13px;text-decoration:none;border:1px solid #2f3645;border-radius:6px;padding:4px 12px;color:#9db4d6}
+  .nav a:hover{background:#1c2331}
+  .nav a.active{background:#1b2a1f;border-color:#3a5a44;color:#9fe0a5;font-weight:600}
+  h1{font-size:18px;margin:0 0 2px} .ts{color:#8a8f98;font-size:12px;margin-bottom:18px}
+  .wrap{max-width:980px}
+  .mono{font-family:ui-monospace,Menlo,monospace}
+  .thesis{background:#13182098;border:1px solid #2a3550;border-left:3px solid #5fd0d0;border-radius:10px;
+    padding:14px 18px;margin-bottom:22px;font-size:13.5px;line-height:1.6;color:#cdd6e4}
+  .thesis .lbl{color:#5fd0d0;font-size:11px;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px}
+  .phase{background:#171a22;border:1px solid #262b36;border-radius:12px;padding:16px 18px;margin-bottom:16px}
+  .phead{display:flex;gap:12px;align-items:center;margin-bottom:4px}
+  .pnum{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:#1c2331;border:1px solid #2f3645;
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:#9db4d6}
+  .ptitle{font-size:15px;font-weight:700;margin-right:auto}
+  .psum{color:#9aa1ad;font-size:12.5px;margin:2px 0 12px 42px}
+  .badge{padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
+  .badge.ok{background:#163a22;color:#5fd07e} .badge.bad{background:#3a1616;color:#ef7a7a}
+  .badge.mid{background:#3a2f16;color:#e6c98a} .badge.muted{background:#222734;color:#9aa1ad}
+  .item{display:flex;gap:11px;padding:8px 0 8px 42px;border-top:1px solid #20242e}
+  .item:first-of-type{border-top:none}
+  .dot{flex-shrink:0;width:14px;height:14px;border-radius:50%;margin-top:3px}
+  .dot.ok{background:#5fd07e} .dot.bad{background:#ef7a7a} .dot.mid{background:#e6c98a} .dot.muted{background:#3a4150}
+  .itxt b{font-size:13px;color:#e6e6e6;font-weight:600}
+  .itxt .d{display:block;color:#9aa1ad;font-size:12px;margin-top:2px}
+  .sec{font-size:13px;font-weight:700;color:#cdd6e4;margin:26px 0 10px;border-bottom:1px solid #262b36;padding-bottom:6px}
+  .ms{display:flex;gap:14px;padding:7px 0;border-top:1px solid #20242e}
+  .ms:first-of-type{border-top:none}
+  .ms .when{flex-shrink:0;width:96px;color:#8a8f98;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+  .ms .what{font-size:12.5px;color:#cdd6e4}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;color:#8a8f98;font-size:11.5px;margin:18px 0 4px}
+  .legend span{display:flex;gap:6px;align-items:center}
+</style></head><body>
+<div class="nav">
+  <a href="agent-status.html">Agent status</a>
+  <a href="task-catalog.html">Task catalog</a>
+  <a href="roadmap.html" class="active">Roadmap</a>
+</div>
+<div class="wrap">
+<h1>Roadmap — harness-vs-model eval</h1>
+<div class="ts">generated 2026-06-02 · hand-curated · edit tools/roadmap.py to update</div>
+<div class="thesis"><span class="lbl">The thesis</span>Prove the suite can detect a <b>HARNESS</b> difference (openclaw vs hermes) independent of the <b>MODEL</b>. Both harnesses run the same model (<span class='mono'>deepseek-v4-pro</span>), so any score gap is the harness. Until the suite demonstrably <i>can</i> discriminate, no “the harnesses are equivalent” conclusion is valid.</div>
+<div class="legend"><span><i class="dot ok" style="width:12px;height:12px;border-radius:50%"></i> done</span><span><i class="dot mid" style="width:12px;height:12px;border-radius:50%"></i> in progress</span><span><i class="dot bad" style="width:12px;height:12px;border-radius:50%"></i> blocked</span><span><i class="dot muted" style="width:12px;height:12px;border-radius:50%"></i> to do</span></div>
+<div class="phase"><div class="phead"><div class="pnum">1</div><div class="ptitle">Make the tasks genuinely discriminating</div><span class="badge mid">in progress</span></div><div class="psum">The tasks now measure the harness, not instruction-following or memorized answers.</div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Methodology grounded in published evidence</b><span class="d">Harness-vs-model separation supported (Terminal-Bench, Aider, METR); pass^k is the right reliability metric (τ-bench); “telegraphing” = a construct-validity threat.</span></div></div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Adversarial review of all 50 tasks</b><span class="d">Found only ~4 genuine harness discriminators; ~23 model-dominated one-shots deprecated (pending operator review); a few outright broken.</span></div></div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Fixed telegraphing — the #1 validity bug</b><span class="d">37 of 50 tasks leaked the trap they secretly measured. All fixed across 7 waves; load-bearing constraints now enforced mechanically, not by instruction.</span></div></div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Built / hardened real discriminators</b><span class="d">context-rot family, sub-agent fan-out redesign (reward = fraction solved), cover-task hardenings (tool-selection, tool-sprawl, plan-then-revise), and browser-find-fact-01 (the only task routing through the harness browser-tool layer).</span></div></div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Drift-proof catalog + deprecation handling</b><span class="d">task-catalog.html regenerates from the on-disk tree; runner auto-excludes status=deprecated tasks.</span></div></div><div class="item"><div class="dot muted"></div><div class="itxt"><b>Rework the ~22 salvageable deprecated tasks (task #89)</b><span class="d">The KILL set was deprecated non-destructively; the salvageable ones still need the hardening treatment before they re-enter the grid.</span></div></div></div><div class="phase"><div class="phead"><div class="pnum">2</div><div class="ptitle">Make the comparison FAIR (infra correctness)</div><span class="badge bad">blocked</span></div><div class="psum">Two infra facts must be true before ANY run is trustworthy. Both are currently broken — this is the live blocker.</div><div class="item"><div class="dot bad"></div><div class="itxt"><b>Fix the provider pin</b><span class="d">only:[“deepseek”] is an invalid OpenRouter slug → 404. hermes can't make a single call; openclaw silently routes free → neither harness is actually pinned, so cost/cache comparisons are void. Fix identified (fireworks or novita — both 200, non-training, 1M ctx); operator picks the host.</span></div></div><div class="item"><div class="dot bad"></div><div class="itxt"><b>Make openclaw actually USE the browser (task #90)</b><span class="d">browser.enabled:true is baked but the tool doesn't surface at runtime. Prime suspect: CDP wiley:9222 unreachable from inside the trial container.</span></div></div><div class="item"><div class="dot ok"></div><div class="itxt"><b>Both harnesses wired to a shared headless Chromium</b><span class="d">openclaw browser.cdpUrl + hermes browser.cdp_url → wiley:9222 (live Chrome 148). Capabilities baked into the image (thin adapters ignore Harbor-injected mcp_servers).</span></div></div></div><div class="phase"><div class="phead"><div class="pnum">3</div><div class="ptitle">Run the real grid</div><span class="badge muted">to do</span></div><div class="psum">Gated on Phase 2.</div><div class="item"><div class="dot muted"></div><div class="itxt"><b>n≥3 pass^k across the discriminating set</b><span class="d">n=1 is a coin-toss — the harness signal is reliability variance + efficiency (cost at equal quality), not single-run reward. Run browser-e2e first as the smoke test.</span></div></div></div><div class="phase"><div class="phead"><div class="pnum">4</div><div class="ptitle">Publish the verdict + Track B</div><span class="badge muted">to do</span></div><div class="psum">Not started.</div><div class="item"><div class="dot muted"></div><div class="itxt"><b>RESULTS.md — the discrimination verdict</b><span class="d">Synthesize the grid: does the instrument detect a harness difference, and how big?</span></div></div><div class="item"><div class="dot muted"></div><div class="itxt"><b>Stand up Track B (general capability)</b><span class="d">The second comparison track, separate from the harness-discrimination track.</span></div></div></div>
+<div class="sec">Where we stand right now</div>
+<div class="phase" style="border-color:#3a2f16">
+  <div class="psum" style="margin-left:0">Phases 1's tasks are sharp, but we're stuck at the <b>Phase 2 gate</b>:
+  we can't run a trustworthy comparison until the <b>provider pin</b> and <b>openclaw browser</b> are fixed.
+  Next two actions — (1) operator picks the pin host (fireworks / novita); (2) diagnose openclaw browser
+  surfacing (task #90). One image rebuild then fixes both → first trustworthy both-harness result.
+  Detail: <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
+</div>
+<div class="sec">Milestones so far</div>
+<div class="ms"><div class="when">2026-06-02</div><div class="what">browser-find-fact-01 + browser enablement; broken-pin diagnosis documented</div></div><div class="ms"><div class="when">2026-06-01</div><div class="what">Adversarial review, telegraphing audit (37 fixed), evidence base, context-rot family</div></div><div class="ms"><div class="when">2026-05-31</div><div class="what">Discrimination-hardening sweep: difficulty is the lever; graded scoring + crash penalty + catalog</div></div><div class="ms"><div class="when">earlier</div><div class="what">Suite defined (~10 categories), thin adapters, rich image, recall + browser infra, provider-pin work, 5 established benchmarks integrated</div></div>
+</div>
+</body></html>

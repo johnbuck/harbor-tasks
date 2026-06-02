@@ -628,6 +628,7 @@ def render(data: dict, health: dict) -> str:
 <div class="nav">
   <a href="agent-status.html" class="active">Agent status</a>
   <a href="task-catalog.html">Task catalog</a>
+  <a href="roadmap.html">Roadmap</a>
 </div>
 <h1>Eval harness status</h1>
 <div class="ts">generated {ts} · source: {IMAGE} + live memory pings · re-run tools/agent_status.py to refresh</div>
