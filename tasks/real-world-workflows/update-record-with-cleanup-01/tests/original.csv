@@ -1,28 +1,45 @@
 date,category,vendor,amount,paid_by,notes
+2026-01-10,rent,Landlord,1800.00,alex,january rent
+2026-01-12,groceries,Trader Joes,58.00,alex,
+2026-01-12,groceries,Trader Joes,58.00,alex,
+2026-02-15,rent,Landlord,1800.00,alex,february rent
+2026-02-20,groceries,Costco,180.00,alex,bulk
+2026-02-20,groceries,Costco,180.00,alex,bulk
 2026-03-15,rent,Landlord,1800.00,alex,march rent
 2026-03-18,groceries,Trader Joes,64.20,alex,
 2026-03-18,groceries,Trader Joes,64.20,alex,
 2026-04-15,rent,Landlord,1800.00,alex,april rent
 2026-04-22,groceries,Whole Foods,103.10,alex,
 2026-04-22,groceries,Whole Foods,103.10,alex,
+2026-04-28,dining,Nopa,72.00,alex,dinner
 2026-05-01,groceries,Trader Joes,87.50,alex,
 2026-05-03,utilities,PG&E,134.22,alex,electric
+2026-05-05,groceries,Whole Foods,142.30,alex,
 2026-05-05,groceries,Whole Foods,142.30,alex,
 2026-05-06,groceries,Whole Foods,55.00,alex,
 2026-05-06,groceries,Whole Foods,55.10,alex,
 2026-05-08,groceries,Trader Joes,76.41,alex,
 2026-05-09,groceries,Costco,210.00,alex,bulk
+2026-05-09,groceries,Costco,210.00,alex,bulk
+2026-05-09,groceries,Costco,210.00,alex,bulk
 2026-05-10,dining,Tartine,28.50,alex,brunch
 2026-05-11,groceries,Bi-Rite,40.00,alex,snacks
 2026-05-11,household,Bi-Rite,40.00,alex,paper goods
 2026-05-12,groceries,Whole Foods,98.75,alex,
+2026-05-12,groceries,Whole Foods,98.75,alex,
+2026-05-13,groceries,Safeway,61.00,alex,
 2026-05-14,utilities,Comcast,89.99,alex,internet
 2026-05-14,utilities,Comcast,89.99,alex,internet
-2026-05-15,rent,Landlord,900.00,alex,may rent (split with roommate)
-2026-05-15,rent,Landlord,900.00,roommate,may rent (split with roommate)
+2026-05-14,utilities,Comcast,89.99,alex,internet
+2026-05-15,rent,Landlord,1800.00,alex,may rent
+2026-05-16,groceries,Trader Joes,33.00,alex,
+2026-05-16,groceries,Trader Joes,33.00,alex,
 2026-05-17,groceries,Bi-Rite,54.12,alex,
 2026-05-19,dining,Souvla,22.00,alex,lunch
 2026-05-21,groceries,Trader Joes,76.41,alex,
+2026-05-21,groceries,Trader Joes,76.41,alex,
+2026-05-22,groceries,Whole Foods,142.30,alex,
 2026-05-23,utilities,Water,42.18,alex,
+2026-05-24,groceries,Costco,210.00,alex,bulk
 2026-05-25,groceries,Whole Foods,118.40,alex,
 2026-05-27,dining,Zuni,84.00,alex,dinner

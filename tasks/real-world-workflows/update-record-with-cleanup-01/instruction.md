@@ -5,8 +5,9 @@ My budget spreadsheet is `/app/budget.csv`. Please do two things in place:
    three times). A "duplicate" is: same `date` + same `vendor` + same `amount`
    + same `category`. Keep exactly **one** of each duplicate group; drop the
    rest. Be careful with the edge cases:
-   - **Only May `groceries` rows.** Don't touch March or April rows even if
-     they're identical duplicates. Don't touch any non-`groceries` May rows
+   - **Only May `groceries` rows.** Don't touch rows from any earlier month
+     (the sheet has history back to January) even if they're identical
+     duplicates. Don't touch any non-`groceries` May rows
      even if they're identical duplicates (e.g. a repeated utilities row stays).
    - A group of **three** identical rows collapses to **one** (drop two).
    - Rows that differ in **any** of the four fields are NOT duplicates — keep
@@ -19,8 +20,8 @@ My budget spreadsheet is `/app/budget.csv`. Please do two things in place:
    `2026-05-15 rent` row for $1800 paid by `alex`. Replace it with two rows:
    one for $900.00 paid by `alex`, one for $900.00 paid by `roommate`. Both
    keep the same date, category, vendor, and notes — but append
-   `" (split with roommate)"` to the notes for both new rows. Don't touch the
-   March or April rent.
+   `" (split with roommate)"` to the notes for both new rows. Don't touch rent
+   from any earlier month.
 
 Constraints:
 - Keep the existing column order: `date,category,vendor,amount,paid_by,notes`.
