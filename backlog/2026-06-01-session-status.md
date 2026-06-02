@@ -94,20 +94,45 @@ discrimination. Recall scorers must grade CONTENT and tolerate format. See memor
 [[harbor-recall-scorer-format-robust]].
 
 ## Open work (priority order)
-1. **Promote the pin:** `docker tag harbor-agents-rich:pinned-v2
-   harbor-agents-rich:latest` — safe now (the symmetric ctx-rot run is done). Do
-   before any cost-sensitive grid. (Accuracy verdict above does not need it.)
+1. ✅ **Pin PROMOTED** — `harbor-agents-rich:latest` now = the pinned image
+   (ID e494e1d1cd2a); old unpinned saved as `:pre-pin-unpinned-bak`. Any new run
+   is cost-fair. See memory [[harbor-provider-pin]].
 2. **Deprecated-set remainder** (matrix `2026-06-01-retired-task-coverage-matrix.md`):
    - ✅ Run-config exclusion DONE — `tools/run_track_a.sh` auto-excludes
      `status=deprecated` (scans dataset dirs, injects `exclude_task_names`);
      `INCLUDE_DEPRECATED=1` opts out. Verified 20 excluded, REBUILD trio active.
+   - Cover-task reworks gating the 15 redundant drops — progress:
+     - ✅ `tool-selection-01` — de-telegraph + de-bypass, oracle 1.0 (4733aa3)
+     - ✅ `tool-sprawl-precision-01` — de-bypass, oracle 1.0 (4733aa3)
+     - ✅ `plan-then-revise-01` — revise-friction + clamp-policy MEMORY check,
+       oracle 9/9 1.0 (3be679f)
+     - ⬜ `refactor-multi-file-01` — scale 3 toy files → 15-25 file package (LARGE)
+     - ⬜ `pr-diff-review-01` — 84-line diff → 300-600 lines, subtle bugs,
+       file:line citations (LARGE)
+     - ⬜ `unit-tests-01` — 4 mutants → 20+ subtle mutants (MED)
+     - ⬜ `dep-bump-breaking-01` — multi-module pkg + real install/test/fix loop
+       (LARGE; the review's "closest" — embodies the failing-loop discriminator)
+     - ⬜ `sub-agent-parallel-decompose-01` — HARD redesign. Two concrete grader
+       flaws (inert clamped bonus; self-reported-timestamp concurrency) are
+       fixable, but the deep issue is that a single deterministic script
+       one-shots all 32 files so fan-out is never REQUIRED. Genuine fix needs
+       non-batchable LLM-per-unit work whose serial reasoning can't fit the
+       wall-clock budget (so fan-out wins) with a deterministic answer key +
+       output-mtime concurrency detection. Design analyzed; not built. Operator
+       input worthwhile on whether to invest.
    - Track B for the 5 authoring tasks (email-copy, restore-runbook, api-contract,
      cli-tool, readme) — destination set, not stood up.
-   - Larger cover-task reworks gating the 15 redundant drops: refactor-multi-file,
-     pr-diff-review, unit-tests, dep-bump, plan-then-revise, tool-selection,
-     tool-sprawl, sub-agent-parallel (inert concurrency axis). Not started.
 3. **Nothing removed** until each retired task's named alternative is green.
-4. Eventually: n=5 pass^k grid (on the promoted pinned image) → RESULTS.md.
+4. **STRATEGIC FORK (worth operator input):** the one real run so far (ctx-rot)
+   came back BLUNT, and the in-window recall/tool reworks may also be blunt for
+   this strong model. Before sinking hours into the 4 LARGE rebuilds, a real n=1
+   of the now-trustworthy KEEP-set discriminators (context-fill OVERFLOW,
+   true-multi-turn-write, proactive-preference, schedule-meeting + the REBUILD
+   trio) would TEST the actual goal — does ANY sound task separate the harnesses?
+   If none do, the build strategy should pivot to the shapes most likely to bite
+   (overflow/compaction, sub-agent delegation, failing loops), not more in-window
+   variants. Costs money + ~time per task; operator should greenlight.
+5. Eventually: n=5 pass^k grid (on the now-pinned image) → RESULTS.md.
 
 ## KEEP-set grader validity audit (2026-06-01, post ctx-rot-bug)
 
