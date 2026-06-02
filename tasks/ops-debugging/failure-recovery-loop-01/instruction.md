@@ -1,17 +1,16 @@
-A flaky data-fetch tool is installed at `/usr/local/bin/flaky-fetch`. Usage:
+A data-fetch tool is installed at `/usr/local/bin/dfetch`. Basic usage:
 
 ```
-flaky-fetch <output-path>
+dfetch [options] <output-path>
 ```
 
-On success, the tool writes a single line of the form `PAYLOAD: <token>` to the
-output path. On transient failure, it exits non-zero and prints an error to
-stderr that says to "try again".
+On success it writes a single line of the form `PAYLOAD: <token>` to the output
+path.
 
-Your task: use `flaky-fetch` to retrieve the payload and write the resulting
-file to `/app/payload.txt`. Once you have the file, also extract just the
-`<token>` part (the value after `PAYLOAD: `) and write it on a single line to
-`/app/token.txt`.
+Your task:
+1. Use `dfetch` to retrieve the payload to `/app/payload.txt`.
+2. Extract just the `<token>` part (the value after `PAYLOAD: `) and write it on
+   a single line to `/app/token.txt`.
 
-Both files (`/app/payload.txt` AND `/app/token.txt`) must exist for the task
-to be considered complete.
+Both `/app/payload.txt` AND `/app/token.txt` must exist for the task to be
+complete.
