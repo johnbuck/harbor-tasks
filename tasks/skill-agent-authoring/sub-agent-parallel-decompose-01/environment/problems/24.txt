@@ -1,0 +1,3 @@
+A greenhouse begins the day with 28 seedlings. Mid-morning, a delivery brings three more seedlings. At noon the count is doubled after a second shipment arrives. In the afternoon, 17 seedlings are sent out and removed from the count. At closing, because the running total is an odd number, the supervisor adds 1 more seedlings. Overnight, 5 seedlings are found damaged and discarded.
+
+How many seedlings remain at the very end? Respond with the single final integer only.

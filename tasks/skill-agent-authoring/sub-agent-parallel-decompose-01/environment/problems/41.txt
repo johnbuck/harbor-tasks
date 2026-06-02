@@ -1,0 +1,3 @@
+A aquarium begins the day with 24 tagged fish. Mid-morning, a delivery brings six more tagged fish. At noon the count is tripled after two more shipments arrive. In the afternoon, 6 tagged fish are sent out and removed from the count. At closing, because the running total is an even number, the supervisor removes exactly half of them. Overnight, 9 tagged fish are found damaged and discarded.
+
+How many tagged fish remain at the very end? Respond with the single final integer only.

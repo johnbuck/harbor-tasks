@@ -1,0 +1,3 @@
+A print shop begins the day with 53 poster batches. Mid-morning, a delivery brings nine more poster batches. At noon the count is doubled after a second shipment arrives. In the afternoon, 7 poster batches are sent out and removed from the count. At closing, because the running total is an odd number, the supervisor adds 3 more poster batches. Overnight, 7 poster batches are found damaged and discarded.
+
+How many poster batches remain at the very end? Respond with the single final integer only.

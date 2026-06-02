@@ -1,106 +1,105 @@
 #!/bin/bash
-# Graded verifier for sub-agent-parallel-decompose-01.
+# GRADED verifier for sub-agent-parallel-decompose-01 (60 prose word-problems).
 #
-# 32 files x 3 independent stages each = 96 sub-checks:
-#   stage 1 (filter):  the set of kept data rows == expected set (order-free)
-#   stage 2 (sort):    the kept data rows are in the exact expected order
-#   stage 3 (summary): the SUMMARY,<count>,<sum> footer is present and correct
+# reward = correct / 60  — a NON-CLAMPED continuous base. Because solving all 60
+# serially in one token-stream blows the 10-minute budget, a harness that grinds
+# them one-by-one finishes only a prefix (base < 1.0); a harness that fans out to
+# sub-agents (openclaw sessions_spawn / hermes delegate_task) completes far more
+# in the same wall-clock and scores higher. The fan-out advantage IS the base
+# reward — there is no separate clamped "parallelism bonus" to go inert.
 #
-# base_reward = passed_subchecks / 96  (graded fraction; NOT binary)
-# parallelism bonus: scaled by observed max-concurrency from /var/log/work.log.
-#   Serial run (max_concurrent<=1) gets no bonus; genuine fan-out earns up to
-#   +0.15, but only multiplied by how much of the work is actually correct
-#   (a parallel run that produces garbage earns no bonus). Final reward is
-#   clamped to 1.0 and still a graded fraction.
+# Concurrency is reported as a DIAGNOSTIC (not folded into reward), measured from
+# the OUTPUT-FILE mtimes (OS wall-clock) — NOT from agent-self-reported
+# timestamps, which a serial agent could fake. A tight mtime burst => genuine
+# fan-out; mtimes spread evenly across the budget => serial.
+#
+# Answer key is /tests/answers.json (verifier-only — never in the agent
+# container). Each answer is checked independently (no all-or-nothing collapse).
 set -u
 mkdir -p /logs/verifier
+python3 - <<'PY' > /logs/verifier/reward.json
+import json, os, re, glob
 
-# Parallelism inference from work.log
-max_concurrent=$(python3 - <<'PY'
-import re
-events = []
+KEY = "/tests/answers.json"
+OUT = "/app/out"
+LOG = "/var/log/work.log"
+
+key = {}
 try:
-    with open("/var/log/work.log") as f:
-        for line in f:
-            m = re.match(r"^(\S+)\s+(BEGIN|END)\s+(\S+)", line.strip())
-            if m:
-                events.append((m.group(1), m.group(2), m.group(3)))
-except FileNotFoundError:
+    key = json.load(open(KEY))
+except Exception:
     pass
-events.sort(key=lambda e: (e[0], 0 if e[1] == "BEGIN" else 1))
-open_set, max_open = set(), 0
-for ts, kind, file in events:
-    if kind == "BEGIN":
-        open_set.add(file)
-    else:
-        open_set.discard(file)
-    max_open = max(max_open, len(open_set))
-print(max_open)
-PY
-)
+total = len(key) or 60
 
-python3 - "$max_concurrent" <<'PY' > /logs/verifier/reward.json
-import csv, json, os, sys
-
-max_concurrent = int(sys.argv[1]) if sys.argv[1].isdigit() else 0
-
-def read_csv(path):
-    if not os.path.isfile(path):
-        return None
+def read_int(path):
+    # Grade CONTENT, tolerate format: accept a bare "144", markdown ("**144**"),
+    # or a short prose answer ("The answer is 144."). Take the LAST integer in the
+    # file — in prose the answer trails the sentence, and a bare answer has only
+    # one number — which avoids grabbing a stray leading token.
     try:
-        with open(path, newline="") as f:
-            return [r for r in csv.reader(f) if r]
+        s = open(path).read().strip()
     except Exception:
         return None
+    nums = re.findall(r"-?\d+", s.replace(",", ""))
+    return int(nums[-1]) if nums else None
 
-passed = 0
-total = 0
-per_file = {}
+correct = 0
+written = 0
+mtimes = []
+for nn, ans in key.items():
+    p = os.path.join(OUT, f"{nn}.txt")
+    if os.path.exists(p):
+        written += 1
+        try:
+            mtimes.append(os.path.getmtime(p))
+        except OSError:
+            pass
+        if read_int(p) == ans:
+            correct += 1
 
-for i in range(1, 33):
-    name = f"data_{i:02d}"
-    exp = read_csv(f"/app/expected/{name}.filtered.csv")
-    act = read_csv(f"/app/{name}.filtered.csv")
-    checks = {"filter": 0, "sort": 0, "summary": 0}
-    if exp is not None and act is not None:
-        # Split expected into data rows + summary footer.
-        exp_body = [r for r in exp[1:] if r and r[0] != "SUMMARY"]
-        exp_summary = next((r for r in exp if r and r[0] == "SUMMARY"), None)
-        act_body = [r for r in act[1:] if r and r[0] != "SUMMARY"]
-        act_summary = next((r for r in act if r and r[0] == "SUMMARY"), None)
-        # stage 1: filter set (order-free) over (id,name,score) tuples
-        if {tuple(r) for r in exp_body} == {tuple(r) for r in act_body}:
-            checks["filter"] = 1
-        # stage 2: exact order
-        if exp_body == act_body:
-            checks["sort"] = 1
-        # stage 3: summary footer correct
-        if act_summary is not None and exp_summary is not None and \
-           act_summary[:3] == exp_summary[:3]:
-            checks["summary"] = 1
-    per_file[name] = checks
-    passed += sum(checks.values())
-    total += 3
+base = correct / total if total else 0.0
 
-base = passed / total if total else 0.0
+# --- concurrency diagnostic from OUTPUT mtimes (wall-clock) ---
+# max files whose mtimes fall within any 3s sliding window.
+max_burst = 0
+span = 0.0
+if mtimes:
+    ms = sorted(mtimes)
+    span = round(ms[-1] - ms[0], 2)
+    j = 0
+    for i in range(len(ms)):
+        while ms[i] - ms[j] > 3.0:
+            j += 1
+        max_burst = max(max_burst, i - j + 1)
 
-# Throughput bonus: proportional to fan-out, gated on correctness so a parallel
-# garbage run earns nothing. Caps at +0.15.
-par_factor = 0.0
-if max_concurrent >= 2:
-    par_factor = min(1.0, (max_concurrent - 1) / 3.0)  # 2->0.33, 4->1.0
-bonus = round(0.15 * par_factor * base, 4)
+# --- secondary: self-reported BEGIN/END overlap from work.log (labelled) ---
+self_reported_peak = 0
+if os.path.exists(LOG):
+    evs = []
+    for line in open(LOG):
+        m = re.match(r"^(\S+)\s+(BEGIN|END)\s+(\S+)", line.strip())
+        if m:
+            evs.append((m.group(1), 0 if m.group(2) == "BEGIN" else 1, m.group(3)))
+    evs.sort(key=lambda e: (e[0], e[1]))
+    openset, peak = set(), 0
+    for _, kind, nn in evs:
+        if kind == 0:
+            openset.add(nn)
+        else:
+            openset.discard(nn)
+        peak = max(peak, len(openset))
+    self_reported_peak = peak
 
-reward = round(min(1.0, base + bonus), 4)
-correctness = 1 if passed == total else 0
-
+reward = round(base, 4)
+correctness = 1 if correct == total else 0
 print(json.dumps({
     "reward": reward,
     "correctness": correctness,
-    "subchecks_passed": passed,
-    "subchecks_total": total,
-    "base_reward": round(base, 4),
-    "max_concurrent": max_concurrent,
-    "parallel_bonus": bonus,
-}, indent=2))
+    "correct": correct,
+    "total": total,
+    "files_written": written,
+    "mtime_burst_peak": max_burst,        # wall-clock concurrency proxy (diagnostic)
+    "mtime_span_sec": span,
+    "self_reported_peak": self_reported_peak,  # from work.log (agent-reported; advisory)
+}))
 PY
