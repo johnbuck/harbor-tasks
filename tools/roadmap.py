@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Generate roadmap.html — the plain-language plan + progress for the harbor-tasks
-harness-vs-model eval.
+"""Generate roadmap.html — the plan + progress for the harbor-tasks harness-vs-model
+eval, broken out by EPIC.
 
 Sibling of tools/task_catalog.py (the TASKS) and tools/agent_status.py (the
-HARNESSES). This page is the PLAN: the thesis, the four phases, what's done, and
-what's blocking the next trustworthy run. Content is hand-curated (a narrative, not
-drift-derived) — edit the PHASES / MILESTONES tables below and re-run:
+HARNESSES). This page is the PLAN: the thesis, the epics, every backlog spec that
+rolls up under each epic, and its status. Content is hand-curated — edit the EPICS
+table below (each spec row points at its backlog/ file) and re-run:
 
     python3 tools/roadmap.py     # writes roadmap.html
 
-Keep it clear and simple. One screen of "where we stand."
+Keep it clear and concise. Spec statuses mirror the backlog frontmatter badges.
 """
 from datetime import date
 from pathlib import Path
@@ -25,71 +25,83 @@ THESIS = (
 )
 
 # status: done | partial | blocked | todo
-PHASES = [
+# Each spec row: (status, label, backlog-file-or-note)
+EPICS = [
     {
-        "n": "1",
-        "title": "Make the tasks genuinely discriminating",
-        "status": "partial",
-        "summary": "The tasks now measure the harness, not instruction-following or memorized answers.",
-        "items": [
-            ("done", "Methodology grounded in published evidence",
-             "Harness-vs-model separation supported (Terminal-Bench, Aider, METR); pass^k is the right reliability metric (τ-bench); “telegraphing” = a construct-validity threat."),
-            ("done", "Adversarial review of all 50 tasks",
-             "Found only ~4 genuine harness discriminators; ~23 model-dominated one-shots deprecated (pending operator review); a few outright broken."),
-            ("done", "Fixed telegraphing — the #1 validity bug",
-             "37 of 50 tasks leaked the trap they secretly measured. All fixed across 7 waves; load-bearing constraints now enforced mechanically, not by instruction."),
-            ("done", "Built / hardened real discriminators",
-             "context-rot family, sub-agent fan-out redesign (reward = fraction solved), cover-task hardenings (tool-selection, tool-sprawl, plan-then-revise), and browser-find-fact-01 (the only task routing through the harness browser-tool layer)."),
-            ("done", "Drift-proof catalog + deprecation handling",
-             "task-catalog.html regenerates from the on-disk tree; runner auto-excludes status=deprecated tasks."),
-            ("todo", "Rework the ~22 salvageable deprecated tasks (task #89)",
-             "The KILL set was deprecated non-destructively; the salvageable ones still need the hardening treatment before they re-enter the grid."),
+        "id": "E1", "status": "done",
+        "title": "Harness runtime & adapters",
+        "summary": "Run both harnesses identically on Harbor — the foundation everything else sits on.",
+        "specs": [
+            ("done", "Harbor adoption — retire rube, build on Harbor", "done/2026-05-27-harbor-adoption.md"),
+            ("done", "Agent adapters — pre-baked image + NoInstall + OpenRouter", "done/2026-05-27-agent-adapters.md"),
+            ("done", "Thin adapters — invoke the BAKED harness, no config rewrite", "done/2026-05-29-thin-adapters.md"),
+            ("done", "Pre-built rich harness images (configs + skills + tools)", "done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md"),
+            ("done", "openclaw reasoning on OpenRouter — resolved", "done/2026-05-28-openclaw-reasoning-RESOLVED.md"),
         ],
     },
     {
-        "n": "2",
-        "title": "Make the comparison FAIR (infra correctness)",
-        "status": "blocked",
-        "summary": "Two infra facts must be true before ANY run is trustworthy. Both are currently broken — this is the live blocker.",
-        "items": [
-            ("blocked", "Fix the provider pin",
-             "only:[“deepseek”] is an invalid OpenRouter slug → 404. hermes can't make a single call; openclaw silently routes free → neither harness is actually pinned, so cost/cache comparisons are void. Fix identified (fireworks or novita — both 200, non-training, 1M ctx); operator picks the host."),
-            ("blocked", "Make openclaw actually USE the browser (task #90)",
-             "browser.enabled:true is baked but the tool doesn't surface at runtime. Prime suspect: CDP <memory-host>:9222 unreachable from inside the trial container."),
-            ("done", "Both harnesses wired to a shared headless Chromium",
-             "openclaw browser.cdpUrl + hermes browser.cdp_url → <memory-host>:9222 (live Chrome 148). Capabilities baked into the image (thin adapters ignore Harbor-injected mcp_servers)."),
+        "id": "E2", "status": "blocked",
+        "title": "Fair-comparison controls",
+        "summary": "Same model, same provider, isolated state — so a score gap is the harness, not luck.",
+        "specs": [
+            ("blocked", "Deterministic provider pin — one shared OpenRouter host",
+             "BROKEN: only:[deepseek] is invalid → 404; fix = fireworks/novita (operator picks)"),
+            ("done", "Cost + token tracking — per-trial usage at live pricing", "done/2026-05-27-cost-and-token-tracking.md"),
+            ("done", "Memory-state wipe hook — reset harness memory at trial start", "hooks/wipe_memory_state.py"),
         ],
     },
     {
-        "n": "3",
-        "title": "Run the real grid",
-        "status": "todo",
-        "summary": "Gated on Phase 2.",
-        "items": [
-            ("todo", "n≥3 pass^k across the discriminating set",
-             "n=1 is a coin-toss — the harness signal is reliability variance + efficiency (cost at equal quality), not single-run reward. Run browser-e2e first as the smoke test."),
+        "id": "E3", "status": "partial",
+        "title": "Capability infrastructure (memory + browser)",
+        "summary": "The subsystems the harnesses actually use — recall memory and a shared browser.",
+        "specs": [
+            ("done", "Eval memory stack — <memory-host> deployment, LAN-reachable", "done/2026-05-29-memory-stack-deployment.md"),
+            ("done", "Recall — bge-m3 embedder + extractor + community-build", "done/2026-05-29-recall-bge-m3-and-eval-ontology.md"),
+            ("done", "Recall — hindsight-style tool surface (P1–P4)", "done/2026-05-29-recall-hindsight-style-plugin.md"),
+            ("done", "Hermes dual-plugin activation", "done/2026-05-29-hermes-dual-plugin-system.md"),
+            ("partial", "Eval infra stack — memory shipped, browser portion", "2026-05-29-eval-infra-stack.md"),
+            ("blocked", "Browser tool enablement — openclaw tool not surfacing (task #90)", "2026-06-02-browser-and-pin-findings.md"),
         ],
     },
     {
-        "n": "4",
-        "title": "Publish the verdict + Track B",
-        "status": "todo",
-        "summary": "Not started.",
-        "items": [
-            ("todo", "RESULTS.md — the discrimination verdict",
-             "Synthesize the grid: does the instrument detect a harness difference, and how big?"),
-            ("todo", "Stand up Track B (general capability)",
-             "The second comparison track, separate from the harness-discrimination track."),
+        "id": "E4", "status": "partial",
+        "title": "Task suite authoring",
+        "summary": "Build the tests — the categories and shapes that exercise harness behaviour.",
+        "specs": [
+            ("partial", "Task suite design — categories, shapes, first-sweep selection", "2026-05-27-task-suite-design.md"),
+            ("done", "Context-management category — long-session behaviour", "2026-05-27-context-management-category.md"),
+            ("partial", "Multi-step task suite — design + specs", "2026-05-28-multi-step-tasks.md"),
+            ("done", "Sub-agent spawning + research tasks", "2026-05-29-new-eval-tasks-subagent-research.md"),
+            ("partial", "Goal-oriented real-world workflows", "2026-05-30-goal-oriented-real-world-tasks.md"),
+            ("partial", "tau3-bench integration — oracle passes; agent-run deferred (#84)", "2026-05-28-tau3-bench-integration.md"),
         ],
     },
-]
-
-# A short, honest timeline of what's been built (most recent first).
-MILESTONES = [
-    ("2026-06-02", "browser-find-fact-01 + browser enablement; broken-pin diagnosis documented"),
-    ("2026-06-01", "Adversarial review, telegraphing audit (37 fixed), evidence base, context-rot family"),
-    ("2026-05-31", "Discrimination-hardening sweep: difficulty is the lever; graded scoring + crash penalty + catalog"),
-    ("earlier", "Suite defined (~10 categories), thin adapters, rich image, recall + browser infra, provider-pin work, 5 established benchmarks integrated"),
+    {
+        "id": "E5", "status": "partial",
+        "title": "Discrimination & validity",
+        "summary": "The frontier: make the suite actually MEASURE the harness, then run the verdict grid.",
+        "specs": [
+            ("partial", "Harness-vs-model discriminating suite — instrument proven (interim)", "2026-05-30-harness-vs-model-discriminating-suite.md"),
+            ("done", "Methodology evidence base — approach grounded in published work", "2026-06-01-methodology-evidence-base.md"),
+            ("done", "Discrimination-hardening sweep — difficulty is the lever", "2026-05-31-discrimination-hardening-session.md"),
+            ("done", "Adversarial review — only ~4 genuine discriminators found", "2026-06-01-adversarial-review.md"),
+            ("done", "Telegraphing audit — 37/50 leaked the trap; all fixed", "2026-06-01-telegraphing-audit.md"),
+            ("done", "Retired-task coverage matrix — no capability left untested", "2026-06-01-retired-task-coverage-matrix.md"),
+            ("todo", "Rework the ~22 salvageable deprecated tasks (task #89)", "—"),
+            ("todo", "Run n≥3 pass^k grid → RESULTS.md verdict (task #81)", "—"),
+        ],
+    },
+    {
+        "id": "E6", "status": "partial",
+        "title": "Observability & reporting",
+        "summary": "See the state at a glance, and publish the verdict.",
+        "specs": [
+            ("done", "Agent-status dashboard — the two harnesses", "done/2026-05-29-agent-status-dashboard.md"),
+            ("done", "Task-catalog page — visual index of every task", "2026-05-31-task-catalog-page.md"),
+            ("done", "Roadmap page — this page", "tools/roadmap.py"),
+            ("todo", "RESULTS.md — the discrimination verdict (task #81)", "—"),
+        ],
+    },
 ]
 
 STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked", "todo": "to do"}
@@ -103,33 +115,33 @@ CSS = """
   .nav a:hover{background:#1c2331}
   .nav a.active{background:#1b2a1f;border-color:#3a5a44;color:#9fe0a5;font-weight:600}
   h1{font-size:18px;margin:0 0 2px} .ts{color:#8a8f98;font-size:12px;margin-bottom:18px}
-  .wrap{max-width:980px}
+  .wrap{max-width:1000px}
   .mono{font-family:ui-monospace,Menlo,monospace}
   .thesis{background:#13182098;border:1px solid #2a3550;border-left:3px solid #5fd0d0;border-radius:10px;
-    padding:14px 18px;margin-bottom:22px;font-size:13.5px;line-height:1.6;color:#cdd6e4}
+    padding:14px 18px;margin-bottom:20px;font-size:13.5px;line-height:1.6;color:#cdd6e4}
   .thesis .lbl{color:#5fd0d0;font-size:11px;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px}
-  .phase{background:#171a22;border:1px solid #262b36;border-radius:12px;padding:16px 18px;margin-bottom:16px}
-  .phead{display:flex;gap:12px;align-items:center;margin-bottom:4px}
-  .pnum{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:#1c2331;border:1px solid #2f3645;
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#9db4d6}
-  .ptitle{font-size:15px;font-weight:700;margin-right:auto}
-  .psum{color:#9aa1ad;font-size:12.5px;margin:2px 0 12px 42px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;color:#8a8f98;font-size:11.5px;margin:0 0 18px}
+  .legend span{display:flex;gap:6px;align-items:center}
+  .ldot{width:11px;height:11px;border-radius:50%}
+  .epic{background:#171a22;border:1px solid #262b36;border-radius:12px;padding:15px 18px;margin-bottom:15px}
+  .ehead{display:flex;gap:11px;align-items:center}
+  .eid{flex-shrink:0;font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;color:#9db4d6;
+    background:#1c2331;border:1px solid #2f3645;border-radius:7px;padding:3px 9px}
+  .etitle{font-size:15px;font-weight:700;margin-right:auto}
+  .esum{color:#9aa1ad;font-size:12.5px;margin:4px 0 11px 0}
   .badge{padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
   .badge.ok{background:#163a22;color:#5fd07e} .badge.bad{background:#3a1616;color:#ef7a7a}
   .badge.mid{background:#3a2f16;color:#e6c98a} .badge.muted{background:#222734;color:#9aa1ad}
-  .item{display:flex;gap:11px;padding:8px 0 8px 42px;border-top:1px solid #20242e}
-  .item:first-of-type{border-top:none}
-  .dot{flex-shrink:0;width:14px;height:14px;border-radius:50%;margin-top:3px}
+  .row{display:flex;gap:11px;align-items:baseline;padding:6px 0;border-top:1px solid #20242e}
+  .row:first-of-type{border-top:none}
+  .dot{flex-shrink:0;width:12px;height:12px;border-radius:50%;align-self:flex-start;margin-top:5px}
   .dot.ok{background:#5fd07e} .dot.bad{background:#ef7a7a} .dot.mid{background:#e6c98a} .dot.muted{background:#3a4150}
-  .itxt b{font-size:13px;color:#e6e6e6;font-weight:600}
-  .itxt .d{display:block;color:#9aa1ad;font-size:12px;margin-top:2px}
+  .rlabel{font-size:13px;color:#e6e6e6;margin-right:auto}
+  .rref{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#717a88;flex-shrink:0;
+    max-width:46%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .sec{font-size:13px;font-weight:700;color:#cdd6e4;margin:26px 0 10px;border-bottom:1px solid #262b36;padding-bottom:6px}
-  .ms{display:flex;gap:14px;padding:7px 0;border-top:1px solid #20242e}
-  .ms:first-of-type{border-top:none}
-  .ms .when{flex-shrink:0;width:96px;color:#8a8f98;font-size:12px;font-family:ui-monospace,Menlo,monospace}
-  .ms .what{font-size:12.5px;color:#cdd6e4}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;color:#8a8f98;font-size:11.5px;margin:18px 0 4px}
-  .legend span{display:flex;gap:6px;align-items:center}
+  .now{background:#1a1712;border:1px solid #3a2f16;border-left:3px solid #e6c98a;border-radius:10px;
+    padding:13px 18px;font-size:12.8px;line-height:1.6;color:#e8dcc2}
 """
 
 
@@ -138,35 +150,32 @@ def esc(s: str) -> str:
 
 
 def render() -> str:
-    phases = []
-    for p in PHASES:
-        items = []
-        for st, title, desc in p["items"]:
-            items.append(
-                f'<div class="item"><div class="dot {STATUS_CLASS[st]}"></div>'
-                f'<div class="itxt"><b>{esc(title)}</b><span class="d">{esc(desc)}</span></div></div>'
+    cards = []
+    for e in EPICS:
+        rows = []
+        for st, label, ref in e["specs"]:
+            ref_html = "" if ref == "—" else f'<span class="rref">{esc(ref)}</span>'
+            rows.append(
+                f'<div class="row"><div class="dot {STATUS_CLASS[st]}"></div>'
+                f'<div class="rlabel">{esc(label)}</div>{ref_html}</div>'
             )
-        b = STATUS_CLASS[p["status"]]
-        phases.append(
-            f'<div class="phase"><div class="phead">'
-            f'<div class="pnum">{p["n"]}</div>'
-            f'<div class="ptitle">{esc(p["title"])}</div>'
-            f'<span class="badge {b}">{STATUS_LABEL[p["status"]]}</span></div>'
-            f'<div class="psum">{esc(p["summary"])}</div>'
-            f'{"".join(items)}</div>'
+        b = STATUS_CLASS[e["status"]]
+        cards.append(
+            f'<div class="epic"><div class="ehead">'
+            f'<span class="eid">{e["id"]}</span>'
+            f'<span class="etitle">{esc(e["title"])}</span>'
+            f'<span class="badge {b}">{STATUS_LABEL[e["status"]]}</span></div>'
+            f'<div class="esum">{esc(e["summary"])}</div>'
+            f'{"".join(rows)}</div>'
         )
-
-    milestones = "".join(
-        f'<div class="ms"><div class="when">{esc(w)}</div><div class="what">{esc(t)}</div></div>'
-        for w, t in MILESTONES
-    )
 
     legend = (
         '<div class="legend">'
-        '<span><i class="dot ok" style="width:12px;height:12px;border-radius:50%"></i> done</span>'
-        '<span><i class="dot mid" style="width:12px;height:12px;border-radius:50%"></i> in progress</span>'
-        '<span><i class="dot bad" style="width:12px;height:12px;border-radius:50%"></i> blocked</span>'
-        '<span><i class="dot muted" style="width:12px;height:12px;border-radius:50%"></i> to do</span>'
+        '<span><i class="ldot" style="background:#5fd07e"></i> done</span>'
+        '<span><i class="ldot" style="background:#e6c98a"></i> in progress</span>'
+        '<span><i class="ldot" style="background:#ef7a7a"></i> blocked</span>'
+        '<span><i class="ldot" style="background:#3a4150"></i> to do</span>'
+        '<span style="margin-left:auto" class="mono">refs → backlog/&lt;file&gt;</span>'
         '</div>'
     )
 
@@ -179,28 +188,25 @@ def render() -> str:
   <a href="roadmap.html" class="active">Roadmap</a>
 </div>
 <div class="wrap">
-<h1>Roadmap — harness-vs-model eval</h1>
-<div class="ts">generated {date.today().isoformat()} · hand-curated · edit tools/roadmap.py to update</div>
+<h1>Roadmap — harness-vs-model eval, by epic</h1>
+<div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 {legend}
-{''.join(phases)}
+{''.join(cards)}
 <div class="sec">Where we stand right now</div>
-<div class="phase" style="border-color:#3a2f16">
-  <div class="psum" style="margin-left:0">Phases 1's tasks are sharp, but we're stuck at the <b>Phase 2 gate</b>:
-  we can't run a trustworthy comparison until the <b>provider pin</b> and <b>openclaw browser</b> are fixed.
-  Next two actions — (1) operator picks the pin host (fireworks / novita); (2) diagnose openclaw browser
-  surfacing (task #90). One image rebuild then fixes both → first trustworthy both-harness result.
-  Detail: <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
-</div>
-<div class="sec">Milestones so far</div>
-{milestones}
+<div class="now">Epics 1–6 are largely built, but we're stuck at the <b>E2 fairness gate</b>: we
+can't run a trustworthy comparison until the <b>provider pin</b> (E2) and <b>openclaw browser</b>
+(E3) are fixed. Next two actions — (1) operator picks the pin host (fireworks / novita);
+(2) diagnose openclaw browser surfacing (task #90). One image rebuild then unblocks the
+E5 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
+<span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
 </div>
 </body></html>"""
 
 
 def main():
     OUT.write_text(render(), encoding="utf-8")
-    print(f"wrote {OUT}")
+    print(f"wrote {OUT} ({sum(len(e['specs']) for e in EPICS)} specs across {len(EPICS)} epics)")
 
 
 if __name__ == "__main__":
