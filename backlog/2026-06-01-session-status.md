@@ -112,14 +112,19 @@ discrimination. Recall scorers must grade CONTENT and tolerate format. See memor
      - ⬜ `unit-tests-01` — 4 mutants → 20+ subtle mutants (MED)
      - ⬜ `dep-bump-breaking-01` — multi-module pkg + real install/test/fix loop
        (LARGE; the review's "closest" — embodies the failing-loop discriminator)
-     - ⬜ `sub-agent-parallel-decompose-01` — HARD redesign. Two concrete grader
-       flaws (inert clamped bonus; self-reported-timestamp concurrency) are
-       fixable, but the deep issue is that a single deterministic script
-       one-shots all 32 files so fan-out is never REQUIRED. Genuine fix needs
-       non-batchable LLM-per-unit work whose serial reasoning can't fit the
-       wall-clock budget (so fan-out wins) with a deterministic answer key +
-       output-mtime concurrency detection. Design analyzed; not built. Operator
-       input worthwhile on whether to invest.
+     - ✅ `sub-agent-parallel-decompose-01` — HARD redesign DONE (f2b0864).
+       Replaced the 32-CSV deterministic transform (one-shottable by a script;
+       also leaked /app/expected) with 60 PROSE word-problems requiring genuine
+       multi-step reasoning (deterministic integer answers, not scriptable).
+       Enough that serial token-generation blows the 10-min budget while fan-out
+       fits → reward = correct/60 (NON-CLAMPED base the fan-out advantage raises
+       directly; no inert bonus). Concurrency = diagnostic from output mtimes
+       (wall-clock), not self-reported. Leak-proof (key in tests/+solution only).
+       Oracle 60/60. **CALIBRATION CAVEAT:** discrimination needs 60-vs-budget
+       above the serial/parallel threshold for deepseek-v4-pro; a first real run
+       must confirm — if both finish serially (base=1.0 both), raise N. This is
+       the ONE task whose discrimination can't be oracle-proven (oracle isn't an
+       LLM); it needs a real n=1 to set N.
    - Track B for the 5 authoring tasks (email-copy, restore-runbook, api-contract,
      cli-tool, readme) — destination set, not stood up.
 3. **Nothing removed** until each retired task's named alternative is green.
