@@ -94,7 +94,9 @@ corr = 1 if s == total else 0
 print(json.dumps({
     "reward": reward, "correctness": corr, "facts": s,
     "early": buckets["early"], "middle": buckets["middle"], "late": buckets["late"],
-    "answer_present": bool(nonempty), "answer_chars": len(raw),
-    "status": "scored" if nonempty else "no_answer_file",
+    # Audit fields kept NUMERIC: VerifierResult.rewards is dict[str, float|int],
+    # so a string here breaks result.json parsing. answer_present 0 == the agent
+    # never persisted /app/answer.md (a VOID), distinct from a present-but-wrong 0.
+    "answer_present": 1 if nonempty else 0, "answer_chars": len(raw),
 }))
 PY
