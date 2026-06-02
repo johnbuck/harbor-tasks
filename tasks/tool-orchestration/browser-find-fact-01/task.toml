@@ -1,0 +1,34 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/browser-find-fact-01"
+description = "Drive the harness's BROWSER tool (both openclaw and hermes are wired to a shared headless Chromium via CDP) to find a fact on a real, stable website. Target: https://quotes.toscrape.com/js/ — a JS-RENDERED page, so a plain `curl`/`wget` of the URL returns no rendered quotes; the harness must actually render + paginate. The asked quote ('Beauty is in the eye of the beholder ... give a stupid or misinformed beholder a black eye') is attributed BY THIS SITE to Jim Henson — an idiosyncratic attribution that differs from the common real-world one, so the model cannot answer from training; it MUST read the site. The quote lives on page 3, so the harness has to navigate/paginate. reward = answer-correct (format-robust, with a sibling penalty against the decoy authors on the same page); browser-tool use is reported as a diagnostic. This is the only task that routes through the harness's browser tool layer — PATH-CLI tool tasks can't discriminate it. CAVEAT: depends on an external site (quotes.toscrape.com, a Zyte-maintained stable scraping sandbox) being reachable through the wiley ProtonVPN exit; a real n=1 is the end-to-end reachability proof (the oracle only validates the grader)."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "browser", "web-navigation", "harness-discriminating"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "browser-find-fact"
+tags = ["tool-orchestration", "browser", "web-navigation", "harness-discriminating"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+# Browser navigation + JS render + pagination across pages takes real wall-clock.
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true   # the harness reaches the CDP browser (wiley:9222) which fetches the site
+mcp_servers = []        # uses the harness's BAKED browser tool, not an injected MCP server
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
