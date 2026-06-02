@@ -2,15 +2,11 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/update-record-with-cleanup-01"
-description = "User asks 'remove last month's grocery duplicates and split rent across the new roommate'. Tests multi-row file-edit precision, duplicate inference, arithmetic, preservation of unrelated history. Failure modes scored per the 11-mode taxonomy."
+description = "User asks 'remove this month's grocery duplicates and split rent with the new roommate' on a ~55-row multi-month budget ledger (reworked 2026-06-01). The deprecated version SHIPPED THE ANSWER KEY to the agent at world-readable /app/.budget.expected.csv (trivially gameable) and was a small one-shot. Now the expected result is NEVER materialized in the container — the grader computes it from the rules at grade time (tests/grade.py reads a pristine copy of the INPUT, not the answer). The ledger has 5 May-grocery duplicate groups (incl. a triple) plus preservation traps (cross-month grocery dups, a May utilities triple, near-amount pairs, same-date-different-category, same-vendor-different-date) — careful multi-row work, not eyeballable. Per-DECISION partial credit: neither 'do nothing' (~0.46) nor 'over-dedup everything' (~0.62) scores well; only correct dedup + preservation + rent split reaches 1.0."
 authors = [{name = "johnbuck"}]
-keywords = ["real-world-workflows", "record-update", "data-cleanup", "goal-oriented"]
+keywords = ["real-world-workflows", "record-update", "data-cleanup", "multi-row-precision"]
 
 [metadata]
-status = "deprecated"
-deprecation_date = "2026-06-01"
-deprecation_reason = "BROKEN: answer key shipped world-readable to the agent at /app/.budget.expected.csv; trivially gameable. Also one-shot CSV."
-deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "hard"
 category = "real-world-workflows"
