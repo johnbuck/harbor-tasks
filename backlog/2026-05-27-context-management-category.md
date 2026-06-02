@@ -1,11 +1,14 @@
 # Context-management category — long-session behavior tests
 
 - **Date:** 2026-05-27
-- **Status:** APPROVED — promoted out of DEFERRED 2026-05-30. Per
+- **Status:** IMPLEMENTED — category is live and in the first sweep (promoted out
+  of DEFERRED 2026-05-30). Per
   [`2026-05-30-harness-vs-model-discriminating-suite.md`](2026-05-30-harness-vs-model-discriminating-suite.md),
   context-management is the strongest pure-harness signal we have; deferring it
-  to a second sweep made it invisible in the first comparison. 3 task instances
-  already authored; weight 3.0 in Track A.
+  to a second sweep made it invisible in the first comparison. The category ships
+  the context-fill OVERFLOW family (01/02/03) plus the in-window `context-rot`
+  sibling (rot-01/02); weight 3.0 in Track A. Ongoing sharpening (overflow sizing,
+  blunt-at-345K findings) is tracked under the discrimination epic, not here.
 - **Origin:** Operator — "test what happens on a long-running session when you exceed the context window: does it get dumber, compact, or window out important context?"
 
 ## Problem

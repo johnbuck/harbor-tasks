@@ -1,7 +1,15 @@
 # Deterministic provider routing — pin OpenRouter upstream host
 
 - **Date:** 2026-05-27
-- **Status:** IMPLEMENTED 2026-05-27
+- **Status:** IMPLEMENTED 2026-05-27; **REGRESSED / BROKEN as of 2026-06-02.**
+  The pinned routing was set to `only:["deepseek"]`, an INVALID OpenRouter provider
+  slug for deepseek-v4-pro → every request 404s ("No endpoints found matching your
+  data policy"). Consequence: hermes can't make a single call, and openclaw's
+  xrouter path silently ignores the bad pin and routes freely — so NEITHER harness
+  is actually pinned. Fix = a valid non-training single host (`fireworks` or
+  `novita`, both 200 / 1M ctx) in BOTH `harnesses/openclaw/openclaw.json` and
+  `harnesses/hermes/config.yaml`, then rebuild the image. Full detail:
+  `backlog/2026-06-02-browser-and-pin-findings.md`. Tracked as the roadmap E2 blocker.
 - **Origin:** v9 showed openclaw 0 cache hits vs hermes 21,504 on the same model — investigation revealed an OpenRouter routing confound.
 
 ## Problem
