@@ -1,0 +1,3 @@
+A vineyard begins the day with 52 wine barrels. Mid-morning, a delivery brings six more wine barrels. At noon the count is tripled after two more shipments arrive. In the afternoon, 14 wine barrels are sent out and removed from the count. At closing, because the running total is an even number, the supervisor removes exactly half of them. Overnight, 2 wine barrels are found damaged and discarded.
+
+How many wine barrels remain at the very end? Respond with the single final integer only.

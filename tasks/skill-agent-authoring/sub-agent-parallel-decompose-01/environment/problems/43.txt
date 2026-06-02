@@ -1,0 +1,3 @@
+A observatory begins the day with 38 logged comets. Mid-morning, a delivery brings twelve more logged comets. At noon the count is tripled after two more shipments arrive. In the afternoon, 10 logged comets are sent out and removed from the count. At closing, because the running total is an even number, the supervisor removes exactly half of them. Overnight, 10 logged comets are found damaged and discarded.
+
+How many logged comets remain at the very end? Respond with the single final integer only.
