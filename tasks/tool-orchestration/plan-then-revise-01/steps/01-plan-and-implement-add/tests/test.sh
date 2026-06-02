@@ -8,6 +8,8 @@ import sys; sys.path.insert(0, '/app')
 from calc import add
 assert add(2, 3) == 5
 assert add(-1, 1) == 0
+assert add(900, 900) == 1000     # clamp policy (upper)
+assert add(-900, -900) == -1000  # clamp policy (lower)
 print('OK')
 " >/dev/null 2>&1 && ok=1
 fi

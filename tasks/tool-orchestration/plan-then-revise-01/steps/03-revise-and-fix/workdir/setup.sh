@@ -18,7 +18,10 @@ KEEP (already implemented in steps 1-2):
   2. multiply(a: int, b: int) -> int   — returns a * b
 
 ADD (new):
-  3. subtract(a: int, b: int) -> int   — returns a - b
+  3. subtract(a: int, b: int) -> int   — returns a - b.
+       It MUST follow the SAME project-wide result policy as the existing
+       functions (the rule fixed at kickoff). Apply it exactly as add and
+       multiply do — the policy itself is unchanged and is not restated here.
   4. apply_op(op: str, a: int, b: int) -> int
        — dispatches to add / multiply / subtract based on `op`.
          Raise ValueError on any unknown op.
