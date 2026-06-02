@@ -1,5 +1,6 @@
 # Eval memory stack — <memory-host> deployment (SHIPPED 2026-05-29)
 
+**Epic:** E3 — Capability infrastructure (memory + browser)
 **Status:** memory portion shipped + reachable from LAN. Browser/CDP is
 explicitly out of scope here (task #54). Canonical compose file lives on <memory-host>
 at `~/Docker/recall/docker-compose.yml`; mirror in this repo at

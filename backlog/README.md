@@ -32,7 +32,10 @@ its name and date — `done/` is purely a status distinction.
 
 Every spec includes:
 
-- A frontmatter block: Title, Date, Status, Origin / triggered-by
+- A frontmatter block: Title, **Epic**, Date, Status, Origin / triggered-by.
+  `Epic:` names the roadmap epic the spec rolls up to (e.g. `E4 — Task Suite`) —
+  the backlog stays a flat directory; epic membership is documented per-spec in
+  frontmatter, not by folder. Epics are defined in `tools/roadmap.py` (→ `roadmap.html`).
 - **Problem** — what's wrong or missing today, with evidence
 - **Scope** — what's in, what's deliberately out
 - **Design decisions** — the choices made and why

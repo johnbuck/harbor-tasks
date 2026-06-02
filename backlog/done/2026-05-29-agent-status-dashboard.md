@@ -1,5 +1,6 @@
 # `tools/agent_status.py` — eval harness status dashboard (SHIPPED 2026-05-29)
 
+**Epic:** E5 — Observability & reporting
 **Status:** shipped, single-file output (`agent-status.html`).
 **Companion:** `tools/README.md`,
 `backlog/done/2026-05-29-hermes-dual-plugin-system.md`, FOOTGUNS #20.

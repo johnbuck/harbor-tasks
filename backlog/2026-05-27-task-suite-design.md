@@ -1,5 +1,6 @@
 # Task suite design — categories, shapes, first-sweep selection
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
 - **Status:** IN PROGRESS
 - **Origin:** Operator — "we need to define the tasks we want to use."

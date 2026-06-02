@@ -1,5 +1,6 @@
 # Hermes plugin activation: two independent systems (RESEARCH 2026-05-29)
 
+**Epic:** E3 — Capability infrastructure (memory + browser)
 **Status:** investigation + dashboard implementation shipped.
 **Related:** `FOOTGUNS.md` #20, `tools/agent_status.py`,
 `backlog/done/2026-05-29-agent-status-dashboard.md`.

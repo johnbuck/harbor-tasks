@@ -1,5 +1,6 @@
 # New eval tasks — sub-agent spawning + research (design)
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-29
 - **Status:** IMPLEMENTED 2026-05-30 — both shapes shipped:
   `tasks/skill-agent-authoring/sub-agent-parallel-decompose-01/` (#55) and

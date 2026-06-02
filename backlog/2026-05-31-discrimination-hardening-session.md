@@ -1,5 +1,7 @@
 # Session record — discrimination hardening (2026-05-31)
 
+- **Epic:** E4 — Task Suite
+
 Full record of the harness-vs-model discrimination work done 2026-05-31, written
 so the context survives a `/clear`. Sibling of
 `2026-05-30-harness-vs-model-discriminating-suite.md` (the original spec) and

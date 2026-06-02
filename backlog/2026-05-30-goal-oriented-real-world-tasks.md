@@ -1,5 +1,6 @@
 # Goal-oriented real-world task suite — how users actually use agents
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
 - **Status:** PROPOSED
 - **Origin:** Operator (2026-05-30) — "consider how the user will use a

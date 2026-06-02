@@ -87,9 +87,10 @@ EPICS = [
     },
     {
         "id": "E4", "status": "partial",
-        "title": "Task suite authoring",
-        "summary": "Build the tests — the categories and shapes that exercise harness behaviour.",
+        "title": "Task Suite",
+        "summary": "Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.",
         "specs": [
+            # ── authoring: the categories, shapes, and task instances ──
             ("partial", "Task suite design — categories, shapes, first-sweep selection", "2026-05-27-task-suite-design.md",
              "The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired."),
             ("done", "Context-management category — long-session behaviour", "2026-05-27-context-management-category.md",
@@ -102,13 +103,7 @@ EPICS = [
              "Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling."),
             ("done", "tau3-bench integration — oracle shipped; agent-run deprecated", "2026-05-28-tau3-bench-integration.md",
              "Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped."),
-        ],
-    },
-    {
-        "id": "E5", "status": "partial",
-        "title": "Discrimination & validity",
-        "summary": "The frontier: make the suite actually MEASURE the harness, then run the verdict grid.",
-        "specs": [
+            # ── discrimination & validity: do the authored tasks actually measure the harness? ──
             ("partial", "Harness-vs-model discriminating suite — instrument proven (interim)", "2026-05-30-harness-vs-model-discriminating-suite.md",
              "The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes."),
             ("done", "Methodology evidence base — approach grounded in published work", "2026-06-01-methodology-evidence-base.md",
@@ -128,7 +123,7 @@ EPICS = [
         ],
     },
     {
-        "id": "E6", "status": "partial",
+        "id": "E5", "status": "partial",
         "title": "Observability & reporting",
         "summary": "See the state at a glance, and publish the verdict.",
         "specs": [
@@ -139,7 +134,7 @@ EPICS = [
             ("done", "Roadmap page — this page", "tools/roadmap.py",
              "tools/roadmap.py — the PLAN view: epics, specs, status, and this expandable detail. Hand-curated; re-run after backlog changes."),
             ("todo", "RESULTS.md — the discrimination verdict (task #81)", "—",
-             "The published verdict: does the instrument detect a harness difference, and how big? Written once the E5 grid runs. Tracked as task #81."),
+             "The published verdict: does the instrument detect a harness difference, and how big? Written once the E4 grid runs. Tracked as task #81."),
         ],
     },
 ]
@@ -283,7 +278,7 @@ def render() -> str:
 can't run a trustworthy comparison until the <b>provider pin</b> (E2) and <b>openclaw browser</b>
 (E3) are fixed. Next two actions — (1) operator picks the pin host (fireworks / novita);
 (2) diagnose openclaw browser surfacing (task #90). One image rebuild then unblocks the
-E5 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
+E4 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
 <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
 <div class="sec">Epics</div>
 {legend}

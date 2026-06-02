@@ -3,6 +3,7 @@ name: recall-bge-m3-and-eval-ontology
 title: Recall — bge-m3 embedder + deepseek-v4-flash extractor + community-build cron + eval-domain ontology
 date: 2026-05-29
 status: IMPLEMENTED 2026-05-29
+epic: E3 — Capability infrastructure (memory + browser)
 origin: ad-hoc evaluation 2026-05-29 — operator audited recall against hindsight; identified four real gaps separate from the agent-experience parity work
 ---
 

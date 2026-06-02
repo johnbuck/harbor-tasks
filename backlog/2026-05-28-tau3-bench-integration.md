@@ -1,5 +1,6 @@
 # tau3-bench integration — spec
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
 - **Status:** ORACLE SHIPPED; **AGENT-RUN DEPRECATED 2026-06-02.** The oracle
   (`solution/solve.sh`) validates the eval pipeline and passes. The live

@@ -1,5 +1,6 @@
 # Agent adapters — pre-baked base image + NoInstall + OpenRouter subclasses
 
+- **Epic:** E1 — Harness runtime & adapters
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** First real-LLM trial: hermes hit `AgentSetupTimeoutError`; openclaw couldn't reach OpenRouter.

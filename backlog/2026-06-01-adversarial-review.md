@@ -1,5 +1,7 @@
 # Adversarial review — is this suite even useful to evaluate a harness? (2026-06-01)
 
+- **Epic:** E4 — Task Suite
+
 6 parallel adversarial reviewers, biased to find fault (default verdict KILL/REWORK
 unless a task CLEARLY forces a harness-dependent failure that spreads the score).
 Verdict: **the suite, as built, does not effectively evaluate harnesses**, and a

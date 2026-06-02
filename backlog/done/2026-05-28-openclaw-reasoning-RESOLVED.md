@@ -1,5 +1,6 @@
 # openclaw reasoning on OpenRouter — RESOLVED 2026-05-28
 
+- **Epic:** E1 — Harness runtime & adapters
 - **Date:** 2026-05-28
 - **Status:** ✅ RESOLVED. Verified end-to-end: QuixBugs task → reward 1.0 with
   `reasoning_tokens = 327` across 4 turns. openclaw reasoning runs ARE now

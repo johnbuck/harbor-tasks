@@ -1,5 +1,6 @@
 # Context-management category — long-session behavior tests
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED — category is live and in the first sweep (promoted out
   of DEFERRED 2026-05-30). Per
