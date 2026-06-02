@@ -1,5 +1,6 @@
 # Harbor adoption — retire rube, build on Harbor
 
+- **Epic:** E1 — Harness runtime & adapters
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** Operator question — "do we actually even need to build rube? Are there existing solutions?"

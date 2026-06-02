@@ -1,5 +1,6 @@
 # Telegraphing audit — do instructions leak what the test secretly measures? (2026-06-01)
 
+**Epic:** E4 — Task Suite
 **Trigger:** operator review found tasks "explicitly giving the harness orders as
 to what to do and what not to do in order to succeed" — i.e. the instruction
 names the trap/strategy the verifier secretly rewards, so we measure

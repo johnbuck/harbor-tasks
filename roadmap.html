@@ -70,14 +70,15 @@
 can't run a trustworthy comparison until the <b>provider pin</b> (E2) and <b>openclaw browser</b>
 (E3) are fixed. Next two actions — (1) operator picks the pin host (fireworks / novita);
 (2) diagnose openclaw browser surfacing (task #90). One image rebuild then unblocks the
-E5 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
+E4 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
 <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
 <div class="sec">Epics</div>
 <div class="legend"><span><i class="ldot" style="background:#5fd07e"></i> done</span><span><i class="ldot" style="background:#e6c98a"></i> in progress</span><span><i class="ldot" style="background:#ef7a7a"></i> blocked</span><span><i class="ldot" style="background:#3a4150"></i> to do</span><span><i class="ldot" style="background:#6e4257"></i> deprecated</span><span style="margin-left:auto">click a row for detail · “open full spec” shows the backlog file</span></div>
-<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete.</div><button class="specbtn" onclick="openSpec('E1-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge bad">blocked</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot bad"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin regressed to an invalid slug `only:[deepseek]` → 404: hermes can't call at all, openclaw silently routes free — so NEITHER is actually pinned. Fix: a valid non-training host (fireworks or novita, both 200 / 1M ctx); operator picks, then rebuild the image.</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge mid">in progress</span></div><div class="esum">The subsystems the harnesses actually use — recall memory and a shared browser.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — wiley deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on wiley and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory shipped, browser portion</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. The memory half shipped; the browser half is the open item below.</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot bad"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — openclaw tool not surfacing (task #90)</div><span class="rref">2026-06-02-browser-and-pin-findings.md</span></div><div class="detail"><div class="dtext">Both harnesses are wired to a shared headless Chromium on wiley (CDP :9222). hermes exposes browser_navigate; openclaw's `browser` tool does NOT surface despite browser.enabled:true — prime suspect is CDP reachability from inside the trial container. browser-find-fact-01 is the gated task that proves the path once it works.</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-02-browser-and-pin-findings.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task suite authoring</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests — the categories and shapes that exercise harness behaviour.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-2','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench integration — oracle shipped; agent-run deprecated</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Discrimination &amp; validity</span><span class="badge mid">in progress</span></div><div class="esum">The frontier: make the suite actually MEASURE the harness, then run the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument proven (interim)</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes.</div><button class="specbtn" onclick="openSpec('E5-0','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E5-1','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E5-2','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E5-3','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E5-4','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E5-5','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Rework the ~22 salvageable deprecated tasks (task #89)</div></div><div class="detail"><div class="dtext">The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89.</div><button class="specbtn" disabled>tracked by task #</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → RESULTS.md verdict (task #81)</div></div><div class="detail"><div class="dtext">The verdict run: pass^k (all-of-k) across the discriminating set, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Gated on the E2 fixes. Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div><div class="epic"><div class="ehead"><span class="eid">E6</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E6-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task-catalog page — visual index of every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py — a drift-proof visual index of every task: what it asks, how it's graded, the oracle, and the environment. Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E6-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page</div><span class="rref">tools/roadmap.py</span></div><div class="detail"><div class="dtext">tools/roadmap.py — the PLAN view: epics, specs, status, and this expandable detail. Hand-curated; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E6-2','tools/roadmap.py')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — the discrimination verdict (task #81)</div></div><div class="detail"><div class="dtext">The published verdict: does the instrument detect a harness difference, and how big? Written once the E5 grid runs. Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div>
+<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete.</div><button class="specbtn" onclick="openSpec('E1-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge bad">blocked</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot bad"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin regressed to an invalid slug `only:[deepseek]` → 404: hermes can't call at all, openclaw silently routes free — so NEITHER is actually pinned. Fix: a valid non-training host (fireworks or novita, both 200 / 1M ctx); operator picks, then rebuild the image.</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge mid">in progress</span></div><div class="esum">The subsystems the harnesses actually use — recall memory and a shared browser.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — wiley deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on wiley and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory shipped, browser portion</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. The memory half shipped; the browser half is the open item below.</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot bad"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — openclaw tool not surfacing (task #90)</div><span class="rref">2026-06-02-browser-and-pin-findings.md</span></div><div class="detail"><div class="dtext">Both harnesses are wired to a shared headless Chromium on wiley (CDP :9222). hermes exposes browser_navigate; openclaw's `browser` tool does NOT surface despite browser.enabled:true — prime suspect is CDP reachability from inside the trial container. browser-find-fact-01 is the gated task that proves the path once it works.</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-02-browser-and-pin-findings.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task Suite</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-2','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench integration — oracle shipped; agent-run deprecated</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument proven (interim)</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes.</div><button class="specbtn" onclick="openSpec('E4-6','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E4-7','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E4-8','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E4-9','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E4-10','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E4-11','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Rework the ~22 salvageable deprecated tasks (task #89)</div></div><div class="detail"><div class="dtext">The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89.</div><button class="specbtn" disabled>tracked by task #</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → RESULTS.md verdict (task #81)</div></div><div class="detail"><div class="dtext">The verdict run: pass^k (all-of-k) across the discriminating set, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Gated on the E2 fixes. Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E5-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task-catalog page — visual index of every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py — a drift-proof visual index of every task: what it asks, how it's graded, the oracle, and the environment. Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E5-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page</div><span class="rref">tools/roadmap.py</span></div><div class="detail"><div class="dtext">tools/roadmap.py — the PLAN view: epics, specs, status, and this expandable detail. Hand-curated; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E5-2','tools/roadmap.py')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — the discrimination verdict (task #81)</div></div><div class="detail"><div class="dtext">The published verdict: does the instrument detect a harness difference, and how big? Written once the E4 grid runs. Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div>
 </div>
 <div id="srcs" style="display:none"><div id="src-E1-0"># Harbor adoption — retire rube, build on Harbor
 
+- **Epic:** E1 — Harness runtime &amp; adapters
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** Operator question — "do we actually even need to build rube? Are there existing solutions?"
@@ -147,6 +148,7 @@ would be months of work to land worse than what Harbor already has.
 - [[2026-05-27-task-suite-design]] — what tasks to actually run.
 </div><div id="src-E1-1"># Agent adapters — pre-baked base image + NoInstall + OpenRouter subclasses
 
+- **Epic:** E1 — Harness runtime &amp; adapters
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** First real-LLM trial: hermes hit `AgentSetupTimeoutError`; openclaw couldn't reach OpenRouter.
@@ -215,6 +217,7 @@ install.sh for hermes). Two failures surfaced:
 - [[2026-05-27-cost-and-token-tracking]] — surface usage from each adapter.
 </div><div id="src-E1-2"># Thin Harbor adapters for openclaw + hermes (SHIPPED 2026-05-29)
 
+**Epic:** E1 — Harness runtime &amp; adapters
 **Status:** shipped + parity-verified end-to-end.
 **Replaces:** the bundled `harbor.agents.installed.openclaw` / `installed.hermes`
 adapters and the older `*NoInstall` subclasses.
@@ -370,6 +373,7 @@ what's baked, persona-cwd pollution for diff-style verifiers, and the upstream
 openclaw workspace/persona conflation.
 </div><div id="src-E1-3"># Pre-built rich harnesses — design + build spec
 
+- **Epic:** E1 — Harness runtime &amp; adapters
 - **Date:** 2026-05-28 (design); shipped 2026-05-29.
 - **Status:** **SHIPPED.** Rich image `harbor-agents-rich:latest` builds
   from `environments/agent-rich/Dockerfile`; thin adapters are
@@ -570,6 +574,7 @@ plus image bakes jupyter/ipykernel + debugpy. Full design:
 browser-cdp; hermes browser_provider `cdp_url`) — neither ships a browser.
 </div><div id="src-E1-4"># openclaw reasoning on OpenRouter — RESOLVED 2026-05-28
 
+- **Epic:** E1 — Harness runtime &amp; adapters
 - **Date:** 2026-05-28
 - **Status:** ✅ RESOLVED. Verified end-to-end: QuixBugs task → reward 1.0 with
   `reasoning_tokens = 327` across 4 turns. openclaw reasoning runs ARE now
@@ -680,6 +685,7 @@ were 0.
   parity before trusting any openclaw-vs-hermes reasoning comparison.
 </div><div id="src-E1-5"># tau3-bench integration — spec
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
 - **Status:** ORACLE SHIPPED; **AGENT-RUN DEPRECATED 2026-06-02.** The oracle
   (`solution/solve.sh`) validates the eval pipeline and passes. The live
@@ -806,6 +812,7 @@ we still prefer the privacy pool where the routing allows it.
   reference.
 </div><div id="src-E2-0"># Deterministic provider routing — pin OpenRouter upstream host
 
+- **Epic:** E2 — Fair-comparison controls
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27; **REGRESSED / BROKEN as of 2026-06-02.**
   The pinned routing was set to `only:["deepseek"]`, an INVALID OpenRouter provider
@@ -888,6 +895,7 @@ Either confound would make a cost/latency comparison meaningless.
   Still deterministic as long as one host is pinned.
 </div><div id="src-E2-1"># Cost + token tracking — per-trial usage with live OpenRouter pricing
 
+- **Epic:** E2 — Fair-comparison controls
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** v3 trial reported `cost_usd: null` for openclaw; hermes reported 0 tokens.
@@ -1199,6 +1207,7 @@ async def wipe_memory_state(event: "TrialHookEvent") -&gt; None:
                            backend, group_id, result)
 </div><div id="src-E3-0"># Eval memory stack — wiley deployment (SHIPPED 2026-05-29)
 
+**Epic:** E3 — Capability infrastructure (memory + browser)
 **Status:** memory portion shipped + reachable from LAN. Browser/CDP is
 explicitly out of scope here (task #54). Canonical compose file lives on wiley
 at `~/Docker/recall/docker-compose.yml`; mirror in this repo at
@@ -1374,6 +1383,7 @@ name: recall-bge-m3-and-eval-ontology
 title: Recall — bge-m3 embedder + deepseek-v4-flash extractor + community-build cron + eval-domain ontology
 date: 2026-05-29
 status: IMPLEMENTED 2026-05-29
+epic: E3 — Capability infrastructure (memory + browser)
 origin: ad-hoc evaluation 2026-05-29 — operator audited recall against hindsight; identified four real gaps separate from the agent-experience parity work
 ---
 
@@ -1559,6 +1569,7 @@ name: recall-hindsight-style-plugin
 title: Recall — hindsight-style tool surface (coaching descriptions, reflect, dispositions, mental models)
 date: 2026-05-29
 status: IMPLEMENTED 2026-05-30 (P1+P2+P3+P4 shipped to both eval canary + prod; D9 #1 resolved as outcome 1: clean public hook at graphiti_core/utils/maintenance/node_operations.py:69 wired through Graphiti.add_episode(custom_extraction_instructions=...))
+epic: E3 — Capability infrastructure (memory + browser)
 origin: ad-hoc evaluation 2026-05-29 — operator asked "should we write a plugin for recall that behaves like hindsight"; deep-dive into `/app/api/hindsight_api/mcp_tools.py` + `config.py` revealed the actual delta
 ---
 
@@ -2328,6 +2339,7 @@ starting P2+. Hypothesis: P1 alone closes most of the observed
   (discovered during R-08 verification — needs `.to_native()`).
 </div><div id="src-E3-3"># Hermes plugin activation: two independent systems (RESEARCH 2026-05-29)
 
+**Epic:** E3 — Capability infrastructure (memory + browser)
 **Status:** investigation + dashboard implementation shipped.
 **Related:** `FOOTGUNS.md` #20, `tools/agent_status.py`,
 `backlog/done/2026-05-29-agent-status-dashboard.md`.
@@ -2473,6 +2485,7 @@ running — confusing and wrong-looking. With the union approach:
   misread as a missing plugin).
 </div><div id="src-E3-4"># Eval infrastructure stack — memory + browser (design)
 
+- **Epic:** E3 — Capability infrastructure (memory + browser)
 - **Date:** 2026-05-29
 - **Status:** **MEMORY portion SHIPPED 2026-05-29** (see
   [`done/2026-05-29-memory-stack-deployment.md`](done/2026-05-29-memory-stack-deployment.md)
@@ -2576,6 +2589,8 @@ repo under `infra/` (to be written), deployed to wiley with operator approval.
 - [ ] CDP wiring keys per harness (task #54).
 - [ ] Backups for new volumes (recall has none today either — known gap).
 </div><div id="src-E3-5"># Browser tool + provider-pin findings (2026-06-02) — pre-compact handoff
+
+- **Epic:** E3 — Capability infrastructure (memory + browser)
 
 Single source of truth for the browser-task + provider-pin work. Read first after
 the compact. **Two live problems, both surfaced by a real e2e of the browser task.**
@@ -2717,6 +2732,7 @@ switch to a non-memorized target later; gating is sufficient for now.)
 5. Commit the source edits + task + this doc together.
 </div><div id="src-E4-0"># Task suite design — categories, shapes, first-sweep selection
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
 - **Status:** IN PROGRESS
 - **Origin:** Operator — "we need to define the tasks we want to use."
@@ -2838,6 +2854,7 @@ PYTHONPATH=/home/trumble/harbor-tasks infisical run \
   deferred to a second sweep.
 </div><div id="src-E4-1"># Context-management category — long-session behavior tests
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED — category is live and in the first sweep (promoted out
   of DEFERRED 2026-05-30). Per
@@ -2906,6 +2923,7 @@ category). Lock the design; run when budget is approved.
 - Depends on [[2026-05-27-task-suite-design]] first-sweep landing.
 </div><div id="src-E4-2"># Multi-step task suite — design + specifications
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
 - **Status:** IN PROGRESS
 - **Origin:** Operator — "build out the multistep instructions as we've defined … capture specifications … push up to show the team."
@@ -3030,6 +3048,7 @@ not affect authoring or oracle validation of these tasks.
   openclaw reasoning-passthrough fix); tau3-bench build-validation in progress.
 </div><div id="src-E4-3"># New eval tasks — sub-agent spawning + research (design)
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-29
 - **Status:** IMPLEMENTED 2026-05-30 — both shapes shipped:
   `tasks/skill-agent-authoring/sub-agent-parallel-decompose-01/` (#55) and
@@ -3104,6 +3123,7 @@ a grounded answer/artifact.
 - [ ] Confirm delegation actually fires per harness (inspect child sessions).
 </div><div id="src-E4-4"># Goal-oriented real-world task suite — how users actually use agents
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
 - **Status:** PROPOSED
 - **Origin:** Operator (2026-05-30) — "consider how the user will use a
@@ -3322,6 +3342,7 @@ single shape shows the signal.
   this spec is **additive** to that plan, not a replacement).
 </div><div id="src-E4-5"># tau3-bench integration — spec
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
 - **Status:** ORACLE SHIPPED; **AGENT-RUN DEPRECATED 2026-06-02.** The oracle
   (`solution/solve.sh`) validates the eval pipeline and passes. The live
@@ -3446,8 +3467,9 @@ we still prefer the privacy pool where the routing allows it.
   acceptance criterion unmet for v1; Track A sweep (#78) is the headline.
   Track-A artifacts in `/tmp/harbor-jobs/tau3-openclaw-smoke*` for diagnostic
   reference.
-</div><div id="src-E5-0"># Harness-vs-model discriminating suite — eval the scaffolding, not the LLM
+</div><div id="src-E4-6"># Harness-vs-model discriminating suite — eval the scaffolding, not the LLM
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
 - **Status:** INSTRUMENT PROVEN (interim), n=5 pass^k pending budget. As of
   2026-05-31:
@@ -4110,7 +4132,9 @@ borrowed-methodology story.
   82%-vs-9%, τ²-bench, SkillsBench, MEM2ACTBENCH) and that three of them have
   novel-contribution potential (write-proactivity scoring, sub-agent
   delegation rubric, skill-discovery latency).
-</div><div id="src-E5-1"># Methodology evidence base — is our harness-eval approach grounded? (2026-06-01)
+</div><div id="src-E4-7"># Methodology evidence base — is our harness-eval approach grounded? (2026-06-01)
+
+- **Epic:** E4 — Task Suite
 
 Operator challenge: stop asserting methodology from LLM priors; show real published
 evidence that this is how harness evaluation is actually done, or admit where it isn't.
@@ -4245,7 +4269,9 @@ METR); (3) treat the **window-overflow protocol** as a novel, well-motivated con
 and calibrate to the *effective* (~300–400k) not *claimed* (1M) window, scoring what
 survives compaction to isolate the harness. Pinning + n&gt;1 variance reporting together are
 the fair-comparison control. Citations above are the spine of RESULTS.md.
-</div><div id="src-E5-2"># Session record — discrimination hardening (2026-05-31)
+</div><div id="src-E4-8"># Session record — discrimination hardening (2026-05-31)
+
+- **Epic:** E4 — Task Suite
 
 Full record of the harness-vs-model discrimination work done 2026-05-31, written
 so the context survives a `/clear`. Sibling of
@@ -4468,7 +4494,9 @@ the three combined). Dial `LINES_PER_SECTION` in each `gen_reports.py` to resize
   on both harnesses to evaluate proactive application + stale-vs-ground-truth.
 - **n=5 pass^k grid** → publish `RESULTS.md` verdict (#79 → #81). Deferred money
   step. With the suite now hard + graded, expect real spread + reliability gaps.
-</div><div id="src-E5-3"># Adversarial review — is this suite even useful to evaluate a harness? (2026-06-01)
+</div><div id="src-E4-9"># Adversarial review — is this suite even useful to evaluate a harness? (2026-06-01)
+
+- **Epic:** E4 — Task Suite
 
 6 parallel adversarial reviewers, biased to find fault (default verdict KILL/REWORK
 unless a task CLEARLY forces a harness-dependent failure that spreads the score).
@@ -4639,8 +4667,9 @@ update-record-with-cleanup-01 all un-deprecated + oracle-green this session
    coaching.** Verify graders aren't gameable by keyword-dumping.
 6. Realistic SCALE and messiness (80 emails, 100k log lines, 150-page corpus,
    15-file repo), not vanilla 2-page synthetic filler.
-</div><div id="src-E5-4"># Telegraphing audit — do instructions leak what the test secretly measures? (2026-06-01)
+</div><div id="src-E4-10"># Telegraphing audit — do instructions leak what the test secretly measures? (2026-06-01)
 
+**Epic:** E4 — Task Suite
 **Trigger:** operator review found tasks "explicitly giving the harness orders as
 to what to do and what not to do in order to succeed" — i.e. the instruction
 names the trap/strategy the verifier secretly rewards, so we measure
@@ -4798,8 +4827,9 @@ the check may be testing an unreasonable latent expectation rather than a real g
   score 1.0 once the instruction no longer hands over the strategy — oracle
   solve.sh encodes the right answer, so it stays 1.0; the point is the AGENT now
   has to earn it).
-</div><div id="src-E5-5"># Retired-task coverage matrix — no capability left untested (2026-06-01)
+</div><div id="src-E4-11"># Retired-task coverage matrix — no capability left untested (2026-06-01)
 
+**Epic:** E4 — Task Suite
 **Purpose.** The adversarial review retired 23 tasks on ONE axis: "does it separate
 openclaw from hermes?" It did NOT ask "does it cover the capability?" Those are
 different questions. This matrix re-triages all 23 by **capability**, assigns each a
@@ -4902,8 +4932,9 @@ housekeeping; nothing scores them in the interim. The retired set still stays on
 disk (deprecated, not removed) until each cover is green. This document + the
 drift-proof `task-catalog.html` ("RETIRED — pending review" badges) are the audit
 trail.
-</div><div id="src-E6-0"># `tools/agent_status.py` — eval harness status dashboard (SHIPPED 2026-05-29)
+</div><div id="src-E5-0"># `tools/agent_status.py` — eval harness status dashboard (SHIPPED 2026-05-29)
 
+**Epic:** E5 — Observability &amp; reporting
 **Status:** shipped, single-file output (`agent-status.html`).
 **Companion:** `tools/README.md`,
 `backlog/done/2026-05-29-hermes-dual-plugin-system.md`, FOOTGUNS #20.
@@ -5045,8 +5076,9 @@ Re-run after any of these and the dashboard reflects the change:
 - flipping `memory.provider:` or `agent.context.engine:` in `harnesses/hermes/config.yaml`,
 - adding a plugin to `plugins.enabled` in the hermes config,
 - starting/stopping a memory service on wiley.
-</div><div id="src-E6-1"># Task Catalog page — visual human-reviewable index of every eval task
+</div><div id="src-E5-1"># Task Catalog page — visual human-reviewable index of every eval task
 
+**Epic:** E5 — Observability &amp; reporting
 **Status:** first draft shipped 2026-05-31.
 **Sibling of:** `tools/agent_status.py` → `agent-status.html` (the harness-status board).
 **Generator:** `tools/task_catalog.py` → `task-catalog.html`.
@@ -5162,7 +5194,7 @@ Re-run after authoring/editing any task. No docker, no network.
 - Render the graded-vs-binary badge from an actual dry-run of the verifier against
   the oracle output rather than the source heuristic.
 - A "coverage matrix" (category × difficulty × graded) heatmap at the top.
-</div><div id="src-E6-2">#!/usr/bin/env python3
+</div><div id="src-E5-2">#!/usr/bin/env python3
 """Generate roadmap.html — the plan + progress for the harbor-tasks harness-vs-model
 eval, broken out by EPIC.
 
@@ -5251,9 +5283,10 @@ EPICS = [
     },
     {
         "id": "E4", "status": "partial",
-        "title": "Task suite authoring",
-        "summary": "Build the tests — the categories and shapes that exercise harness behaviour.",
+        "title": "Task Suite",
+        "summary": "Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.",
         "specs": [
+            # ── authoring: the categories, shapes, and task instances ──
             ("partial", "Task suite design — categories, shapes, first-sweep selection", "2026-05-27-task-suite-design.md",
              "The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired."),
             ("done", "Context-management category — long-session behaviour", "2026-05-27-context-management-category.md",
@@ -5266,13 +5299,7 @@ EPICS = [
              "Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling."),
             ("done", "tau3-bench integration — oracle shipped; agent-run deprecated", "2026-05-28-tau3-bench-integration.md",
              "Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped."),
-        ],
-    },
-    {
-        "id": "E5", "status": "partial",
-        "title": "Discrimination &amp; validity",
-        "summary": "The frontier: make the suite actually MEASURE the harness, then run the verdict grid.",
-        "specs": [
+            # ── discrimination &amp; validity: do the authored tasks actually measure the harness? ──
             ("partial", "Harness-vs-model discriminating suite — instrument proven (interim)", "2026-05-30-harness-vs-model-discriminating-suite.md",
              "The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes."),
             ("done", "Methodology evidence base — approach grounded in published work", "2026-06-01-methodology-evidence-base.md",
@@ -5292,7 +5319,7 @@ EPICS = [
         ],
     },
     {
-        "id": "E6", "status": "partial",
+        "id": "E5", "status": "partial",
         "title": "Observability &amp; reporting",
         "summary": "See the state at a glance, and publish the verdict.",
         "specs": [
@@ -5303,7 +5330,7 @@ EPICS = [
             ("done", "Roadmap page — this page", "tools/roadmap.py",
              "tools/roadmap.py — the PLAN view: epics, specs, status, and this expandable detail. Hand-curated; re-run after backlog changes."),
             ("todo", "RESULTS.md — the discrimination verdict (task #81)", "—",
-             "The published verdict: does the instrument detect a harness difference, and how big? Written once the E5 grid runs. Tracked as task #81."),
+             "The published verdict: does the instrument detect a harness difference, and how big? Written once the E4 grid runs. Tracked as task #81."),
         ],
     },
 ]
@@ -5447,7 +5474,7 @@ def render() -&gt; str:
 can't run a trustworthy comparison until the &lt;b&gt;provider pin&lt;/b&gt; (E2) and &lt;b&gt;openclaw browser&lt;/b&gt;
 (E3) are fixed. Next two actions — (1) operator picks the pin host (fireworks / novita);
 (2) diagnose openclaw browser surfacing (task #90). One image rebuild then unblocks the
-E5 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
+E4 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
 &lt;span class="mono"&gt;backlog/2026-06-02-browser-and-pin-findings.md&lt;/span&gt;.&lt;/div&gt;
 &lt;div class="sec"&gt;Epics&lt;/div&gt;
 {legend}

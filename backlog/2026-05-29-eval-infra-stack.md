@@ -1,5 +1,6 @@
 # Eval infrastructure stack — memory + browser (design)
 
+- **Epic:** E3 — Capability infrastructure (memory + browser)
 - **Date:** 2026-05-29
 - **Status:** **MEMORY portion SHIPPED 2026-05-29** (see
   [`done/2026-05-29-memory-stack-deployment.md`](done/2026-05-29-memory-stack-deployment.md)

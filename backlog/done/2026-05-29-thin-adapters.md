@@ -1,5 +1,6 @@
 # Thin Harbor adapters for openclaw + hermes (SHIPPED 2026-05-29)
 
+**Epic:** E1 — Harness runtime & adapters
 **Status:** shipped + parity-verified end-to-end.
 **Replaces:** the bundled `harbor.agents.installed.openclaw` / `installed.hermes`
 adapters and the older `*NoInstall` subclasses.

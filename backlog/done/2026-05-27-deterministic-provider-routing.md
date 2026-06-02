@@ -1,5 +1,6 @@
 # Deterministic provider routing — pin OpenRouter upstream host
 
+- **Epic:** E2 — Fair-comparison controls
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27; **REGRESSED / BROKEN as of 2026-06-02.**
   The pinned routing was set to `only:["deepseek"]`, an INVALID OpenRouter provider

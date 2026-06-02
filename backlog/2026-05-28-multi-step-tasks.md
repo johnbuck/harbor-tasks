@@ -1,5 +1,6 @@
 # Multi-step task suite — design + specifications
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
 - **Status:** IN PROGRESS
 - **Origin:** Operator — "build out the multistep instructions as we've defined … capture specifications … push up to show the team."

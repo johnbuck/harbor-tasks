@@ -1,5 +1,6 @@
 # Retired-task coverage matrix — no capability left untested (2026-06-01)
 
+**Epic:** E4 — Task Suite
 **Purpose.** The adversarial review retired 23 tasks on ONE axis: "does it separate
 openclaw from hermes?" It did NOT ask "does it cover the capability?" Those are
 different questions. This matrix re-triages all 23 by **capability**, assigns each a

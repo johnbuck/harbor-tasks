@@ -1,5 +1,7 @@
 # Browser tool + provider-pin findings (2026-06-02) — pre-compact handoff
 
+- **Epic:** E3 — Capability infrastructure (memory + browser)
+
 Single source of truth for the browser-task + provider-pin work. Read first after
 the compact. **Two live problems, both surfaced by a real e2e of the browser task.**
 

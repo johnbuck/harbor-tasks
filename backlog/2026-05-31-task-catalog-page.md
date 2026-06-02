@@ -1,5 +1,6 @@
 # Task Catalog page — visual human-reviewable index of every eval task
 
+**Epic:** E5 — Observability & reporting
 **Status:** first draft shipped 2026-05-31.
 **Sibling of:** `tools/agent_status.py` → `agent-status.html` (the harness-status board).
 **Generator:** `tools/task_catalog.py` → `task-catalog.html`.

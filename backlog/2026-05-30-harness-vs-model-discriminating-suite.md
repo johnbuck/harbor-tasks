@@ -1,5 +1,6 @@
 # Harness-vs-model discriminating suite — eval the scaffolding, not the LLM
 
+- **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
 - **Status:** INSTRUMENT PROVEN (interim), n=5 pass^k pending budget. As of
   2026-05-31:

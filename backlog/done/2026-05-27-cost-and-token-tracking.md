@@ -1,5 +1,6 @@
 # Cost + token tracking — per-trial usage with live OpenRouter pricing
 
+- **Epic:** E2 — Fair-comparison controls
 - **Date:** 2026-05-27
 - **Status:** IMPLEMENTED 2026-05-27
 - **Origin:** v3 trial reported `cost_usd: null` for openclaw; hermes reported 0 tokens.

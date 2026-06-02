@@ -1,5 +1,6 @@
 # Pre-built rich harnesses — design + build spec
 
+- **Epic:** E1 — Harness runtime & adapters
 - **Date:** 2026-05-28 (design); shipped 2026-05-29.
 - **Status:** **SHIPPED.** Rich image `harbor-agents-rich:latest` builds
   from `environments/agent-rich/Dockerfile`; thin adapters are

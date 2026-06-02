@@ -1,5 +1,7 @@
 # Methodology evidence base — is our harness-eval approach grounded? (2026-06-01)
 
+- **Epic:** E4 — Task Suite
+
 Operator challenge: stop asserting methodology from LLM priors; show real published
 evidence that this is how harness evaluation is actually done, or admit where it isn't.
 Five parallel research passes (WebSearch + WebFetch, primary sources only). Each

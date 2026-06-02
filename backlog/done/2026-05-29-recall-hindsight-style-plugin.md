@@ -3,6 +3,7 @@ name: recall-hindsight-style-plugin
 title: Recall — hindsight-style tool surface (coaching descriptions, reflect, dispositions, mental models)
 date: 2026-05-29
 status: IMPLEMENTED 2026-05-30 (P1+P2+P3+P4 shipped to both eval canary + prod; D9 #1 resolved as outcome 1: clean public hook at graphiti_core/utils/maintenance/node_operations.py:69 wired through Graphiti.add_episode(custom_extraction_instructions=...))
+epic: E3 — Capability infrastructure (memory + browser)
 origin: ad-hoc evaluation 2026-05-29 — operator asked "should we write a plugin for recall that behaves like hindsight"; deep-dive into `/app/api/hindsight_api/mcp_tools.py` + `config.py` revealed the actual delta
 ---
 
