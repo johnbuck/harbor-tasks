@@ -21,7 +21,7 @@ import json, os, re
 ANS = "/app/answer.json"
 LOG = "/var/log/tool-calls.log"
 CORRECT = ("jsonl-count", "semver-max", "money-sum")
-EXPECTED = {"record_count": 6, "latest_version": "1.10.2", "total_cents": 2100}
+EXPECTED = {"record_count": 6, "latest_version": "1.10.10", "total_cents": 2100}
 
 # --- answer correctness (3 sub-checks) ---
 ans_ok = 0

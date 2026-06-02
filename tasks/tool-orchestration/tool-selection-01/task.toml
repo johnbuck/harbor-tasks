@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/tool-selection-01"
-description = "18 helper tools with name-adjacent decoy traps; exactly 3 solve the task and each sub-goal has an obvious-but-wrong adjacent tool (lexicographic vs semantic-version max, naive-float vs currency-aware sum, json-array vs jsonl count). Graded reward blends answer correctness (3 sub-answers) with tool-selection precision/recall F1 read from the invocation log."
+description = "18 helper tools with name-adjacent decoy traps; exactly 3 solve the task and each sub-goal has an obvious-but-wrong adjacent tool (lexicographic vs semantic-version max, naive-float vs currency-aware sum, json-array vs jsonl count). Graded reward blends answer correctness (3 sub-answers) with tool-selection precision/recall F1 read from the invocation log. Hardened 2026-06-01: removed the instruction telegraph that handed over the semver answer; data now defeats the naive bypass (events.jsonl interleaves comment/blank/malformed lines so wc/grep overcount; semantic max is 1.10.10 so plain-text sort and a careless reader both miss)."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "tool-selection", "tool-sprawl", "decoys"]
 

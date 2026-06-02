@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/tool-sprawl-precision-01"
-description = "60 candidate shell tools (with name-adjacent decoy traps); exactly 3 solve the task. Graded reward blends answer-fraction (3 sub-answers) with tool-selection F1 over the agent's invocation history."
+description = "60 candidate shell tools (with name-adjacent decoy traps); exactly 3 solve the task. Graded reward blends answer-fraction (3 sub-answers) with tool-selection F1 over the agent's invocation history. Hardened 2026-06-01: customers.csv is padded with comment/blank lines so a naive `wc -l` count is wrong, and csv-row-count parses rows and skips them -- the customer_count sub-answer now requires the tool rather than a line count."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "tool-sprawl", "tool-selection"]
 
