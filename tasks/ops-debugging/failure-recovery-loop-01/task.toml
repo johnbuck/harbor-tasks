@@ -2,15 +2,11 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/failure-recovery-loop-01"
-description = "Tool returns transient errors before succeeding; agent must retry, not give up. Verifier grades EFFICIENCY of recovery, not just eventual success: reward = 0.6*correctness + 0.4*efficiency, where efficiency is clamped on a retry budget (ideal 4 invocations = clean recovery, ceiling 15 = flailing). A harness that recovers in the minimum attempts scores ~1.0; one that burns a dozen retries scores ~0.7; never-recovered scores ~0. Attempts counted from /var/log/fetch.counter, incremented by flaky-fetch on every call."
+description = "ADAPTIVE recovery (reworked 2026-06-01): the dfetch tool fails with DIFFERENT, actionable errors until the agent reads each and applies the SPECIFIC fix — supply --region, then a provisioned region (eu-west|us-east, revealed only by the error), then the session token at /app/.dfetch_token (revealed by the 401), then clear a stale lock via `dfetch --release`. A blind retry of the same command stalls on the first unmet requirement forever, so CORRECTNESS itself discriminates an observe-diagnose-adapt harness from a flailing one (the old deterministic fail-1-3/succeed-4 version let a fixed retry loop win). reward = 0.6*correctness + 0.4*efficiency; efficiency clamps on a call budget (IDEAL 6 = clean discovery, CEIL 18 = flailing); never-recovered scores 0. Calls counted from /var/log/dfetch.counter. No telegraphing: instruction states only basic usage + deliverables."
 authors = [{name = "johnbuck"}]
-keywords = ["ops-debugging", "failure-recovery", "retry"]
+keywords = ["ops-debugging", "failure-recovery", "adaptive-recovery", "diagnosis"]
 
 [metadata]
-status = "deprecated"
-deprecation_date = "2026-06-01"
-deprecation_reason = "Deterministic fail-1-3/succeed-4 → fixed retry loop is optimal; no adaptive recovery tested."
-deprecation_doc = "backlog/2026-06-01-adversarial-review.md"
 author_name = "johnbuck"
 difficulty = "hard"
 category = "ops-debugging"

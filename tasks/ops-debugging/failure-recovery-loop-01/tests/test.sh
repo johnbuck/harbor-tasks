@@ -1,56 +1,34 @@
 #!/bin/bash
-# Verifier: GRADED on correctness + EFFICIENCY (retry budget), so a harness that
-# recovers cleanly in the minimum number of attempts scores higher than one that
-# flails through many retries, even though both eventually produce the files.
-#
-# Attempt counting: flaky-fetch increments /var/log/fetch.counter on EVERY
-# invocation (see environment/Dockerfile). The tool deterministically fails on
-# calls 1-3 (transient) and succeeds on call 4+, so the minimum number of
-# invocations needed to recover is 4. Extra invocations beyond that are wasted
-# retries / spamming — the inefficiency signal we want to grade.
+# ADAPTIVE-RECOVERY scorer. Recovery here REQUIRES diagnosing each error and
+# applying a DIFFERENT correction (region -> valid region -> token -> release);
+# a blind retry of the same command never succeeds, so CORRECTNESS itself
+# discriminates an adaptive harness from a flailing one. Efficiency grades how
+# cleanly it recovered, on a call budget.
 #
 # Reward = 0.6*correctness + 0.4*efficiency
-#   correctness = (payload_ok + token_ok) / 2          (did it reach recovered state)
-#   efficiency  = clamp((CEIL - attempts)/(CEIL - IDEAL), 0, 1)
-#     IDEAL = 4  (forced floor: 3 transient fails + 1 success = clean recovery)
-#     CEIL  = 15 (a harness still looping at this point has no recovery strategy)
-# If correctness == 0 (never recovered) efficiency is meaningless and is dropped,
-# so a give-up scores ~0 regardless of how few attempts it made.
-#
-# reward.json MUST stay a FLAT dict of scalar numbers only (Harbor pydantic
-# rejects nested dict/list values -> reward=None / trial error; FOOTGUNS #38).
-
+#   correctness = (payload_ok + token_ok)/2
+#   efficiency  = clamp((CEIL - calls)/(CEIL - IDEAL), 0, 1)
+#     IDEAL = 6  (realistic minimum to DISCOVER all 4 corrections via errors:
+#                 missing-region, bad-region, 401, stale-lock, --release, success)
+#     CEIL  = 18 (still flailing at 3x the discovery cost)
+#   correctness==0 (never recovered) drops efficiency -> reward 0.
+# reward.json MUST be a FLAT scalar dict (Harbor rejects nested; FOOTGUNS #38).
 mkdir -p /logs/verifier
 
 payload_ok=0; token_ok=0
-if [ -f /app/payload.txt ] && grep -q '^PAYLOAD: hgr-7842-OK$' /app/payload.txt; then
-    payload_ok=1
-fi
-if [ -f /app/token.txt ] && [ "$(cat /app/token.txt 2>/dev/null | tr -d '[:space:]')" = "hgr-7842-OK" ]; then
-    token_ok=1
-fi
-
-attempts=$(cat /var/log/fetch.counter 2>/dev/null || echo 0)
+[ -f /app/payload.txt ] && grep -q '^PAYLOAD: hgr-7842-OK$' /app/payload.txt && payload_ok=1
+[ -f /app/token.txt ] && [ "$(tr -d '[:space:]' < /app/token.txt 2>/dev/null)" = "hgr-7842-OK" ] && token_ok=1
+calls=$(cat /var/log/dfetch.counter 2>/dev/null || echo 0)
 
 read reward correctness efficiency <<<"$(python3 -c "
-payload_ok = $payload_ok
-token_ok   = $token_ok
-attempts   = $attempts
-IDEAL = 4
-CEIL  = 15
-
-correctness = (payload_ok + token_ok) / 2.0
-raw = (CEIL - attempts) / float(CEIL - IDEAL)
-efficiency = max(0.0, min(1.0, raw))
-
-if correctness == 0:
-    reward = 0.6 * correctness  # 0.0 — never recovered; do not credit efficiency
-else:
-    reward = 0.6 * correctness + 0.4 * efficiency
-
-print(round(reward, 4), round(correctness, 4), round(efficiency, 4))
+p=$payload_ok; t=$token_ok; calls=$calls
+IDEAL=6; CEIL=18
+correctness=(p+t)/2.0
+eff=max(0.0,min(1.0,(CEIL-calls)/float(CEIL-IDEAL)))
+reward = 0.0 if correctness==0 else 0.6*correctness + 0.4*eff
+print(round(reward,4), round(correctness,4), round(eff,4))
 ")"
 
-cat > /logs/verifier/reward.json <<EOF
-{"reward": ${reward}, "correctness": ${correctness}, "efficiency": ${efficiency}, "attempts": ${attempts}}
-EOF
+cat > /logs/verifier/reward.json <<JSON
+{"reward": ${reward}, "correctness": ${correctness}, "efficiency": ${efficiency}, "calls": ${calls}}
+JSON
