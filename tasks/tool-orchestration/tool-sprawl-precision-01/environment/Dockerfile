@@ -30,9 +30,23 @@ EOF
 RUN cat > /opt/tools/csv-row-count <<'EOF' && chmod +x /opt/tools/csv-row-count
 #!/bin/bash
 _logwrap csv-row-count true
-# Counts data rows (excludes header line).
-n=$(($(wc -l < "$1") - 1))
-echo "$n"
+# Counts DATA rows: parses the CSV, drops the header, and skips blank lines and
+# comment lines (#...). A raw `wc -l` (with or without -1 for the header) is
+# WRONG on a file padded with blank/comment lines.
+python3 -c "
+import sys, csv
+rows = 0
+with open(sys.argv[1], newline='') as f:
+    for i, row in enumerate(csv.reader(f)):
+        if i == 0:                      # header
+            continue
+        if not row or not row[0].strip():
+            continue                    # blank line
+        if row[0].lstrip().startswith('#'):
+            continue                    # comment line
+        rows += 1
+print(rows)
+" "$1"
 EOF
 
 RUN cat > /opt/tools/word-tally <<'EOF' && chmod +x /opt/tools/word-tally
@@ -71,17 +85,23 @@ RUN for name in \
 # Symlink all tools onto PATH.
 RUN for f in /opt/tools/*; do ln -sf "$f" "/usr/local/bin/$(basename $f)"; done
 
-# Seed input files.
-RUN cat > /app/customers.csv <<'EOF'
-id,name,signup_date
-1,alpha,2026-01-01
-2,bravo,2026-01-15
-3,charlie,2026-02-01
-4,delta,2026-02-20
-5,echo,2026-03-04
-6,foxtrot,2026-03-22
-7,golf,2026-04-01
-EOF
+# Seed input files. customers.csv carries 7 DATA rows but is padded with a
+# comment line and two blank lines, so naive `wc -l` (11) and `wc -l` minus the
+# header (10) are both WRONG -- only a tool that parses rows and skips
+# blank/comment lines returns customer_count = 7.
+RUN printf '%s\n' \
+    'id,name,signup_date' \
+    '# exported 2026-04-01; blank and #-comment lines are not customers' \
+    '1,alpha,2026-01-01' \
+    '2,bravo,2026-01-15' \
+    '3,charlie,2026-02-01' \
+    '' \
+    '4,delta,2026-02-20' \
+    '5,echo,2026-03-04' \
+    '6,foxtrot,2026-03-22' \
+    '' \
+    '7,golf,2026-04-01' \
+    > /app/customers.csv
 
 RUN cat > /app/notes.txt <<'EOF'
 the quick brown fox jumps over the lazy dog

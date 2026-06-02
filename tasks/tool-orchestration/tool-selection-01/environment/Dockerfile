@@ -23,11 +23,27 @@ echo "$(date -Iseconds) $NAME $*" >> /var/log/tool-calls.log
 "$@"
 EOF
 
-# --- Correct tool 1: jsonl-count (count JSON objects, one per line) ---
+# --- Correct tool 1: jsonl-count (count VALID JSON objects, one per line) ---
+# Skips blank lines, comments, and any line that is not a parseable JSON object,
+# so a raw `wc -l` / `grep -c '{'` over the noisy file overcounts.
 RUN cat > /opt/tools/jsonl-count <<'EOF' && chmod +x /opt/tools/jsonl-count
 #!/bin/bash
 _logwrap jsonl-count true
-python3 -c "import sys,json; print(sum(1 for l in open(sys.argv[1]) if l.strip() and json.loads(l) is not None))" "$1"
+python3 -c "
+import sys, json
+n = 0
+for l in open(sys.argv[1]):
+    s = l.strip()
+    if not s:
+        continue
+    try:
+        obj = json.loads(s)
+    except Exception:
+        continue
+    if isinstance(obj, dict):
+        n += 1
+print(n)
+" "$1"
 EOF
 
 # --- Correct tool 2: semver-max (semantically-greatest version) ---
@@ -101,26 +117,36 @@ RUN for f in /opt/tools/*; do ln -sf "$f" "/usr/local/bin/$(basename $f)"; done
 
 # --- Seed input files (expected answers are derived from these) ---
 
-# events.jsonl: 6 JSON objects, one per line -> record_count = 6.
-RUN cat > /app/events.jsonl <<'EOF'
-{"id": 1, "kind": "click"}
-{"id": 2, "kind": "view"}
-{"id": 3, "kind": "click"}
-{"id": 4, "kind": "scroll"}
-{"id": 5, "kind": "view"}
-{"id": 6, "kind": "click"}
-EOF
+# events.jsonl: 6 VALID JSON objects interleaved with non-record noise (a blank
+# line, two comment lines, and a brace-bearing line that is NOT valid JSON). A
+# raw `wc -l` returns 10 and `grep -c '{'` returns 7 -> both WRONG. Only a tool
+# that parses each line as JSON and keeps the objects returns record_count = 6.
+RUN printf '%s\n' \
+    '# events captured 2026-05-30 (lines beginning with # are not records)' \
+    '{"id": 1, "kind": "click"}' \
+    '{"id": 2, "kind": "view"}' \
+    '' \
+    '{"id": 3, "kind": "click"}' \
+    '{malformed - not json}' \
+    '{"id": 4, "kind": "scroll"}' \
+    '{"id": 5, "kind": "view"}' \
+    '# end of first batch' \
+    '{"id": 6, "kind": "click"}' \
+    > /app/events.jsonl
 
-# releases.txt: semantic max = 1.10.2 (lexicographic max would be 1.9.0).
+# releases.txt: semantic max = 1.10.10. Plain-text/lexicographic max is "1.9.0"
+# (the text-sort-last decoy), and a careless reader picks "1.10.2" -> both WRONG.
 RUN cat > /app/releases.txt <<'EOF'
 1.2.0
 1.9.0
 1.10.0
 1.10.2
+1.10.10
 0.9.9
 EOF
 
-# cart.csv: prices as $d.cc -> total = $20.00 = 2000 cents.
+# cart.csv: prices as $d.cc -> total = $21.00 = 2100 cents. The csv-col-sum decoy
+# cannot parse the leading "$" and returns 0.
 RUN cat > /app/cart.csv <<'EOF'
 item,price
 apple,$12.50
