@@ -3,7 +3,7 @@ multi_step_reward_strategy = "final"
 
 [task]
 name = "johnbuck/multistep-memory-conversational-02"
-description = "Multi-turn memory under PRECISION pressure: 12 of my personal facts planted across 2 early steps, then 3 distractor turns that each do a small unrelated task AND plant a confusable fact about someone ELSE (a colleague's lactose allergy & terrier, a cousin's silver Mazda & November birthday, a tenant's Denver hometown & yoga day), then graded recall of 12 of MY facts with NO notes/files — one fact (the car) requires make+model+colour+year, so detail matters. A harness that confuses others' facts for mine, or recalls vaguely, scores a fraction (validated: confused=0.5, vague=0.5833, precise=1.0). Stresses session-memory precision + detail retention, not just gross recall."
+description = "Multi-turn memory under PRECISION pressure: 12 of my personal facts planted across 2 early steps, then 3 distractor turns that each do a small unrelated task AND plant a confusable fact about someone ELSE (a colleague's lactose allergy & terrier, a cousin's silver Mazda & November birthday, a tenant's Denver hometown & yoga day), then graded recall of 12 of MY facts with NO notes/files — one fact (the car) requires make+model+colour+year, so detail matters. A harness that confuses others' facts for mine, or recalls vaguely, scores a fraction (scored with a per-fact SIBLING PENALTY — stating the planted distractor value, or hedging by dumping both, forfeits that fact (precise recall=1.0, hedge/confuse on every sibling-fact ≈ 0.33)). Stresses session-memory precision + detail retention, not just gross recall."
 authors = [{name = "johnbuck"}]
 keywords = ["conversation-persona", "remember-facts", "multi-step", "memory"]
 
