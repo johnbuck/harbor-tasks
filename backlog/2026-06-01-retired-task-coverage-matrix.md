@@ -47,11 +47,11 @@ deprecated-on-disk so nothing is lost.
 
 | Retired task(s) | Capability | LIVE task that covers it | Live status |
 |---|---|---|---|
-| `code-editing/fix-bug-with-failing-test-01..05` (5) | Bug-fix / small code edit | `code-editing/refactor-multi-file-01`, `code-spec-review/pr-diff-review-01`, `test-authoring/unit-tests-01` | REWORK pending (task #89) |
-| `code-editing/add-feature-with-tests-01,-02` (2) | Feature implementation | `code-editing/refactor-multi-file-01`, `migration/dep-bump-breaking-01` | REWORK pending |
-| `building-prototypes/multistep-scaffold-implement-document-01..03` (3) | Multi-step scaffolding | `tool-orchestration/plan-then-revise-01` | REWORK pending |
-| `tool-orchestration/multistep-plan-execute-01..03` (3) | Tool orchestration / plan-execute | `tool-orchestration/tool-selection-01`, `tool-orchestration/tool-sprawl-precision-01` | REWORK pending |
-| `skill-agent-authoring/sub-agent-01` (1) | Sub-agent fan-out | `skill-agent-authoring/sub-agent-parallel-decompose-01` | REWORK pending |
+| `code-editing/fix-bug-with-failing-test-01..05` (5) | Bug-fix / small code edit | `code-editing/refactor-multi-file-01`, `code-spec-review/pr-diff-review-01`, `test-authoring/unit-tests-01` | ⬜ REWORK pending (LARGE) — covers NOT yet hardened; keep retired-on-disk |
+| `code-editing/add-feature-with-tests-01,-02` (2) | Feature implementation | `code-editing/refactor-multi-file-01`, `migration/dep-bump-breaking-01` | ⬜ REWORK pending (LARGE) |
+| `building-prototypes/multistep-scaffold-implement-document-01..03` (3) | Multi-step scaffolding | `tool-orchestration/plan-then-revise-01` | ✅ cover GREEN — plan-then-revise reworked + harness-memory clamp check, oracle 9/9 (3be679f) |
+| `tool-orchestration/multistep-plan-execute-01..03` (3) | Tool orchestration / plan-execute | `tool-orchestration/tool-selection-01`, `tool-orchestration/tool-sprawl-precision-01` | ✅ cover GREEN — both de-telegraphed + de-bypassed, oracle 1.0 (4733aa3) |
+| `skill-agent-authoring/sub-agent-01` (1) | Sub-agent fan-out | `skill-agent-authoring/sub-agent-parallel-decompose-01` | ✅ cover GREEN (oracle) — redesigned so fan-out is REQUIRED (60 prose problems, non-clamped base), oracle 60/60 (f2b0864). CALIBRATION: needs a real n=1 to confirm N-vs-budget threshold before the drop is final |
 | `conversation-persona/remember-facts-01` (1) | Conversational memory | `multistep-memory-conversational-01..03`, `true-multi-turn-memory-write-01`, `multistep-proactive-preference-01` | ✅ cover GREEN — memory-conversational 01/02/03 sibling-penalty fix landed (1a793e4, e1eac24); KEEP set intact |
 
 ---
@@ -79,16 +79,26 @@ No capability is dropped. Only redundant *implementations* are.
 
 ## Dependency order (what blocks what)
 
-1. **Rework the live Track-A tasks** (refactor, pr-diff, unit-tests, dep-bump,
-   plan-then-revise, tool-selection, tool-sprawl, sub-agent-parallel,
-   memory-conversational ×3) → green at n=1. *(task #89 Phase 3)*
-2. **Only then** drop the 15 redundant retired tasks (their capability is now proven
-   covered).
-3. **Rebuild the 3** (failure-recovery, diagnose-from-logs, update-record) in their
-   existing slots → green.
-4. **Stand up Track B** (config + LLM judge + metric) and relocate the 5
-   authoring/artifact tasks.
+1. **Rework the live Track-A cover tasks** → green at oracle. *(task #89)*
+   - ✅ plan-then-revise (3be679f), tool-selection + tool-sprawl (4733aa3),
+     sub-agent-parallel-decompose (f2b0864), memory-conversational ×3 (1a793e4,
+     e1eac24) — ALL oracle-green.
+   - ⬜ STILL PENDING (LARGE): refactor-multi-file, pr-diff-review, unit-tests,
+     dep-bump-breaking. These gate dropping the 5 fix-bug + 2 add-feature retired
+     tasks (the bug-fix / feature-impl capabilities).
+2. **Only then** drop the redundant retired tasks whose cover is green. Right now
+   that's the scaffold ×3 (cover=plan-then-revise ✅), plan-execute ×3
+   (cover=tool-selection/sprawl ✅), sub-agent-01 (cover=sub-agent-parallel ✅,
+   pending the calibration n=1), remember-facts (cover=memory set ✅). The 7
+   code-editing retired tasks stay until their LARGE covers are green.
+3. ✅ **Rebuilt the 3** (failure-recovery, diagnose-from-logs, update-record) —
+   un-deprecated + oracle-green (53c02d4, 22bc3eb, 1717f02). Deprecated 23 → 20.
+4. ⬜ **Stand up Track B** (config + LLM judge + metric) and relocate the 5
+   authoring/artifact tasks. Not started.
 
-Until step 1 is green, the retired set stays exactly as-is on disk (deprecated, not
-removed). This document + the catalog's "RETIRED — pending review" badges are the
-audit trail.
+NOTE: a sweep can no longer accidentally score a retired task — `run_track_a.sh`
+auto-excludes `status=deprecated` (0d75056). So the on-disk drop is now purely
+housekeeping; nothing scores them in the interim. The retired set still stays on
+disk (deprecated, not removed) until each cover is green. This document + the
+drift-proof `task-catalog.html` ("RETIRED — pending review" badges) are the audit
+trail.
