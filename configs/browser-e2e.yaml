@@ -1,0 +1,39 @@
+# End-to-end proof of browser-find-fact-01 on BOTH harnesses (real n=1 each).
+# Proves the live path: harness browser tool -> shared wiley Chromium (CDP) ->
+# ProtonVPN exit -> https://quotes.toscrape.com/js/ -> render + paginate ->
+# extract the site's attribution (Jim Henson). The oracle only validated the
+# grader; this validates the browser path itself.
+#
+# SEQUENTIAL by construction: the runner runs one job per harness in turn, each
+# with 1 task x 1 attempt = 1 trial, so only one browser session is live at a
+# time (the wiley Chromium is shared — concurrent trials would collide).
+#
+# Run:
+#   source ~/.config/infisical/infisical-identity.env
+#   CONFIG=configs/browser-e2e.yaml JOB_NAME=browser-e2e tools/run_track_a.sh
+
+jobs_dir: /home/trumble/harbor-tasks/jobs/browser-e2e
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 1
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: /home/trumble/harbor-tasks/tasks/tool-orchestration
+    task_names: ["browser-find-fact-01"]

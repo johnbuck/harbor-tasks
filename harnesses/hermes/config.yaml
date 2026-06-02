@@ -669,7 +669,11 @@ agent:
 #   google_chat:      hermes-google_chat      (same as telegram)
 #
 platform_toolsets:
-  cli: [hermes-cli]
+  # browser toolset added so the CLI agent gets browser_navigate/snapshot/click/
+  # etc. (drives the self-hosted CDP Chromium via browser.cdp_url; the
+  # BROWSERBASE_API_KEY requirement is bypassed by _get_cdp_override). Parity
+  # with openclaw's browser.enabled=true so BOTH harnesses can navigate.
+  cli: [hermes-cli, browser]
   telegram: [hermes-telegram]
   discord: [hermes-discord]
   whatsapp: [hermes-whatsapp]

@@ -1,0 +1,140 @@
+# Browser tool + provider-pin findings (2026-06-02) — pre-compact handoff
+
+Single source of truth for the browser-task + provider-pin work. Read first after
+the compact. **Two live problems, both surfaced by a real e2e of the browser task.**
+
+## NEXT ACTION (highest priority)
+**Make openclaw actually USE the browser tool.** `browser.enabled: true` is now
+baked but the `browser` tool STILL does not surface in openclaw's tool catalog at
+runtime (confirmed in the 2026-06-02 e2e: openclaw's exposed tools had no
+`browser` / `browser_*` entry). Diagnose why and fix:
+- Likely gates (in order of suspicion): (a) the CDP endpoint
+  `http://internal-host:9222` not reachable/connectable from INSIDE the
+  trial container at openclaw session-start → openclaw drops the browser tool
+  silently; (b) `openclaw agent --local` mode (what the thin adapter runs)
+  suppressing the browser tool; (c) `browser.enabled` needing to live at a
+  different config path than top-level.
+- First check: from inside a running rich container on the eval network, can it
+  reach wiley:9222 (`curl http://internal-host:9222/json/version`)? The
+  recall/hindsight MCP (8408/8888) IS reachable from trials, but 9222 was never
+  confirmed container-side.
+- openclaw browser subsystem is baked (`dist/browser-bridges-*.js`,
+  `browser-cli-actions-*`). Gate in dist:
+  `resolvedCfg.browser.enabled ? resolveBrowserConfig(...)`. Tool name exposed to
+  the model = `"browser"` (single tool). hermes uses `browser_navigate` etc.
+- Verify by re-running `configs/browser-e2e.yaml` and checking
+  `browser_tool_calls > 0` in the reward.json.
+
+## Problem 1 — the provider pin is BROKEN (must fix before ANY trustworthy run)
+Direct OpenRouter tests (real calls, deepseek/deepseek-v4-pro):
+
+| provider routing | result |
+|---|---|
+| `only:["deepseek"]` + `data_collection:deny` (the CURRENT pin) | **404** "No endpoints found matching your data policy (Paid model training)" |
+| `only:["deepseek"]` (no data policy) | **404** "No endpoints available matching your guardrail restrictions" |
+| `data_collection:deny` + `allow_fallbacks:true` (no `only`) | 200 — served by Parasail |
+
+**`only:["deepseek"]` is an invalid provider slug for this model — it matches NO
+endpoint and always 404s.** So:
+- **hermes** (native OpenRouter) 404'd on every call → never ran a single LLM turn
+  in the e2e. Its 0.0 was NOT a browser/quality signal.
+- **openclaw** only "worked" because its **xrouter** path silently IGNORES the
+  broken `only:[deepseek]` and routes freely. So **neither harness was ever
+  actually pinned** — the whole fairness premise was void, and the `pinned-v2`
+  image I promoted to `:latest` is built on this broken pin. (My error.)
+
+**The fix** — valid single NON-training hosts (confirmed 200 under
+`data_collection:deny`, no fallback):
+
+| `only:[host]` | status | context |
+|---|---|---|
+| `fireworks` | 200 ✓ | 1M |
+| `novita` | 200 ✓ | 1M |
+| `together` | 200 ✓ | 512K |
+| `atlas-cloud`, `siliconflow` | 200 ✓ | 1M |
+| `parasail`, `deepinfra` | 429 transient (serve it) | 1M |
+| `deepseek` (current) | 404 invalid | — |
+| `gmicloud` | 404 (trains) | — |
+
+Change `only:["deepseek"]` → `only:["fireworks"]` (or `novita` — both full 1M ctx,
+non-training) in BOTH `harnesses/openclaw/openclaw.json`
+(`models.providers.xrouter.params.provider`) AND `harnesses/hermes/config.yaml`
+(`provider_routing`). Keeps fairness (one shared host) + privacy (`deny` satisfied)
++ unblocks hermes. **OPERATOR: pick fireworks or novita.** Then rebuild + the pin
+is finally real (also fixes the long-standing "neither harness pinned" issue).
+Test script: `/tmp/confirm_hermes_endpoint.py` + `/tmp/find_pin_host.py` (rerun via
+`infisical run --domain=http://internal-host:8380 --projectId=7dadfcc8-... --env=production --path=/proxy/ -- python3 <script>`; key never printed).
+
+## Problem 2 — browser task is memorization-confounded (mitigated by gating)
+`quotes.toscrape.com` is a top scraping-tutorial site, so its quote→author data
+(incl. the "Jim Henson" attribution) is in training. In BOTH e2e runs openclaw
+answered "Jim Henson" correctly WITHOUT browsing (`answer_correct=1`,
+`browser_used=0`). Mitigation already shipped: the grader now **gates reward on
+`browser_used`** (a correct answer with no browser call scores 0), so memory
+shortcuts don't pass. Once openclaw's browser actually works, a real browse →
+`browser_used=1` → reward 1. (If we want the answer itself to require the browser,
+switch to a non-memorized target later; gating is sufficient for now.)
+
+## browser-find-fact-01 task spec (built this session)
+- Path: `tasks/tool-orchestration/browser-find-fact-01/` (single-step,
+  `allow_internet=true`, `mcp_servers=[]`, agent timeout 600s).
+- Target: `https://quotes.toscrape.com/js/` (JS-rendered → curl sees 0 quotes;
+  forces a real browser). Asked quote: "...give a stupid or misinformed beholder a
+  black eye" → site attributes to **Jim Henson**, on **page 3** (forces pagination).
+- Grader (`tests/test.sh`): `reward = 1.0 iff answer_correct AND browser_used`.
+  answer_correct = "henson" present AND no decoy author (sibling penalty, format-
+  robust). browser_used = trajectory has a `browser`/`browser_*` tool call
+  (matches BOTH openclaw `"browser"` and hermes `browser_navigate`). Oracle gets
+  answer_correct=1, browser_used=0 → headline 0 (EXPECTED; browser tasks aren't
+  oracle-provable end-to-end — documented in task.toml).
+- Oracle `solution/solve.sh` writes "Jim Henson" (validates the answer-check).
+
+## Browser wiring facts (verified)
+- Both harnesses wired to a SHARED headless Chromium on wiley via CDP:
+  openclaw `browser.cdpUrl`, hermes `browser.cdp_url` = `http://internal-host:9222`
+  (LIVE: Chrome 148, `ws://...:9222/`). Shared → run browser trials SEQUENTIALLY
+  (`n_concurrent_trials:1`, as `configs/browser-e2e.yaml` does) or they collide.
+- Remote browser can't see a site served INSIDE the trial container (localhost) —
+  hence a real external site (operator chose this), not a container-local one.
+- **Thin adapters DO NOT forward Harbor `mcp_servers`** (`lib/openclaw_thin.py`
+  runs `openclaw agent --local --json` against the BAKED config; ditto hermes).
+  So Harbor-level `[[environment.mcp_servers]]` injection never reaches the model
+  — capabilities MUST be enabled in the baked config + image rebuild.
+
+## Config + image state
+- Source configs baked via `environments/agent-rich/Dockerfile` (COPY lines 32
+  openclaw.json, 40 hermes config.yaml). Rebuild:
+  `docker build -f environments/agent-rich/Dockerfile -t harbor-agents-rich:latest .`
+- **UNCOMMITTED edits (this session):**
+  - `harnesses/openclaw/openclaw.json` — added `browser.enabled: true`
+  - `harnesses/hermes/config.yaml` — `cli: [hermes-cli, browser]` (was `[hermes-cli]`)
+  - `tasks/tool-orchestration/browser-find-fact-01/{task.toml,tests/test.sh}` —
+    grader gated on browser_used + both-convention detection
+  - `configs/browser-e2e.yaml` (new) — both-harness sequential e2e config
+  - These are NOT yet committed (pin still broken; browser not yet surfacing).
+    Commit alongside the pin fix once both are resolved.
+- **Image tags:**
+  - `:latest` = 092dcd0592dd — browser-enabled BUT still has the broken
+    `only:[deepseek]` pin. Not trustworthy until the pin fix.
+  - `:pre-browser-bak` = e494e1d1cd2a — = the promoted pinned-v2 (broken pin).
+  - `:pre-pin-unpinned-bak` = 19cce11e1834 — old UNPINNED image; hermes WORKED on
+    it (routed via fallback to a non-training host). The only currently-working-
+    for-hermes image, but load-balanced (cost-contaminated).
+
+## e2e run log (what actually happened)
+- Run 1 (pinned `:latest`, browser DISABLED): openclaw 1.0 (memory answer, no
+  browser), hermes 0.0 (pin 404). Headline "DISCRIMINATES" — FALSE on both counts.
+- Run 2 (browser-enabled rebuild): openclaw reward 0 (answer right from memory,
+  but browser_used=0 gate), hermes 0.0 (pin 404). Browser tool still not surfacing.
+- Conclusion: NO valid browser signal yet. Need (a) pin fix so hermes runs, (b)
+  openclaw browser surfacing. THEN re-run for a real result.
+
+## Sequenced plan to finish
+1. Operator picks pin host (fireworks/novita). Edit both source configs
+   `only:[deepseek]` → `only:[<host>]`.
+2. Diagnose + fix openclaw browser surfacing (NEXT ACTION above).
+3. Rebuild `:latest`; verify openclaw exposes `browser` + hermes exposes
+   `browser_navigate`, and hermes makes LLM calls (no 404).
+4. Re-run `configs/browser-e2e.yaml`; confirm `browser_used=1` for both and read
+   the real reward split.
+5. Commit the source edits + task + this doc together.
