@@ -129,20 +129,31 @@ still picks up deprecated tasks — Harbor doesn't read `status`. Before any run
 exclude `status=deprecated` (active-only allowlist, or move after review) and have
 `metrics/track_a_weighted.py` skip them.
 
-**Phase 3 — rework ~22 salvageable: NOT STARTED** (task #89). Priority order:
-1. CONTAINED SCORING FIXES first (stop the false 1.0s): memory-conversational-01/02/03
-   (penalize sibling value on a labeled answer line), sub-agent-parallel-decompose-01
-   (concurrency bonus is inert — make budget infeasible serially + score concurrency
-   as a separate non-clamped dim), context-fill-02/03 (line-anchor the grep).
+**Phase 3 — rework ~22 salvageable: IN PROGRESS** (task #89). Priority order:
+1. CONTAINED SCORING FIXES (stop the false 1.0s):
+   - ✅ **memory-conversational-01/02/03 DONE** (2026-06-01, commits 1a793e4 +
+     e1eac24): added the sibling penalty (require right value AND not the planted
+     distractor); also fixed 01's oracle being truncated to 6/12. All three oracle
+     1.0; dump-both now ≈0.33.
+   - ⬜ sub-agent-parallel-decompose-01 (concurrency bonus is inert — make budget
+     infeasible serially + score concurrency as a separate non-clamped dim).
+   - ⬜ context-fill-02/03 (line-anchor the grep) — note the context-ROT family
+     (built this session) already uses line-anchored scoring as the pattern.
 2. MEDIUM: remove residual telegraphing + undate decoys (agentic-research,
    factual-lookup-cited, find-contradictions), require legitimate sends
-   (prompt-injection), remove edge-case coaching (shell-pipeline).
+   (prompt-injection), remove edge-case coaching (shell-pipeline). ⬜ not started.
 3. LARGE REBUILDS: scale past the 1M window (research corpora 150+ pages,
    shell-pipeline 100k lines, secret-scan 200 files, pandas 50k rows), multi-file
-   repos + failing loops (refactor, pr-diff, unit-tests, dep-bump).
+   repos + failing loops (refactor, pr-diff, unit-tests, dep-bump). ⬜ not started.
 Each rework: validate via Harbor oracle (Docker build + plumbing). KEEP set
 (context-fill-01, proactive-preference-01, true-multi-turn-write-01,
 schedule-meeting-01) stays; reasoning-parity-01 = infra probe, exclude from grid.
+
+**Separate from Phase 3 — the 3 BROKEN KILLs were REBUILT, not dropped** (matrix
+bucket ①): failure-recovery-loop-01, diagnose-from-logs-01,
+update-record-with-cleanup-01 all un-deprecated + oracle-green this session
+(commits 53c02d4, 22bc3eb, 1717f02). Deprecated count 23 → 20. Full state:
+`2026-06-01-session-status.md`.
 
 ## Cross-cutting design principles for a real harness discriminator
 1. The answer must be **uncomputable without the harness-mediated path** (memory,
