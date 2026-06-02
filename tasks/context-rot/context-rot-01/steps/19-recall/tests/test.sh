@@ -1,34 +1,92 @@
 #!/bin/bash
 # CONTEXT-ROT recall scorer for MERIDIAN HALL.
-# 12 paraphrased questions; each answer is checked ON ITS OWN numbered line
-# (line-anchored, so a verbose dump of all candidates on one line cannot score).
-# Needles sit at controlled conversational depth -> the per-position subscores
-# expose the rot CURVE:
+# 12 paraphrased questions; each answer is matched on EXACTLY ONE line so a
+# single blob listing every candidate cannot score (anti-dump). Needles sit at
+# controlled conversational depth -> the per-position subscores expose the rot
+# CURVE:
 #   EARLY  (Q1-4, visits 2-6)   = primacy edge
 #   MIDDLE (Q5-8, visits 8-12)  = lost-in-the-middle (rot-critical)
 #   LATE   (Q9-12, visits 14-18)= recency edge
-# A harness that suffers rot shows MIDDLE << EARLY,LATE; one that actively manages
-# context flattens it. Headline reward = correct / 12.
+# A harness that suffers rot shows MIDDLE << EARLY,LATE; one that actively
+# manages context flattens it. Headline reward = correct / 12.
+#
+# FORMAT-ROBUST (fixed 2026-06-01): the per-question line is found by, in order,
+# (1) an enumerated line whose lead token is the question number ("N." / "N)" /
+# "N:"), else (2) the Nth non-empty answer line (positional fallback). This
+# accepts BOTH a numbered list and a bare one-answer-per-line list as equally
+# valid formats -- the prior scorer REQUIRED the "N." prefix and scored a
+# content-correct bare list as 0 (a false zero that fabricated discrimination).
+# Anti-dump is preserved: each question still maps to a single distinct line.
 mkdir -p /logs/verifier
-ans_line() { grep -iE "^[[:space:]]*$1[\.\)]" /app/answer.md 2>/dev/null | head -1; }
-ok() { printf '%s' "$(ans_line "$1")" | grep -qiE "$2"; }
+python3 - <<'PY' > /logs/verifier/reward.json
+import json, re
 
-early=0; mid=0; late=0
-ok 1  "pitch[ -]?pine"                        && early=$((early+1))
-ok 2  "harcourt"                              && early=$((early+1))
-ok 3  "1788"                                  && early=$((early+1))
-ok 4  "nickel[ -]?bronze"                     && early=$((early+1))
-ok 5  "aldhelm"                               && mid=$((mid+1))
-ok 6  "crittall"                              && mid=$((mid+1))
-ok 7  "white[ -]?oak"                         && mid=$((mid+1))
-ok 8  "(14[,.]?000|fourteen[ -]thousand)"     && mid=$((mid+1))
-ok 9  "pugin"                                 && late=$((late+1))
-ok 10 "flemish"                               && late=$((late+1))
-ok 11 "penrhyn"                               && late=$((late+1))
-ok 12 "gillett"                               && late=$((late+1))
+# (regex, bucket) in question order 1..12
+PATTERNS = [
+    (r"pitch[ -]?pine",                    "early"),
+    (r"harcourt",                          "early"),
+    (r"1788",                              "early"),
+    (r"nickel[ -]?bronze",                 "early"),
+    (r"aldhelm",                           "middle"),
+    (r"crittall",                          "middle"),
+    (r"white[ -]?oak",                     "middle"),
+    (r"(14[,.]?000|fourteen[ -]thousand)", "middle"),
+    (r"pugin",                             "late"),
+    (r"flemish",                           "late"),
+    (r"penrhyn",                           "late"),
+    (r"gillett",                           "late"),
+]
 
-s=$((early+mid+late))
-total=12
-r=$(python3 -c "print(round(${s}/${total}, 4))")
-if [ "$s" -eq "$total" ]; then corr=1; else corr=0; fi
-echo "{\"reward\": ${r}, \"correctness\": ${corr}, \"facts\": ${s}, \"early\": ${early}, \"middle\": ${mid}, \"late\": ${late}}" > /logs/verifier/reward.json
+try:
+    with open("/app/answer.md") as f:
+        lines = [ln.rstrip("\n") for ln in f]
+except FileNotFoundError:
+    lines = []
+
+# Positional answer lines: non-empty, excluding obvious preamble/header lines
+# ("Here are my answers:", markdown headers) so a one-line preamble doesn't
+# shift the bare-list mapping by one.
+def is_preamble(ln):
+    s = ln.strip()
+    if s.startswith("#"):
+        return True
+    if re.match(r"(?i)^(here|below|the following|answers?|my answers?)\b.*:\s*$", s):
+        return True
+    return False
+
+nonempty = [ln for ln in lines if ln.strip() and not is_preamble(ln)]
+
+def enum_line(n):
+    pat = re.compile(rf"^\s*{n}\s*[.)\]:>-]")
+    for ln in lines:
+        if pat.match(ln):
+            return ln
+    return None
+
+def strip_marks(s):
+    s = re.sub(r"^\s*\d+\s*[.)\]:>-]\s*", "", s)  # leading enumerator
+    s = re.sub(r"[*_`#>]", "", s)                  # markdown emphasis
+    return s
+
+def cell_for(n):  # 1-based
+    el = enum_line(n)
+    if el is not None:
+        return strip_marks(el)
+    if n - 1 < len(nonempty):
+        return strip_marks(nonempty[n - 1])
+    return ""
+
+buckets = {"early": 0, "middle": 0, "late": 0}
+for i, (pat, b) in enumerate(PATTERNS, start=1):
+    if re.search(pat, cell_for(i), re.I):
+        buckets[b] += 1
+
+s = sum(buckets.values())
+total = len(PATTERNS)
+reward = round(s / total, 4) if total else 0.0
+corr = 1 if s == total else 0
+print(json.dumps({
+    "reward": reward, "correctness": corr, "facts": s,
+    "early": buckets["early"], "middle": buckets["middle"], "late": buckets["late"],
+}))
+PY
