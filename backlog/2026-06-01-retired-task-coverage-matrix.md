@@ -52,7 +52,7 @@ deprecated-on-disk so nothing is lost.
 | `building-prototypes/multistep-scaffold-implement-document-01..03` (3) | Multi-step scaffolding | `tool-orchestration/plan-then-revise-01` | REWORK pending |
 | `tool-orchestration/multistep-plan-execute-01..03` (3) | Tool orchestration / plan-execute | `tool-orchestration/tool-selection-01`, `tool-orchestration/tool-sprawl-precision-01` | REWORK pending |
 | `skill-agent-authoring/sub-agent-01` (1) | Sub-agent fan-out | `skill-agent-authoring/sub-agent-parallel-decompose-01` | REWORK pending |
-| `conversation-persona/remember-facts-01` (1) | Conversational memory | `multistep-memory-conversational-01..03`, `true-multi-turn-memory-write-01`, `multistep-proactive-preference-01` | mix of REWORK + KEEP |
+| `conversation-persona/remember-facts-01` (1) | Conversational memory | `multistep-memory-conversational-01..03`, `true-multi-turn-memory-write-01`, `multistep-proactive-preference-01` | ✅ cover GREEN — memory-conversational 01/02/03 sibling-penalty fix landed (1a793e4, e1eac24); KEEP set intact |
 
 ---
 
