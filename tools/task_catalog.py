@@ -438,6 +438,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <div class="nav">
   <a href="agent-status.html">Agent status</a>
   <a href="task-catalog.html" class="active">Task catalog</a>
+  <a href="roadmap.html">Roadmap</a>
 </div>
 <h1>Task catalog — every eval task, in detail</h1>
 <div class="ts">generated {ts} · source: tasks/ + configs/ · re-run tools/task_catalog.py to refresh ·
