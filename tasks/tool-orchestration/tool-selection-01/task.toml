@@ -11,7 +11,7 @@ author_name = "johnbuck"
 difficulty = "hard"
 category = "tool-orchestration"
 shape = "tool-selection"
-tags = ["tool-orchestration", "tool-selection", "harness-discriminating"]
+tags = ["tool-orchestration", "tool-selection", "model-bound"]
 
 [verifier]
 timeout_sec = 60.0
