@@ -1,7 +1,15 @@
 # tau3-bench integration — spec
 
 - **Date:** 2026-05-28
-- **Status:** IN PROGRESS
+- **Status:** ORACLE SHIPPED; **AGENT-RUN DEPRECATED 2026-06-02.** The oracle
+  (`solution/solve.sh`) validates the eval pipeline and passes. The live
+  **agent-run is deprecated**: our thin adapters run the BAKED harness
+  (`openclaw agent --local --json`) and do NOT forward Harbor's injected
+  `[[environment.mcp_servers]]`, so the `tau3-runtime` MCP never reaches the
+  agent. Closing the gap would require an install-during-trial / MCP-forwarding
+  adapter (was task #84) — not worth building for a single benchmark. tau3 is
+  retained as oracle-only pipeline validation; the live conversation eval is out
+  of scope. Re-open only if a real harness-discrimination need for tau3 emerges.
 - **Origin:** Operator — "build it now, don't defer; write a spec then build."
 
 ## What tau3-bench is
