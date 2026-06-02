@@ -22,7 +22,7 @@ harbor-tasks/
 ├── lib/                # adapter subclasses (thin + install-capable)
 ├── metrics/            # post-run analyzers (Track A weighted aggregator)
 ├── rubrics/            # Rubric TOMLs for harbor analyze
-├── tools/              # sweep drivers + agent status dashboard
+├── tools/              # sweep drivers + the three status dashboards (below)
 └── tasks/              # Harbor task directories
     └── <category>/
         └── <shape>-<NN>/
@@ -31,6 +31,22 @@ harbor-tasks/
             ├── environment/Dockerfile
             └── tests/test.sh
 ```
+
+## Dashboards
+
+Three self-contained static HTML pages (dark theme, shared top nav, no server —
+open from disk). Each has a generator under `tools/`; re-run to refresh.
+
+| Page | Generator | What it shows |
+|------|-----------|---------------|
+| **Roadmap** (`roadmap.html`) | `tools/roadmap.py` | The PLAN: thesis, where-we-stand, the **epics**, every backlog spec rolled up under one (status + expandable detail + open-full-spec modal). |
+| **Task Suite** (`task-catalog.html`) | `tools/task_catalog.py` | The TASKS: an accordion over every task — instruction / grader / oracle / env, plus a per-task **work status** and an **operator-approval** axis (every task is `NEEDS REVIEW` until its `task.toml` sets `approved = true`). |
+| **Agent status** (`agent-status.html`) | `tools/agent_status.py` | The HARNESSES: live config / skills / MCP / memory health for openclaw + hermes. |
+
+The work is organized into **epics** (E1 runtime & adapters · E2 fair-comparison
+controls · E3 capability infra · **E4 Task Suite** · E5 observability). Epics are
+defined in `tools/roadmap.py`; each backlog spec also carries an `Epic:` frontmatter
+line (the `backlog/` dir stays flat — see `backlog/README.md`).
 
 ## Categories (18)
 

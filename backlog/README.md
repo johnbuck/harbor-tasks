@@ -64,13 +64,24 @@ Optional but encouraged:
 - [2026-05-29 recall bge-m3 + eval ontology (SHIPPED 2026-05-29)](done/2026-05-29-recall-bge-m3-and-eval-ontology.md) — recall migrated to bge-m3 + deepseek-v4-flash; community-build daily cron; parallel `recall-mcp-eval` container with coding-domain ontology
 - [2026-05-29 recall hindsight-style plugin (SHIPPED 2026-05-30)](done/2026-05-29-recall-hindsight-style-plugin.md) — coaching descriptions + reflect + dispositions + directives + mental models; 4-phase build with adversarial reviews at design AND post-implementation, all findings folded back in (22 surfaced + 22 resolved including 9 deferred should-fixes resolved separately)
 
-### Proposed / in progress
+### Active (`backlog/`)
 
-- [2026-05-27 task suite design](2026-05-27-task-suite-design.md) — 17 categories × 67 shapes, first-sweep selection (IN PROGRESS)
-- [2026-05-27 context-management category](2026-05-27-context-management-category.md) — long-session behavior tests (DEFERRED)
-- [2026-05-28 multi-step tasks](2026-05-28-multi-step-tasks.md) — Harbor `steps/` shape
-- [2026-05-28 tau3-bench integration](2026-05-28-tau3-bench-integration.md) — external multi-turn benchmark
-- [2026-05-29 eval infra stack](2026-05-29-eval-infra-stack.md) — memory portion SHIPPED (see `done/2026-05-29-memory-stack-deployment.md`); browser/CDP still open (task #54)
-- [2026-05-29 new eval tasks: subagent + research](2026-05-29-new-eval-tasks-subagent-research.md) — tasks #55, #56
-- [2026-05-30 harness-vs-model discriminating suite](2026-05-30-harness-vs-model-discriminating-suite.md) — rubric for what makes a task harness-discriminating, 8 new shapes, two-track sweep weighting
-- [2026-05-30 goal-oriented real-world tasks](2026-05-30-goal-oriented-real-world-tasks.md) — new `real-world-workflows` category; how users actually invoke agents (schedule, communicate, resist injection); 11-mode failure taxonomy
+Status is each spec's frontmatter badge; the epic tag is its `Epic:` line.
+
+- [2026-05-27 task suite design](2026-05-27-task-suite-design.md) — 17 categories × 67 shapes, first-sweep selection (IN PROGRESS · E4)
+- [2026-05-27 context-management category](2026-05-27-context-management-category.md) — long-session behaviour: overflow + context-rot (IMPLEMENTED · E4)
+- [2026-05-28 multi-step tasks](2026-05-28-multi-step-tasks.md) — Harbor `steps/` shape (IN PROGRESS · E4)
+- [2026-05-28 tau3-bench integration](2026-05-28-tau3-bench-integration.md) — external multi-turn benchmark; **oracle shipped, agent-run DEPRECATED 2026-06-02** (E4)
+- [2026-05-29 eval infra stack](2026-05-29-eval-infra-stack.md) — memory portion SHIPPED; browser/CDP still open, now task #90 (E3)
+- [2026-05-29 new eval tasks: subagent + research](2026-05-29-new-eval-tasks-subagent-research.md) — tasks #55, #56 (IMPLEMENTED · E4)
+- [2026-05-30 harness-vs-model discriminating suite](2026-05-30-harness-vs-model-discriminating-suite.md) — rubric for what makes a task harness-discriminating; instrument proven interim (E4)
+- [2026-05-30 goal-oriented real-world tasks](2026-05-30-goal-oriented-real-world-tasks.md) — `real-world-workflows` category; 11-mode failure taxonomy (PROPOSED · E4)
+- [2026-05-31 discrimination-hardening session](2026-05-31-discrimination-hardening-session.md) — difficulty is the lever; graded scoring + crash penalty + catalog (E4)
+- [2026-05-31 Task Suite page](2026-05-31-task-catalog-page.md) — `tools/task_catalog.py`; accordion + work-status + approval axes (IMPLEMENTED · E5)
+- [2026-06-01 adversarial review](2026-06-01-adversarial-review.md) — only ~4 genuine discriminators; 23 deprecated (E4)
+- [2026-06-01 methodology evidence base](2026-06-01-methodology-evidence-base.md) — approach grounded in published work (E4)
+- [2026-06-01 telegraphing audit](2026-06-01-telegraphing-audit.md) — 37/50 leaked the trap; all fixed (E4)
+- [2026-06-01 retired-task coverage matrix](2026-06-01-retired-task-coverage-matrix.md) — no capability left untested (E4)
+- [2026-06-01 session status](2026-06-01-session-status.md) — pre-compact pickup log (not an epic spec)
+- [2026-06-02 browser + provider-pin findings](2026-06-02-browser-and-pin-findings.md) — broken pin + openclaw browser not surfacing; the E2/E3 blockers (E3)
+- [2026-06-02 roadmap page](2026-06-02-roadmap-page.md) — `tools/roadmap.py`; the by-epic plan view; the E4/E5 epic merge (IMPLEMENTED · E5)

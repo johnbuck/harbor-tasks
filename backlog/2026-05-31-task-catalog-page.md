@@ -1,9 +1,9 @@
-# Task Catalog page — visual human-reviewable index of every eval task
+# Task Suite page (was "Task Catalog") — visual review + work tracker for every eval task
 
 **Epic:** E5 — Observability & reporting
-**Status:** first draft shipped 2026-05-31.
+**Status:** first draft shipped 2026-05-31; **evolved to the "Task Suite" view 2026-06-02** (renamed, card→accordion, work-status + operator-approval axes — see Revision history).
 **Sibling of:** `tools/agent_status.py` → `agent-status.html` (the harness-status board).
-**Generator:** `tools/task_catalog.py` → `task-catalog.html`.
+**Generator:** `tools/task_catalog.py` → `task-catalog.html` (filename unchanged; the page now *titles* itself "Task Suite").
 
 ## Problem
 
@@ -39,8 +39,8 @@ The two are complementary.
    `configs/track-a-weights.toml`), `harness-discriminating` tag, difficulty,
    multi-step + step count, and whether it's in the focused n=5 set
    (`configs/track-a-focused.yaml`).
-4. **Accessible from the same area** as the agent-status board: both pages carry a
-   shared top nav (`Agent status` ↔ `Task catalog`).
+4. **Accessible from the same area** as the agent-status board: all pages carry a
+   shared top nav (`Agent status` · `Task Suite` · `Roadmap`).
 5. Client-side filter/search (by category, difficulty, graded, discriminating,
    focused, free text) so a reviewer can slice the 48 quickly.
 6. Drift-proof: read entirely from the on-disk task tree + config files at generate
@@ -109,9 +109,37 @@ python3 tools/task_catalog.py --open     # + open in browser
 
 Re-run after authoring/editing any task. No docker, no network.
 
-## Follow-ups (not in first draft)
+## Revision history
 
-- Link each task card to its latest trial result in the `harbor view` dashboard
+**2026-06-02 — "Task Suite" view (granular work + approval tracking).** The page
+grew from a static *definition* index into the granular **work tracker** for the
+Task Suite epic (E4). Changes:
+
+- **Renamed** the visible title + nav label `Task catalog` → **`Task Suite`** (the
+  `task-catalog.html` filename and `tools/task_catalog.py` generator are unchanged,
+  so no links break). All three dashboards' shared nav updated.
+- **Card grid → accordion.** Each task is now a collapsed row (name + status
+  badges); click expands to the full detail (work note, description, steps, tags,
+  file chips). Added expand-all / collapse-all. Scans 52 tasks at a glance.
+- **Work-status axis** (derived, like the graded badge; overridable via
+  `[metadata] work_status`): one of `discriminating` (tagged harness discriminator,
+  pending grid confirmation), `needs-validation` (graded, not yet proven to
+  separate the harnesses), `needs-hardening` (binary / likely BLUNT), `retired`
+  (deprecated by the adversarial review, pending rework — task #89). Surfaced as a
+  header badge + an expanded "Work:" note + a summary "work remaining" count + a
+  filter. This is the per-task answer to "what's done vs. what's left."
+- **Operator-approval axis.** Every task shows **NEEDS REVIEW** until its
+  `task.toml` sets `[metadata] approved = true` (absence ⇒ not vetted). Surfaced as
+  the leading header badge, a summary count, and an approval filter. Opt-in, so no
+  bulk file churn — the operator approves tasks one at a time as they vet them.
+
+Both new axes are orthogonal: a task can be a tagged discriminator (work-status)
+yet still un-vetted (NEEDS REVIEW). Both read from `task.toml` at generate time, so
+they can't drift.
+
+## Follow-ups (not yet done)
+
+- Link each task row to its latest trial result in the `harbor view` dashboard
   (needs a stable task→job URL scheme).
 - Render the graded-vs-binary badge from an actual dry-run of the verifier against
   the oracle output rather than the source heuristic.
