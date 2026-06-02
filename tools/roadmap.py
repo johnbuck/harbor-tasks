@@ -34,9 +34,9 @@ THESIS = (
 # status: done | partial | blocked | todo
 EPICS = [
     {
-        "id": "E1", "status": "done",
+        "id": "E1", "status": "partial",
         "title": "Harness runtime & adapters",
-        "summary": "Run both harnesses identically on Harbor — the foundation everything else sits on.",
+        "summary": "Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; one runtime-install adapter remains.",
         "specs": [
             ("done", "Harbor adoption — retire rube, build on Harbor", "done/2026-05-27-harbor-adoption.md",
              "Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard."),
@@ -48,6 +48,8 @@ EPICS = [
              "harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM."),
             ("done", "openclaw reasoning on OpenRouter — resolved", "done/2026-05-28-openclaw-reasoning-RESOLVED.md",
              "openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison."),
+            ("todo", "Install-during-trial adapter — unblocks tau3 agent-run (task #84)", "2026-05-28-tau3-bench-integration.md",
+             "The only open runtime/adapter item. The thin adapter runs the BAKED harness and can't pip/npm-install mid-trial, so benchmarks that need a runtime install (tau3) pass the oracle but can't do a live agent-run. Writing an install-during-trial openclaw adapter closes the gap. Tracked as task #84 (was blocked at #80); documented in the tau3 spec, which is also tracked under E4."),
         ],
     },
     {
