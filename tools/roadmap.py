@@ -34,9 +34,9 @@ THESIS = (
 # status: done | partial | blocked | todo
 EPICS = [
     {
-        "id": "E1", "status": "partial",
+        "id": "E1", "status": "done",
         "title": "Harness runtime & adapters",
-        "summary": "Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; one runtime-install adapter remains.",
+        "summary": "Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.",
         "specs": [
             ("done", "Harbor adoption — retire rube, build on Harbor", "done/2026-05-27-harbor-adoption.md",
              "Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard."),
@@ -48,8 +48,8 @@ EPICS = [
              "harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM."),
             ("done", "openclaw reasoning on OpenRouter — resolved", "done/2026-05-28-openclaw-reasoning-RESOLVED.md",
              "openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison."),
-            ("todo", "Install-during-trial adapter — unblocks tau3 agent-run (task #84)", "2026-05-28-tau3-bench-integration.md",
-             "The only open runtime/adapter item. The thin adapter runs the BAKED harness and can't pip/npm-install mid-trial, so benchmarks that need a runtime install (tau3) pass the oracle but can't do a live agent-run. Writing an install-during-trial openclaw adapter closes the gap. Tracked as task #84 (was blocked at #80); documented in the tau3 spec, which is also tracked under E4."),
+            ("deprecated", "Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)", "2026-05-28-tau3-bench-integration.md",
+             "Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete."),
         ],
     },
     {
@@ -100,8 +100,8 @@ EPICS = [
              "Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task."),
             ("partial", "Goal-oriented real-world workflows", "2026-05-30-goal-oriented-real-world-tasks.md",
              "Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling."),
-            ("partial", "tau3-bench integration — oracle passes; agent-run deferred (#84)", "2026-05-28-tau3-bench-integration.md",
-             "Integrate the tau3 benchmark. The oracle passes, but the agent-run needs an install-during-trial adapter (task #84), so live runs are deferred."),
+            ("done", "tau3-bench integration — oracle shipped; agent-run deprecated", "2026-05-28-tau3-bench-integration.md",
+             "Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped."),
         ],
     },
     {
@@ -144,8 +144,10 @@ EPICS = [
     },
 ]
 
-STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked", "todo": "to do"}
-STATUS_CLASS = {"done": "ok", "partial": "mid", "blocked": "bad", "todo": "muted"}
+STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked",
+                "todo": "to do", "deprecated": "deprecated"}
+STATUS_CLASS = {"done": "ok", "partial": "mid", "blocked": "bad",
+                "todo": "muted", "deprecated": "dep"}
 
 CSS = """
   body{font:14px/1.6 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}
@@ -171,12 +173,15 @@ CSS = """
   .badge{padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
   .badge.ok{background:#163a22;color:#5fd07e} .badge.bad{background:#3a1616;color:#ef7a7a}
   .badge.mid{background:#3a2f16;color:#e6c98a} .badge.muted{background:#222734;color:#9aa1ad}
+  .badge.dep{background:#241820;color:#a87a93;border:1px solid #4a2a3d}
   .row{display:flex;gap:11px;align-items:baseline;padding:7px 0;border-top:1px solid #20242e;cursor:pointer}
   .row:first-of-type{border-top:none} .row:hover .rlabel{color:#fff}
   .dot{flex-shrink:0;width:12px;height:12px;border-radius:50%;align-self:flex-start;margin-top:5px}
   .dot.ok{background:#5fd07e} .dot.bad{background:#ef7a7a} .dot.mid{background:#e6c98a} .dot.muted{background:#3a4150}
+  .dot.dep{background:#6e4257}
   .caret{display:inline-block;width:11px;color:#717a88;transition:transform .12s;font-size:10px}
   .row.exp .caret{transform:rotate(90deg)}
+  .row.depr .rlabel{color:#9a8290;text-decoration:line-through;text-decoration-color:#5a3a48}
   .rlabel{font-size:13px;color:#e6e6e6;margin-right:auto}
   .rref{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#717a88;flex-shrink:0;
     max-width:42%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -234,8 +239,9 @@ def render() -> str:
             else:
                 btn = '<button class="specbtn" disabled>tracked by task #</button>'
             ref_html = "" if ref == "—" else f'<span class="rref">{esc(ref)}</span>'
+            rowcls = "row depr" if st == "deprecated" else "row"
             rows.append(
-                f'<div class="row" onclick="tog(this)"><div class="dot {STATUS_CLASS[st]}"></div>'
+                f'<div class="{rowcls}" onclick="tog(this)"><div class="dot {STATUS_CLASS[st]}"></div>'
                 f'<div class="rlabel"><span class="caret">▶</span> {esc(label)}</div>{ref_html}</div>'
                 f'<div class="detail"><div class="dtext">{esc(detail)}</div>{btn}</div>'
             )
@@ -255,6 +261,7 @@ def render() -> str:
         '<span><i class="ldot" style="background:#e6c98a"></i> in progress</span>'
         '<span><i class="ldot" style="background:#ef7a7a"></i> blocked</span>'
         '<span><i class="ldot" style="background:#3a4150"></i> to do</span>'
+        '<span><i class="ldot" style="background:#6e4257"></i> deprecated</span>'
         '<span style="margin-left:auto">click a row for detail · “open full spec” shows the backlog file</span>'
         '</div>'
     )
