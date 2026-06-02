@@ -109,4 +109,35 @@ discrimination. Recall scorers must grade CONTENT and tolerate format. See memor
 3. **Nothing removed** until each retired task's named alternative is green.
 4. Eventually: n=5 pass^k grid (on the promoted pinned image) → RESULTS.md.
 
+## KEEP-set grader validity audit (2026-06-01, post ctx-rot-bug)
+
+The ctx-rot false-zero proved a format-strict grader can fabricate a verdict, so
+I audited the four review KEEP-set discriminators (the ones whose scores feed the
+final verdict) for the same bug class. **All four are SOUND / format-robust —
+the bug was isolated to the newly-built ctx-rot family:**
+- `context-management/multistep-context-fill-01` (19-recall): whole-file
+  `grep -qE` content match + stale/decoy −1 penalties. Not line-anchored;
+  dumping both current+stale nets 0 for that field. ✓
+- `conversation-persona/true-multi-turn-memory-write-01` (08-recall-question):
+  whole-file `has()` match, rejects stale-as-current for the 2 updated fields,
+  field-fraction partial credit. ✓
+- `conversation-persona/multistep-proactive-preference-01` (04-announce): python
+  regex over the whole announce file (ISO date / 24h / no-emoji heading / D.H.
+  signoff). ✓
+- `real-world-workflows/schedule-meeting-from-name-01` (single-step): grades
+  STRUCTURED artifacts (outbox.jsonl / calendar.ics / done.txt), computes
+  expected slots, overlap-checks. Not free-text recall → not format-brittle. ✓
+
+Conclusion: the genuine discriminators can be trusted for the eventual n=5 grid;
+only the ctx-rot family needed the format-robust rewrite (done).
+
+## Tool-task validity hardening (2026-06-01)
+- `tool-selection-01`: removed the instruction telegraph that handed over the
+  semver answer; data now makes the naive bypass WRONG (noisy JSONL, semantic max
+  1.10.10). Oracle 1.0 on the pinned image.
+- `tool-sprawl-precision-01`: customers.csv padded with comment/blank lines,
+  csv-row-count parses rows → customer_count needs the tool. Oracle 1.0.
+- Residual: tool names still descriptive (name-match possible); tool-CLI-on-PATH
+  → model-bound, weak harness discriminators. Acceptable; documented in commits.
+
 ## Deprecated count: 23 → 20 (3 REBUILDs un-deprecated this session).
