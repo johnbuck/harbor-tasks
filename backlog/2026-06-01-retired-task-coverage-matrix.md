@@ -16,13 +16,13 @@ Fates:
 
 ---
 
-## Bucket ① REBUILD (3) — harness-relevant capability, broken impl
+## Bucket ① REBUILD (3) — harness-relevant capability, broken impl — ✅ ALL BUILT + ORACLE-GREEN (2026-06-01)
 
-| Retired task | Capability | Why rebuild (not drop) | Hardening |
+| Retired task | Capability | Hardening shipped | Status |
 |---|---|---|---|
-| `ops-debugging/failure-recovery-loop-01` | Adaptive failure recovery | This is a **core** harness axis (principle #3: a failing loop the agent can't one-shot). Killed only because it's deterministic — fail-1-3/succeed-4 → a fixed `for` loop wins. | Make failures non-deterministic/adaptive (cause changes between attempts; must observe→revise, not blind-retry). Reward gated on a retry budget. |
-| `ops-debugging/diagnose-from-logs-01` | Log diagnosis under scale | Real capability; killed because the log narrates its own root cause in inline comments + keyword-match grader. | Strip narration; scale to 100k+ lines so it overflows one window → long-context harness test. Grader scores the *fix*, not copied keywords. |
-| `real-world-workflows/update-record-with-cleanup-01` | Multi-step ledger ops w/ cleanup | Real capability; killed because the answer key (`/app/.budget.expected.csv`) ships world-readable to the agent. | Remove the leaked key; scale the ledger; score multi-step state threading + cleanup, not a one-shot diff. |
+| `ops-debugging/failure-recovery-loop-01` | Adaptive failure recovery | Replaced deterministic flaky-fetch with `dfetch`: fails with DIFFERENT actionable errors needing SPECIFIC fixes (region→valid region→token→release); blind retry stalls forever → correctness itself discriminates. reward=0.6*corr+0.4*eff. | ✅ un-deprecated, oracle 1.0 (commit 53c02d4) |
+| `ops-debugging/diagnose-from-logs-01` | Log diagnosis under scale | Stripped narration comments; generator buries ~30 causal lines in ~100k lines (6.2MB); anti-keyword-dump GATE = computed connection-hold duration (~155s, printed nowhere). Grader /10. | ✅ un-deprecated, oracle 1.0 (commit 22bc3eb) |
+| `real-world-workflows/update-record-with-cleanup-01` | Multi-row ledger ops w/ cleanup | Removed leaked answer key; grader computes expected from rules at grade time (reads INPUT, not answer); scaled to ~55 rows w/ 5 dup groups + preservation traps; per-decision partial credit (do-nothing 0.46, over-dedup 0.62, correct 1.0). | ✅ un-deprecated, oracle 1.0 (commit 1717f02) |
 
 ## Bucket ② TRACK B (5) — model-quality capability, no harness surface
 
