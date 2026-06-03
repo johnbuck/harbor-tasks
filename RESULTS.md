@@ -61,6 +61,20 @@ hermes's honcho+recall under load.
 > recall-bearing substrate, so it no longer holds; the core-suite n=1 run
 > re-establishes the memory baselines on the new substrate.
 
+> **Capability note — browser tool now live (2026-06-03, `#90`).** The rich image
+> shipped a **stale plugin registry** that never indexed openclaw's `browser`
+> plugin, so the `browser` tool was absent from every prior run (the
+> embedded-vs-gateway theory for this was disproven — see
+> `backlog/2026-06-03-browser-tool-registry-fix.md`). Fixed by baking `openclaw
+> plugins registry --refresh` into the image; both harnesses keep the plain
+> embedded `--local` invocation. Live e2e (`configs/browser-e2e.yaml`): **openclaw
+> reward 1.0 (24 browser calls), hermes reward 1.0 (69 calls)** — both genuinely
+> drove the shared wiley Chromium (the `browser_used` gate defeats memorization).
+> Construct-validity scope: only **browser-dependent** tasks were affected by the
+> prior gap (the rest of the tool catalog — exec/read/write/memory/sub-agents —
+> was always present); the lone browser task is BLUNT (both 1.0), so no other
+> baseline shifts from this fix.
+
 ---
 
 ## Smoke baseline (94 tasks, n=1, pre-sharpening)

@@ -1,13 +1,24 @@
 # Gateway-backed full-harness execution (openclaw + hermes)
 
 **Epic:** E3 — Capability infrastructure (memory + browser)
-**Status:** APPROVED 2026-06-03 — root cause found; implementation to start after compact.
+**Status:** REJECTED 2026-06-03 — premise disproven by direct experiment. See
+`2026-06-03-browser-tool-registry-fix.md` for the real #90 fix.
 **Date:** 2026-06-03
-**Origin / triggered-by:** chasing #90 (openclaw `browser` tool never surfacing) revealed
-the thin adapter runs openclaw in **embedded `--local` mode**, not its full gateway-backed
-runtime — so gateway-hosted capabilities (the browser control server) are silently absent.
-Operator decision: the eval must exercise the **full** harnesses (that was the point of the
-rich setup), not a reduced thin client. Complete the gateway path; do not defer.
+**Origin / triggered-by:** chasing #90 (openclaw `browser` tool never surfacing).
+
+> ## ⚠️ REJECTED — read this first
+> This spec was written on the theory that thin `openclaw agent --local` runs **embedded**,
+> dropping the gateway's "browser control server" → no browser tool, so we'd need to run the
+> harnesses gateway-backed. **Four in-container experiments disproved it.** The real blocker
+> was a **stale baked plugin registry** that never indexed the `browser` plugin; after
+> `openclaw plugins registry --refresh`, plain **embedded `--local` exposes the identical
+> 59-tool catalog as gateway-backed** (browser + full hindsight memory + sub-agent tools +
+> skills). Embedded is not a reduced runtime for anything the core-11 exercises; the gateway
+> only adds channels/cron/device-pairing/multi-session-routing/sidecars, which no eval task
+> touches. Operator decision (2026-06-03): ship the registry-refresh fix and **keep embedded**.
+> Rejected, not deferred — there is no capability gap to close. The text below is retained as
+> archaeology of the wrong turn (and of how the gateway CLI actually works, which was learned
+> correctly even though the conclusion was wrong).
 
 ## The premise we broke
 

@@ -11,27 +11,15 @@ the compact. **Two live problems, both surfaced by a real e2e of the browser tas
 > fixed in the same pass (`cd /app`). See the "RESOLVED" notes inline below. The
 > only remaining item in this doc is the browser surfacing (NEXT ACTION).
 
-## NEXT ACTION (highest priority)
-**Make openclaw actually USE the browser tool.** `browser.enabled: true` is now
-baked but the `browser` tool STILL does not surface in openclaw's tool catalog at
-runtime (confirmed in the 2026-06-02 e2e: openclaw's exposed tools had no
-`browser` / `browser_*` entry). Diagnose why and fix:
-- Likely gates (in order of suspicion): (a) the CDP endpoint
-  `http://internal-host:9222` not reachable/connectable from INSIDE the
-  trial container at openclaw session-start → openclaw drops the browser tool
-  silently; (b) `openclaw agent --local` mode (what the thin adapter runs)
-  suppressing the browser tool; (c) `browser.enabled` needing to live at a
-  different config path than top-level.
-- First check: from inside a running rich container on the eval network, can it
-  reach wiley:9222 (`curl http://internal-host:9222/json/version`)? The
-  recall/hindsight MCP (8408/8888) IS reachable from trials, but 9222 was never
-  confirmed container-side.
-- openclaw browser subsystem is baked (`dist/browser-bridges-*.js`,
-  `browser-cli-actions-*`). Gate in dist:
-  `resolvedCfg.browser.enabled ? resolveBrowserConfig(...)`. Tool name exposed to
-  the model = `"browser"` (single tool). hermes uses `browser_navigate` etc.
-- Verify by re-running `configs/browser-e2e.yaml` and checking
-  `browser_tool_calls > 0` in the reward.json.
+## NEXT ACTION — RESOLVED 2026-06-03 (stale plugin registry)
+**Both findings in this doc are now closed.** The browser-tool blocker was neither
+CDP reachability nor `--local`/embedded mode — it was a **stale baked plugin
+registry** that never indexed the `browser` plugin. Fix: bake `openclaw plugins
+registry --refresh` into the rich image (46 → 64 enabled). Full write-up +
+disproof of the embedded-vs-gateway theory: `2026-06-03-browser-tool-registry-fix.md`.
+The four guesses above (CDP unreachable / `--local` suppresses / config path /
+gateway-backed required) were ALL wrong; recorded here so the dead ends aren't
+re-explored.
 
 ## Problem 1 — the provider pin is BROKEN → **RESOLVED 2026-06-03 (pinned to novita)**
 
