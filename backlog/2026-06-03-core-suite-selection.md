@@ -50,6 +50,28 @@ depth comes from running each at n=5, not from duplicate tasks.
 - `context-management/multistep-context-fill-01/03`, `context-rot/context-rot-01` — same-
   family variants for breadth.
 
+## Substrate decision — `recall` removed from both harnesses (2026-06-03)
+
+While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, wiley `:8408`)
+was **erroring on every hermes invocation**, so it was **removed from both eval harness
+configs** to keep the comparison fair and unblocked (commits `597070b` + `8f812e1`):
+
+- `harnesses/openclaw/openclaw.json` → `mcp.servers`: `recall` dropped, `hindsight` kept.
+- `harnesses/hermes/config.yaml` → `mcp_servers`: `recall` dropped (restore breadcrumb
+  left as a comment), `hindsight` kept.
+- **Scope is the two eval harnesses only.** The wiley recall MCP server (`:8408`) and all
+  its support functionality are untouched; hermes's honcho provider is untouched. The
+  harnesses simply no longer mount recall.
+
+**New memory substrate:** openclaw = **hindsight only** vs hermes = **honcho + hindsight**
+(both previously shared recall + hindsight). Consequence: the Δ0.50
+`memory-conversational-01` discriminator was measured on the old recall-bearing substrate
+and is now **VOID** — RESULTS.md's proven-discriminator note + "Known asymmetries" are
+corrected to match, and the core-suite n=1 run re-establishes the memory baselines.
+
+**Takes effect only after** rebuilding `harbor-agents-rich` (the configs are baked into
+the image, not read live).
+
 ## How to run
 
 ```bash
