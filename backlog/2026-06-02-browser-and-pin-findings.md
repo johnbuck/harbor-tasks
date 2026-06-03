@@ -5,6 +5,12 @@
 Single source of truth for the browser-task + provider-pin work. Read first after
 the compact. **Two live problems, both surfaced by a real e2e of the browser task.**
 
+> **UPDATE 2026-06-03 — Problem 1 (provider pin) is RESOLVED; Problem 2 (openclaw
+> browser, E3) is still open.** Both harnesses re-pinned `deepseek → novita`,
+> rebuilt, and verified (commits d6421e2 + 7f63a40). Hermes write-persistence (#92)
+> fixed in the same pass (`cd /app`). See the "RESOLVED" notes inline below. The
+> only remaining item in this doc is the browser surfacing (NEXT ACTION).
+
 ## NEXT ACTION (highest priority)
 **Make openclaw actually USE the browser tool.** `browser.enabled: true` is now
 baked but the `browser` tool STILL does not surface in openclaw's tool catalog at
@@ -27,7 +33,22 @@ runtime (confirmed in the 2026-06-02 e2e: openclaw's exposed tools had no
 - Verify by re-running `configs/browser-e2e.yaml` and checking
   `browser_tool_calls > 0` in the reward.json.
 
-## Problem 1 — the provider pin is BROKEN (must fix before ANY trustworthy run)
+## Problem 1 — the provider pin is BROKEN → **RESOLVED 2026-06-03 (pinned to novita)**
+
+> **RESOLUTION (2026-06-03).** Re-pinned BOTH harnesses `deepseek → novita` and
+> rebuilt the image; verified end-to-end via `tasks/_verify/file-persistence-01`
+> (oracle + openclaw + hermes all reward 1.0 / answer_present 1). `data_collection:
+> deny` preserved (privacy intact). **Correction to the fix table below: `fireworks`
+> is deny-eligible but its deepseek-v4-pro endpoint has NO native tool-use**, so
+> hermes 404s "No endpoints found that support tool use" on it (openclaw masks this —
+> its xrouter path routes tools differently and 200s even on a tool-use-less host, so
+> ALWAYS verify the pin host with hermes, not just openclaw). Providers confirmed to
+> serve `deny + tool-use + reasoning + require_parameters`: **novita, deepinfra,
+> together, parasail, siliconflow** (NOT fireworks / gmicloud / atlascloud / baidu).
+> Picked **novita**. Also note the precise failure mode: `deepseek` is a valid slug,
+> but DeepSeek's own endpoint became *training-flagged*, so it's deny-incompatible
+> (the "invalid slug" framing below was imprecise). Commits d6421e2 + 7f63a40.
+
 Direct OpenRouter tests (real calls, deepseek/deepseek-v4-pro):
 
 | provider routing | result |
@@ -116,8 +137,11 @@ switch to a non-memorized target later; gating is sufficient for now.)
   - These are NOT yet committed (pin still broken; browser not yet surfacing).
     Commit alongside the pin fix once both are resolved.
 - **Image tags:**
-  - `:latest` = 092dcd0592dd — browser-enabled BUT still has the broken
-    `only:[deepseek]` pin. Not trustworthy until the pin fix.
+  - `:latest` (rebuilt 2026-06-03) — pinned to **novita** (deny + tool-use +
+    reasoning, verified), recall MCP removed from both harnesses, `cd /app` write-
+    persistence fix live (adapter, not baked). Pin + #92 are trustworthy; the only
+    unverified capability left is openclaw browser surfacing (E3).
+  - `:pre-browser-bak` = e494e1d1cd2a — the promoted pinned-v2 (broken deepseek pin).
   - `:pre-browser-bak` = e494e1d1cd2a — = the promoted pinned-v2 (broken pin).
   - `:pre-pin-unpinned-bak` = 19cce11e1834 — old UNPINNED image; hermes WORKED on
     it (routed via fallback to a non-training host). The only currently-working-
@@ -132,9 +156,10 @@ switch to a non-memorized target later; gating is sufficient for now.)
   openclaw browser surfacing. THEN re-run for a real result.
 
 ## Sequenced plan to finish
-1. Operator picks pin host (fireworks/novita). Edit both source configs
-   `only:[deepseek]` → `only:[<host>]`.
-2. Diagnose + fix openclaw browser surfacing (NEXT ACTION above).
+1. ~~Operator picks pin host (fireworks/novita). Edit both source configs
+   `only:[deepseek]` → `only:[<host>]`.~~ **DONE 2026-06-03 — pinned to novita,
+   rebuilt, verified (#92 fixed too).**
+2. Diagnose + fix openclaw browser surfacing (NEXT ACTION above). **← only remaining item.**
 3. Rebuild `:latest`; verify openclaw exposes `browser` + hermes exposes
    `browser_navigate`, and hermes makes LLM calls (no 404).
 4. Re-run `configs/browser-e2e.yaml`; confirm `browser_used=1` for both and read
