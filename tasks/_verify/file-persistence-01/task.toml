@@ -1,0 +1,36 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/file-persistence-01"
+description = "Write-persistence probe: the agent must write a known token to /app/answer.md. Verifies the harness actually persists a file to the task workdir where the verifier reads it (the #92 hermes write-persistence check). One LLM turn — pennies, not the 19-step rot scenario."
+authors = [{name = "johnbuck"}]
+keywords = ["_verify", "write-persistence", "harness-plumbing"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "easy"
+category = "_verify"
+shape = "file-persistence"
+tags = ["_verify", "write-persistence"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 180.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[solution.env]

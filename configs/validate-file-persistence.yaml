@@ -1,0 +1,29 @@
+# Write-persistence probe (#92). Cheap: one LLM turn for hermes (pennies, not the
+# ~$5 19-step rot scenario) + the free oracle as a control.
+#   oracle  -> should be reward 1.0, answer_present 1 (proves the probe + grader)
+#   hermes  -> reward 1.0 + answer_present 1 means the cd-/app cwd fix landed the
+#              write where the verifier reads; answer_present 0 = still shadowed.
+jobs_dir: /home/trumble/harbor-tasks/jobs
+job_name: validate-file-persistence
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 2
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+
+agents:
+  - name: oracle
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  - path: /home/trumble/harbor-tasks/tasks/_verify
+    task_names:
+      - file-persistence-01
