@@ -19,7 +19,11 @@ capture (see Key Finding below). Treat single-run rewards as directional.
 
 **Same model both harnesses:** `deepseek/deepseek-v4-pro` (openclaw via the
 `xrouter` custom provider, hermes via OpenRouter), reasoning ON. Any gap is the
-harness, not the model.
+harness, not the model. **Both pinned to the same OpenRouter upstream — `novita`**
+(re-pin 2026-06-03; the prior `deepseek` pin 404'd under `data_collection: deny`
+once DeepSeek's endpoint became training-flagged; novita serves the model under
+deny + tool-use + reasoning). Shared pin ⇒ per-host cache + price identical, so a
+cost/behaviour delta is the harness, not load-balancer luck.
 
 ---
 
