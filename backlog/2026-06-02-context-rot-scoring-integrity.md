@@ -1,8 +1,9 @@
 # Context-rot scoring integrity — false-zero audit + metric normalization
 
 **Epic:** E4 — Task Suite
-**Status:** PARTIAL — audit grader + result correction SHIPPED 2026-06-02; metric
-normalization PROPOSED (task #93).
+**Status:** SHIPPED 2026-06-02 — audit grader + result correction + metric
+normalization (task #93) all landed. Only remaining open item is the hermes
+`context-rot-02` re-run, which is blocked on write-persistence (task #92).
 **Date:** 2026-06-02
 **Origin / triggered-by:** reviewing the context-rot runs in `harbor view`, a hermes
 trial showed reward 0 after burning huge tokens; investigation found the 0 was an
@@ -59,22 +60,42 @@ which can fabricate or distort a harness "gap":
   - **Caveat:** hand-patching recorded runs is a stopgap. The durable source of truth is
     a **re-run** of `context-rot-02` hermes once task #92 lands.
 
-## Proposed (task #93) — metric normalization
+## What shipped (task #93, 2026-06-02) — metric normalization
 
-Make the cross-task aggregates meaningful instead of blended:
+Both recall graders (`context-rot-0{1,2}/steps/19-recall/tests/test.sh`) now emit a
+`reward.json` containing **only normalized [0,1] keys with identical names across both
+tasks**, so Harbor's per-key cross-trial `Mean` is comparable PER HARNESS:
 
-- Both context-rot graders emit a **shared, normalized recall metric** (fractions in
-  [0,1], identical key names across tasks) — e.g. `recall` (= reward), plus normalized
-  `early/middle/late` fractions. Drop the task-specific raw counts (`facts`/`chains`)
-  from the scored `rewards`, or rename to one shared key, so there are **no missing-key
-  zeros** to average.
-- Keep the **audit fields out of the scored `rewards`** so `answer_present`/`answer_chars`
-  stop polluting job-level metric means (today they average to `0.5` / `42.5`). Options:
-  a separate sidecar file, or a reserved non-aggregated namespace.
-- Re-score existing context-rot trials under the new keys (or re-run).
-- Do **not** change Harbor's global `Mean` to "average over present keys only" — for
+| key | meaning | range |
+|---|---|---|
+| `reward` | overall accuracy (`correct / total`) | [0,1] |
+| `correctness` | 1 iff every item solved | {0,1} |
+| `early` / `middle` / `late` | per-depth accuracy = the rot curve (`bucket_correct / bucket_size`) | [0,1] |
+
+Normalizing the depth buckets to **fractions** is what makes the rot curve comparable
+across rot-01 (4 questions/bucket) and rot-02 (2–3 questions/bucket) — `middle: 0.0`
+reads the same on both. No raw-count keys remain in the scored dict, so the
+missing-key-averages-to-0 blend (`chains` 8→4.0, `facts` 12→6.0) is gone.
+
+Everything else moved to a sibling **`reward-details.json`** written to the same
+verifier dir but **never parsed into `VerifierResult.rewards`** (Harbor only reads
+`reward.json`/`reward.txt`): raw `correct`/`total`, the task-specific count
+(`facts`/`chains`), per-bucket `*_correct`/`*_total`, and the answer audit
+(`answer_present`, `answer_chars`). It's downloaded with the rest of the verifier dir,
+so a 0 is still fully auditable — it just can't masquerade as a score (`answer_chars`
+85 → 42.5 is dead).
+
+Validated against the real archived hermes `context-rot-02` answer (→ `reward 1.0`,
+`early/middle/late 1.0`) plus a VOID case (all-0, `answer_present 0`) and a synthetic
+middle-rot bare list (`reward 0.625`, `early 1.0 / middle 0.0 / late 1.0`).
+
+- **Existing recorded trials are NOT re-scored in place** — the per-trial `reward.json`
+  under `jobs/` still carries the old keys. The durable correction is a **re-run** under
+  the new graders (cheap, deterministic). `reward` was always correct in the old data, so
+  the headline per-harness comparison (hermes 1.0 vs openclaw 0.854) needs no patch.
+- Did **not** change Harbor's global `Mean` to "average over present keys only" — for
   pass-rate metrics, missing-as-0 (an errored trial = failure) is intentional; changing
-  it globally would silently inflate other jobs' pass rates.
+  it globally would silently inflate other jobs' pass rates. Fix stays grader-local.
 
 ## Design decisions
 
@@ -92,8 +113,10 @@ Make the cross-task aggregates meaningful instead of blended:
       validated vs the real `VerifierResult` model + correct/empty/missing inputs.
 - [x] hermes `context-rot-02` recorded result corrected to 1.0 (trial + job aggregate),
       with originals + `CORRECTION.md` preserved.
-- [ ] **Normalized shared recall metric across both context-rot tasks; audit fields out
-      of scored rewards; existing trials re-scored or re-run** — task #93.
+- [x] **Normalized shared recall metric across both context-rot tasks; audit fields out
+      of scored rewards** — task #93 (graders emit only `reward`/`correctness`/normalized
+      `early`/`middle`/`late`; raw counts + answer audit moved to `reward-details.json`).
+      Existing trials get the new keys on re-run (not back-patched).
 - [ ] hermes `context-rot-02` re-run cleanly once write-persistence (task #92) is fixed,
       replacing the hand-patched result.
 

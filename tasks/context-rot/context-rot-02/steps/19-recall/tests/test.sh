@@ -74,7 +74,9 @@ def cell_for(n):
     return ""
 
 buckets = {"early": 0, "middle": 0, "late": 0}
+sizes = {"early": 0, "middle": 0, "late": 0}
 for i, (pat, b) in enumerate(PATTERNS, start=1):
+    sizes[b] += 1
     if re.search(pat, cell_for(i), re.I):
         buckets[b] += 1
 
@@ -82,12 +84,37 @@ s = sum(buckets.values())
 total = len(PATTERNS)
 reward = round(s / total, 4) if total else 0.0
 corr = 1 if s == total else 0
+
+def frac(b):
+    return round(buckets[b] / sizes[b], 4) if sizes[b] else 0.0
+
+# reward.json (#93): ONLY normalized [0,1] keys that mean the same thing on
+# EVERY task in the context-rot family, so Harbor's default per-key cross-trial
+# Mean is comparable PER HARNESS. Harbor parses the whole reward.json blob into
+# VerifierResult.rewards and means every key across trials -- so a raw count
+# ("chains": 7) gets halved when a sibling task in the same job emits "facts"
+# instead, and "answer_chars": 85 -> 42.5 masquerades as a score. Both are
+# banished to reward-details.json below, which Harbor does NOT aggregate.
+#   reward            = overall accuracy (correct / total)
+#   correctness       = 1 iff all chains solved
+#   early/middle/late = per-depth accuracy (the rot curve: middle << edges = rot)
 print(json.dumps({
-    "reward": reward, "correctness": corr, "chains": s,
-    "early": buckets["early"], "middle": buckets["middle"], "late": buckets["late"],
-    # Audit fields kept NUMERIC: VerifierResult.rewards is dict[str, float|int],
-    # so a string here breaks result.json parsing. answer_present 0 == the agent
-    # never persisted /app/answer.md (a VOID), distinct from a present-but-wrong 0.
-    "answer_present": 1 if nonempty else 0, "answer_chars": len(raw),
+    "reward": reward,
+    "correctness": corr,
+    "early": frac("early"),
+    "middle": frac("middle"),
+    "late": frac("late"),
 }))
+
+# Diagnostics + answer audit: raw counts and the persisted-answer probe. A
+# present-but-wrong 0 (answer_present=1) is distinct from a never-persisted VOID
+# (answer_present=0). Sibling file -> never folded into the scored rewards dict.
+with open("/logs/verifier/reward-details.json", "w") as f:
+    json.dump({
+        "correct": s, "total": total, "chains": s,
+        "early_correct": buckets["early"], "early_total": sizes["early"],
+        "middle_correct": buckets["middle"], "middle_total": sizes["middle"],
+        "late_correct": buckets["late"], "late_total": sizes["late"],
+        "answer_present": 1 if nonempty else 0, "answer_chars": len(raw),
+    }, f)
 PY
