@@ -37,13 +37,6 @@
 
   "mcp": {
     "servers": {
-      "recall": {
-        "transport": "streamable-http",
-        "url": "http://internal-host:8408/mcp",
-        "headers": {
-          "X-Group-ID": "eval-openclaw"
-        }
-      },
       "hindsight": {
         "transport": "streamable-http",
         "url": "http://internal-host:8888/mcp/eval-openclaw/"
