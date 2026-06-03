@@ -120,8 +120,12 @@ EPICS = [
              "The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89."),
             ("partial", "Context-rot scoring integrity — false-zero audit + metric normalization", "2026-06-02-context-rot-scoring-integrity.md",
              "A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). Only open item: re-run existing trials under the new keys (gated on #92)."),
+            ("done", "Core suite — the 11 load-bearing harness-measuring tests", "2026-06-03-core-suite-selection.md",
+             "Designated the CORE comparison set: 11 tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Excludes prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild."),
+            ("done", "Recall MCP dropped from both eval harnesses — memory substrate change", "2026-06-03-core-suite-selection.md",
+             "recall (Graphiti temporal-KG memory, <memory-host>:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the <memory-host> recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1."),
             ("todo", "Run n≥3 pass^k grid → RESULTS.md verdict (task #81)", "—",
-             "The verdict run: pass^k (all-of-k) across the discriminating set, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Gated on the E2 fixes. Tracked as task #81."),
+             "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Gated on the E2 fixes + the image rebuild. Tracked as task #81."),
         ],
     },
     {
@@ -278,11 +282,18 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now">Epics 1–6 are largely built, but we're stuck at the <b>E2 fairness gate</b>: we
-can't run a trustworthy comparison until the <b>provider pin</b> (E2) and <b>openclaw browser</b>
-(E3) are fixed. Next two actions — (1) operator picks the pin host (fireworks / novita);
-(2) diagnose openclaw browser surfacing (task #90). One image rebuild then unblocks the
-E4 verdict grid (n≥3 pass^k → RESULTS.md). Detail:
+<div class="now">The <b>core suite is now defined</b> — 11 load-bearing tests
+(<span class="mono">configs/core-suite.yaml</span>), one per harness-distinct capability,
+anchored on the three proven discriminators; context-rot scoring integrity is fixed
+(<b>#93</b>, only normalized comparable keys in reward.json); and <b>recall was removed
+from both harnesses</b> (it errored on every hermes call) — new substrate is
+openclaw=hindsight vs hermes=honcho+hindsight, which voids the old Δ0.50 memory baseline.
+Still gated at the <b>E2 fairness gate</b>: the <b>provider pin</b> (E2) and
+<b>openclaw browser</b> (E3). Next actions — (1) operator picks the pin host; (2) diagnose
+openclaw browser (task #90); (3) <b>rebuild harbor-agents-rich</b> (bakes the recall
+removal + configs), then run the core-suite <b>n=1 separation check</b> → <b>n≥3 pass^k</b>
+verdict grid → RESULTS.md. Detail:
+<span class="mono">backlog/2026-06-03-core-suite-selection.md</span> ·
 <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
 <div class="sec">Epics</div>
 {legend}
