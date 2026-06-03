@@ -117,6 +117,11 @@ middle-rot bare list (`reward 0.625`, `early 1.0 / middle 0.0 / late 1.0`).
       of scored rewards** — task #93 (graders emit only `reward`/`correctness`/normalized
       `early`/`middle`/`late`; raw counts + answer audit moved to `reward-details.json`).
       Existing trials get the new keys on re-run (not back-patched).
+- [x] **Live oracle validation (2026-06-03)** — both context-rot tasks run through the full
+      Docker build + multi-step + verifier stack (`configs/validate-ctx-rot.yaml`, oracle, no
+      LLM): `reward.json` = the 5 normalized keys only, `reward-details.json` sibling written
+      + downloaded, job aggregate clean (no `chains`/`facts`/`answer_chars`), reward 1.0 both.
+      Proves the #93 grader integration, not just the offline logic.
 - [ ] hermes `context-rot-02` re-run cleanly once write-persistence (task #92) is fixed,
       replacing the hand-patched result.
 
