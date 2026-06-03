@@ -90,6 +90,11 @@ class HermesThin(HermesOpenRouter):
         # provider + reasoning_effort + toolsets + skills come from config.yaml.
         run_cmd = (
             'export PATH="$HOME/.local/bin:/usr/local/bin:$PATH" && '
+            # Bring up the self-contained in-container headless Chromium before the
+            # agent runs; hermes's browser tool attaches to 127.0.0.1:9222 (baked
+            # browser.cdp_url). Idempotent + readiness-gated. Spec:
+            # backlog/2026-06-03-self-contained-browser.md.
+            "bash /opt/harness/start-cdp.sh && "
             # #92 write-persistence fix: hermes's file tools are workspace-rooted
             # at the terminal backend's cwd (baked config `terminal.cwd: "."`).
             # If the process doesn't start in the task workdir, write_file lands
