@@ -90,6 +90,13 @@ class HermesThin(HermesOpenRouter):
         # provider + reasoning_effort + toolsets + skills come from config.yaml.
         run_cmd = (
             'export PATH="$HOME/.local/bin:/usr/local/bin:$PATH" && '
+            # #92 write-persistence fix: hermes's file tools are workspace-rooted
+            # at the terminal backend's cwd (baked config `terminal.cwd: "."`).
+            # If the process doesn't start in the task workdir, write_file lands
+            # in a cwd-shadow the verifier (reading /app) never sees — the
+            # context-rot-02 false-zero (write_file reported 85 bytes; /app stayed
+            # empty). cd into /app so writes persist where they're graded.
+            "cd /app && "
             "hermes --yolo chat "
             '-q "$HARBOR_INSTRUCTION" '
             "-Q "
