@@ -118,6 +118,8 @@ EPICS = [
              "Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested."),
             ("todo", "Rework the ~22 salvageable deprecated tasks (task #89)", "—",
              "The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89."),
+            ("partial", "Context-rot scoring integrity — false-zero audit + metric normalization", "2026-06-02-context-rot-scoring-integrity.md",
+             "A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). PROPOSED (task #93): shared normalized recall metric so chains/facts stop blending across the two tasks (Mean scores missing keys as 0 → chains=(0+8)/2=4.0 is meaningless; only `reward` is cross-task-valid)."),
             ("todo", "Run n≥3 pass^k grid → RESULTS.md verdict (task #81)", "—",
              "The verdict run: pass^k (all-of-k) across the discriminating set, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Gated on the E2 fixes. Tracked as task #81."),
         ],
