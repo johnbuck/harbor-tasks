@@ -316,12 +316,14 @@ browser:
   # after this period of no activity between agent loops (default: 120 = 2 minutes)
   inactivity_timeout: 120
 
-  # Local CDP endpoint — shared headless Chromium running on <memory-host>
-  # (~/Docker/agent-cdp). Set instead of browser.cloud_provider so we use a
-  # self-hosted browser instead of Browserbase. Reachable from the rich-harness
-  # container via the homelab LAN (internal-host resolves via Pi-hole).
+  # Local CDP endpoint — SELF-CONTAINED headless Chromium running INSIDE this
+  # trial container (started by /opt/harness/start-cdp.sh; /usr/bin/chromium baked
+  # into the rich image). Set instead of browser.cloud_provider so we use the
+  # in-container browser instead of Browserbase. NOT <memory-host> — every browser action
+  # stays in-container, no cross-machine dependency. Spec:
+  # backlog/2026-06-03-self-contained-browser.md.
   # Read by tools/browser_tool.py::_get_cdp_override → browser.cdp_url.
-  cdp_url: "http://internal-host:9222"
+  cdp_url: "http://127.0.0.1:9222"
 
 # =============================================================================
 # Tool Loop Guardrails

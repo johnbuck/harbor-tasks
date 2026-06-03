@@ -46,6 +46,25 @@ RUN . ~/.nvm/nvm.sh && nvm use 22 >/dev/null 2>&1 \
     && openclaw plugins list --json 2>/dev/null | grep -q '"browser"' \
     && echo "browser plugin indexed OK"
 
+# --- self-contained browser: bake Chromium INTO the image --------------------
+# Both harnesses' browser tools attach to a headless Chromium running INSIDE the
+# trial container (127.0.0.1:9222), not a shared one on <memory-host>. Debian trixie's
+# `chromium` package gives a real /usr/bin/chromium (148, matches the old <memory-host>
+# Chrome). /etc/chromium.d/* is sourced by Debian's chromium wrapper, so the
+# container flags (--no-sandbox etc., required to run as root) apply to every
+# launch. start-cdp.sh brings it up per-trial. Spec:
+# backlog/2026-06-03-self-contained-browser.md.
+RUN apt-get update -qq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        chromium fonts-liberation \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/chromium.d \
+    && printf '%s\n' 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --no-sandbox --disable-dev-shm-usage --disable-gpu"' \
+        > /etc/chromium.d/00-harbor-container \
+    && /usr/bin/chromium --version
+COPY environments/agent-rich/start-cdp.sh /opt/harness/start-cdp.sh
+RUN chmod +x /opt/harness/start-cdp.sh
+
 # --- hermes: bake the rich config over the default template ------------------
 # The installer seeds ~/.hermes with a DEFAULT config.yaml (anthropic/opus,
 # provider auto, memory off). Overwrite it with our rich config (deepseek via

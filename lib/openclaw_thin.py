@@ -111,8 +111,13 @@ class OpenClawThin(OpenClawOpenRouter):
         # for the openclaw CLI; do NOT add another --agent or openclaw 2026.5.26+
         # will silently fail with `Unknown model: xrouter/...` because the
         # duplicated arg breaks model resolution.
+        # Bring up the self-contained in-container headless Chromium before the
+        # agent runs; openclaw's browser tool attaches to 127.0.0.1:9222 (baked
+        # browser.cdpUrl). Idempotent + readiness-gated. Spec:
+        # backlog/2026-06-03-self-contained-browser.md.
         command = (
             ". ~/.nvm/nvm.sh && nvm use 22 && "
+            "bash /opt/harness/start-cdp.sh && "
             f"openclaw agent --local --json {cli_flags_arg}"
             f"--model {shlex.quote(self.model_name)} "
             f"--message {shlex.quote(instruction)} "

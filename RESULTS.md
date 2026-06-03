@@ -74,6 +74,16 @@ hermes's honcho+recall under load.
 > prior gap (the rest of the tool catalog — exec/read/write/memory/sub-agents —
 > was always present); the lone browser task is BLUNT (both 1.0), so no other
 > baseline shifts from this fix.
+>
+> **Self-contained browser (2026-06-03, `backlog/2026-06-03-self-contained-browser.md`).**
+> The browser tool initially drove a shared Chromium **on <memory-host>** over the LAN; that
+> cross-machine dependency is removed. A real `/usr/bin/chromium` (148) is now baked
+> into the rich image and a per-trial `start-cdp.sh` launches a headless Chromium
+> **inside each trial container**; both harnesses attach to `127.0.0.1:9222`. One
+> controlled browser backend per container (only the harness's tool differs ⇒ fair).
+> Re-verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectories show
+> `127.0.0.1` and **0** <memory-host> references. (Memory/hindsight `:8888` remains the shared
+> <memory-host> substrate by design — a separate decision.)
 
 ---
 
