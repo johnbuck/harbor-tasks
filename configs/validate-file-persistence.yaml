@@ -20,6 +20,8 @@ environment:
 
 agents:
   - name: oracle
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
   - import_path: lib.hermes_thin:HermesThin
     model_name: deepseek/deepseek-v4-pro
 

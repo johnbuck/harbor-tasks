@@ -120,7 +120,14 @@ provider_routing:
   # are identical and any token/cost/behaviour delta is the HARNESS, not OpenRouter
   # load-balancer luck. A pinned-host outage failing the trial is an honest failure;
   # see backlog/2026-06-01-adversarial-review.md (provider contamination finding).
-  only: ["deepseek"]
+  # Repinned deepseek -> novita 2026-06-03: DeepSeek's own deepseek-v4-pro endpoint
+  # became training-flagged, so data_collection:deny left zero eligible endpoints
+  # -> 404. Fireworks is deny-eligible but its deepseek-v4-pro endpoint does NOT
+  # support tool use (function calling), which hermes requires -> "no endpoints
+  # support tool use" 404. Novita serves deepseek-v4-pro under deny + tool-use +
+  # reasoning + require_parameters (all verified). Must stay byte-identical to
+  # openclaw.json's provider.only.
+  only: ["novita"]
   allow_fallbacks: false
 
 # =============================================================================
