@@ -1,0 +1,68 @@
+# CORE SUITE — the load-bearing harness-vs-model discrimination set (2026-06-03).
+#
+# 11 tasks, one per harness-distinct capability, anchored on the three PROVEN
+# discriminators from RESULTS.md (memory-conversational-01 Δ0.50, failure-
+# recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls).
+# Same model both harnesses (deepseek-v4-pro, reasoning ON) ⇒ any gap is the
+# HARNESS, not the model. Selection rationale + alternates:
+# backlog/2026-06-03-core-suite-selection.md.
+#
+# Capability coverage:
+#   Memory          ×3  recall-under-load / proactive-write+correct / stale-vs-file
+#   Long-context    ×2  compaction-on-overflow / in-window-rot (lost-in-the-middle)
+#   Control loop    ×2  error-recovery+retry / mid-task replanning
+#   Tool precision  ×1  selection among 57 decoys (F1)
+#   Delegation+skill×2  sub-agent fan-out / skill discovery among decoys
+#   Stateful wf     ×1  multi-step ledger edit with preservation traps
+#
+# Run n=1 FIRST to confirm each task separates the harnesses (and catch broken
+# tasks) before paying 5× for the pass^k reliability grid:
+#   CONFIG=$PWD/configs/core-suite.yaml N_ATTEMPTS=1 JOB_NAME=core-suite-n1 tools/run_track_a.sh
+# Then the real signal (reliability) at n=5:
+#   CONFIG=$PWD/configs/core-suite.yaml N_ATTEMPTS=5 JOB_NAME=core-suite-n5 tools/run_track_a.sh
+
+job_name: core-suite
+
+n_attempts: 1
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
+
+datasets:
+  # Memory — recall, proactive write+correction, stale-vs-live-file
+  - path: <repo>/tasks/conversation-persona
+    task_names:
+      - multistep-memory-conversational-01   # PROVEN Δ0.50 — recall under distractor load
+      - true-multi-turn-memory-write-01       # proactive write + correction, latest-value /8
+      - multistep-stale-memory-vs-file-01     # stale memory vs re-fetched live file (275 vs 45)
+
+  # Long-context — compaction on overflow, in-window rot
+  - path: <repo>/tasks/context-management
+    task_names:
+      - multistep-context-fill-02             # chunks deleted pre-recall (cheat-proof), graded /14
+  - path: <repo>/tasks/context-rot
+    task_names:
+      - context-rot-02                        # multi-hop lost-in-the-middle; normalized rot curve (#93)
+
+  # Control loop — recovery/retry, replanning
+  - path: <repo>/tasks/ops-debugging
+    task_names:
+      - failure-recovery-loop-01              # PROVEN 1.0-vs-0.0 (4 vs 51 retries)
+  - path: <repo>/tasks/tool-orchestration
+    task_names:
+      - tool-sprawl-precision-01              # PROVEN efficiency — selection among 57 decoys (F1)
+      - plan-then-revise-01                   # mid-task replanning, graded re-plan /8
+
+  # Delegation + skill acquisition
+  - path: <repo>/tasks/skill-agent-authoring
+    task_names:
+      - sub-agent-parallel-decompose-01       # sub-agent fan-out (60 vs budget), /60
+      - skill-discovery-and-use-01            # discover right skill among decoys, /16
+
+  # Stateful multi-step workflow
+  - path: <repo>/tasks/real-world-workflows
+    task_names:
+      - update-record-with-cleanup-01         # ledger dedup + preservation traps, leak-proof, /19
