@@ -42,6 +42,13 @@ they usually *both pass* → BLUNT. The harness difference shows up as:
 **Δ=0.50**, near-identical cost. openclaw's recall+hindsight out-retrieved
 hermes's honcho+recall under load.
 
+> **⚠️ Baseline VOID after 2026-06-03 (commit `597070b`).** The `recall` MCP was
+> erroring on every hermes invocation and has been **removed from both eval
+> harnesses** — the memory substrate is now **openclaw = hindsight only** vs
+> **hermes = honcho + hindsight**. This Δ=0.50 was measured on the old
+> recall-bearing substrate, so it no longer holds; the core-suite n=1 run
+> re-establishes the memory baselines on the new substrate.
+
 ---
 
 ## Smoke baseline (94 tasks, n=1, pre-sharpening)
@@ -98,7 +105,11 @@ n=5 to surface their reliability gap.
 ## Known asymmetries (disclosed)
 
 - **Honcho**: hermes uses honcho as a native memory provider; openclaw does not
-  (operator decision, task #72). Both share recall + hindsight.
+  (operator decision, task #72). Both share **hindsight**. `recall` was shared
+  too until 2026-06-03 (commit `597070b`), when it was dropped from both
+  harnesses for erroring on every hermes call — so the current memory substrate
+  is openclaw=hindsight vs hermes=honcho+hindsight (the wiley recall server at
+  :8408 is untouched; the harnesses just no longer mount it).
 - **Anti-contamination**: `hooks/wipe_memory_state.py` wipes the eval recall
   group / hindsight bank / honcho workspace before every trial — scoped to
   `eval-*` only (guarded; can never touch prod `juliet/yui/akane`). honcho 409 +
