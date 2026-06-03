@@ -1,5 +1,13 @@
 # Harbor-tasks comparison grid — openclaw vs. hermes
 
+> **Role (2026-06-03, option a — `backlog/2026-06-03-results-verdict-thin-over-report.md`).**
+> This file is the **thin verdict layer**, not the numbers source. The metrics are owned
+> by Harbor's reporting (`harbor view`, per-job `result.json`) + `metrics/track_a_weighted.py`
+> → `track_a_report.json` (split, pass^k, per-category, efficiency — auto-computed). RESULTS.md
+> owns only what no automated report can: the plain-English **verdict**, the **construct-validity
+> caveats**, and the reproduction command — embedding the auto-computed split block, never a
+> hand-typed metrics table. (A richer FE-exportable report is a later follow-up.)
+
 **Status (2026-05-31):** INTERIM — the instrument is **proven to discriminate
 harness from model** on three axes (efficiency, memory reliability, recovery
 reliability); the final **n=5 pass^k** grid is pending a budget decision (the

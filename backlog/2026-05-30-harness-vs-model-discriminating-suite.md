@@ -68,9 +68,14 @@ The instrument is **proven** when:
    harness-discriminating categories: `context-management`,
    `tool-orchestration`, `skill-agent-authoring`, the memory-write
    `conversation-persona` shape, and `real-world-workflows`.
-3. **RESULTS.md** is published — per-category + per-difficulty, pass^k
-   reliability columns, plain-English verdict — and is reproducible from one
-   command.
+3. **The verdict is published.** Retargeted 2026-06-03 (see
+   `2026-06-03-results-verdict-thin-over-report.md`): the NUMBERS are owned by
+   Harbor's reporting + `metrics/track_a_weighted.py` → `track_a_report.json`
+   (per-category + per-difficulty + pass^k + the split, auto-computed — never
+   hand-typed). **RESULTS.md** is the THIN layer on top: the plain-English
+   verdict + construct-validity caveats (asymmetries, recall-removed, BLUNT
+   controls, false-zero traps), embedding the auto-computed split block and
+   linking to the viewer. A richer exportable report is a later FE feature.
 
 ### The prove-the-instrument loop
 
