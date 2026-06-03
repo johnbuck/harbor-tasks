@@ -82,7 +82,9 @@ EPICS = [
             ("partial", "Eval infra stack — memory shipped, browser portion", "2026-05-29-eval-infra-stack.md",
              "The combined memory + browser infra spec. The memory half shipped; the browser half is the open item below."),
             ("blocked", "Browser tool enablement — openclaw tool not surfacing (task #90)", "2026-06-02-browser-and-pin-findings.md",
-             "Both harnesses are wired to a shared headless Chromium on wiley (CDP :9222). hermes exposes browser_navigate; openclaw's `browser` tool does NOT surface despite browser.enabled:true — prime suspect is CDP reachability from inside the trial container. browser-find-fact-01 is the gated task that proves the path once it works."),
+             "Both harnesses wired to a shared headless Chromium on wiley (CDP :9222). 2026-06-03 ROOT CAUSE FOUND (supersedes the CDP-reachability guess — CDP IS reachable from the container): openclaw's `browser` tool is filtered because it needs OpenClaw's browser CONTROL SERVER, which only the gateway runs — and the thin adapter runs `openclaw agent --local` (embedded, no gateway). The browser plugin loads + registers the tool unconditionally; embedded mode just has no server to back it. Folded into the gateway-backed full-harness work below."),
+            ("blocked", "Gateway-backed full-harness execution (openclaw + hermes)", "2026-06-03-gateway-backed-full-harness.md",
+             "The thin `--local` invocation runs both harnesses EMBEDDED, not their full gateway-backed runtime — silently dropping gateway-hosted capabilities (the browser control server). That undercuts the whole premise (compare the REAL harnesses, not a reduced thin client). Findings: gateway refuses to bind without a token (→ embedded fallback); with a token it gets past auth but the browser tool exposure is a 3-step chain (gateway ready → agent connects gateway-backed, no fallback → control server attaches to the wiley CDP). Fix: rework the adapters to start the gateway w/ token, wait for real readiness, run gateway-backed, verify browser surfaces + drives CDP; verify hermes full-stack + browser parity; then re-baseline the core-11 (prior runs were all embedded). NEXT after compact."),
         ],
     },
     {
@@ -286,19 +288,22 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now">The <b>E2 fairness gate is cleared.</b> Both harnesses are re-pinned to
-<b>novita</b> (the deepseek pin had 404'd under data_collection:deny; novita serves
-deepseek-v4-pro with deny + tool-use + reasoning — privacy intact), and <b>hermes
-write-persistence (#92) is fixed</b> (<span class="mono">cd /app</span>) — verified by the
-file-persistence probe: openclaw, hermes, and oracle all reward 1.0 / answer_present 1.
-Also done: the <b>core suite</b> is defined (11 tests, <span class="mono">configs/core-suite.yaml</span>),
-context-rot scoring integrity is fixed (<b>#93</b>), and <b>recall is removed from both
-harnesses</b> (substrate now openclaw=hindsight vs hermes=honcho+hindsight; old Δ0.50
-memory baseline VOID). The image is rebuilt with all of it baked. <b>Only remaining gate:
-<span class="mono">openclaw browser</span> (E3, task #90).</b> Next action — run the core-suite
-<b>n=1 separation check</b> → <b>n≥3 pass^k</b> grid → the thin verdict (E5). Detail:
-<span class="mono">backlog/2026-06-03-core-suite-selection.md</span> ·
-<span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
+<div class="now"><b>Active focus: gateway-backed full-harness execution (E3).</b> Chasing #90
+exposed that the thin <span class="mono">openclaw agent --local</span> invocation runs both
+harnesses <b>EMBEDDED, not their full gateway-backed runtime</b> — silently dropping
+gateway-hosted capabilities (the browser control server → no <span class="mono">browser</span>
+tool). That undercuts the premise: the rich setup exists to compare the <i>real</i> harnesses,
+not a reduced thin client. Root cause nailed (gateway refuses to bind without a token →
+embedded fallback; with a token, browser exposure is a 3-step chain — gateway ready → agent
+connects gateway-backed → control server attaches to the wiley CDP). Spec:
+<span class="mono">backlog/2026-06-03-gateway-backed-full-harness.md</span>. <b>Validity caveat:</b>
+every run to date was embedded openclaw, so prior numbers must be re-baselined once full-harness
+lands.<br><br>
+<b>Already done</b> (E2 cleared + scoring solid): both harnesses pinned to <b>novita</b>
+(privacy-intact, deny+tool-use+reasoning); hermes write-persistence (<b>#92</b>) fixed +
+verified; <b>core-11</b> defined; context-rot scoring (<b>#93</b>) fixed; recall removed
+(substrate openclaw=hindsight vs hermes=honcho+hindsight). <b>Sequence:</b> finish gateway-backed
+full-harness (incl. hermes browser parity) → re-baseline core-11 n=1 → n≥3 pass^k → thin verdict (E5).</div>
 <div class="sec">Epics</div>
 {legend}
 {''.join(cards)}
