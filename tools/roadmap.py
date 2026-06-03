@@ -53,13 +53,13 @@ EPICS = [
         ],
     },
     {
-        "id": "E2", "status": "blocked",
+        "id": "E2", "status": "done",
         "title": "Fair-comparison controls",
         "summary": "Same model, same provider, isolated state — so a score gap is the harness, not luck.",
         "specs": [
-            ("blocked", "Deterministic provider pin — one shared OpenRouter host",
+            ("done", "Deterministic provider pin — one shared OpenRouter host (novita)",
              "done/2026-05-27-deterministic-provider-routing.md",
-             "Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin regressed to an invalid slug `only:[deepseek]` → 404: hermes can't call at all, openclaw silently routes free — so NEITHER is actually pinned. Fix: a valid non-training host (fireworks or novita, both 200 / 1M ctx); operator picks, then rebuild the image."),
+             "Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin had regressed to `only:[deepseek]` which, once DeepSeek's deepseek-v4-pro endpoint became training-flagged, left 0 endpoints under data_collection:deny → 404 on every hermes call. RESOLVED 2026-06-03: re-pinned both harnesses to **novita** (byte-identical provider.only in openclaw.json + hermes config.yaml). Fireworks was deny-eligible but lacks tool-use for this model; novita serves deepseek-v4-pro under deny + tool-use + reasoning + require_parameters (all verified via direct API probes + a live oracle/openclaw/hermes probe — all three reward 1.0). data_collection:deny preserved (privacy intact)."),
             ("done", "Cost + token tracking — per-trial usage at live pricing", "done/2026-05-27-cost-and-token-tracking.md",
              "Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model."),
             ("done", "Memory-state wipe hook — reset harness memory at trial start", "hooks/wipe_memory_state.py",
@@ -124,6 +124,8 @@ EPICS = [
              "Designated the CORE comparison set: 11 tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Excludes prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild."),
             ("done", "Recall MCP dropped from both eval harnesses — memory substrate change", "2026-06-03-core-suite-selection.md",
              "recall (Graphiti temporal-KG memory, wiley:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the wiley recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1."),
+            ("done", "Hermes write-persistence (#92) — false-zero root cause fixed", "2026-06-02-context-rot-scoring-integrity.md",
+             "The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: \".\"`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app && hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression."),
             ("todo", "Run n≥3 pass^k grid → verdict (task #81)", "—",
              "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild. Tracked as task #81."),
         ],
@@ -284,17 +286,17 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now">The <b>core suite is now defined</b> — 11 load-bearing tests
-(<span class="mono">configs/core-suite.yaml</span>), one per harness-distinct capability,
-anchored on the three proven discriminators; context-rot scoring integrity is fixed
-(<b>#93</b>, only normalized comparable keys in reward.json); and <b>recall was removed
-from both harnesses</b> (it errored on every hermes call) — new substrate is
-openclaw=hindsight vs hermes=honcho+hindsight, which voids the old Δ0.50 memory baseline.
-Still gated at the <b>E2 fairness gate</b>: the <b>provider pin</b> (E2) and
-<b>openclaw browser</b> (E3). Next actions — (1) operator picks the pin host; (2) diagnose
-openclaw browser (task #90); (3) <b>rebuild harbor-agents-rich</b> (bakes the recall
-removal + configs), then run the core-suite <b>n=1 separation check</b> → <b>n≥3 pass^k</b>
-verdict grid → RESULTS.md. Detail:
+<div class="now">The <b>E2 fairness gate is cleared.</b> Both harnesses are re-pinned to
+<b>novita</b> (the deepseek pin had 404'd under data_collection:deny; novita serves
+deepseek-v4-pro with deny + tool-use + reasoning — privacy intact), and <b>hermes
+write-persistence (#92) is fixed</b> (<span class="mono">cd /app</span>) — verified by the
+file-persistence probe: openclaw, hermes, and oracle all reward 1.0 / answer_present 1.
+Also done: the <b>core suite</b> is defined (11 tests, <span class="mono">configs/core-suite.yaml</span>),
+context-rot scoring integrity is fixed (<b>#93</b>), and <b>recall is removed from both
+harnesses</b> (substrate now openclaw=hindsight vs hermes=honcho+hindsight; old Δ0.50
+memory baseline VOID). The image is rebuilt with all of it baked. <b>Only remaining gate:
+<span class="mono">openclaw browser</span> (E3, task #90).</b> Next action — run the core-suite
+<b>n=1 separation check</b> → <b>n≥3 pass^k</b> grid → the thin verdict (E5). Detail:
 <span class="mono">backlog/2026-06-03-core-suite-selection.md</span> ·
 <span class="mono">backlog/2026-06-02-browser-and-pin-findings.md</span>.</div>
 <div class="sec">Epics</div>

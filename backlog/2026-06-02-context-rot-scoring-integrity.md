@@ -122,7 +122,14 @@ middle-rot bare list (`reward 0.625`, `early 1.0 / middle 0.0 / late 1.0`).
       LLM): `reward.json` = the 5 normalized keys only, `reward-details.json` sibling written
       + downloaded, job aggregate clean (no `chains`/`facts`/`answer_chars`), reward 1.0 both.
       Proves the #93 grader integration, not just the offline logic.
-- [ ] hermes `context-rot-02` re-run cleanly once write-persistence (task #92) is fixed,
+- [x] **Write-persistence (task #92) fixed + verified** — root cause was hermes's file
+      tools being workspace-rooted at `terminal.cwd: "."` while the adapter never cd'd to
+      the workdir (writes shadowed off `/app`). Fix: `cd /app` in `lib/hermes_thin.py`
+      (commit e1c4541). Verified on the `_verify/file-persistence-01` probe: hermes
+      `answer_present` 0→1, reward 1.0 (with openclaw + oracle 1.0). Also required re-pinning
+      both harnesses deepseek→novita (deepseek endpoint went training-flagged → 404 under deny).
+- [ ] hermes `context-rot-02` full re-run to replace the hand-patched stopgap result —
+      now UNBLOCKED (#92 fixed); the ~$5 19-step run can fold into the core-suite n=1.
       replacing the hand-patched result.
 
 ## Findings worth remembering
