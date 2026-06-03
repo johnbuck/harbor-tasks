@@ -67,9 +67,9 @@ EPICS = [
         ],
     },
     {
-        "id": "E3", "status": "partial",
+        "id": "E3", "status": "done",
         "title": "Capability infrastructure (memory + browser)",
-        "summary": "The subsystems the harnesses actually use — recall memory and a shared browser.",
+        "summary": "The subsystems the harnesses actually use — memory + a shared browser. Both halves shipped: memory stack on <memory-host>, and the browser tool unblocked (stale-registry fix) + verified driving the shared Chromium end-to-end on BOTH harnesses.",
         "specs": [
             ("done", "Eval memory stack — <memory-host> deployment, LAN-reachable", "done/2026-05-29-memory-stack-deployment.md",
              "Recall / Graphiti memory services deployed on <memory-host> and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory."),
@@ -79,12 +79,12 @@ EPICS = [
              "Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts."),
             ("done", "Hermes dual-plugin activation", "done/2026-05-29-hermes-dual-plugin-system.md",
              "Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does."),
-            ("partial", "Eval infra stack — memory shipped, browser portion", "2026-05-29-eval-infra-stack.md",
-             "The combined memory + browser infra spec. The memory half shipped; the browser half is the open item below."),
-            ("blocked", "Browser tool enablement — openclaw tool not surfacing (task #90)", "2026-06-02-browser-and-pin-findings.md",
-             "Both harnesses wired to a shared headless Chromium on <memory-host> (CDP :9222). 2026-06-03 ROOT CAUSE FOUND (supersedes the CDP-reachability guess — CDP IS reachable from the container): openclaw's `browser` tool is filtered because it needs OpenClaw's browser CONTROL SERVER, which only the gateway runs — and the thin adapter runs `openclaw agent --local` (embedded, no gateway). The browser plugin loads + registers the tool unconditionally; embedded mode just has no server to back it. Folded into the gateway-backed full-harness work below."),
-            ("blocked", "Gateway-backed full-harness execution (openclaw + hermes)", "2026-06-03-gateway-backed-full-harness.md",
-             "The thin `--local` invocation runs both harnesses EMBEDDED, not their full gateway-backed runtime — silently dropping gateway-hosted capabilities (the browser control server). That undercuts the whole premise (compare the REAL harnesses, not a reduced thin client). Findings: gateway refuses to bind without a token (→ embedded fallback); with a token it gets past auth but the browser tool exposure is a 3-step chain (gateway ready → agent connects gateway-backed, no fallback → control server attaches to the <memory-host> CDP). Fix: rework the adapters to start the gateway w/ token, wait for real readiness, run gateway-backed, verify browser surfaces + drives CDP; verify hermes full-stack + browser parity; then re-baseline the core-11 (prior runs were all embedded). NEXT after compact."),
+            ("done", "Eval infra stack — memory + browser both shipped", "2026-05-29-eval-infra-stack.md",
+             "The combined memory + browser infra spec. Memory half shipped earlier; the browser half closed 2026-06-03 (stale-registry fix below, verified e2e on both harnesses)."),
+            ("done", "Browser tool enablement — stale plugin registry (task #90)", "2026-06-03-browser-tool-registry-fix.md",
+             "Both harnesses wired to a shared headless Chromium on <memory-host> (CDP :9222). 2026-06-03 REAL ROOT CAUSE (supersedes BOTH the CDP-reachability guess AND the embedded-vs-gateway theory): the rich image shipped a STALE persisted plugin registry (/root/.openclaw/plugins) indexed before the `browser` plugin's deps were present, so browser (+ canvas/file-transfer/phone-control/talk-voice) were never indexed and their tools never surfaced — embedded OR gateway-backed. Fix is one line baked into the image: `openclaw plugins registry --refresh` (46 → 64 enabled). Proven in-container: after refresh, plain embedded `openclaw agent --local` exposes the identical 59-tool catalog as gateway-backed (browser + full hindsight memory + sessions_spawn/subagents + 14 skills). Embedded is NOT a reduced runtime for anything the core-11 exercises — so the prior 'must go gateway-backed' conclusion was wrong (see the row below)."),
+            ("rejected", "Gateway-backed full-harness execution — NOT NEEDED (was the #90 theory)", "2026-06-03-gateway-backed-full-harness.md",
+             "Spec written on a premise that the experiments disproved. The theory: thin `--local` runs EMBEDDED, dropping the gateway's browser control server → no browser tool. Reality: the blocker was the stale plugin registry (row above); once refreshed, embedded `--local` exposes browser + memory + the full 59-tool catalog identically to gateway-backed. The gateway adds only channels/cron/device-pairing/multi-session-routing/sidecars — none of which the core-11 tasks touch. Operator decision (2026-06-03): ship the registry-refresh fix, KEEP the embedded `--local` invocation (simpler, no gateway lifecycle / port-collision / teardown risk, and proven fair). Gateway-backed left as rejected, not deferred — there is no capability gap to close."),
         ],
     },
     {
@@ -154,9 +154,9 @@ EPICS = [
 ]
 
 STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked",
-                "todo": "to do", "deprecated": "deprecated"}
+                "todo": "to do", "deprecated": "deprecated", "rejected": "rejected"}
 STATUS_CLASS = {"done": "ok", "partial": "mid", "blocked": "bad",
-                "todo": "muted", "deprecated": "dep"}
+                "todo": "muted", "deprecated": "dep", "rejected": "dep"}
 
 CSS = """
   body{font:14px/1.6 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}
@@ -248,7 +248,7 @@ def render() -> str:
             else:
                 btn = '<button class="specbtn" disabled>tracked by task #</button>'
             ref_html = "" if ref == "—" else f'<span class="rref">{esc(ref)}</span>'
-            rowcls = "row depr" if st == "deprecated" else "row"
+            rowcls = "row depr" if st in ("deprecated", "rejected") else "row"
             rows.append(
                 f'<div class="{rowcls}" onclick="tog(this)"><div class="dot {STATUS_CLASS[st]}"></div>'
                 f'<div class="rlabel"><span class="caret">▶</span> {esc(label)}</div>{ref_html}</div>'
@@ -288,22 +288,25 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now"><b>Active focus: gateway-backed full-harness execution (E3).</b> Chasing #90
-exposed that the thin <span class="mono">openclaw agent --local</span> invocation runs both
-harnesses <b>EMBEDDED, not their full gateway-backed runtime</b> — silently dropping
-gateway-hosted capabilities (the browser control server → no <span class="mono">browser</span>
-tool). That undercuts the premise: the rich setup exists to compare the <i>real</i> harnesses,
-not a reduced thin client. Root cause nailed (gateway refuses to bind without a token →
-embedded fallback; with a token, browser exposure is a 3-step chain — gateway ready → agent
-connects gateway-backed → control server attaches to the <memory-host> CDP). Spec:
-<span class="mono">backlog/2026-06-03-gateway-backed-full-harness.md</span>. <b>Validity caveat:</b>
-every run to date was embedded openclaw, so prior numbers must be re-baselined once full-harness
-lands.<br><br>
+<div class="now"><b>#90 (browser) is fixed — and the fix overturned its own spec.</b> Chasing the
+missing <span class="mono">browser</span> tool, the embedded-vs-gateway theory was <i>disproven</i>
+in-container: the real blocker was a <b>stale persisted plugin registry</b> baked into the rich
+image (indexed before the browser plugin's deps existed → browser + canvas/file-transfer/etc.
+never indexed). One line baked into the image — <span class="mono">openclaw plugins registry
+--refresh</span> (46 → 64 enabled) — and the <span class="mono">browser</span> tool surfaces.
+Proven: plain embedded <span class="mono">openclaw agent --local</span> then exposes the
+<i>identical</i> 59-tool catalog as gateway-backed (browser + full hindsight memory + sub-agent
+tools + skills). Embedded is NOT a reduced runtime for anything the core-11 exercises, so the
+gateway-backed work is <b>rejected, not deferred</b> — there's no capability gap to close.
+<b>Operator decision (2026-06-03):</b> registry-refresh + keep embedded. <b>Validity caveat:</b>
+prior runs lacked the browser tool, so only <i>browser-dependent</i> tasks need re-baselining —
+the rest of the catalog was always present.<br><br>
 <b>Already done</b> (E2 cleared + scoring solid): both harnesses pinned to <b>novita</b>
 (privacy-intact, deny+tool-use+reasoning); hermes write-persistence (<b>#92</b>) fixed +
 verified; <b>core-11</b> defined; context-rot scoring (<b>#93</b>) fixed; recall removed
-(substrate openclaw=hindsight vs hermes=honcho+hindsight). <b>Sequence:</b> finish gateway-backed
-full-harness (incl. hermes browser parity) → re-baseline core-11 n=1 → n≥3 pass^k → thin verdict (E5).</div>
+(substrate openclaw=hindsight vs hermes=honcho+hindsight); browser tool (<b>#90</b>) fixed via
+registry refresh. <b>Sequence:</b> confirm hermes browser parity → run core-11 n=1 separation
+→ n≥3 pass^k → thin verdict (E5).</div>
 <div class="sec">Epics</div>
 {legend}
 {''.join(cards)}

@@ -32,6 +32,20 @@ RUN mkdir -p /root/.openclaw /opt/harness/openclaw-workspace
 COPY harnesses/openclaw/openclaw.json /root/.openclaw/openclaw.json
 COPY harnesses/openclaw/workspace/ /opt/harness/openclaw-workspace/
 
+# --- refresh the persisted plugin registry (THE #90 fix) ---------------------
+# The base image ships a STALE persisted plugin registry (/root/.openclaw/plugins)
+# that was indexed before several stock extensions (notably `browser`, plus
+# canvas/file-transfer/phone-control/talk-voice) were fully present, so they were
+# never indexed and their tools never surfaced at runtime — embedded OR
+# gateway-backed. `registry --refresh` rebuilds it from the current manifests so
+# the `browser` tool (and the rest) are available to the agent. Verified: refresh
+# takes 46 → 64 enabled plugins and makes `browser` appear in the agent catalog.
+# Assert browser is indexed so a future base-image change can't silently drop it.
+RUN . ~/.nvm/nvm.sh && nvm use 22 >/dev/null 2>&1 \
+    && openclaw plugins registry --refresh >/dev/null 2>&1 \
+    && openclaw plugins list --json 2>/dev/null | grep -q '"browser"' \
+    && echo "browser plugin indexed OK"
+
 # --- hermes: bake the rich config over the default template ------------------
 # The installer seeds ~/.hermes with a DEFAULT config.yaml (anthropic/opus,
 # provider auto, memory off). Overwrite it with our rich config (deepseek via
