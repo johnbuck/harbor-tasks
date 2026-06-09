@@ -18,8 +18,8 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/home/trumble/harbor-tasks}"
-HARBOR="${HARBOR:-/tmp/harbor}"
+REPO="${REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HARBOR="${HARBOR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../harbor" && pwd)}"
 CONFIG="${CONFIG:-${REPO}/configs/track-a-harness.yaml}"
 WEIGHTS="${REPO}/configs/track-a-weights.toml"
 # Persistent jobs dir on the encrypted /home (327G), NOT /tmp — /tmp is tmpfs

@@ -13,8 +13,8 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/home/trumble/harbor-tasks}"
-HARBOR="${HARBOR:-/tmp/harbor}"
+REPO="${REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HARBOR="${HARBOR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../harbor" && pwd)}"
 CONFIG="${REPO}/configs/tau3-agent-run.yaml"
 JOB_NAME="${JOB_NAME:-tau3-agentrun-$(date +%Y-%m-%d__%H-%M-%S)}"
 
