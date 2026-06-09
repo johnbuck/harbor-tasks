@@ -5,18 +5,18 @@
 # `uv run --project /tmp/harbor …`. /tmp is wiped on reboot, and that upstream
 # checkout lacks the subscription-auth patch — so the "Generate Analysis" button
 # 500'd after every reboot. This script pins the launch to the fork
-# (/home/<user>/harbor), which carries the patch + the prebuilt UI, so the viewer
-# survives reboots. See backlog/2026-06-02-viewer-subscription-auth.md.
+# (the sibling ../harbor checkout), which carries the patch + the prebuilt UI, so
+# the viewer survives reboots. See backlog/2026-06-02-viewer-subscription-auth.md.
 #
 # Usage:  tools/view.sh [PORT]          # default 8089
-# Env:    HARBOR_FORK   fork checkout    (default /home/<user>/harbor)
+# Env:    HARBOR_FORK   fork checkout    (default: sibling ../harbor)
 #         HARBOR_JOBS   jobs dir to serve (default <repo>/jobs)
 #         HARBOR_HOST   bind host        (default 0.0.0.0)
 set -euo pipefail
 
 PORT="${1:-8089}"
 HOST="${HARBOR_HOST:-0.0.0.0}"
-FORK="${HARBOR_FORK:-/home/<user>/harbor}"
+FORK="${HARBOR_FORK:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../harbor" && pwd)}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 JOBS="${HARBOR_JOBS:-$REPO/jobs}"
 
