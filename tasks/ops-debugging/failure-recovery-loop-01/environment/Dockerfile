@@ -62,7 +62,14 @@ if [ -z "$out" ]; then
   echo "dfetch: error: no output path given" >&2
   exit 5
 fi
-echo "PAYLOAD: hgr-7842-OK" > "$out"
+# The payload is DERIVED from the session token at emit time, not stored as a
+# literal — so grepping this script reveals the mechanism but NOT the answer
+# (no single file-read yields the payload; you need the token too, and the only
+# documented way to the token is the 401-error recovery step). Closes the
+# plaintext-grep shortcut that failed the KILL test. (Residual: a root agent can
+# still read the token + replicate this hash — see backlog rollout spec; the
+# airtight fix needs a privilege boundary / stateful sidecar.)
+echo "PAYLOAD: $(printf '%s' "$CORRECT" | sha256sum | cut -c1-11)" > "$out"
 echo "dfetch: success" >&2
 exit 0
 EOF

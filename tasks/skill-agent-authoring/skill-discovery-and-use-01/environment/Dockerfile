@@ -107,38 +107,14 @@ RUN set -e; \
     decoy csv-head         "Show the header row and first N data rows of a CSV. A previewer." '{"header": [], "rows": []}'
 
 # ---- Eight target CSVs, each needing the ONE correct skill -----------------
+# NOTE: the expected answers are NOT materialized in the agent container (the
+# deprecated leak was a world-readable /app/expected/). The verifier recomputes
+# the expected structural summary from /app/data at grade time (tests/reward.py).
 RUN python3 - <<'PY'
-import csv, json, random, os
+import csv, random, os
 random.seed(7)
 NAMES = ["alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel"]
 os.makedirs("/app/data", exist_ok=True)
-os.makedirs("/app/expected", exist_ok=True)
-import importlib.util
-spec = importlib.util.spec_from_file_location("sk", "/app/skills/csv-structure-summary/run.py")
-
-def infer_dtype(values):
-    seen = set()
-    for v in values:
-        if v == "": continue
-        try: int(v); seen.add("int"); continue
-        except ValueError: pass
-        try: float(v); seen.add("float"); continue
-        except ValueError: pass
-        seen.add("str")
-    if not seen: return "unknown"
-    if seen == {"int"}: return "int"
-    if seen <= {"int","float"}: return "float"
-    return "str"
-
-def summarize(path):
-    rows = list(csv.reader(open(path, newline="")))
-    header, *data = rows
-    cols = []
-    for i, name in enumerate(header):
-        vals = [r[i] if i < len(r) else "" for r in data]
-        cols.append({"name": name, "dtype": infer_dtype(vals),
-                     "nulls": sum(1 for v in vals if v == "")})
-    return {"rows": len(data), "columns": cols}
 
 for k in range(1, 9):
     nrows = random.randint(4, 9)
@@ -150,6 +126,4 @@ for k in range(1, 9):
     p = f"/app/data/table_{k:02d}.csv"
     with open(p, "w", newline="") as f:
         w = csv.writer(f); w.writerow(["id","name","age","score"]); w.writerows(rows)
-    with open(f"/app/expected/table_{k:02d}.json", "w") as f:
-        json.dump(summarize(p), f)
 PY

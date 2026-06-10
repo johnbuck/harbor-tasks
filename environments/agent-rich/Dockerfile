@@ -7,7 +7,10 @@
 # "STOP USING THE PACKAGED HARNESSES" direction (FOOTGUNS #12).
 #
 # Build (context MUST be the repo root so COPY can read harnesses/):
-#   docker build -f environments/agent-rich/Dockerfile -t harbor-agents-rich:latest .
+#   environments/agent-rich/build.sh
+# build.sh sources the gitignored configs/local.env and passes the internal
+# memory-service endpoints as build-args — this PUBLIC repo holds only
+# __HINDSIGHT_URL__ / __HONCHO_URL__ placeholders in the baked configs.
 #
 # Verify:
 #   docker run --rm harbor-agents-rich:latest bash -lc \
@@ -78,6 +81,19 @@ COPY harnesses/hermes/honcho.json /root/.hermes/honcho.json
 # hermes uses a uv-managed venv (no pip); install honcho-ai into it via uv.
 RUN /root/.local/bin/uv pip install --python /usr/local/lib/hermes-agent/venv/bin/python \
         --no-cache honcho-ai
+
+# --- bake internal endpoints (kept OUT of git; injected at build time) --------
+# The committed harness configs carry __HINDSIGHT_URL__ / __HONCHO_URL__ so this
+# PUBLIC repo holds no internal topology. Real values arrive as build-args from
+# environments/agent-rich/build.sh (which sources gitignored configs/local.env).
+# Fail loudly if unset — a bare `docker build` must NOT silently bake broken URLs.
+ARG HINDSIGHT_URL
+ARG HONCHO_URL
+RUN { test -n "$HINDSIGHT_URL" && test -n "$HONCHO_URL"; } \
+      || { echo "ERROR: build via environments/agent-rich/build.sh — HINDSIGHT_URL and HONCHO_URL build-args are required" >&2; exit 1; } \
+    && sed -i "s|__HINDSIGHT_URL__|$HINDSIGHT_URL|g" /root/.openclaw/openclaw.json /root/.hermes/config.yaml \
+    && sed -i "s|__HONCHO_URL__|$HONCHO_URL|g"     /root/.hermes/honcho.json \
+    && ! grep -RnE '__(HINDSIGHT|HONCHO)_URL__' /root/.openclaw/openclaw.json /root/.hermes/config.yaml /root/.hermes/honcho.json
 
 # --- fail-fast validation ----------------------------------------------------
 # openclaw must parse its config; hermes must still launch with the new config.

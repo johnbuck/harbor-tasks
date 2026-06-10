@@ -1,66 +1,16 @@
 #!/bin/bash
-# Graded verifier for skill-discovery-and-use-01.
+# Graded verifier (rewardkit). 8 files x 2 sub-checks = 16; reward = passed/16.
 #
-# 8 files x 2 independent sub-checks = 16 sub-checks:
-#   (A) correctness: /app/out/table_XX.json matches the expected structural
-#       summary (key-order tolerant deep equality).
-#   (B) discovery:   the CORRECT skill (csv-structure-summary) was actually run
-#       against this file — proven by its breadcrumb in
-#       /app/.skill-runs/csv-structure-summary.log. A harness that grabbed a
-#       decoy skill, or re-implemented from scratch, can still get (A) right but
-#       fails (B); a harness that found the right skill but ran it on only some
-#       files earns partial (B).
+# Runs in the SEPARATE verifier sandbox (task.toml environment_mode = "separate").
+# Expected is RECOMPUTED from /app/data at grade time (tests/reward.py) — no answer
+# key anywhere (the deprecated /app/expected/ leak is gone). Per-criterion results
+# go to /logs/verifier/reward-details.json (shown in `harbor view`); reward.json
+# stays {"reward": <float>} (FOOTGUNS #38).
 #
-# reward = passed_subchecks / 16   (graded fraction; NOT binary)
+# rewardkit is BAKED into the verifier image (tests/Dockerfile: pip install
+# harbor-rewardkit==0.1.4), so grading has NO runtime network dependency — call the
+# baked `rewardkit` directly (it uses the image python; reward.py is stdlib +
+# rewardkit only, so FOOTGUNS #7's uvx-python-shadow concern doesn't apply).
 set -u
 mkdir -p /logs/verifier
-
-python3 - <<'PY' > /logs/verifier/reward.json
-import json, os
-
-BREADCRUMB = "/app/.skill-runs/csv-structure-summary.log"
-ran_files = set()
-if os.path.isfile(BREADCRUMB):
-    for line in open(BREADCRUMB):
-        ran_files.add(os.path.basename(line.strip()))
-
-passed = 0
-total = 0
-per_file = {}
-
-for k in range(1, 9):
-    name = f"table_{k:02d}"
-    checks = {"correct": 0, "discovered": 0}
-    exp_path = f"/app/expected/{name}.json"
-    out_path = f"/app/out/{name}.json"
-    try:
-        expected = json.load(open(exp_path))
-    except Exception:
-        expected = None
-    # (A) correctness
-    if expected is not None and os.path.isfile(out_path):
-        try:
-            actual = json.load(open(out_path))
-            if actual == expected:
-                checks["correct"] = 1
-        except Exception:
-            pass
-    # (B) discovery: the correct skill ran against this csv
-    if f"{name}.csv" in ran_files:
-        checks["discovered"] = 1
-    per_file[name] = checks
-    passed += sum(checks.values())
-    total += 2
-
-reward = round(passed / total, 4) if total else 0.0
-correctness = 1 if passed == total else 0
-print(json.dumps({
-    "reward": reward,
-    "correctness": correctness,
-    "subchecks_passed": passed,
-    "subchecks_total": total,
-    # Harbor's VerifierResult requires every reward value to be a scalar
-    # (float/int) — emit the COUNT, not the filename list (FOOTGUNS #38).
-    "skill_runs_logged": len(ran_files),
-}, indent=2))
-PY
+rewardkit /tests --workspace /app --output /logs/verifier/reward.json

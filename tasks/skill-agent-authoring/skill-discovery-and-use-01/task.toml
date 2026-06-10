@@ -1,5 +1,13 @@
 schema_version = "1.1"
 
+# Separate verifier sandbox (P3): grading runs in its own container that sees
+# ONLY these artifacts copied from the agent sandbox — not full /app, not the
+# tests/ grader code, not running processes. The agent therefore cannot read the
+# grader logic or plant state to game it. /app/data is copied so the verifier can
+# RECOMPUTE expected (no answer key anywhere); /app/out + /app/.skill-runs are the
+# agent's product + the correct-skill breadcrumb.
+artifacts = ["/app/data", "/app/out", "/app/.skill-runs"]
+
 [task]
 name = "johnbuck/skill-discovery-and-use-01"
 description = "The ONE correct skill (csv-structure-summary) is buried among NINE plausible decoy skills with adjacent names/purposes. The agent must read SKILL.md descriptions to discover the right one and invoke it on all 8 target CSVs. Verifier is GRADED: reward = passed_subchecks / 16 (per file: output-correct + correct-skill-actually-ran via breadcrumb). Decoys defeat name-only guessing; breadcrumb defeats from-scratch reimplementation."
@@ -19,6 +27,14 @@ tags = ["skill-agent-authoring", "skill-discovery", "harness-discriminating", "g
 
 [verifier]
 timeout_sec = 60.0
+environment_mode = "separate"
+
+# Verifier runs in its own sandbox, BUILT FROM tests/Dockerfile (which bakes the
+# grader AND rewardkit into the image). Do NOT pin docker_image here — that
+# suppresses the tests/Dockerfile build and ships an image with no /tests/test.sh.
+# rewardkit is baked, so grading needs no network: allow_internet = false.
+[verifier.environment]
+allow_internet = false
 
 [agent]
 timeout_sec = 600.0

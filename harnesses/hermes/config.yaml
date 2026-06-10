@@ -809,11 +809,11 @@ mcp_servers:
   # recall MCP server itself is untouched; this harness simply no longer mounts
   # it. hindsight remains the active eval memory MCP. To restore, re-add:
   #   recall:
-  #     url: "http://internal-host:8408/mcp"
+  #     url: "${RECALL_URL}/mcp"   # internal recall MCP endpoint (see configs/local.env)
   #     headers: { X-Group-ID: "eval-hermes" }
   # hindsight — learning memory. per-agent bank via URL path.
   hindsight:
-    url: "http://internal-host:8888/mcp/eval-hermes/"
+    url: "__HINDSIGHT_URL__/mcp/eval-hermes/"
 
 # Example servers (reference — see docs/mcp.md):
 # mcp_servers:

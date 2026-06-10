@@ -821,3 +821,104 @@ rewards.per_file.int    Input should be a valid integer [input_value={...dict...
 - It does **not** follow symlinks in the jobs folder — symlinking run dirs in makes them invisible (and briefly broke the listing). Use real dirs (move, don't link).
 - `/api/jobs` returns `{"items":[...]}` (not a bare list); a brief "0 items" right after startup is just the initial scan, not a failure.
 - The viewer points at ONE folder — keep all runs under the single pinned `jobs_dir` (see #39) so one dashboard shows everything.
+
+---
+
+## 41. Harbor 0.13.1 added an interactive env-var confirmation prompt — `harbor run` CLI hangs/aborts non-interactively without `-y`
+
+**Context:** harbor was upgraded **0.8.0 → 0.13.1** on 2026-06-03 (both checkouts:
+durable fork `/home/trumble/harbor` on branch `local/v0.13.1-subscription-auth`
+= v0.13.1 + the subscription-auth patch; eval runtime `/tmp/harbor` detached at
+the `v0.13.1` tag). Rebuild each `.venv` with `uv sync` after a checkout.
+
+**Symptom:** any direct `harbor run …` invocation prints an "Environment
+Variables / Phase" table and blocks on `Proceed? (Y/n):`. Piped/non-interactive
+(or `timeout`-wrapped) callers get `Aborted.` and exit non-zero — no trial runs.
+
+**Fix:** pass `--yes`/`-y` to auto-confirm. This is a CLI-layer prompt only;
+the **programmatic `Job.create()`/`Job.run()` path used by `run_track_a.sh` does
+NOT prompt**, so the Track-A sweep runner is unaffected — but `configs/validate*.yaml`
+oracle smokes run via `harbor run -c …` DO need `-y` now.
+
+**Verified on 0.13.1:** all runner imports (`harbor.job.Job`,
+`harbor.models.job.config.JobConfig`, `harbor.trial.hooks.TrialEvent`), the
+adapter base classes (`harbor.agents.installed.{openclaw,hermes,base}`,
+`harbor.environments.base`, `harbor.models.agent.context`), and
+`JobConfig.model_validate(core-suite.yaml)` all resolve unchanged; an oracle
+smoke on `ops-debugging/failure-recovery-loop-01` scored reward 1.0 / 0
+exceptions. **No JobConfig schema drift across 0.8→0.13.** New surface now
+available: native network mode + phase allowlist (`#1455`), `--env-file`,
+`harbor leaderboard submit`, job plugins, more `--env` cloud backends.
+
+**Re-baseline note:** every pre-2026-06-03 result was measured on harbor 0.8.0.
+Per operator decision (upgrade-first-then-rebaseline), the proven discriminators
+must be re-run on 0.13.1 before the n=5 verdict (#81) is trusted.
+
+---
+
+## 42. Separate verifier (`environment_mode = "separate"`) builds the grader image from `tests/Dockerfile` — NOT from `docker_image`
+
+**Symptom:** a task with `[verifier] environment_mode = "separate"` errors with
+`RewardFileNotFoundError` and the verifier stdout shows `/tests/test.sh: No such
+file or directory` — even though `tests/test.sh` exists on the host.
+
+**Root cause:** Harbor runs separate verifiers with `skip_tests_upload=True` — it
+does **not** upload `tests/` at grade time. The verifier image must **already own
+`/tests/test.sh`**. Harbor builds that image from a **`tests/Dockerfile`** (build
+context = `tests/`; for multistep, `steps/<name>/tests/`). The prototype shipped no
+`tests/Dockerfile` and instead pinned `[verifier.environment] docker_image =
+"harbor-agents-rich:latest"` — a generic image with no task tests baked in →
+`/tests/test.sh` missing.
+
+**Fix:** ship a `tests/Dockerfile` that bakes the grader (and rewardkit) into
+`/tests`, and do NOT pin `docker_image`:
+```dockerfile
+FROM harbor-agents-rich:latest
+RUN pip install --no-cache-dir harbor-rewardkit==0.1.4   # bake → no runtime PyPI fetch
+COPY test.sh reward.py /tests/
+RUN chmod +x /tests/test.sh
+```
+`[verifier.environment]` governs the verifier's NETWORK policy (`allow_internet`),
+not the image. With rewardkit baked, `allow_internet = false` and grading runs
+offline. **Multistep cost:** each grading step needs its own `tests/Dockerfile`, so
+a 16-grade-step task = 16 verifier images. Validate every conversion with the free
+oracle (`harbor trial start -p <task> --agent oracle`): full marks, flat-scalar
+reward.json, all criteria in reward-details.json. See
+`backlog/2026-06-09-verifier-sandbox-rollout.md`.
+
+## 43. A rich-image rebuild that tags only `:pinned-v2` (not `:latest`) silently breaks every FRESH build
+
+**Symptom:** existing/cached task builds work, but any NEW image build (e.g. a new
+verifier `tests/Dockerfile` `FROM harbor-agents-rich:latest`) fails with
+`pull access denied … harbor-agents-rich:latest … repository does not exist`.
+
+**Root cause:** the 2026-06-09 rich rebuild tagged the image `harbor-agents-rich:pinned-v2`
+and never also tagged `:latest`. Every task Dockerfile + Hard Rule #1 + the dashboards
+reference `:latest`. Cached agent images still resolved off old layers, masking it;
+a fresh build tried to pull `:latest` from docker.io and 404'd. Fix:
+`docker tag harbor-agents-rich:pinned-v2 harbor-agents-rich:latest`. **Lesson:** the
+rich-image build process MUST tag `:latest` (or whatever every Dockerfile FROMs).
+A pin tag is fine as an extra, never as the only tag.
+
+## 44. Verifier isolation does NOT fix a forged ARTIFACT — the signal source must be un-forgeable
+
+**Symptom:** a grader trusts an agent-writable file as proof (a `chmod 666`
+`/var/log/tool-calls.log`, an agent-written `done.txt` breadcrumb, a `browser_used`
+marker globbed from `/logs`, a baked answer string the agent can copy into the
+expected output). Moving grading to a separate sandbox feels like it should fix this
+— **it does not.** If the agent forged the artifact DURING its run, the forged
+artifact is copied into the sandbox and the verifier trusts it just the same.
+
+**Root cause:** `environment_mode = "separate"` isolates the grader from the agent's
+processes and hides grader source — but it grades the `artifacts` that were copied
+OUT of the agent container, which the agent could have corrupted. Isolation closes
+"agent reads grader / plants state in the grading env"; it does NOT close "agent
+fabricates the evidence the grader reads."
+
+**Fix:** pair isolation with a grader that sources its signal from something the
+agent cannot forge — the **harness trajectory** (the recorded tool-call sequence,
+captured by the adapter outside the container) rather than an in-container log, or a
+value **recomputed** from a read-only input the agent never had write access to.
+The 2026-06-09 audit found two PROVEN discriminators (`failure-recovery-loop-01`,
+`tool-sprawl-precision-01`) gameable exactly this way. See
+`backlog/2026-06-09-verifier-integrity-audit.md`.

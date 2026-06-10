@@ -15,9 +15,16 @@
 # reward.json MUST be a FLAT scalar dict (Harbor rejects nested; FOOTGUNS #38).
 mkdir -p /logs/verifier
 
+# Expected payload = first 11 hex chars of sha256("sk-fetch-9f3a2b71") — the
+# session token baked at /app/.dfetch_token (dfetch derives it at emit time
+# instead of storing a plaintext literal, so no single file-read leaks it). This
+# grader lives in tests/ (uploaded post-agent), so the expected value is never
+# visible to the agent. If the baked token changes, recompute:
+#   printf '%s' "sk-fetch-9f3a2b71" | sha256sum | cut -c1-11
+EXPECTED_PAYLOAD="8c76e8be959"
 payload_ok=0; token_ok=0
-[ -f /app/payload.txt ] && grep -q '^PAYLOAD: hgr-7842-OK$' /app/payload.txt && payload_ok=1
-[ -f /app/token.txt ] && [ "$(tr -d '[:space:]' < /app/token.txt 2>/dev/null)" = "hgr-7842-OK" ] && token_ok=1
+[ -f /app/payload.txt ] && grep -q "^PAYLOAD: ${EXPECTED_PAYLOAD}$" /app/payload.txt && payload_ok=1
+[ -f /app/token.txt ] && [ "$(tr -d '[:space:]' < /app/token.txt 2>/dev/null)" = "${EXPECTED_PAYLOAD}" ] && token_ok=1
 calls=$(cat /var/log/dfetch.counter 2>/dev/null || echo 0)
 
 read reward correctness efficiency <<<"$(python3 -c "

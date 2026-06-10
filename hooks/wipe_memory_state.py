@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import shlex
 import subprocess
 from typing import TYPE_CHECKING
@@ -38,9 +39,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 RECALL_CONTAINER = "recall-neo4j"
-HINDSIGHT_BASE = "http://internal-host:8888"
-HONCHO_BASE = "http://internal-host:8000"
-WILEY_SSH = "wiley@internal-host"
+# Internal endpoints injected at runtime from the gitignored configs/local.env
+# (exported into the harbor process env). Kept out of this public repo.
+HINDSIGHT_BASE = os.environ.get("HINDSIGHT_URL", "")
+HONCHO_BASE = os.environ.get("HONCHO_URL", "")
+WILEY_SSH = os.environ.get("WILEY_SSH", "")
 
 # DATA-SAFETY INVARIANT: this hook deletes memory. It must only ever touch the
 # dedicated eval namespaces — NEVER the production agents that share the same

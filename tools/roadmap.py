@@ -130,8 +130,12 @@ EPICS = [
              "recall (Graphiti temporal-KG memory, wiley:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the wiley recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1."),
             ("done", "Hermes write-persistence (#92) — false-zero root cause fixed", "2026-06-02-context-rot-scoring-integrity.md",
              "The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: \".\"`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app && hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression."),
+            ("done", "Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE", "2026-06-09-verifier-integrity-audit.md",
+             "7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical."),
+            ("partial", "Verifier-sandbox rollout — separate env + baked rewardkit", "2026-06-09-verifier-sandbox-rollout.md",
+             "Adopt Harbor's native environment_mode=separate (grader runs in its own container, sees only declared artifacts). Contract learned the hard way: the verifier image is built from tests/Dockerfile (skip_tests_upload), NOT a pinned docker_image — FOOTGUNS #42. rewardkit now BAKED into the verifier image (no per-trial PyPI fetch); reference skill-discovery-and-use-01 oracle-validated 1.0 offline. KEY caveat: isolation alone does NOT fix a forged artifact (FOOTGUNS #44) — each gameable task also needs its grader re-sourced from the un-forgeable harness trajectory or a recomputed read-only input. Wave 1 underway."),
             ("todo", "Run n≥3 pass^k grid → verdict (task #81)", "—",
-             "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild. Tracked as task #81."),
+             "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild + the Wave-1 verifier-integrity fixes (a gameable discriminator must be closed before its numbers are trusted). Tracked as task #81."),
         ],
     },
     {
@@ -290,7 +294,27 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now"><b>#90 (browser) is fixed — and the fix overturned its own spec.</b> Chasing the
+<div class="now"><b>Verifier-integrity rollout (2026-06-09) — TWO of three proven discriminators are
+GAMEABLE.</b> Adopting Harbor's native <span class="mono">environment_mode="separate"</span> verifier
+sandbox (prototyped on skill-discovery; the broken prototype is now fixed + oracle-validated, with
+rewardkit <i>baked</i> into the verifier image — no per-trial PyPI fetch). A 7-agent audit of all 54
+tasks found the headline risk: <span class="mono">failure-recovery-loop-01</span> (success string
+baked in an agent-readable script + plantable <span class="mono">payload.txt</span>) and
+<span class="mono">tool-sprawl-precision-01</span> (<span class="mono">tool_f1</span> read from a
+<span class="mono">chmod-666</span> log) can be FAKED without exercising the measured capability — a
+gameable discriminator silently invalidates the thesis. <b>Key caveat:</b> isolation alone does NOT
+fix a forged artifact (FOOTGUNS #44); each gameable task also needs its grader re-sourced from the
+un-forgeable trajectory or a recomputed read-only input. <b>Threat-model refinement (2026-06-10):</b>
+this eval measures HONEST harnesses, so the real priority is <i>honest shortcut</i> (a capable agent
+reads a baked answer — a KILL-test fail) over <i>adversarial forge</i> (fabricating a log honest
+harnesses never touch). DONE + oracle-validated tonight: <span class="mono">unit-tests-01</span>
+(mutant answer-key relocated env→tests/) and <span class="mono">failure-recovery-loop-01</span>
+(plaintext payload → token-derived; the proven discriminator now passes the KILL test, honest
+behavior unchanged). Adversarial-forge tasks deprioritized (low value for an honest-harness verdict);
+<span class="mono">schedule-meeting</span> deferred (needs a sidecar redesign — see
+backlog/2026-06-10-overnight…). New: <span class="mono">NORTH_STAR.md</span> (canonical value
+hierarchy). <b>Gates the n≥3 verdict (#81)</b> — failure-recovery needs a supervised re-baseline.<br><br>
+<b>#90 (browser) is fixed — and the fix overturned its own spec.</b> Chasing the
 missing <span class="mono">browser</span> tool, the embedded-vs-gateway theory was <i>disproven</i>
 in-container: the real blocker was a <b>stale persisted plugin registry</b> baked into the rich
 image (indexed before the browser plugin's deps existed → browser + canvas/file-transfer/etc.
