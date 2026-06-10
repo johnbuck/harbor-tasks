@@ -35,6 +35,20 @@ RUN mkdir -p /root/.openclaw /opt/harness/openclaw-workspace
 COPY harnesses/openclaw/openclaw.json /root/.openclaw/openclaw.json
 COPY harnesses/openclaw/workspace/ /opt/harness/openclaw-workspace/
 
+# --- inject internal endpoints (build-time; this PUBLIC repo holds no topology) ---
+# The committed configs carry __HINDSIGHT_URL__ / __HONCHO_URL__ placeholders;
+# real values arrive as build-args from environments/agent-rich/build.sh (which
+# sources gitignored configs/local.env). openclaw.json MUST be substituted BEFORE
+# any openclaw command runs — `plugins registry --refresh` below loads the config
+# and rejects an unresolved placeholder URL. Fail loudly if the arg is missing so
+# a bare `docker build` can't bake a broken URL.
+ARG HINDSIGHT_URL
+ARG HONCHO_URL
+RUN test -n "$HINDSIGHT_URL" \
+      || { echo "ERROR: build via environments/agent-rich/build.sh — HINDSIGHT_URL/HONCHO_URL build-args required" >&2; exit 1; } \
+    && sed -i "s|__HINDSIGHT_URL__|$HINDSIGHT_URL|g" /root/.openclaw/openclaw.json \
+    && ! grep -qE '__HINDSIGHT_URL__' /root/.openclaw/openclaw.json
+
 # --- refresh the persisted plugin registry (THE #90 fix) ---------------------
 # The base image ships a STALE persisted plugin registry (/root/.openclaw/plugins)
 # that was indexed before several stock extensions (notably `browser`, plus
@@ -82,18 +96,15 @@ COPY harnesses/hermes/honcho.json /root/.hermes/honcho.json
 RUN /root/.local/bin/uv pip install --python /usr/local/lib/hermes-agent/venv/bin/python \
         --no-cache honcho-ai
 
-# --- bake internal endpoints (kept OUT of git; injected at build time) --------
-# The committed harness configs carry __HINDSIGHT_URL__ / __HONCHO_URL__ so this
-# PUBLIC repo holds no internal topology. Real values arrive as build-args from
-# environments/agent-rich/build.sh (which sources gitignored configs/local.env).
-# Fail loudly if unset — a bare `docker build` must NOT silently bake broken URLs.
-ARG HINDSIGHT_URL
-ARG HONCHO_URL
+# --- inject internal endpoints into the hermes configs (build-time) ----------
+# Same placeholder→build-arg scheme as openclaw above; done after the hermes
+# config + honcho.json are COPY'd. HINDSIGHT_URL/HONCHO_URL ARGs are in scope
+# from their declaration earlier in this stage.
 RUN { test -n "$HINDSIGHT_URL" && test -n "$HONCHO_URL"; } \
       || { echo "ERROR: build via environments/agent-rich/build.sh — HINDSIGHT_URL and HONCHO_URL build-args are required" >&2; exit 1; } \
-    && sed -i "s|__HINDSIGHT_URL__|$HINDSIGHT_URL|g" /root/.openclaw/openclaw.json /root/.hermes/config.yaml \
-    && sed -i "s|__HONCHO_URL__|$HONCHO_URL|g"     /root/.hermes/honcho.json \
-    && ! grep -RnE '__(HINDSIGHT|HONCHO)_URL__' /root/.openclaw/openclaw.json /root/.hermes/config.yaml /root/.hermes/honcho.json
+    && sed -i "s|__HINDSIGHT_URL__|$HINDSIGHT_URL|g" /root/.hermes/config.yaml \
+    && sed -i "s|__HONCHO_URL__|$HONCHO_URL|g"       /root/.hermes/honcho.json \
+    && ! grep -RnE '__(HINDSIGHT|HONCHO)_URL__' /root/.hermes/config.yaml /root/.hermes/honcho.json
 
 # --- fail-fast validation ----------------------------------------------------
 # openclaw must parse its config; hermes must still launch with the new config.
