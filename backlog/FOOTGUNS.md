@@ -922,3 +922,25 @@ value **recomputed** from a read-only input the agent never had write access to.
 The 2026-06-09 audit found two PROVEN discriminators (`failure-recovery-loop-01`,
 `tool-sprawl-precision-01`) gameable exactly this way. See
 `backlog/2026-06-09-verifier-integrity-audit.md`.
+
+## 45. A rewardkit `@rk.criterion` with NO extra args (only `workspace`) registers TWICE
+
+**Symptom:** a rewardkit `reward.py` produces ONE more criterion than expected —
+e.g. a grader with 9 parametrized criteria + 1 zero-arg criterion yields **11**,
+not 10, with the zero-arg one appearing twice (once at the front, once where you
+called it). The reward still looks right on the oracle (all-pass → 1.0 either way),
+but the **denominator is inflated**, so partial-credit scoring is wrong — exactly
+the silent scoring drift that fakes/destroys a discrimination signal.
+
+**Cause:** rewardkit's `discover`/registry double-counts a criterion whose factory
+takes no parameters beyond `workspace`. Parametrized criteria (those taking a
+factory arg like `key`/`n`) register exactly once per explicit call and are NOT
+affected.
+
+**Fix:** never write a zero-extra-arg criterion. Give every `@rk.criterion` at
+least one factory parameter and register it explicitly — the simplest is ONE
+parametrized criterion `rule(workspace, key, label)` that dispatches on `key` over
+ALL your checks (including special ones like a red-herring gate), registered in a
+single `for key,label in ALL: rk.rule(key, label)` loop. Always confirm the
+criterion COUNT in `reward-details.json` matches what you intended (not just that
+the oracle scores 1.0).

@@ -1,5 +1,10 @@
 schema_version = "1.1"
 
+# Separate verifier sandbox: grades only the declared artifact (the agent's
+# openapi.yaml), in its own container, with the rewardkit grader baked in
+# (tests/Dockerfile). No grader source or answer key in the agent's reach.
+artifacts = ["/app/openapi.yaml"]
+
 [task]
 name = "johnbuck/api-contract-01"
 description = "Author an OpenAPI 3 contract for a Todo API (CRUD + 400/404 error responses, Error schema, create-input schema that omits server-assigned id); graded deterministically per endpoint/status-code/schema-rule (N=16)."
@@ -19,6 +24,11 @@ tags = ["building-designs", "api-contract", "graded", "deterministic"]
 
 [verifier]
 timeout_sec = 300.0
+environment_mode = "separate"
+
+# Built from tests/Dockerfile (bakes rewardkit + pyyaml); grading needs no network.
+[verifier.environment]
+allow_internet = false
 
 [agent]
 timeout_sec = 300.0

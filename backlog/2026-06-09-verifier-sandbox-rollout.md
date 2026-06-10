@@ -42,6 +42,84 @@ Separate-verifier is NOT a 3-line TOML edit. The mechanics:
 5. The base tag must exist locally: `harbor-agents-rich:latest` (a rebuild that tags
    only `:pinned-v2` and forgets `:latest` breaks every fresh build — see FOOTGUNS).
 
+## rewardkit conversion playbook (2026-06-10 — operator directive: default to rewardkit)
+
+Operator call: **rewardkit is the grading framework.** Don't trust/preserve the
+bespoke bash/python graders (error-prone — most of FOOTGUNS is bespoke-grader bugs);
+**re-implement** each grader cleanly as rewardkit `@rk.criterion`s. Keep bespoke ONLY
+where provably essential (pytest-execution tasks — code-editing, migration,
+reasoning-parity — where pytest IS the right tool and rewardkit would just wrap it).
+
+**Two validated modes** (oracle-confirmed reward 1.0 on each):
+- **Shared mode** (default for simple deterministic graders): grader runs in the
+  agent container, full `/app` + `/opt/canonical` access. Add
+  `RUN pip install --no-cache-dir harbor-rewardkit==0.1.4` to the task's
+  `environment/Dockerfile`; `tests/reward.py` is the grader; `tests/test.sh` runs
+  `rewardkit /tests --workspace /app --output /logs/verifier/reward.json`. No
+  `task.toml` change. Ref: `ops-debugging/shell-pipeline-01`.
+- **Separate mode** (when grading must be isolated — integrity-sensitive tasks, or
+  the grader needs no `/opt` refs): `tests/Dockerfile` bakes rewardkit; `task.toml`
+  gets `artifacts=[...]` + `[verifier] environment_mode="separate"` +
+  `[verifier.environment] allow_internet=false`. Ref: `skill-agent-authoring/
+  skill-discovery-and-use-01`, `building-designs/api-contract-01`.
+
+**Faithfulness rule (NORTH_STAR validity):** preserve the exact match logic /
+expected values so partial-credit scoring is unchanged (the oracle only proves the
+full-marks path; partial scores drive the discrimination). One `@rk.criterion` per
+fact/sub-check → reward-details.json shows exactly which sub-checks each harness got
+(high value for the verdict analysis).
+
+**The base-image enabler — DONE (operator-authorized 2026-06-10).** rewardkit is baked
+into `harbor-agents-rich:latest` (`pinned-v3-rewardkit` promoted; also added to the
+canonical `environments/agent-rich/Dockerfile` so a full rebuild keeps it — FOOTGUNS
+#43). **Consequence:** a shared-mode conversion is now just `tests/reward.py` +
+`tests/test.sh` — NO `environment/Dockerfile` change. But Harbor caches the agent
+image keyed on Dockerfile content, so a tests-only edit needs **`harbor trial start
+--force-build`** to pick up the new base + new grader (FOOTGUNS #5). Validate every
+conversion that way.
+
+**Penalty / non-additive tasks** (secret-scan `max(0,found-fp)`, find-contradictions
+distractor penalty, tool-selection/sprawl F1, recall UPDATE-trap `-1` per stale value):
+VALIDATED PATTERN (pr-diff-review-01) — one **weight-1 `score` criterion** returns
+the EXACT formula as a float (rewardkit criteria may return floats; it does not
+clamp, and `max(0,…)/N` is already in [0,1]); the per-check breakdown rides along as
+**weight-0 informational criteria** (visible in reward-details.json, zero effect on
+the weighted_mean). Set weights via the factory kwarg: `rk.check("score", …,
+weight=1.0)` / `rk.check("i1", …, weight=0.0)`. Preserve the formula exactly.
+
+**Conversion checklist gotchas:** (a) never a zero-extra-arg criterion (FOOTGUNS #45
+— double-registers); parametrize + verify the criterion COUNT. (b) A deterministic
+rewardkit grader needs no LLM key — DELETE any vestigial `[verifier.env]
+ANTHROPIC_API_KEY = "${…}"` left from an old judge, or Harbor fails to resolve it and
+errors before grading (bit agentic-research). (c) tests-only edits need `--force-build`.
+
+**Conversion targets (34 active tasks; skip the 20 deprecated).**
+
+**DONE + oracle-validated (12 single-step, every criterion count verified):**
+- additive (binary criteria → weighted_mean): `skill-discovery` (sep, 16),
+  `shell-pipeline` (5), `pandas-sql-from-nl-01` (6), `factual-lookup-cited-01` (10),
+  `diagnose-from-logs-01` (10), `agentic-research-with-memory-01` (8),
+  `api-contract-01` (sep, 16 — deprecated/pattern-proof).
+- penalty (weight-1 `score`=`max(0,found-fp)/N` + weight-0 detail): `pr-diff-review-01`
+  (5), `secret-scan-01` (6), `find-contradictions-01` (17).
+- F1-blend (weight-1 `score`=`0.5·answer+0.5·F1`): `tool-selection-01` (5),
+  `tool-sprawl-precision-01` (5, PROVEN — efficiency verdict comes from cost/tokens,
+  not the dropped `tool_calls_total`).
+- 60-way + diagnostic sidecar: `sub-agent-parallel-decompose-01` (60; mtime
+  concurrency → `/logs/verifier/concurrency.json`, not reward.json).
+- Plus integrity fixes (separate work): `unit-tests-01` (mutant leak relocated to
+  tests/), `failure-recovery-loop-01` (KILL-test payload now token-derived).
+
+**REMAINING — core-suite MULTISTEP recall graders** (one `@rk.criterion` per fact,
+preserve exact match patterns; the grading is in the recall step so its
+`steps/<recall>/tests/` needs the reward.py — higher stakes, 2 are proven
+discriminators): `memory-conversational-01/02/03`, `stale-memory-vs-file-01`,
+`proactive-preference-01`, `true-multi-turn-memory-write-01`, `context-fill-01/02/03`,
+`context-rot-01/02`.
+
+**Keep bespoke (pytest — provably the right tool, rewardkit would just wrap it):**
+`refactor-multi-file-01`, `dep-bump-breaking-01`, `unit-tests-01`, `reasoning-parity-01`.
+
 ## The reusable pattern (the template every conversion follows)
 
 `tests/Dockerfile`:
