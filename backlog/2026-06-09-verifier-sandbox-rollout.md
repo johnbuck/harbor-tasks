@@ -1,5 +1,5 @@
 ---
-status: IN PROGRESS
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-09
 ---
@@ -110,12 +110,18 @@ errors before grading (bit agentic-research). (c) tests-only edits need `--force
 - Plus integrity fixes (separate work): `unit-tests-01` (mutant leak relocated to
   tests/), `failure-recovery-loop-01` (KILL-test payload now token-derived).
 
-**REMAINING — core-suite MULTISTEP recall graders** (one `@rk.criterion` per fact,
-preserve exact match patterns; the grading is in the recall step so its
-`steps/<recall>/tests/` needs the reward.py — higher stakes, 2 are proven
-discriminators): `memory-conversational-01/02/03`, `stale-memory-vs-file-01`,
-`proactive-preference-01`, `true-multi-turn-memory-write-01`, `context-fill-01/02/03`,
-`context-rot-01/02`.
+**DONE — core-suite MULTISTEP recall graders (11, all oracle-validated reward 1.0).**
+One `@rk.criterion` per fact in the recall step's `steps/<recall>/tests/reward.py`,
+exact match patterns preserved: `memory-conversational-01/02/03` (12 facts, sibling
+penalty), `stale-memory-vs-file-01` (binary: current value 275), `proactive-preference-01`
+(4 prefs), `true-multi-turn-memory-write-01` (blend (cf/8)·(0.85+0.15·dinner_ok)),
+`context-fill-01/02/03` (UPDATE-trap net +1/−1; 03 line-anchored), `context-rot-01/02`
+(positional cell_for matching; #93 per-depth fractions + answer_present preserved as
+weight-0 criteria). Commits 5ae5b83, c55a2be, e20870e, e7c26c7.
+
+**✅ ROLLOUT COMPLETE — all 23 active graded tasks grade via rewardkit.** (12 single-step
++ 11 multistep.) Every conversion oracle-validated with a verified criterion count, $0
+OpenRouter. The 5 commits are local on <run-host> `main` pending the operator push.
 
 **Keep bespoke (pytest — provably the right tool, rewardkit would just wrap it):**
 `refactor-multi-file-01`, `dep-bump-breaking-01`, `unit-tests-01`, `reasoning-parity-01`.
