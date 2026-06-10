@@ -1,4 +1,4 @@
 FROM harbor-agents-rich:latest
 
-# Verifier dep: YAML parsing for the deterministic per-criterion structural check.
-RUN pip install --no-cache-dir "pyyaml==6.0.2"
+# (Grading moved to the separate verifier image — tests/Dockerfile bakes its own
+# pyyaml + rewardkit. The agent image needs no verifier deps.)

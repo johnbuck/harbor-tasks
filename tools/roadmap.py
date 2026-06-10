@@ -132,8 +132,8 @@ EPICS = [
              "The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: \".\"`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app && hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression."),
             ("done", "Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE", "2026-06-09-verifier-integrity-audit.md",
              "7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical."),
-            ("partial", "Verifier-sandbox rollout — separate env + baked rewardkit", "2026-06-09-verifier-sandbox-rollout.md",
-             "Adopt Harbor's native environment_mode=separate (grader runs in its own container, sees only declared artifacts). Contract learned the hard way: the verifier image is built from tests/Dockerfile (skip_tests_upload), NOT a pinned docker_image — FOOTGUNS #42. rewardkit now BAKED into the verifier image (no per-trial PyPI fetch); reference skill-discovery-and-use-01 oracle-validated 1.0 offline. KEY caveat: isolation alone does NOT fix a forged artifact (FOOTGUNS #44) — each gameable task also needs its grader re-sourced from the un-forgeable harness trajectory or a recomputed read-only input. Wave 1 underway."),
+            ("partial", "rewardkit grading rollout — 12 graders converted + validated", "2026-06-09-verifier-sandbox-rollout.md",
+             "Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. 12 single-step graders DONE + oracle-validated with verified criterion counts, across 3 patterns: additive (skill-discovery, shell-pipeline, pandas-sql, factual-lookup, diagnose-from-logs, agentic-research, api-contract), penalty=max(0,found-fp)/N via a weight-1 score criterion + weight-0 detail (pr-diff-review, secret-scan, find-contradictions), and F1-blend (tool-selection, tool-sprawl). sub-agent-parallel = 60 criteria + concurrency sidecar. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. REMAINING: the core-suite MULTISTEP recall graders (memory/context/conversation — per-fact criteria, recall-step reward.py). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed (skill-discovery, api-contract); isolation alone doesn't fix a forged artifact (#44)."),
             ("todo", "Run n≥3 pass^k grid → verdict (task #81)", "—",
              "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild + the Wave-1 verifier-integrity fixes (a gameable discriminator must be closed before its numbers are trusted). Tracked as task #81."),
         ],
@@ -294,8 +294,21 @@ def render() -> str:
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now"><b>Verifier-integrity rollout (2026-06-09) — TWO of three proven discriminators are
-GAMEABLE.</b> Adopting Harbor's native <span class="mono">environment_mode="separate"</span> verifier
+<div class="now"><b>rewardkit grading rollout (2026-06-10) — 12 graders converted + oracle-validated.</b>
+Per operator directive, rewardkit is now the grading framework: bespoke bash/python graders are
+RE-IMPLEMENTED cleanly as rewardkit criteria (most of FOOTGUNS is bespoke-grader bugs). rewardkit is
+<i>baked</i> into <span class="mono">harbor-agents-rich:latest</span>, so a conversion is just
+<span class="mono">reward.py</span> + <span class="mono">test.sh</span> + an oracle
+<span class="mono">--force-build</span>. <b>12 single-step graders done</b> across three patterns —
+additive (weighted_mean of binary criteria), penalty (a weight-1 <span class="mono">score</span>
+criterion holds <span class="mono">max(0,found-fp)/N</span>, weight-0 criteria give the breakdown),
+and F1-blend — each with a verified criterion count and <b>$0 OpenRouter</b> (oracle-only). Footguns
+found + documented: zero-arg criteria double-register (#45); a vestigial
+<span class="mono">verifier.env</span> LLM key breaks grading. <b>Remaining:</b> the core-suite
+MULTISTEP recall graders (per-fact criteria in the recall step). <b>Keep bespoke:</b> the pytest
+tasks.<br><br>
+<b>Verifier-integrity (2026-06-09) — TWO of three proven discriminators were
+GAMEABLE</b> (now fixed). Adopting Harbor's native <span class="mono">environment_mode="separate"</span> verifier
 sandbox (prototyped on skill-discovery; the broken prototype is now fixed + oracle-validated, with
 rewardkit <i>baked</i> into the verifier image — no per-trial PyPI fetch). A 7-agent audit of all 54
 tasks found the headline risk: <span class="mono">failure-recovery-loop-01</span> (success string

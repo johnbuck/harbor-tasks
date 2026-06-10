@@ -106,11 +106,21 @@ RUN { test -n "$HINDSIGHT_URL" && test -n "$HONCHO_URL"; } \
     && sed -i "s|__HONCHO_URL__|$HONCHO_URL|g"       /root/.hermes/honcho.json \
     && ! grep -RnE '__(HINDSIGHT|HONCHO)_URL__' /root/.hermes/config.yaml /root/.hermes/honcho.json
 
+# --- rewardkit: the grading framework, baked once for all tasks --------------
+# Tasks grade via rewardkit (tests/reward.py); baking it here means shared-mode
+# graders need no per-task install and separate-verifier images inherit it.
+# The currently-deployed :latest was produced by layering this same install onto
+# pinned-v2 (harbor-agents-rich:pinned-v3-rewardkit) and promoting it; a full
+# rebuild from this Dockerfile reproduces it. MUST stay so any rebuild keeps
+# rewardkit in :latest (FOOTGUNS #43 — never let :latest drift from what tasks FROM).
+RUN pip install --no-cache-dir harbor-rewardkit==0.1.4
+
 # --- fail-fast validation ----------------------------------------------------
 # openclaw must parse its config; hermes must still launch with the new config.
 RUN . ~/.nvm/nvm.sh && nvm use 22 >/dev/null 2>&1 \
     && openclaw config validate \
     && export PATH="$HOME/.local/bin:/usr/local/bin:$PATH" \
-    && HERMES_HOME=/root/.hermes hermes version
+    && HERMES_HOME=/root/.hermes hermes version \
+    && python3 -c "import rewardkit"
 
 WORKDIR /app
