@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
-# Block internal homelab topology from entering this PUBLIC repo.
+# Block internal network topology from entering this PUBLIC repo.
 # Enable once per clone:  git config core.hooksPath .githooks
+#
+# Matches SHAPES, not specific hostnames, so this guard discloses nothing itself:
+#   - any *.lan hostname        (internal DNS)
+#   - any *.ts.net hostname     (Tailscale MagicDNS)
+#   - any RFC1918 private IP     (10/8, 192.168/16, 172.16–31/12)
+# Real internal values live only in the gitignored configs/local.env; commit
+# placeholders + configs/local.env.example instead.
 set -uo pipefail
 
-# Patterns that must never be committed (real values live in gitignored configs/local.env).
-PAT='internal-host|10\.0\.10\.[0-9]|tailnet|INFISICAL_PROJECT_ID|INFISICAL_PROJECT_ID|infisical-identity|nas-host'
+PAT='\.lan\b|\.ts\.net\b|\b(10|192\.168|172\.(1[6-9]|2[0-9]|3[01]))\.[0-9]{1,3}\.[0-9]{1,3}\b'
 
-# Scan only ADDED lines in staged changes; the example template is allowed to show shapes.
-bad=$(git diff --cached --no-color -U0 -- . ':(exclude)configs/local.env.example' ':(exclude).githooks/pre-commit' \
+# Scan only ADDED lines in staged changes; the template may show placeholder shapes.
+bad=$(git diff --cached --no-color -U0 -- . \
+        ':(exclude)configs/local.env.example' \
+        ':(exclude).githooks/pre-commit' \
       | grep -E '^\+' | grep -nE "$PAT" || true)
 
 if [ -n "$bad" ]; then
-  echo "✗ pre-commit: internal homelab topology detected in staged changes:" >&2
+  echo "✗ pre-commit: internal network topology (.lan / .ts.net / private IP) in staged changes:" >&2
   echo "$bad" | sed 's/^/    /' >&2
   echo "  This repo is PUBLIC. Use placeholders + configs/local.env (gitignored)." >&2
   echo "  Override (rarely correct): git commit --no-verify" >&2
