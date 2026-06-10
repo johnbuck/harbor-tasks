@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Block internal homelab topology from entering this PUBLIC repo.
+# Enable once per clone:  git config core.hooksPath .githooks
+set -uo pipefail
+
+# Patterns that must never be committed (real values live in gitignored configs/local.env).
+PAT='internal-host|10\.0\.10\.[0-9]|tailnet|INFISICAL_PROJECT_ID|INFISICAL_PROJECT_ID|infisical-identity|nas-host'
+
+# Scan only ADDED lines in staged changes; the example template is allowed to show shapes.
+bad=$(git diff --cached --no-color -U0 -- . ':(exclude)configs/local.env.example' ':(exclude).githooks/pre-commit' \
+      | grep -E '^\+' | grep -nE "$PAT" || true)
+
+if [ -n "$bad" ]; then
+  echo "✗ pre-commit: internal homelab topology detected in staged changes:" >&2
+  echo "$bad" | sed 's/^/    /' >&2
+  echo "  This repo is PUBLIC. Use placeholders + configs/local.env (gitignored)." >&2
+  echo "  Override (rarely correct): git commit --no-verify" >&2
+  exit 1
+fi

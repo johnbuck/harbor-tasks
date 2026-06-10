@@ -39,7 +39,7 @@
     "servers": {
       "hindsight": {
         "transport": "streamable-http",
-        "url": "http://internal-host:8888/mcp/eval-openclaw/"
+        "url": "__HINDSIGHT_URL__/mcp/eval-openclaw/"
       }
     }
   },

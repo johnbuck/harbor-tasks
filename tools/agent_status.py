@@ -18,6 +18,7 @@ Usage:
 
 import argparse
 import json
+import os
 import subprocess
 import urllib.request
 import webbrowser
@@ -38,9 +39,10 @@ MEMORY = [
     # eval harnesses (openclaw + hermes) point at; the dashboard tracks
     # eval-side health. recall-prod on :8407 (agent-memory ontology) serves
     # the unrelated <prod-group>/<prod-group>/<prod-group> production groups.
-    ("recall", "http://internal-host:8408/health", "Graphiti temporal KG (eval, 23 tools, coding ontology)"),
-    ("hindsight", "http://internal-host:8888/health", "learning memory (57 tools)"),
-    ("honcho", "http://internal-host:8000/health", "ambient user model"),
+    # Internal endpoints from env (gitignored configs/local.env) — no topology in this public repo.
+    ("recall", f"{os.environ.get('RECALL_URL', '')}/health", "Graphiti temporal KG (eval, 23 tools, coding ontology)"),
+    ("hindsight", f"{os.environ.get('HINDSIGHT_URL', '')}/health", "learning memory (57 tools)"),
+    ("honcho", f"{os.environ.get('HONCHO_URL', '')}/health", "ambient user model"),
     ("mem-embed", None, "bge-m3 shared embedder, 1024-dim (bridge-internal; serves all three)"),
 ]
 

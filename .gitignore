@@ -3,6 +3,10 @@
 .env.*
 !.env.template
 
+# Internal endpoints (memory hosts, Infisical coords) — kept OUT of this PUBLIC
+# repo. Real values live here; commit only configs/local.env.example.
+configs/local.env
+
 # Harbor job outputs (kept local; opt-in upload to Harbor Hub if needed)
 jobs/
 

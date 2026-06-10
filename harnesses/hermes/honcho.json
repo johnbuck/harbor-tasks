@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "baseUrl": "http://internal-host:8000",
+  "baseUrl": "__HONCHO_URL__",
   "workspace": "eval-hermes",
   "aiPeer": "eval-hermes",
   "saveMessages": true

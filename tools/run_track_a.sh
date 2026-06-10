@@ -28,8 +28,11 @@ WEIGHTS="${REPO}/configs/track-a-weights.toml"
 JOBS_DIR="${JOBS_DIR:-${REPO}/jobs}"
 JOB_NAME="${JOB_NAME:-track-a-$(date +%Y-%m-%d__%H-%M-%S)}"
 
-SITE_URL="${INFISICAL_SITE_URL:-http://internal-host:8380}"
-PROJECT_ID="${INFISICAL_PROJECT_ID:-INFISICAL_PROJECT_ID}"
+# Internal endpoints + Infisical coords come from the gitignored configs/local.env
+# (template: configs/local.env.example). Keeps topology out of this public repo.
+[ -f "$REPO/configs/local.env" ] && { set -a; . "$REPO/configs/local.env"; set +a; }
+SITE_URL="${INFISICAL_SITE_URL:?set INFISICAL_SITE_URL in configs/local.env (see configs/local.env.example)}"
+PROJECT_ID="${INFISICAL_PROJECT_ID:?set INFISICAL_PROJECT_ID in configs/local.env (see configs/local.env.example)}"
 
 : "${INFISICAL_CLIENT_ID:?set INFISICAL_CLIENT_ID via ~/.config/infisical/infisical-identity.env}"
 : "${INFISICAL_CLIENT_SECRET:?set INFISICAL_CLIENT_SECRET via ~/.config/infisical/infisical-identity.env}"

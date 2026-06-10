@@ -54,10 +54,10 @@ cp /app/stringutils.py /tmp/orig_stringutils.py
 declare -A KILL
 for m in m1 m2 m3 m4; do
     case "$m" in
-        m1) src=/opt/canonical/mutants/m1_no_lowercase.py ;;
-        m2) src=/opt/canonical/mutants/m2_no_collapse.py ;;
-        m3) src=/opt/canonical/mutants/m3_no_strip_hyphens.py ;;
-        m4) src=/opt/canonical/mutants/m4_strips_digits.py ;;
+        m1) src=/tests/mutants/m1_no_lowercase.py ;;
+        m2) src=/tests/mutants/m2_no_collapse.py ;;
+        m3) src=/tests/mutants/m3_no_strip_hyphens.py ;;
+        m4) src=/tests/mutants/m4_strips_digits.py ;;
     esac
     cp "$src" /app/stringutils.py
     if python -m pytest "$TEST" -q >"/logs/verifier/mutant_${m}.log" 2>&1; then
