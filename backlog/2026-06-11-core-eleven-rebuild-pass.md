@@ -202,3 +202,162 @@ pipeline forbids builds/sweeps, so the operator runs D7 after baton merges the
 reviewed branch. Acceptance criteria 2 (T9 budget), 3 (T5 oracle), 4 (T3
 symmetry), 5 (T4 tokens), and 7 (the grid) are inherently run-dependent and are
 verified in D7, not by baton.
+
+---
+
+## Implementation log / as-built (2026-06-11)
+
+Branch `baton/2026-06-11-core-eleven-rebuild-pass` off
+`remediation/core-eleven-2026-06-10` (merge-base `bcc1e7b`). 21 files changed,
++1485/-198. Commits: `3415407` (red tests) → `b080bca`/`f05c0d7`/`7d556c6`
+(green). All offline-verifiable acceptance is implemented; everything that
+inherently needs a build or a live sweep is staged for D7 and explicitly marked
+below. **The D7 manual gate (rebuild, oracle 11/11, n=5 re-grid, RESULTS.md) has
+NOT been run — it is out of scope for this pipeline.**
+
+### What actually changed (files + essence)
+
+- **T6 — `tasks/ops-debugging/failure-recovery-loop-01/`** (D1). The
+  world-readable shell `dfetch` is replaced by a **compiled, stripped C binary**
+  built in `environment/Dockerfile` from an inline `.c` + a build-time 32-byte
+  random secret (`head -c32 /dev/urandom`), embedded XOR-masked (`0x5a`) into the
+  binary; the `.c` and secret header are `rm`'d in the **same RUN layer** so no
+  plaintext secret survives any image layer. Success mints
+  `NONCE = HMAC-SHA256(secret, "region|token|counter")` (self-contained SHA-256 +
+  HMAC in C, no openssl dep). A hidden `dfetch --verify <msg> <nonce>` subcommand
+  lets the grader authenticate **without ever holding the secret**. Each rejected
+  call appends its stage to an append-only ordered log
+  `/var/log/dfetch.progression` (`bad-region → 401 → stale-lock → release`).
+  `tests/test.sh` now requires: status=success **AND** `--verify` passes **AND**
+  the progression log is present, canonically ordered, and contains `release`,
+  **AND** `calls >= MIN_CALLS` (2). IDEAL re-derived to **3** (clean conf-first
+  recovery), CEIL kept at 18. `task.toml` description + `solution/solve.sh`
+  comment updated.
+- **T9 — `tasks/skill-agent-authoring/sub-agent-parallel-decompose-01/`** (D2).
+  `environment/Dockerfile` gains a **throwaway first build stage** (`AS calbuild`)
+  that compiles a stripped `cal-lookup` C binary with the `CAL-NN → offset` table
+  baked in as a **non-string `int` array** (so `strings` reveals nothing), then
+  `COPY --from=calbuild` installs only the binary into the agent image — the
+  plaintext `registry.json` never reaches a final-image layer. The binary
+  `sleep`s `LOOKUP_LATENCY_SEC` (default **8s**, an authoring estimate) per call
+  to create real serial-vs-fan-out pressure. `solution/gen.py` now writes the
+  registry **twice from one RNG draw**: the answer-key copy to `tests/registry.json`
+  and a byte-identical served copy to `environment/registry.json` (both committed).
+- **T5 — `tasks/context-rot/context-rot-02/`** (D3). `environment/gen_reports.py`
+  replaces every real-world bridge entity/attribute with **invented** ones
+  (Lyon→Mournholt, Jackfield→Penhollow, Thames→Mereveil, Saint Luke→Saint Dunmore,
+  Durham→Wessenshire, Hereford→Calderwick, Loughborough→Bellforge, Latvia→Vendreth)
+  and adds a `DISTRACTORS` table — one **same-type confusable** per chain (a 2nd
+  architect, 2nd pottery, 2nd foundry…) placed at a different section depth than
+  the graded needle. The answer key is **committed and regenerated in lock-step**:
+  `steps/19-recall/solution/solve.sh` and `tests/reward.py` PATTERNS updated to the
+  new fictional second-hops.
+- **T3 — `hooks/seed_stale_memory.py` (new) + `tools/run_track_a.sh`** (D4). A new
+  `TrialEvent.START` hook writes the stale `cache_ttl_seconds=45` memory into the
+  trial's `eval-<harness>` hindsight bank, **scoped by `TASK_MATCH` substring** to
+  the T3 trial only, reusing `HINDSIGHT_BASE` / `_assert_eval_scope` / `_resolve_group`
+  from `wipe_memory_state.py` so it can never touch a prod bank. Registered in the
+  driver **after** the wipe hook (order matters; the bare CLI can't load hooks).
+- **T4 — no code change** (D5). Per open-question 4 default, `gen_reports.py` is
+  left unchanged; the token re-measurement and any fill extension are deferred to
+  D7. (T4 = the context-fill overflow task; no file in this diff.)
+- **T10 — `tasks/skill-agent-authoring/skill-discovery-and-use-01/`** (D6). The 3
+  near-miss skills and all **9 far-decoy skills** now (a) compute their **real
+  advertised output** from the CSV arg (a behavioral probe can't collapse the
+  candidate set on a constant) and (b) drop a per-skill `.skill-runs/<name>.log`
+  breadcrumb. `tests/reward.py` adds `_is_brute_sweep()` — if ≥6 decoy logs each
+  cover ≥6 distinct files (a "run all 13 on all 8" sweep), discovery credit is
+  **denied**.
+- **T11 — `tasks/real-world-workflows/update-record-with-cleanup-01/`** (D6,
+  grader-only, no rebuild). `tests/grade.py`: preserve + collateral credit is now
+  gated on `dedup_gate = min(1, dedup_ok)` (do-nothing falls **below** 0.50);
+  the dedup/preserve identity key drops the **notes** field (`row[:5]`); header
+  detection only skips row 0 when its first cell is literally `date` (fixes the
+  headerless first-row eat). `task.toml` description corrected (month is **given**
+  in instruction.md, not discovered; do-nothing no longer floors at 0.50).
+- **Tests (new, red-first):** `tests/exploits/test_t6_progression.py`,
+  `test_t9_dockerfile_serves_lookup.py`, `test_t9_registry_equality.py`,
+  `test_t10_sweep_no_credit.py`, `tests/regrade/test_t11_floor_notes_headerless.py`.
+
+### Key decisions / deviations from the plan
+
+- **T6 binary-swap defense (beyond the plan).** The plan delegated auth to the
+  binary's `--verify`, but a root agent on the shared filesystem could overwrite
+  `/usr/local/bin/dfetch` with an `exit 0` stub that "verifies" any nonce. Added a
+  **sha256 integrity pin**: the Dockerfile prints the genuine binary's digest and
+  writes it to `/usr/local/share/dfetch.sha256`; the grader holds
+  `EXPECTED_DFETCH_SHA` and fails closed unless `sha256sum` matches, invoking
+  dfetch by **absolute path**. **Action required in D7:** the digest is
+  randomised per build, so `EXPECTED_DFETCH_SHA` in `tests/test.sh` is still the
+  sentinel `PASTE_DFETCH_SHA256_AT_BUILD_D7` — it MUST be pasted from the build
+  log after the rebuild or T6 fails closed for everyone.
+- **T9 latency is an estimate, not a calibration.** `LOOKUP_LATENCY_SEC=8` is the
+  authoring guess; the plan's "derive from a measured serial baseline" (acceptance
+  2) is genuinely run-dependent and stays for D7. The serving mechanism (compiled
+  binary) is final.
+- **T4 left untouched** by design (open-question 4 default).
+
+### Resolution of the planner's open questions
+
+1. **T6 root-agent residual — ACCEPTED as documented, with an added pin.** The
+   "no secret FILE on the fs" property is *proven* (source + header deleted in the
+   build layer; agent uid can't read the secret). The `strings`/disassemble
+   residual on the stripped binary is acknowledged in code comments as the design
+   bet (honest error-walk strictly shorter than reversing HMAC out of a stripped
+   binary). A separate verifier image (substrate, out of scope) was NOT pursued;
+   instead the binary-swap hole that delegation opened was closed with the sha256
+   pin. No substrate touched.
+2. **T9 compiled-binary over sleeping http.server — CONFIRMED.** Implemented as a
+   compiled on-demand `cal-lookup` (the lower-risk option: single-tasks have no
+   `setup.sh` and the rich image has no service entrypoint to boot an http.server).
+   The agent-readable `registry.json` never lands in a final layer (built in a
+   throwaway stage, copied as a stripped binary only), so the parser-bypass /
+   resurrected-registry lesson from the predecessor is respected.
+3. **T3 seeding schema + scope — schema is BEST-EFFORT, scope is ENFORCED.** The
+   POST body (`{"content": <NL fact>, "metadata": {...value...}}` to
+   `…/banks/<bank>/memories`) is the offline best guess; the wipe hook only
+   exercised DELETE, so the exact create shape **must be confirmed against the
+   live hindsight API in D7** (flagged in the hook docstring). The hook is firmly
+   **scoped**: it no-ops unless `TASK_MATCH` ("multistep-stale-memory-vs-file-01")
+   is in the task name, and `_assert_eval_scope` guarantees it can only write an
+   `eval-*` bank.
+4. **T4 baton-side scope — DEFERRED (default taken).** `gen_reports.py` left
+   unchanged; the measurement and any fill extension happen in D7.
+5. **T5 answer-key ownership — COMMITTED and regenerated in lock-step.** The key
+   is the committed `solve.sh` + reward `PATTERNS`; both were regenerated together
+   with the corpus in this change, so there is no served/answer-key drift. (T9
+   applies the same discipline: served `environment/registry.json` ==
+   answer-key `tests/registry.json`, one RNG draw, enforced by
+   `test_t9_registry_equality.py`.)
+
+### Lessons / gotchas for the next maintainer
+
+- **Per-build secret ⇒ per-build grader edit.** T6's `EXPECTED_DFETCH_SHA` and
+  the broader "digest printed in build log" pattern mean the rebuild is not
+  idempotent for the grader — D7 must paste the digest or T6 silently fails
+  closed (bin_ok=0 → reward 0 for everyone, looking exactly like a hard task).
+- **Answer-key-equivalent files must die in the build stage, not the final
+  image.** Both T6 (secret) and T9 (`registry.json`) rely on deleting the
+  plaintext in the **same layer / a throwaway stage** — a `rm` in a later layer
+  still leaves it recoverable in image history.
+- **Hook ordering is load-bearing.** `seed_stale_memory` MUST be registered after
+  `wipe_memory_state` or the wipe deletes the seed. The bare `harbor run` CLI
+  loads neither — only the driver does.
+- **T3 symmetry is the one thing unprovable offline** (acceptance 1b): both
+  harnesses retrieving `45` pre-flip needs the live backend and is a D7 gate.
+
+### How to verify
+
+- **Offline (what baton can prove, all green):** on thringle,
+  `~/benchmarking/harbor/.venv/bin/python -m pytest tests/exploits tests/regrade -q`
+  → **37 passed** (run 2026-06-11). These cover the T6 ordered-progression gate,
+  the T9 served-lookup + registry-equality invariants, the T10 brute-sweep denial,
+  and the T11 floor/notes/headerless fixes.
+- **D7 (manual, NOT run here — the operator's gate):** rebuild
+  `harbor-agents-rich:latest`; **paste the T6 dfetch sha256 into
+  `EXPECTED_DFETCH_SHA`**; oracle 11/11 = 1.0; confirm the live hindsight create
+  schema (T3) and that both harnesses retrieve `45` pre-flip; measure the T9
+  serial baseline and tune `LOOKUP_LATENCY_SEC`/budget; measure the T4 threaded
+  token count; run the severity-gated n=5 re-grid and record Δ + the lifted
+  BLOCKED status (tasks 3/5/6/9) in RESULTS.md. "Good" = oracle 1.0, offline suite
+  green, and a fan-out run clears more T9 problems than a serial walk within budget.
