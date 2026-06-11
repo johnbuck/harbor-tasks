@@ -278,6 +278,17 @@ gcc -O2 -I/tmp -o /usr/local/bin/dfetch /tmp/dfetch.c
 strip /usr/local/bin/dfetch
 chmod 755 /usr/local/bin/dfetch
 rm -f /tmp/dfetch.c /tmp/dfetch_secret.h
+# AUTHENTICATOR INTEGRITY PIN (criterion 1). The grader (tests/test.sh) trusts the
+# dfetch binary for HMAC verification, but a root agent could swap it for an
+# exit-0 stub. The grader therefore requires the binary's sha256 to match a digest
+# PINNED in the trusted post-agent grader. Capture that digest here and paste it
+# into tests/test.sh's EXPECTED_DFETCH_SHA (the D7 build step). The secret — hence
+# the binary — is randomised per build, so the digest can only be known after this
+# build; it is printed to the build log AND written to a build-artifact file.
+DFETCH_SHA="$(sha256sum /usr/local/bin/dfetch | cut -d' ' -f1)"
+printf '%s\n' "$DFETCH_SHA" > /usr/local/share/dfetch.sha256
+echo ">>> dfetch sha256 = ${DFETCH_SHA}"
+echo ">>> D7: paste this into tasks/.../tests/test.sh EXPECTED_DFETCH_SHA before the sweep"
 DFBUILD
 
 # Provisioning manifest the agent DISCOVERS by exploring /app (the errors point at

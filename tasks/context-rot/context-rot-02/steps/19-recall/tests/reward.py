@@ -13,15 +13,17 @@ from pathlib import Path
 
 import rewardkit as rk
 
+# Fictional bridge attributes (rebuild 2026-06-11): every value is invented so no
+# parametric/web shortcut exists; recall must come from accumulated in-context facts.
 PATTERNS = [
-    (r"lyon",                   "early"),
-    (r"jackfield",              "early"),
-    (r"thames",                 "middle"),
-    (r"(saint|st\.?)[ -]?luke", "middle"),
-    (r"durham",                 "middle"),
-    (r"hereford",               "late"),
-    (r"loughborough",           "late"),
-    (r"latvia",                 "late"),
+    (r"mournholt",                 "early"),
+    (r"penhollow",                 "early"),
+    (r"mereveil",                  "middle"),
+    (r"(saint|st\.?)[ -]?dunmore", "middle"),
+    (r"wessenshire",               "middle"),
+    (r"calderwick",                "late"),
+    (r"bellforge",                 "late"),
+    (r"vendreth",                  "late"),
 ]
 
 

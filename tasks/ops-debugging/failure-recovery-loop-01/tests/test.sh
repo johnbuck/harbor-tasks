@@ -15,6 +15,18 @@
 # HMAC and exits 0 only for an authentic nonce. We never hold the secret. A forged
 # STATUS=success with an arbitrary nonce CANNOT pass --verify, at ANY call count.
 #
+# BINARY-SWAP DEFENSE (criterion 1, rebuild 2026-06-11). Because the agent is root
+# on the shared filesystem, it could overwrite /usr/local/bin/dfetch with a 2-line
+# `#!/bin/sh; exit 0` stub that "verifies" ANY forged nonce. Delegating auth to an
+# agent-overwritable artifact is no better than holding the secret. We close this by
+# PINNING the authenticator's integrity: the genuine binary's sha256 is captured at
+# build time (see Dockerfile) and baked into THIS grader — which is uploaded by the
+# harness post-agent and is therefore NOT agent-writable. Before crediting a verify
+# we require `sha256sum /usr/local/bin/dfetch` to equal that pinned digest, and we
+# invoke dfetch by ABSOLUTE path (never a PATH lookup the agent could shadow). A
+# swapped stub mismatches the pin -> verify_ok stays 0 -> reward 0; the genuine
+# binary cannot validate a forged nonce. RE-residual below still applies.
+#
 # Second, independent gate: every genuine recovery walks the error ladder, and
 # dfetch appends each stage to the append-only ordered progression log
 # /var/log/dfetch.progression (bad-region -> 401 -> stale-lock -> release). We
@@ -44,11 +56,26 @@ MSG="$(sed -n 's/^MSG=//p' "$ST" 2>/dev/null | head -1)"
 status_ok=0
 grep -qx 'STATUS=success' "$ST" 2>/dev/null && status_ok=1
 
-# HMAC authentication via the binary that owns the secret. Absent binary / MSG, or
-# a non-authentic nonce => verify_ok stays 0.
+# Authenticator integrity pin. The genuine dfetch's sha256 is captured at build
+# (Dockerfile prints `sha256sum /usr/local/bin/dfetch`); paste that 64-hex digest
+# below, replacing the sentinel, as the D7 build step. The secret — hence the
+# binary — is randomised per build, so the real digest can only exist here, in the
+# trusted post-agent grader, after a build. Until pasted the pin fails closed
+# (bin_ok stays 0) for BOTH the genuine binary and any swapped stub.
+DFETCH=/usr/local/bin/dfetch
+EXPECTED_DFETCH_SHA="PASTE_DFETCH_SHA256_AT_BUILD_D7"   # 64-hex digest, filled at build
+bin_ok=0
+if [ -x "$DFETCH" ]; then
+  actual_sha="$(sha256sum "$DFETCH" 2>/dev/null | cut -d' ' -f1)"
+  [ -n "$actual_sha" ] && [ "$actual_sha" = "$EXPECTED_DFETCH_SHA" ] && bin_ok=1
+fi
+
+# HMAC authentication via the PINNED binary that owns the secret. Absent/ swapped
+# binary, absent MSG, or a non-authentic nonce => verify_ok stays 0. dfetch is
+# invoked by absolute path so the agent cannot shadow it via PATH.
 verify_ok=0
-if [ "$status_ok" = 1 ] && [ -n "$NONCE" ] && [ -n "$MSG" ] && command -v dfetch >/dev/null 2>&1; then
-  if dfetch --verify "$MSG" "$NONCE" >/dev/null 2>&1; then verify_ok=1; fi
+if [ "$status_ok" = 1 ] && [ "$bin_ok" = 1 ] && [ -n "$NONCE" ] && [ -n "$MSG" ]; then
+  if "$DFETCH" --verify "$MSG" "$NONCE" >/dev/null 2>&1; then verify_ok=1; fi
 fi
 
 # Correctness signals (read against the nonce dfetch actually emitted; never a
@@ -111,9 +138,10 @@ JSON
 cat > /logs/verifier/reward-details.json <<JSON
 {
   "emitted_nonce": "${NONCE}",
+  "bin_ok": ${bin_ok},
   "verify_ok": ${verify_ok},
   "payload_ok": ${payload_ok},
   "token_ok": ${token_ok},
-  "note": "recovered requires an HMAC-authenticated nonce (dfetch --verify) AND an ordered progression log with 'release'. recovered=0 => VOID (reward 0). Nonce is HMAC(secret, region|token|counter); the secret lives only in the stripped dfetch binary."
+  "note": "recovered requires a build-pinned (sha256) dfetch binary, an HMAC-authenticated nonce (dfetch --verify) AND an ordered progression log with 'release'. bin_ok=0 means the authenticator failed its integrity pin (swapped stub, or the D7 build digest is not yet pasted into EXPECTED_DFETCH_SHA). recovered=0 => VOID (reward 0). Nonce is HMAC(secret, region|token|counter); the secret lives only in the stripped dfetch binary."
 }
 JSON

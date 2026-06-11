@@ -73,6 +73,7 @@ from harbor.job import Job
 from harbor.models.job.config import JobConfig
 from harbor.trial.hooks import TrialEvent
 from hooks.wipe_memory_state import wipe_memory_state
+from hooks.seed_stale_memory import seed_stale_memory
 
 
 async def main() -> int:
@@ -157,6 +158,11 @@ async def main() -> int:
         config = JobConfig.model_validate(sub)
         job = await Job.create(config)
         job.add_hook(TrialEvent.START, wipe_memory_state)
+        # Seed the T3 stale memory AFTER the wipe (order matters: the wipe empties
+        # the eval banks, then this writes one stale memory back, scoped to the T3
+        # trial only). The bare `harbor run` CLI does not load hooks — same footgun
+        # the wipe hook documents — so it is registered here in the driver.
+        job.add_hook(TrialEvent.START, seed_stale_memory)
         print(f"[{label}] job={sub['job_name']} {len(job)} trials, "
               f"n_attempts={config.n_attempts}", file=sys.stderr)
         await job.run()
