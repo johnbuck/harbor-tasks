@@ -467,3 +467,159 @@ Two exploits were executed (T9 parser: 60/60; T4 generator token count:
 already holds: rich base image on all 11, flat reward.json on all 11, verifier
 sandboxing on T10/T11, post-agent tests upload, T11 leak-proofness) are in the
 per-task sections' source reports.
+
+---
+
+## Implementation log / as-built (2026-06-11)
+
+Branch `baton/2026-06-11-core-eleven-second-adversarial-pass` off
+`remediation/core-eleven-2026-06-10`. Three commits (red test → feat → feat).
+This pass landed **all the offline-verifiable work**; everything that needs a
+docker rebuild or a live n=5 run was deliberately deferred and is logged below
+(this pipeline forbids builds/sweeps — open question 5).
+
+### What actually changed
+
+**New shared artifact**
+- `lib/wipe_scratch.sh` — canonical scratch-wipe fragment (open question 3
+  resolved: **commit-once + copy-verbatim**, not inline). It wipes `/tmp`,
+  `/var/tmp`, `/logs/agent`, agent `$HOME` caches (`.cache`, `.local/share`,
+  `scratch`, `notes`), and the harness session stores
+  (`$HOME/.openclaw/sessions|history|*.jsonl`, `$HERMES_HOME/sessions|history|*.json`).
+  It deliberately does **not** touch `/app` (each step decides) and **never**
+  touches the external memory backends (those are network services wiped by
+  `hooks/wipe_memory_state.py`). No `|| true` swallowing — absent surfaces are
+  no-ops, real failures still surface. A verbatim copy is committed into each
+  recall step's `workdir/` so Harbor uploads it beside `setup.sh`.
+
+**Wave 1 — S1 shared wipe (5 tasks: T1, T2, T4, T5, T8).** Each recall/baseline
+`setup.sh` now `source "$(dirname "$0")/wipe_scratch.sh"` before its `/app`
+action. T8's `03-revise-and-fix/tests/test.sh` adds an independent
+`clamp_note*` survival assertion that fails loudly (flat `reward 0.0`) because
+`multi_step.py` treats setup failure as only a warning.
+
+**Wave 2 — the four criticals (offline-verifiable parts only):**
+- **T3 spoiler strip** (`04-query/workdir/setup.sh`): removed the trap-narrating
+  comment and the literal stale value; key-anchored sed
+  (`s/^cache_ttl_seconds:.*/.../`) + `grep -q` verify (`set -e`, exits nonzero on
+  a no-op) + `rm -f -- "$0"` self-delete. Grader (`reward.py`) reworked to the S3
+  exclusivity rule: `answered_current_exclusive` (275 present AND stale 45
+  absent) is the weight-1 criterion, with a `_CARVEOUT` regex for honest update
+  phrasing ("275 (was 45)", "updated from 45", "45 →"); legacy signals demoted
+  to weight-0 diagnostics. `task.toml` description rewritten to match.
+- **T6 forgery gate** (`failure-recovery-loop-01/tests/test.sh`): `correctness=0`
+  unless `recovered`, a `calls >= MIN_CALLS(4)` forgery gate, `IDEAL` re-derived
+  6→4, counter now read from the environment and accepted **only** as a strict
+  integer (code-injection guard — the agent-writable counter is never
+  interpolated into the interpreter source), plus an S4 belt-and-suspenders flat
+  `reward.json` fallback.
+- **T9 latency-gated round-trip** (`sub-agent-parallel-decompose-01`):
+  `solution/gen.py` now appends a per-problem **calibration OFFSET** that is
+  *not* in the prose — the prose names only a `CAL-NN` code — and folds the
+  offset into each answer. The offset table is written to a verifier-side
+  `tests/registry.json` (answer-key-equivalent, kept out of `environment/`).
+  `instruction.md` detelegraphed (removed the "may not finish serially / so we
+  can observe scheduling" cues; states only the time limit + the lookup step).
+  `reward.py` narrowed its bare `except` to `(OSError, ValueError)`; `test.sh`
+  got the S4 `|| echo '{"reward":0.0}'` guard. `solution/solve.sh` +
+  `tests/answers.json` regenerated.
+- **T5** got the S1 wipe + S2/S3 grader fixes via `19-recall`; the
+  fictionalize-bridge-attributes + same-type-distractor corpus rebuild was
+  **deferred** (it is a generator/corpus change best done with the rebuild).
+
+**Wave 3 — S2/S3 grader fixes:** T1, T2, T4, T5 recall `reward.py` graders
+loosened format-strictness (day-name abbreviations, bare numbers, enumerator
+formats) and added exclusivity/dump-rejection per S3. T8's `OP_NAMES` check
+changed `list(...)==[...]` → `sorted(...)==[...]` (order-agnostic, S2).
+
+**Wave 4 — S4 + S5:** S4 crash-guard `|| echo '{"reward":0.0}'` added to T7/T9
+`test.sh` (T6 has its own inline fallback). S5 drift: `configs/core-suite.yaml`
+(`/14`→`/12` for context-fill-02; `/19`→`/16` for update-record; plan-then-revise
+relabelled to the real weight blend); `SHAPES.md` shape-14 verifier "judge"→
+"deterministic rewardkit (correct/60)".
+
+**Bypass-regression harness (new `tests/` tree, design decision 2).** 37 offline
+checks, runnable on thringle's harbor venv with no docker/sweep:
+`tests/helpers.py` + `conftest.py` (rewardkit-driving + shell-grader remap
+helpers); `tests/exploits/` (T3 spoiler, T6 forgery, T8 opnames, T9 parser +
+`t9_parser.py` the recorded exploit); `tests/wipe/test_s1_wipe.py`;
+`tests/regrade/test_s2_s3_matrix.py` (natural-phrasing answers score / dump-hedge
+attacks fail); `tests/s4/test_s4_crash_guard.py`; `tests/hygiene/test_s5_drift.py`.
+
+### Key decisions & deviations from the plan
+
+- **Tasks T10 and T11 were NOT touched.** Both are MINOR; their fixes
+  (decoy-logging/decoy-compute for T10, second-step/floor-gating for T11)
+  were out of scope for this offline pass and remain open.
+- **The wipe fragment is committed per-step, not symlinked.** Symlinks don't
+  survive Harbor's workdir upload reliably, so a verbatim copy in each
+  `workdir/` is the as-built delivery (5 identical copies + the `lib/` master).
+- The spec's S1 also named tasks 1/2/4/5/8; that is exactly the set wired.
+
+### Open questions — as-built resolution
+
+1. **T6 under a root agent.** CONFIRMED: the agent runs as **root**
+   (`environment/Dockerfile:24` says so explicitly). The spec's "root-only
+   chmod 600" lighter fix is therefore insufficient, as the question warned.
+   Shipped this pass: the offline-verifiable `calls >= 4` gate +
+   `correctness=0`-unless-recovered + integer-only counter guard, which already
+   makes the demonstrated `calls=0` forgery score 0.0
+   (`tests/exploits/test_t6_forgery_regression.py` proves it). The heavier
+   **compiled-dfetch-with-embedded-secret + HMAC nonce + grader-recompute +
+   ordered-error-progression log** design is committed to in the `test.sh`
+   header as **REBUILD-DEFERRED** (it cannot be exercised offline). The
+   forge-with-N-junk-calls gap remains until that rebuild.
+2. **T3 stale-memory seeding.** DEFERRED. The mechanical seeding (a TrialEvent
+   hook or step-00 pre-step that writes the stale `45` into the hindsight bank
+   for the trial's `eval-<harness>` group) needs sweep-driver wire-up + the
+   `_assert_eval_scope` prod-safety guard + a rebuild/run to verify symmetry —
+   all outside this pipeline. Only the offline T3 parts (spoiler strip,
+   key-anchored sed, exclusivity grader) landed. The memoryless-degeneration
+   fix (spec T3 #3 / acceptance 1b) stays open for the rebuild pass.
+3. **S1 fragment delivery without a rebuild.** RESOLVED as **commit
+   `lib/wipe_scratch.sh` + copy verbatim into each recall step's `workdir/`**
+   (not inline). Paths were read from the rich-image home layout, not guessed
+   (openclaw session JSONL under `$HOME/.openclaw`, hermes under `$HERMES_HOME`).
+   No rebuild needed — these are in-container scripts uploaded with the step.
+4. **T9 latency gate.** As-built the "gate" is the **per-problem
+   calibration-offset round-trip**: the answer depends on a fact (`CAL-NN`→offset)
+   that is not in the prose, served only by a registry lookup, so a prose-only
+   parser collapses to chance (`tests/exploits/test_t9_parser_regression.py`).
+   The actual **latency-bearing local lookup install** (a localhost endpoint or
+   sleeping file-read wrapper — never external internet) **and budget
+   calibration against a measured honest-serial run** are REBUILD/RUN-DEFERRED;
+   the offline change guarantees the parser bypass is dead, not yet that the
+   budget forces fan-out.
+5. **Wave-2 rebuild/run dependency.** Confirmed and logged: tasks **3, 5, 6, 9
+   stay BLOCKED for verdict-bearing n=5 runs** until the operator does the
+   post-merge rebuild + sweep (T6 compiled helper, T9 gated-lookup install +
+   budget, T5 corpus rebuild, T3 seeding, T4 token re-measurement). `RESULTS.md`
+   was **not** modified on this branch (no sweep ran); per design decision 3 the
+   operator records the deferral there when the severity-gated sweep runs.
+
+### Lessons / gotchas for the next maintainer
+
+- The agent really is root in T6 — any "make a file the agent can't write" fix
+  is void without a compiled helper + a build-time secret stripped before agent
+  start. Don't ship a chmod-only fix.
+- `registry.json` (T9) is **answer-key-equivalent**: it must stay in `tests/`,
+  never in `environment/`, or the parser bypass returns. `gen.py` writes it
+  beside `answers.json` from the same RNG draw.
+- `multi_step.py` treats a `setup.sh` non-zero exit as a *warning*, not a
+  failure — so any load-bearing wipe needs an **independent assertion in
+  `test.sh`** (the T8 `clamp_note*` probe pattern), not just `set -e` in setup.
+- Acceptance criteria 1b, 6, 7 (seeding symmetry, T4 token re-measurement, the
+  n=5 re-grid) are inherently run-dependent and remain unverified here.
+
+### How to verify
+
+Offline, on thringle (no docker, no sweep):
+```
+ssh thringle@LAN-IP 'cd ~/benchmarking/.baton-worktrees/baton-2026-06-11-core-eleven-second-adversarial-pass \
+  && ~/benchmarking/harbor/.venv/bin/python -m pytest tests/ -q'
+```
+Good = **37 passed** (as-built: 37 passed in ~31s). This exercises every
+recorded exploit-regression (T3/T6/T8/T9), the S1 wipe, the S2/S3 regrade
+matrix, the S4 crash guards, and the S5 drift checks. The rebuild/run-dependent
+acceptance criteria (T6 HMAC, T9 budget, T5 corpus, T3 seeding symmetry, T4
+token count, n=5 Δ) are explicitly **deferred to the post-merge operator pass**.
