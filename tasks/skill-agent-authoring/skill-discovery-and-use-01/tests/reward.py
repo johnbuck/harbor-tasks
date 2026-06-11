@@ -2,10 +2,14 @@
 
 8 files x 2 independent binary sub-checks = 16 criteria, equal weight:
   (A) table_XX correct    — /app/out/table_XX.json matches the canonical
-      structural summary RECOMPUTED from /app/data/table_XX.csv at grade time.
-  (B) table_XX discovered — the correct skill (csv-structure-summary) actually
-      ran against this file, proven by its breadcrumb in
-      /app/.skill-runs/csv-structure-summary.log.
+      shape report RECOMPUTED from /app/data/table_XX.csv at grade time (this
+      requires the correct skill's `--null=empty` mode; the default mode and the
+      colliding decoys produce a near-miss that fails here).
+  (B) table_XX discovered — the correct skill (tabular-shape-report) actually
+      read this file, proven by a breadcrumb line `<file> <sha256-of-bytes>` in
+      /app/.skill-runs/tabular-shape-report.log whose hash the grader re-derives
+      from /app/data/table_XX.csv. Echoing filenames no longer suffices — the
+      hash must match the real bytes.
 
 reward = passed_subchecks / 16 (weighted_mean of 16 equal-weight binary
 criteria → identical to the previous bash grader's `passed/16`). The per-file
@@ -16,17 +20,18 @@ of being discarded to satisfy Harbor's flat-scalar reward.json rule (FOOTGUNS
 LEAK-PROOF: the expected answers are NOT materialized anywhere the agent can
 read. This grader derives them from the SAME public input the agent got
 (/app/data) using the SAME dtype/null logic the correct skill documents, so the
-oracle (which runs the real skill) scores 16/16 and a copy-the-answer-key cheat
-has nothing to copy.
+oracle (which runs the real skill with `--null=empty`) scores 16/16 and a
+copy-the-answer-key cheat has nothing to copy.
 """
 
 import csv
+import hashlib
 import json
 from pathlib import Path
 
 import rewardkit as rk
 
-BREADCRUMB = ".skill-runs/csv-structure-summary.log"
+BREADCRUMB = ".skill-runs/tabular-shape-report.log"
 
 
 def _infer_dtype(values):
@@ -53,7 +58,7 @@ def _infer_dtype(values):
 
 
 def _summary(csv_path: Path):
-    """Canonical structural summary — mirrors csv-structure-summary/run.py."""
+    """Canonical shape report — mirrors tabular-shape-report/run.py --null=empty."""
     rows = list(csv.reader(csv_path.open(newline="")))
     if not rows:
         return {"rows": 0, "columns": []}
@@ -81,10 +86,12 @@ def table_correct(workspace: Path, k: int) -> bool:
 @rk.criterion(description="table_{k:02d} discovered (correct skill ran)")
 def table_discovered(workspace: Path, k: int) -> bool:
     bc = workspace / BREADCRUMB
-    if not bc.is_file():
+    src = workspace / "data" / f"table_{k:02d}.csv"
+    if not bc.is_file() or not src.is_file():
         return False
-    ran = {Path(line.strip()).name for line in bc.read_text().splitlines() if line.strip()}
-    return f"table_{k:02d}.csv" in ran
+    want = f"table_{k:02d}.csv {hashlib.sha256(src.read_bytes()).hexdigest()}"
+    lines = {line.strip() for line in bc.read_text().splitlines() if line.strip()}
+    return want in lines
 
 
 for _k in range(1, 9):

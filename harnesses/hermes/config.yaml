@@ -482,13 +482,28 @@ memory:
   # memory (MEMORY.md/USER.md) stays active alongside it; recall + hindsight
   # are separate MCP tools. Honcho config (baseUrl, workspace) is in
   # $HERMES_HOME/honcho.json. Only ONE external provider may be active — honcho.
+  #
+  # EVAL SUBSTRATE (2026-06-10, spec 2026-06-10-core-eleven-remediation): honcho
+  # is DISABLED via honcho.json `"enabled": false` so this harness runs
+  # hindsight-only, matching openclaw's memory surface (recall was removed
+  # 2026-06-03). Running honcho+hindsight vs openclaw's hindsight-only made any
+  # memory Δ uninterpretable. To restore honcho, flip honcho.json back to
+  # `"enabled": true` AND rebuild harbor-agents-rich. `provider: honcho` below is
+  # left as-is (gated off by the kill switch), not changed to an unknown enum.
+  #
+  # Built-in FILE memory (MEMORY.md/USER.md) is ALSO disabled for run 1
+  # (memory_enabled/user_profile_enabled false below) — openclaw has no exact
+  # match for it, so leaving it on reintroduces the asymmetry honcho-off removed.
+  # Net substrate for run 1: BOTH harnesses rely purely on the hindsight MCP
+  # (mcp_servers.hindsight) for cross-step persistence. Restore by flipping both
+  # back to true + rebuild.
   provider: honcho
 
   # Agent's personal notes: environment facts, conventions, things learned
-  memory_enabled: true
-  
+  memory_enabled: false
+
   # User profile: preferences, communication style, expectations
-  user_profile_enabled: true
+  user_profile_enabled: false
   
   # Character limits (~2.75 chars per token, model-independent)
   memory_char_limit: 2200   # ~800 tokens

@@ -1,45 +1,341 @@
 date,category,vendor,amount,paid_by,notes
-2026-01-10,rent,Landlord,1800.00,alex,january rent
-2026-01-12,groceries,Trader Joes,58.00,alex,
-2026-01-12,groceries,Trader Joes,58.00,alex,
-2026-02-15,rent,Landlord,1800.00,alex,february rent
-2026-02-20,groceries,Costco,180.00,alex,bulk
-2026-02-20,groceries,Costco,180.00,alex,bulk
-2026-03-15,rent,Landlord,1800.00,alex,march rent
-2026-03-18,groceries,Trader Joes,64.20,alex,
-2026-03-18,groceries,Trader Joes,64.20,alex,
-2026-04-15,rent,Landlord,1800.00,alex,april rent
-2026-04-22,groceries,Whole Foods,103.10,alex,
-2026-04-22,groceries,Whole Foods,103.10,alex,
-2026-04-28,dining,Nopa,72.00,alex,dinner
-2026-05-01,groceries,Trader Joes,87.50,alex,
-2026-05-03,utilities,PG&E,134.22,alex,electric
+2024-06-15,rent,Landlord,1800.00,alex,june 2024 rent
+2024-06-03,utilities,PG&E,110.00,alex,electric
+2024-06-07,utilities,Comcast,89.99,alex,internet
+2024-06-23,utilities,Water,38.00,alex,
+2024-06-04,groceries,Trader Joes,45.00,alex,
+2024-06-08,groceries,Whole Foods,58.70,alex,
+2024-06-12,groceries,Safeway,72.40,alex,
+2024-06-16,groceries,Berkeley Bowl,86.10,alex,
+2024-06-20,groceries,Rainbow,99.80,alex,
+2024-06-24,groceries,Costco,113.50,alex,
+2024-06-10,dining,Nopa,20.00,alex,dinner
+2024-06-19,dining,Souvla,18.00,alex,lunch
+2024-06-26,household,Target,25.00,alex,supplies
+2024-07-15,rent,Landlord,1800.00,alex,july 2024 rent
+2024-07-03,utilities,PG&E,111.37,alex,electric
+2024-07-07,utilities,Comcast,89.99,alex,internet
+2024-07-23,utilities,Water,38.53,alex,
+2024-07-04,groceries,Whole Foods,54.00,alex,
+2024-07-08,groceries,Safeway,67.70,alex,
+2024-07-12,groceries,Berkeley Bowl,81.40,alex,
+2024-07-16,groceries,Rainbow,95.10,alex,
+2024-07-20,groceries,Costco,108.80,alex,
+2024-07-24,groceries,Trader Joes,122.50,alex,
+2024-07-10,dining,Zuni,22.10,alex,dinner
+2024-07-19,dining,Tartine,19.70,alex,lunch
+2024-07-26,household,Bi-Rite,28.30,alex,supplies
+2024-08-15,rent,Landlord,1800.00,alex,august 2024 rent
+2024-08-03,utilities,PG&E,112.74,alex,electric
+2024-08-07,utilities,Comcast,89.99,alex,internet
+2024-08-23,utilities,Water,39.06,alex,
+2024-08-04,groceries,Safeway,63.00,alex,
+2024-08-08,groceries,Berkeley Bowl,76.70,alex,
+2024-08-12,groceries,Rainbow,90.40,alex,
+2024-08-16,groceries,Costco,104.10,alex,
+2024-08-20,groceries,Trader Joes,117.80,alex,
+2024-08-24,groceries,Whole Foods,131.50,alex,
+2024-08-10,dining,Souvla,24.20,alex,dinner
+2024-08-19,dining,Delfina,21.40,alex,lunch
+2024-08-26,household,Target,31.60,alex,supplies
+2024-09-15,rent,Landlord,1800.00,alex,september 2024 rent
+2024-09-03,utilities,PG&E,114.11,alex,electric
+2024-09-07,utilities,Comcast,89.99,alex,internet
+2024-09-23,utilities,Water,39.59,alex,
+2024-09-04,groceries,Berkeley Bowl,72.00,alex,
+2024-09-08,groceries,Rainbow,85.70,alex,
+2024-09-12,groceries,Costco,99.40,alex,
+2024-09-16,groceries,Trader Joes,113.10,alex,
+2024-09-20,groceries,Whole Foods,126.80,alex,
+2024-09-24,groceries,Safeway,140.50,alex,
+2024-09-10,dining,Tartine,26.30,alex,dinner
+2024-09-19,dining,Nopa,23.10,alex,lunch
+2024-09-26,household,Bi-Rite,34.90,alex,supplies
+2024-10-15,rent,Landlord,1800.00,alex,october 2024 rent
+2024-10-03,utilities,PG&E,115.48,alex,electric
+2024-10-07,utilities,Comcast,89.99,alex,internet
+2024-10-23,utilities,Water,40.12,alex,
+2024-10-04,groceries,Rainbow,81.00,alex,
+2024-10-08,groceries,Costco,94.70,alex,
+2024-10-12,groceries,Trader Joes,108.40,alex,
+2024-10-16,groceries,Whole Foods,122.10,alex,
+2024-10-20,groceries,Safeway,135.80,alex,
+2024-10-24,groceries,Berkeley Bowl,149.50,alex,
+2024-10-10,dining,Delfina,28.40,alex,dinner
+2024-10-19,dining,Zuni,24.80,alex,lunch
+2024-10-26,household,Target,38.20,alex,supplies
+2024-11-15,rent,Landlord,1800.00,alex,november 2024 rent
+2024-11-03,utilities,PG&E,116.85,alex,electric
+2024-11-07,utilities,Comcast,89.99,alex,internet
+2024-11-23,utilities,Water,40.65,alex,
+2024-11-04,groceries,Costco,90.00,alex,
+2024-11-08,groceries,Trader Joes,103.70,alex,
+2024-11-12,groceries,Whole Foods,117.40,alex,
+2024-11-16,groceries,Safeway,131.10,alex,
+2024-11-20,groceries,Berkeley Bowl,144.80,alex,
+2024-11-24,groceries,Rainbow,158.50,alex,
+2024-11-10,dining,Nopa,30.50,alex,dinner
+2024-11-19,dining,Souvla,26.50,alex,lunch
+2024-11-26,household,Bi-Rite,41.50,alex,supplies
+2024-12-15,rent,Landlord,1800.00,alex,december 2024 rent
+2024-12-03,utilities,PG&E,118.22,alex,electric
+2024-12-07,utilities,Comcast,89.99,alex,internet
+2024-12-23,utilities,Water,41.18,alex,
+2024-12-04,groceries,Trader Joes,99.00,alex,
+2024-12-08,groceries,Whole Foods,112.70,alex,
+2024-12-12,groceries,Safeway,126.40,alex,
+2024-12-16,groceries,Berkeley Bowl,140.10,alex,
+2024-12-20,groceries,Rainbow,153.80,alex,
+2024-12-24,groceries,Costco,167.50,alex,
+2024-12-10,dining,Zuni,32.60,alex,dinner
+2024-12-19,dining,Tartine,28.20,alex,lunch
+2024-12-26,household,Target,44.80,alex,supplies
+2025-01-15,rent,Landlord,1800.00,alex,january 2025 rent
+2025-01-03,utilities,PG&E,119.59,alex,electric
+2025-01-07,utilities,Comcast,89.99,alex,internet
+2025-01-23,utilities,Water,41.71,alex,
+2025-01-04,groceries,Whole Foods,108.00,alex,
+2025-01-08,groceries,Safeway,121.70,alex,
+2025-01-12,groceries,Berkeley Bowl,135.40,alex,
+2025-01-16,groceries,Rainbow,149.10,alex,
+2025-01-20,groceries,Costco,162.80,alex,
+2025-01-24,groceries,Trader Joes,46.50,alex,
+2025-01-10,dining,Souvla,34.70,alex,dinner
+2025-01-19,dining,Delfina,29.90,alex,lunch
+2025-01-26,household,Bi-Rite,48.10,alex,supplies
+2025-02-15,rent,Landlord,1800.00,alex,february 2025 rent
+2025-02-03,utilities,PG&E,120.96,alex,electric
+2025-02-07,utilities,Comcast,89.99,alex,internet
+2025-02-23,utilities,Water,42.24,alex,
+2025-02-04,groceries,Safeway,117.00,alex,
+2025-02-08,groceries,Berkeley Bowl,130.70,alex,
+2025-02-12,groceries,Rainbow,144.40,alex,
+2025-02-16,groceries,Costco,158.10,alex,
+2025-02-20,groceries,Trader Joes,171.80,alex,
+2025-02-24,groceries,Whole Foods,55.50,alex,
+2025-02-10,dining,Tartine,36.80,alex,dinner
+2025-02-19,dining,Nopa,31.60,alex,lunch
+2025-02-26,household,Target,51.40,alex,supplies
+2025-03-15,rent,Landlord,1800.00,alex,march 2025 rent
+2025-03-03,utilities,PG&E,122.33,alex,electric
+2025-03-07,utilities,Comcast,89.99,alex,internet
+2025-03-23,utilities,Water,42.77,alex,
+2025-03-04,groceries,Berkeley Bowl,126.00,alex,
+2025-03-08,groceries,Rainbow,139.70,alex,
+2025-03-12,groceries,Costco,153.40,alex,
+2025-03-16,groceries,Trader Joes,167.10,alex,
+2025-03-20,groceries,Whole Foods,50.80,alex,
+2025-03-24,groceries,Safeway,64.50,alex,
+2025-03-10,dining,Delfina,38.90,alex,dinner
+2025-03-19,dining,Zuni,33.30,alex,lunch
+2025-03-26,household,Bi-Rite,54.70,alex,supplies
+2025-04-15,rent,Landlord,1800.00,alex,april 2025 rent
+2025-04-03,utilities,PG&E,123.70,alex,electric
+2025-04-07,utilities,Comcast,89.99,alex,internet
+2025-04-23,utilities,Water,43.30,alex,
+2025-04-04,groceries,Rainbow,135.00,alex,
+2025-04-08,groceries,Costco,148.70,alex,
+2025-04-12,groceries,Trader Joes,162.40,alex,
+2025-04-16,groceries,Whole Foods,46.10,alex,
+2025-04-20,groceries,Safeway,59.80,alex,
+2025-04-24,groceries,Berkeley Bowl,73.50,alex,
+2025-04-10,dining,Nopa,41.00,alex,dinner
+2025-04-19,dining,Souvla,35.00,alex,lunch
+2025-04-26,household,Target,58.00,alex,supplies
+2025-05-15,rent,Landlord,1800.00,alex,may 2025 rent
+2025-05-03,utilities,PG&E,125.07,alex,electric
+2025-05-07,utilities,Comcast,89.99,alex,internet
+2025-05-23,utilities,Water,43.83,alex,
+2025-05-04,groceries,Costco,144.00,alex,
+2025-05-08,groceries,Trader Joes,157.70,alex,
+2025-05-12,groceries,Whole Foods,171.40,alex,
+2025-05-16,groceries,Safeway,55.10,alex,
+2025-05-20,groceries,Berkeley Bowl,68.80,alex,
+2025-05-24,groceries,Rainbow,82.50,alex,
+2025-05-10,dining,Zuni,43.10,alex,dinner
+2025-05-19,dining,Tartine,36.70,alex,lunch
+2025-05-26,household,Bi-Rite,61.30,alex,supplies
+2025-06-15,rent,Landlord,1800.00,alex,june 2025 rent
+2025-06-03,utilities,PG&E,126.44,alex,electric
+2025-06-07,utilities,Comcast,89.99,alex,internet
+2025-06-23,utilities,Water,44.36,alex,
+2025-06-04,groceries,Trader Joes,153.00,alex,
+2025-06-08,groceries,Whole Foods,166.70,alex,
+2025-06-12,groceries,Safeway,50.40,alex,
+2025-06-16,groceries,Berkeley Bowl,64.10,alex,
+2025-06-20,groceries,Rainbow,77.80,alex,
+2025-06-24,groceries,Costco,91.50,alex,
+2025-06-10,dining,Souvla,45.20,alex,dinner
+2025-06-19,dining,Delfina,38.40,alex,lunch
+2025-06-26,household,Target,64.60,alex,supplies
+2025-07-15,rent,Landlord,1800.00,alex,july 2025 rent
+2025-07-03,utilities,PG&E,127.81,alex,electric
+2025-07-07,utilities,Comcast,89.99,alex,internet
+2025-07-23,utilities,Water,44.89,alex,
+2025-07-04,groceries,Whole Foods,162.00,alex,
+2025-07-08,groceries,Safeway,45.70,alex,
+2025-07-12,groceries,Berkeley Bowl,59.40,alex,
+2025-07-16,groceries,Rainbow,73.10,alex,
+2025-07-20,groceries,Costco,86.80,alex,
+2025-07-24,groceries,Trader Joes,100.50,alex,
+2025-07-10,dining,Tartine,47.30,alex,dinner
+2025-07-19,dining,Nopa,40.10,alex,lunch
+2025-07-26,household,Bi-Rite,67.90,alex,supplies
+2025-08-15,rent,Landlord,1800.00,alex,august 2025 rent
+2025-08-03,utilities,PG&E,129.18,alex,electric
+2025-08-07,utilities,Comcast,89.99,alex,internet
+2025-08-23,utilities,Water,45.42,alex,
+2025-08-04,groceries,Safeway,171.00,alex,
+2025-08-08,groceries,Berkeley Bowl,54.70,alex,
+2025-08-12,groceries,Rainbow,68.40,alex,
+2025-08-16,groceries,Costco,82.10,alex,
+2025-08-20,groceries,Trader Joes,95.80,alex,
+2025-08-24,groceries,Whole Foods,109.50,alex,
+2025-08-10,dining,Delfina,49.40,alex,dinner
+2025-08-19,dining,Zuni,41.80,alex,lunch
+2025-08-26,household,Target,71.20,alex,supplies
+2025-09-15,rent,Landlord,1800.00,alex,september 2025 rent
+2025-09-03,utilities,PG&E,130.55,alex,electric
+2025-09-07,utilities,Comcast,89.99,alex,internet
+2025-09-23,utilities,Water,45.95,alex,
+2025-09-04,groceries,Berkeley Bowl,50.00,alex,
+2025-09-08,groceries,Rainbow,63.70,alex,
+2025-09-12,groceries,Costco,77.40,alex,
+2025-09-16,groceries,Trader Joes,91.10,alex,
+2025-09-20,groceries,Whole Foods,104.80,alex,
+2025-09-24,groceries,Safeway,118.50,alex,
+2025-09-10,dining,Nopa,51.50,alex,dinner
+2025-09-19,dining,Souvla,43.50,alex,lunch
+2025-09-26,household,Bi-Rite,74.50,alex,supplies
+2025-10-15,rent,Landlord,1800.00,alex,october 2025 rent
+2025-10-03,utilities,PG&E,131.92,alex,electric
+2025-10-07,utilities,Comcast,89.99,alex,internet
+2025-10-23,utilities,Water,46.48,alex,
+2025-10-04,groceries,Rainbow,59.00,alex,
+2025-10-08,groceries,Costco,72.70,alex,
+2025-10-12,groceries,Trader Joes,86.40,alex,
+2025-10-16,groceries,Whole Foods,100.10,alex,
+2025-10-20,groceries,Safeway,113.80,alex,
+2025-10-24,groceries,Berkeley Bowl,127.50,alex,
+2025-10-10,dining,Zuni,53.60,alex,dinner
+2025-10-19,dining,Tartine,45.20,alex,lunch
+2025-10-26,household,Target,77.80,alex,supplies
+2025-11-15,rent,Landlord,1800.00,alex,november 2025 rent
+2025-11-03,utilities,PG&E,133.29,alex,electric
+2025-11-07,utilities,Comcast,89.99,alex,internet
+2025-11-23,utilities,Water,47.01,alex,
+2025-11-04,groceries,Costco,68.00,alex,
+2025-11-08,groceries,Trader Joes,81.70,alex,
+2025-11-12,groceries,Whole Foods,95.40,alex,
+2025-11-16,groceries,Safeway,109.10,alex,
+2025-11-20,groceries,Berkeley Bowl,122.80,alex,
+2025-11-24,groceries,Rainbow,136.50,alex,
+2025-11-10,dining,Souvla,55.70,alex,dinner
+2025-11-19,dining,Delfina,46.90,alex,lunch
+2025-11-26,household,Bi-Rite,81.10,alex,supplies
+2025-12-15,rent,Landlord,1800.00,alex,december 2025 rent
+2025-12-03,utilities,PG&E,134.66,alex,electric
+2025-12-07,utilities,Comcast,89.99,alex,internet
+2025-12-23,utilities,Water,47.54,alex,
+2025-12-04,groceries,Trader Joes,77.00,alex,
+2025-12-08,groceries,Whole Foods,90.70,alex,
+2025-12-12,groceries,Safeway,104.40,alex,
+2025-12-16,groceries,Berkeley Bowl,118.10,alex,
+2025-12-20,groceries,Rainbow,131.80,alex,
+2025-12-24,groceries,Costco,145.50,alex,
+2025-12-10,dining,Tartine,57.80,alex,dinner
+2025-12-19,dining,Nopa,48.60,alex,lunch
+2025-12-26,household,Target,84.40,alex,supplies
+2026-01-15,rent,Landlord,1800.00,alex,january 2026 rent
+2026-01-03,utilities,PG&E,136.03,alex,electric
+2026-01-07,utilities,Comcast,89.99,alex,internet
+2026-01-23,utilities,Water,48.07,alex,
+2026-01-04,groceries,Whole Foods,86.00,alex,
+2026-01-08,groceries,Safeway,99.70,alex,
+2026-01-12,groceries,Berkeley Bowl,113.40,alex,
+2026-01-16,groceries,Rainbow,127.10,alex,
+2026-01-20,groceries,Costco,140.80,alex,
+2026-01-24,groceries,Trader Joes,154.50,alex,
+2026-01-10,dining,Delfina,59.90,alex,dinner
+2026-01-19,dining,Zuni,50.30,alex,lunch
+2026-01-26,household,Bi-Rite,87.70,alex,supplies
+2026-02-15,rent,Landlord,1800.00,alex,february 2026 rent
+2026-02-03,utilities,PG&E,137.40,alex,electric
+2026-02-07,utilities,Comcast,89.99,alex,internet
+2026-02-23,utilities,Water,48.60,alex,
+2026-02-04,groceries,Safeway,95.00,alex,
+2026-02-08,groceries,Berkeley Bowl,108.70,alex,
+2026-02-12,groceries,Rainbow,122.40,alex,
+2026-02-16,groceries,Costco,136.10,alex,
+2026-02-20,groceries,Trader Joes,149.80,alex,
+2026-02-24,groceries,Whole Foods,163.50,alex,
+2026-02-10,dining,Nopa,62.00,alex,dinner
+2026-02-19,dining,Souvla,52.00,alex,lunch
+2026-02-26,household,Target,91.00,alex,supplies
+2026-03-15,rent,Landlord,1800.00,alex,march 2026 rent
+2026-03-03,utilities,PG&E,138.77,alex,electric
+2026-03-07,utilities,Comcast,89.99,alex,internet
+2026-03-23,utilities,Water,49.13,alex,
+2026-03-04,groceries,Berkeley Bowl,104.00,alex,
+2026-03-08,groceries,Rainbow,117.70,alex,
+2026-03-12,groceries,Costco,131.40,alex,
+2026-03-16,groceries,Trader Joes,145.10,alex,
+2026-03-20,groceries,Whole Foods,158.80,alex,
+2026-03-24,groceries,Safeway,172.50,alex,
+2026-03-10,dining,Zuni,64.10,alex,dinner
+2026-03-19,dining,Tartine,53.70,alex,lunch
+2026-03-26,household,Bi-Rite,94.30,alex,supplies
+2026-04-15,rent,Landlord,1800.00,alex,april 2026 rent
+2026-04-03,utilities,PG&E,140.14,alex,electric
+2026-04-07,utilities,Comcast,89.99,alex,internet
+2026-04-23,utilities,Water,49.66,alex,
+2026-04-04,groceries,Rainbow,113.00,alex,
+2026-04-08,groceries,Costco,126.70,alex,
+2026-04-12,groceries,Trader Joes,140.40,alex,
+2026-04-16,groceries,Whole Foods,154.10,alex,
+2026-04-20,groceries,Safeway,167.80,alex,
+2026-04-24,groceries,Berkeley Bowl,51.50,alex,
+2026-04-10,dining,Souvla,66.20,alex,dinner
+2026-04-19,dining,Delfina,55.40,alex,lunch
+2026-04-26,household,Target,27.60,alex,supplies
+2026-05-15,rent,Landlord,1800.00,alex,may 2026 rent
+2026-05-03,utilities,PG&E,141.51,alex,electric
+2026-05-07,utilities,Comcast,89.99,alex,internet
+2026-05-23,utilities,Water,38.19,alex,
+2026-05-04,groceries,Costco,122.00,alex,
+2026-05-08,groceries,Trader Joes,135.70,alex,
+2026-05-12,groceries,Whole Foods,149.40,alex,
+2026-05-16,groceries,Safeway,163.10,alex,
+2026-05-20,groceries,Berkeley Bowl,46.80,alex,
+2026-05-24,groceries,Rainbow,60.50,alex,
+2026-05-10,dining,Tartine,68.30,alex,dinner
+2026-05-19,dining,Nopa,57.10,alex,lunch
+2026-05-26,household,Bi-Rite,30.90,alex,supplies
+2024-08-04,groceries,Safeway,63.00,alex,
+2024-11-04,groceries,Costco,90.00,alex,
+2025-03-04,groceries,Berkeley Bowl,126.00,alex,
+2025-07-04,groceries,Whole Foods,162.00,alex,
+2026-02-04,groceries,Safeway,95.00,alex,
+2025-10-04,groceries,Rainbow,59.00,alex,
+2025-10-04,groceries,Rainbow,59.00,alex,
 2026-05-05,groceries,Whole Foods,142.30,alex,
 2026-05-05,groceries,Whole Foods,142.30,alex,
+2026-05-09,groceries,Costco,210.00,alex,
+2026-05-09,groceries,Costco,210.00,alex,
+2026-05-09,groceries,Costco,210.00,alex,
+2026-05-13,groceries,Whole Foods,98.75,alex,
+2026-05-13,groceries,Whole Foods,98.75,alex,
+2026-05-17,groceries,Trader Joes,33.00,alex,
+2026-05-17,groceries,Trader Joes,33.00,alex,
+2026-05-21,groceries,Trader Joes,76.41,alex,
+2026-05-21,groceries,Trader Joes,76.41,alex,
+2026-05-27,groceries,Safeway,61.00,alex,
+2026-05-27,groceries,Safeway,61.00,alex,
+2026-05-07,utilities,Comcast,89.99,alex,internet
+2026-05-07,utilities,Comcast,89.99,alex,internet
 2026-05-06,groceries,Whole Foods,55.00,alex,
 2026-05-06,groceries,Whole Foods,55.10,alex,
-2026-05-08,groceries,Trader Joes,76.41,alex,
-2026-05-09,groceries,Costco,210.00,alex,bulk
-2026-05-09,groceries,Costco,210.00,alex,bulk
-2026-05-09,groceries,Costco,210.00,alex,bulk
-2026-05-10,dining,Tartine,28.50,alex,brunch
-2026-05-11,groceries,Bi-Rite,40.00,alex,snacks
-2026-05-11,household,Bi-Rite,40.00,alex,paper goods
-2026-05-12,groceries,Whole Foods,98.75,alex,
-2026-05-12,groceries,Whole Foods,98.75,alex,
-2026-05-13,groceries,Safeway,61.00,alex,
-2026-05-14,utilities,Comcast,89.99,alex,internet
-2026-05-14,utilities,Comcast,89.99,alex,internet
-2026-05-14,utilities,Comcast,89.99,alex,internet
-2026-05-15,rent,Landlord,1800.00,alex,may rent
-2026-05-16,groceries,Trader Joes,33.00,alex,
-2026-05-16,groceries,Trader Joes,33.00,alex,
-2026-05-17,groceries,Bi-Rite,54.12,alex,
-2026-05-19,dining,Souvla,22.00,alex,lunch
-2026-05-21,groceries,Trader Joes,76.41,alex,
-2026-05-21,groceries,Trader Joes,76.41,alex,
-2026-05-22,groceries,Whole Foods,142.30,alex,
-2026-05-23,utilities,Water,42.18,alex,
-2026-05-24,groceries,Costco,210.00,alex,bulk
-2026-05-25,groceries,Whole Foods,118.40,alex,
-2026-05-27,dining,Zuni,84.00,alex,dinner
+2026-05-11,groceries,Bi-Rite,40.00,alex,
+2026-05-11,household,Bi-Rite,40.00,alex,supplies
+2026-05-18,groceries,Bi-Rite,54.12,alex,
+2026-05-29,groceries,Bi-Rite,54.12,alex,

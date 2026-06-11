@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "baseUrl": "__HONCHO_URL__",
   "workspace": "eval-hermes",
   "aiPeer": "eval-hermes",

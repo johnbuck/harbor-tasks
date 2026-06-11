@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/tool-sprawl-precision-01"
-description = "60 candidate shell tools (with name-adjacent decoy traps); exactly 3 solve the task. Graded reward blends answer-fraction (3 sub-answers) with tool-selection F1 over the agent's invocation history. Hardened 2026-06-01: customers.csv is padded with comment/blank lines so a naive `wc -l` count is wrong, and csv-row-count parses rows and skips them -- the customer_count sub-answer now requires the tool rather than a line count."
+description = "60 candidate shell tools; exactly 3 solve the task but are NAMED OPAQUELY (function only in --help), while 9 name-collision decoys match the task verbs better and do the wrong thing -- so correct selection requires reading descriptions, not name-matching. The answer value is NOT graded (a root agent computes it offline); reward = 0.5*selection_F1 + 0.5*call_efficiency over the agent's invocation log, so wrong tools and over-calling both cost score and computing the value offline gains nothing."
 authors = [{name = "johnbuck"}]
 keywords = ["tool-orchestration", "tool-sprawl", "tool-selection"]
 
@@ -11,7 +11,7 @@ author_name = "johnbuck"
 difficulty = "hard"
 category = "tool-orchestration"
 shape = "tool-sprawl-precision"
-tags = ["tool-orchestration", "tool-selection", "model-bound"]
+tags = ["tool-orchestration", "tool-selection", "harness-bound"]
 
 [verifier]
 timeout_sec = 60.0

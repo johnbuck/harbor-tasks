@@ -1,46 +1,45 @@
-"""rewardkit grader for tool-sprawl-precision-01 — answer correctness + tool F1.
+"""rewardkit grader for tool-sprawl-precision-01 — tool SELECTION, not answer value.
 
-reward = 0.5 * answer_fraction + 0.5 * tool_f1 over 60 candidate tools where exactly
-3 solve the task. answer_fraction = correct/3; tool_f1 is precision*recall over the
-3 correct tools, read from /var/log/tool-calls.log. Same formula + (string)
-comparisons as the prior bash grader.
+The answer VALUE (customer_count / top_word / total_quantity) is deliberately NOT
+graded: a root agent can compute it offline with plain python3, so scoring it
+measures the MODEL, not the harness. We grade purely on which tools the harness
+SELECTED and how economically, read from /var/log/tool-calls.log (every tool logs
+its name + argv when invoked on data; reading `--help` is free and not logged).
 
-Blend → weight-1 `score` criterion holds the exact reward; 3 answer checks + F1 are
-weight-0 detail. (PROVEN efficiency discriminator. tool_f1 reads an agent-writable
-log — forgeable by an adversary but genuine for honest harnesses; see FOOTGUNS #44.)
+reward = 0.5 * selection_f1 + 0.5 * call_efficiency
+
+  precision       = correct-tool calls / total calls          (wrong tools hurt)
+  recall          = distinct correct tools used / 3            (missed tools hurt)
+  selection_f1    = harmonic mean(precision, recall)
+  call_efficiency = distinct correct tools used / total calls  (NON-CLAMPED;
+                    over-calling — even correct tools — and any wrong call lower it)
+
+Ideal trajectory = invoke each of the 3 correct tools exactly once (total=3):
+precision=recall=f1=1, efficiency=3/3=1 → 1.0. Spraying decoys lowers both terms;
+re-running correct tools lowers efficiency only. Computing values offline and
+never calling a tool → total=0 → 0.0 (the floor/VOID case, flagged by
+`tools_invoked`).
+
+The log is agent-writable (chmod 666) → a root agent that reverse-engineers the
+grader could forge it, but honest tool use is the strictly-shorter path so neither
+harness forges in practice. Residual root-forgery is documented, not hidden
+(FOOTGUNS #44; D3 root-constraint). reward.json stays flat; breakdown is weight-0.
 """
-import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
 import rewardkit as rk
 
-LOG = Path("/var/log/tool-calls.log")
-CORRECT = ("csv-row-count", "word-tally", "json-key-sum")
-# answers compared as strings (matches the prior grader's `[ "$x" = "7" ]`).
-EXPECTED = {"customer_count": "7", "top_word": "the", "total_quantity": "19"}
+LOG = Path(os.environ.get("TOOL_CALL_LOG", "/var/log/tool-calls.log"))
+CORRECT = ("recstat", "lexrank", "colroll")
 
 
 @lru_cache(maxsize=4)
-def _metrics(workspace_str: str):
-    got = {}
-    p = Path(workspace_str) / "answer.json"
-    if p.exists():
-        try:
-            got = json.loads(p.read_text())
-        except Exception:
-            got = {}
-    cc = str(got.get("customer_count")) == EXPECTED["customer_count"]
-    tw = str(got.get("top_word", "")).lower() == EXPECTED["top_word"]
-    tq = str(got.get("total_quantity")) == EXPECTED["total_quantity"]
-    answer_fraction = sum([cc, tw, tq]) / 3.0
-
+def _metrics(_cache_key: str):
     total, correct_calls, hit = 0, 0, set()
     if LOG.exists():
         for line in LOG.read_text().splitlines():
-            line = line.strip()
-            if not line:
-                continue
             parts = line.split(None, 2)  # "<iso-ts> <toolname> <args...>"
             if len(parts) < 2:
                 continue
@@ -48,25 +47,36 @@ def _metrics(workspace_str: str):
             if parts[1] in CORRECT:
                 correct_calls += 1
                 hit.add(parts[1])
+
     precision = (correct_calls / total) if total > 0 else 0.0
     recall = len(hit) / len(CORRECT)
     f1 = 0.0 if (precision + recall) == 0 else 2 * precision * recall / (precision + recall)
-    return {"cc": cc, "tw": tw, "tq": tq, "answer_fraction": answer_fraction, "f1": f1}
+    efficiency = (len(hit) / total) if total > 0 else 0.0
+    return {
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "efficiency": efficiency,
+        "total_calls": float(total),
+        "distinct_correct": float(len(hit)),
+        "tools_invoked": 1.0 if total > 0 else 0.0,
+    }
 
 
 @rk.criterion(description="{label}")
 def check(workspace: Path, key: str, label: str):
-    m = _metrics(str(workspace))
+    m = _metrics("k")
     if key == "score":
-        return 0.5 * m["answer_fraction"] + 0.5 * m["f1"]
-    if key == "f1":
-        return m["f1"]
+        return 0.5 * m["f1"] + 0.5 * m["efficiency"]
     return m[key]
 
 
-rk.check("score", "reward = 0.5*answer_fraction + 0.5*tool_f1", weight=1.0)
-for _k, _l in [("cc", "answer: customer_count correct"),
-               ("tw", "answer: top_word correct"),
-               ("tq", "answer: total_quantity correct"),
-               ("f1", "tool-selection F1 (precision*recall)")]:
+rk.check("score", "reward = 0.5*selection_f1 + 0.5*call_efficiency", weight=1.0)
+for _k, _l in [("f1", "tool-selection F1 (precision*recall)"),
+               ("efficiency", "call efficiency (distinct correct / total calls)"),
+               ("precision", "precision (correct calls / total calls)"),
+               ("recall", "recall (distinct correct tools / 3)"),
+               ("total_calls", "total tool invocations logged"),
+               ("distinct_correct", "distinct correct tools invoked"),
+               ("tools_invoked", "any tool invoked (0 = VOID/offline)")]:
     rk.check(_k, _l, weight=0.0)

@@ -1,14 +1,7 @@
-There are **8** CSV files under `/app/data/` (`table_01.csv` through `table_08.csv`). For **each** one, produce a structural summary and write it to `/app/out/table_XX.json` in this exact format:
+I'm wiring up a data-ingestion step and need a compact, machine-readable description of each table in `/app/data/` so a downstream loader knows the column layout — and how each column is typed and how much of it is missing — before it ever reads the data.
 
-```json
-{"rows": <int>, "columns": [{"name": "<str>", "dtype": "<str>", "nulls": <int>}, ...]}
-```
+There are **8** CSV files under `/app/data/` (`table_01.csv` through `table_08.csv`). For **each** one, produce that per-table description as JSON and write it to `/app/out/table_XX.json` (matching the source filename).
 
-- `rows` is the number of data rows (excluding the header).
-- For each column: `name`, `dtype` (one of `"int"`, `"float"`, `"str"`, `"unknown"`), and `nulls` (count of empty cells). A column with mixed int/float values is `"float"`; a column that is entirely empty is `"unknown"`.
+The skills installed under `/app/skills/` cover this kind of work — each skill is a directory with a `SKILL.md` that describes what it does and how to run it. Pick the appropriate one and use it as documented; don't reimplement it yourself.
 
-All 8 outputs must exist under `/app/out/`.
-
-Skills are available to you in the environment (`/app/skills/`, each a directory with a `SKILL.md`).
-
-Write only the 8 files under `/app/out/`. No other commentary.
+Produce exactly the 8 output files under `/app/out/`. No other output.

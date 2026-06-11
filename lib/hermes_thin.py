@@ -95,6 +95,19 @@ class HermesThin(HermesOpenRouter):
             # browser.cdp_url). Idempotent + readiness-gated. Spec:
             # backlog/2026-06-03-self-contained-browser.md.
             "bash /opt/harness/start-cdp.sh && "
+            # Multi-step session threading (OPT-IN per task). If the task image bakes
+            # /opt/harness/thread-session, continue the SAME hermes session across
+            # steps: the first step of the trial creates it (no -c), later steps
+            # resume with -c (= most recent; the per-trial container only ever runs
+            # this one session, so "most recent" is unambiguous). This lets the
+            # context tasks accumulate a long conversation. Absent the marker, every
+            # step is FRESH (default): correct for single-step tasks AND the memory
+            # tasks, where facts must survive via the memory MCP, not in-context.
+            # Flag confirmed in-image: `hermes chat -c/--continue [NAME]`. Spec:
+            # 2026-06-10-core-eleven-remediation D1.
+            'CONT=""; if [ -f /opt/harness/thread-session ]; then '
+            '[ -f /tmp/.harbor_hermes_started ] && CONT="-c"; '
+            'touch /tmp/.harbor_hermes_started; fi && '
             # #92 write-persistence fix: hermes's file tools are workspace-rooted
             # at the terminal backend's cwd (baked config `terminal.cwd: "."`).
             # If the process doesn't start in the task workdir, write_file lands
@@ -104,7 +117,7 @@ class HermesThin(HermesOpenRouter):
             "cd /app && "
             "hermes --yolo chat "
             '-q "$HARBOR_INSTRUCTION" '
-            "-Q "
+            "-Q $CONT "
             f"--model {shlex.quote(self.model_name)} "
             "2>&1 | stdbuf -oL tee /logs/agent/hermes.txt"
         )

@@ -1,25 +1,31 @@
 """Leak-proof, per-decision grader for update-record-with-cleanup-01.
 
-REWORK (2026-06-01). The deprecated version shipped the answer key to the agent
-at world-readable /app/.budget.expected.csv — trivially gameable. This grader
-NEVER materializes the answer in the container: it reads a pristine copy of the
-ORIGINAL ledger (tests/original.csv — the same INPUT the agent got, not the
-answer), applies the cleanup RULES in code to derive the expected result, and
-scores the agent's /app/budget.csv against it.
+No answer key is ever materialized in the container. This grader reads a pristine
+copy of the ORIGINAL ledger (tests/original.csv — the SAME input the agent got,
+NOT the answer), classifies every row by the cleanup rules, and scores the
+agent's /app/budget.csv per decision. The agent is told only the user goal; it
+must DISCOVER the duplicate groups and the preservation traps from the ~340-row,
+24-month ledger.
 
-Scoring is per-DECISION (partial credit), so neither "do nothing" nor
-"over-dedup everything" scores well — you must make each call correctly:
-  * DEDUP   (one unit per May-groceries duplicate group): collapse to exactly 1.
-  * PRESERVE(one unit per NON-(May&groceries) duplicate group): keep ALL copies
-            (cross-month grocery dups + the May utilities triple must survive).
-  * RENT    (2 units): the 1800 may-rent row replaced by two 900 rows
-            (alex + roommate, notes appended); the original 1800 row gone.
-  * COLLATERAL (fractional unit): every other original row (near-amount pairs,
-            same-date-different-category, same-vendor-different-date singles)
-            preserved — guards against an over-aggressive dedup dropping them.
+Per-DECISION partial credit (order-independent), so neither "do nothing" nor
+"over-dedup everything" scores well:
+  * DEDUP   (1 unit / May-2026 grocery duplicate group): collapse to exactly 1.
+  * PRESERVE(1 unit / NON-(May groceries) duplicate group): keep ALL copies —
+            earlier-month grocery dups + the May utilities triple must survive.
+  * RENT    (2 units): the May-2026 1800 rent row replaced by two 900 rows
+            (one paid by alex, one by Sam); the original 1800 row gone.
+  * COLLATERAL (1 fractional unit): every other original row (near-amount pairs,
+            same-date/different-category, same-vendor/different-date singletons,
+            and all unrelated months) preserved — guards against over-dedup.
 
-reward = (dedup_ok + preserve_ok + rent_ok + collateral_frac) / total_units.
-reward.json MUST be a FLAT scalar dict (FOOTGUNS #38).
+reward = (dedup_ok + preserve_ok + rent_split_ok + rent_orig_gone + collateral_frac) / total.
+
+Format tolerance (kills false-zeros): amounts are normalized to 2 decimals
+($/commas stripped) so 900.0 == 900.00; the rent-split halves match on
+date/category/vendor/amount/payer only (notes are not mandated); the roommate
+name matches case-insensitively. Other fields compare exactly (stripped) — the
+agent is not asked to rename vendors/categories. Row ORDER is not graded (the
+instruction does not require it). reward.json is a FLAT scalar dict (FOOTGUNS #38).
 """
 
 import csv
@@ -31,9 +37,18 @@ ORIGINAL = Path("/tests/original.csv")
 AGENT = Path("/app/budget.csv")
 REWARD = Path("/logs/verifier/reward.json")
 
-RENT_ORIG = ("2026-05-15", "rent", "Landlord", "1800.00", "alex", "may rent")
-RENT_NEW_ALEX = ("2026-05-15", "rent", "Landlord", "900.00", "alex", "may rent (split with roommate)")
-RENT_NEW_ROOM = ("2026-05-15", "rent", "Landlord", "900.00", "roommate", "may rent (split with roommate)")
+RENT_DATE = "2026-05-15"
+RENT_VENDOR = "Landlord"
+RENT_ORIG_AMT = "1800.00"
+RENT_HALF = "900.00"
+
+
+def canon_amt(a):
+    a = a.strip().lstrip("$").replace(",", "")
+    try:
+        return f"{float(a):.2f}"
+    except ValueError:
+        return a.strip()
 
 
 def parse(path):
@@ -42,54 +57,50 @@ def parse(path):
         return rows
     with path.open(newline="") as f:
         r = csv.reader(f)
-        header = next(r, None)
+        next(r, None)  # header
         for row in r:
             if len(row) == 6 and any(c.strip() for c in row):
-                rows.append(tuple(c.strip() for c in row))
+                d, cat, v, amt, paid, notes = (c.strip() for c in row)
+                rows.append((d, cat, v, canon_amt(amt), paid, notes))
     return rows
 
 
-def expected_sequence(orig):
-    """Apply the cleanup rules in order (used only for the correctness flag)."""
-    out, seen = [], set()
-    for row in orig:
-        date, cat, vendor, amt, paid, notes = row
-        if cat == "groceries" and date.startswith("2026-05"):
-            key = (date, vendor, amt, cat)
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append(row)
-        elif row == RENT_ORIG:
-            out.append(RENT_NEW_ALEX)
-            out.append(RENT_NEW_ROOM)
-        else:
-            out.append(row)
-    return out
+def is_rent_orig(row):
+    return (row[0] == RENT_DATE and row[1] == "rent"
+            and row[2] == RENT_VENDOR and row[3] == RENT_ORIG_AMT)
 
 
 def main():
     REWARD.parent.mkdir(parents=True, exist_ok=True)
     orig = parse(ORIGINAL)
     agent = parse(AGENT)
-    ac = Counter(agent)
     oc = Counter(orig)
+    ac = Counter(agent)
 
     dedup_rows, preserve_rows, singletons = [], [], []
     for row, c in oc.items():
-        date, cat, vendor, amt, paid, notes = row
-        is_may_groc = cat == "groceries" and date.startswith("2026-05")
+        if is_rent_orig(row):
+            continue
+        is_may_groc = row[1] == "groceries" and row[0].startswith("2026-05")
         if c > 1 and is_may_groc:
             dedup_rows.append(row)
         elif c > 1:
             preserve_rows.append((row, c))
-        elif row != RENT_ORIG:
+        else:
             singletons.append(row)
 
     dedup_ok = sum(1 for row in dedup_rows if ac.get(row, 0) == 1)
     preserve_ok = sum(1 for row, c in preserve_rows if ac.get(row, 0) == c)
-    rent_split_ok = 1 if (ac.get(RENT_NEW_ALEX, 0) >= 1 and ac.get(RENT_NEW_ROOM, 0) >= 1) else 0
-    rent_orig_gone = 1 if ac.get(RENT_ORIG, 0) == 0 else 0
+
+    def has_rent_half(name):
+        for (d, cat, v, amt, paid, notes), n in ac.items():
+            if (d == RENT_DATE and cat == "rent" and v == RENT_VENDOR
+                    and amt == RENT_HALF and paid.lower() == name):
+                return True
+        return False
+
+    rent_split_ok = 1 if (has_rent_half("alex") and has_rent_half("sam")) else 0
+    rent_orig_gone = 1 if not any(is_rent_orig(r) for r in ac) else 0
     collateral_frac = (sum(1 for row in singletons if ac.get(row, 0) >= 1) / len(singletons)) if singletons else 1.0
 
     n_dedup, n_preserve = len(dedup_rows), len(preserve_rows)
@@ -97,11 +108,9 @@ def main():
     earned = dedup_ok + preserve_ok + rent_split_ok + rent_orig_gone + collateral_frac
     reward = round(earned / total, 4)
 
-    correctness = 1 if agent == expected_sequence(orig) else 0
-
     out = {
         "reward": reward,
-        "correctness": correctness,
+        "answer_present": 1 if agent else 0,
         "dedup_ok": dedup_ok, "dedup_total": n_dedup,
         "preserve_ok": preserve_ok, "preserve_total": n_preserve,
         "rent_split_ok": rent_split_ok, "rent_orig_gone": rent_orig_gone,

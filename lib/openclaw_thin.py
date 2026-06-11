@@ -115,10 +115,21 @@ class OpenClawThin(OpenClawOpenRouter):
         # agent runs; openclaw's browser tool attaches to 127.0.0.1:9222 (baked
         # browser.cdpUrl). Idempotent + readiness-gated. Spec:
         # backlog/2026-06-03-self-contained-browser.md.
+        # Multi-step session threading (OPT-IN per task). If the task image bakes
+        # /opt/harness/thread-session, every step of the trial targets ONE explicit
+        # openclaw session id (--session-id), so the conversation actually
+        # accumulates across steps — required for the context tasks (context-fill /
+        # context-rot) to exercise window overflow / in-window rot. Absent the
+        # marker, each step is a FRESH session (the default): correct for single-
+        # step tasks AND for the memory tasks, where facts must survive via the
+        # memory MCP, not in-context. The per-trial container is isolated, so a
+        # fixed id can't collide across pass^k repeats. Flag confirmed in-image:
+        # `openclaw agent --session-id <id>`. Spec: 2026-06-10-core-eleven-remediation D1.
         command = (
             ". ~/.nvm/nvm.sh && nvm use 22 && "
             "bash /opt/harness/start-cdp.sh && "
-            f"openclaw agent --local --json {cli_flags_arg}"
+            'SID=""; [ -f /opt/harness/thread-session ] && SID="--session-id harbor-trial"; '
+            f"openclaw agent --local --json {cli_flags_arg}$SID "
             f"--model {shlex.quote(self.model_name)} "
             f"--message {shlex.quote(instruction)} "
             "2>&1 </dev/null | stdbuf -oL tee /logs/agent/openclaw.txt"
