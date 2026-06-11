@@ -51,14 +51,19 @@ fi
 answer_present=0; [ -f /app/payload.txt ] && answer_present=1
 calls=$(cat /var/log/dfetch.counter 2>/dev/null || echo 0)
 
-read reward correctness efficiency recovered calls <<<"$(python3 -c "
+read reward correctness efficiency recovered calls <<<"$(calls_raw="$calls" python3 -c "
+import os, re
 p=$payload_ok; t=$token_ok; recovered=$recovered
-# Integer hygiene + S4 crash guard: a poisoned/non-integer counter must not crash
-# the grader (a missing reward.json => Harbor silently drops the trial). Treat an
-# unparseable counter as 'no valid recovery' and as 0 calls in the FLAT output.
-try:
-    calls=int('''$calls'''.strip()); calls_out=calls
-except Exception:
+# Integer hygiene + S4 crash guard + CODE-INJECTION guard: the counter is
+# agent-writable (root, world-writable file) and its bytes are NEVER interpolated
+# into this interpreter source -- doing so would let crafted content (e.g. a
+# triple-quote breakout) inject arbitrary Python and forge the reward. Read it
+# from the environment and accept ONLY a strict integer; a poisoned/non-integer
+# counter is treated as 'no valid recovery' and as 0 calls in the FLAT output.
+s=os.environ['calls_raw'].strip()
+if re.fullmatch(r'-?[0-9]+', s):
+    calls=int(s); calls_out=calls
+else:
     calls=-1; calls_out=0; recovered=0
 MIN_CALLS=4; IDEAL=4; CEIL=18
 # Forgery gate: a success with fewer than MIN_CALLS dfetch calls cannot have
