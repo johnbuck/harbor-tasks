@@ -22,6 +22,12 @@ __pycache__/
 *.swp
 .DS_Store
 
+# Claude Code local session state — machine/user-specific (permission allowlists
+# with local mount paths, transient locks); never commit to this public repo. A
+# shared .claude/settings.json (no `.local`) can still be committed if ever wanted.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
 # Generated dashboards are COMMITTED (so the suite is human-reviewable straight
 # from the repo, the whole point of the catalog). Regenerate before committing
 # task changes: `python3 tools/task_catalog.py` / `python3 tools/agent_status.py`.
