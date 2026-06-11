@@ -166,7 +166,7 @@ python /app/skills/csv-summary/run.py <csv-path>
 ```
 EOF
 RUN cat > /app/skills/csv-summary/run.py <<'EOF'
-import csv, json, sys
+import csv, hashlib, json, os, sys
 rows = list(csv.reader(open(sys.argv[1], newline="")))
 header, *data = rows
 cols = []
@@ -188,6 +188,14 @@ for i, name in enumerate(header):
     dt = "unknown" if not seen else ("int" if seen == {"int"}
          else ("float" if seen <= {"int", "float"} else "str"))
     cols.append({"name": name, "dtype": dt, "nulls": 0})  # near-miss: never counts blanks
+try:
+    _p = sys.argv[1]
+    _d = hashlib.sha256(open(_p, "rb").read()).hexdigest()
+    _runs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_p))), ".skill-runs")
+    os.makedirs(_runs, exist_ok=True)
+    open(os.path.join(_runs, "csv-summary.log"), "a").write(os.path.basename(_p) + " " + _d + "\n")
+except Exception:
+    pass
 print(json.dumps({"rows": len(data), "columns": cols}))
 EOF
 RUN mkdir -p /app/skills/csv-structure
@@ -206,13 +214,21 @@ python /app/skills/csv-structure/run.py <csv-path>
 ```
 EOF
 RUN cat > /app/skills/csv-structure/run.py <<'EOF'
-import csv, json, sys
+import csv, hashlib, json, os, sys
 rows = list(csv.reader(open(sys.argv[1], newline="")))
 header, *data = rows
 cols = []
 for i, name in enumerate(header):
     nulls = sum(1 for r in data if (r[i] if i < len(r) else "") == "")
     cols.append({"name": name, "dtype": "str", "nulls": nulls})  # near-miss: no type inference
+try:
+    _p = sys.argv[1]
+    _d = hashlib.sha256(open(_p, "rb").read()).hexdigest()
+    _runs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_p))), ".skill-runs")
+    os.makedirs(_runs, exist_ok=True)
+    open(os.path.join(_runs, "csv-structure.log"), "a").write(os.path.basename(_p) + " " + _d + "\n")
+except Exception:
+    pass
 print(json.dumps({"rows": len(rows), "columns": cols}))  # near-miss: counts the header row
 EOF
 RUN mkdir -p /app/skills/table-summary
@@ -231,32 +247,179 @@ python /app/skills/table-summary/run.py <csv-path>
 ```
 EOF
 RUN cat > /app/skills/table-summary/run.py <<'EOF'
-import csv, json, sys
+import csv, hashlib, json, os, sys
 rows = list(csv.reader(open(sys.argv[1], newline="")))
 header, *data = rows
 cols = []
 for i, name in enumerate(header):
     nulls = sum(1 for r in data if (r[i] if i < len(r) else "") == "")
     cols.append({"name": name, "dtype": "str", "nulls": nulls})  # near-miss: dtype always str
+try:
+    _p = sys.argv[1]
+    _d = hashlib.sha256(open(_p, "rb").read()).hexdigest()
+    _runs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_p))), ".skill-runs")
+    os.makedirs(_runs, exist_ok=True)
+    open(os.path.join(_runs, "table-summary.log"), "a").write(os.path.basename(_p) + " " + _d + "\n")
+except Exception:
+    pass
 print(json.dumps({"rows": len(data), "columns": cols}))
 EOF
 
 # ---- Nine further DECOY skills (different shape entirely) -------------------
-RUN set -e; \
-    decoy() { \
-      d="/app/skills/$1"; mkdir -p "$d"; \
-      printf -- '---\nname: %s\ndescription: %s\n---\n\n## How to use\n\n```\npython /app/skills/%s/run.py <csv-path>\n```\n' "$1" "$2" "$1" > "$d/SKILL.md"; \
-      printf 'import sys, json\nprint(json.dumps(%s))\n' "$3" > "$d/run.py"; \
-    }; \
-    decoy csv-stats        "Compute summary STATISTICS (mean/min/max/stddev) for the numeric columns of a CSV. Use for descriptive numeric stats." '{"mean": 0, "min": 0, "max": 0}'; \
-    decoy csv-profile      "Generate a rich data PROFILE of a CSV (cardinality, sample values, histograms). Use for exploratory profiling." '{"profile": [], "n_columns": 0}'; \
-    decoy table-describe   "Describe a tabular file the way pandas.describe() does (count/mean/std/quartiles per numeric column)." '{"describe": {}}'; \
-    decoy csv-schema-infer "Infer a JSON-SCHEMA document (types + required fields) for a CSV so it can be validated. Emits a draft-07 schema." '{"$schema": "draft-07", "properties": {}}'; \
-    decoy csv-rowcount     "Count the number of rows in a CSV. Fast single-number row counter, nothing else." '{"count": 0}'; \
-    decoy csv-nullreport   "Report ONLY the null/empty-cell counts per column of a CSV (no dtypes, no row count)." '{"nulls": {}}'; \
-    decoy csv-dtypes       "Infer ONLY the per-column data types of a CSV as a flat name->dtype map (no row count, no null counts)." '{"dtypes": {}}'; \
-    decoy json-summarize   "Summarize a JSON document's structure (keys, depth, types). For JSON, not CSV." '{"keys": [], "depth": 0}'; \
-    decoy csv-head         "Show the header row and first N data rows of a CSV. A previewer." '{"header": [], "rows": []}'
+# These compute their REAL advertised output from the CSV argument (a behavioral
+# probe that just runs them cannot collapse the candidate set by spotting a
+# constant), and each drops its OWN breadcrumb into /app/.skill-runs/<name>.log.
+# The breadcrumb is what lets the verifier detect a brute-force "run all 13 on
+# all 8" sweep: a fleet of busy decoy logs == the agent did not DISCOVER the
+# right skill, it brute-forced, so the discovery half is denied (tests/reward.py).
+RUN python3 - <<'PY'
+import json, os
+
+DESC = {
+ "csv-stats":        "Compute summary STATISTICS (mean/min/max/stddev) for the numeric columns of a CSV. Use for descriptive numeric stats.",
+ "csv-profile":      "Generate a rich data PROFILE of a CSV (cardinality, sample values, histograms). Use for exploratory profiling.",
+ "table-describe":   "Describe a tabular file the way pandas.describe() does (count/mean/std/quartiles per numeric column).",
+ "csv-schema-infer": "Infer a JSON-SCHEMA document (types + required fields) for a CSV so it can be validated. Emits a draft-07 schema.",
+ "csv-rowcount":     "Count the number of rows in a CSV. Fast single-number row counter, nothing else.",
+ "csv-nullreport":   "Report ONLY the null/empty-cell counts per column of a CSV (no dtypes, no row count).",
+ "csv-dtypes":       "Infer ONLY the per-column data types of a CSV as a flat name->dtype map (no row count, no null counts).",
+ "json-summarize":   "Summarize a JSON document's structure (keys, depth, types). For JSON, not CSV.",
+ "csv-head":         "Show the header row and first N data rows of a CSV. A previewer.",
+}
+
+# Each skill's compute body sets `result` from `header`/`data`/`cols`/`path`.
+BODY = {
+ "csv-stats": """
+    result = {}
+    for i, name in enumerate(header):
+        nums = [_num(r[i]) for r in data if i < len(r) and _num(r[i]) is not None]
+        if nums:
+            result[name] = {"mean": round(sum(nums)/len(nums), 4),
+                            "min": min(nums), "max": max(nums)}
+""",
+ "csv-profile": """
+    result = {"n_columns": len(header), "profile": []}
+    for i, name in enumerate(header):
+        vals = [r[i] for r in data if i < len(r)]
+        result["profile"].append({"name": name,
+            "cardinality": len(set(vals)), "sample": vals[:3]})
+""",
+ "table-describe": """
+    desc = {}
+    for i, name in enumerate(header):
+        nums = [_num(r[i]) for r in data if i < len(r) and _num(r[i]) is not None]
+        if nums:
+            m = sum(nums)/len(nums)
+            var = sum((x-m)**2 for x in nums)/len(nums)
+            desc[name] = {"count": len(nums), "mean": round(m, 4),
+                          "std": round(var**0.5, 4)}
+    result = {"describe": desc}
+""",
+ "csv-schema-infer": """
+    props = {}
+    for i, name in enumerate(header):
+        vals = [r[i] for r in data if i < len(r) and r[i] != ""]
+        t = "integer"
+        for v in vals:
+            if _num(v) is None:
+                t = "string"; break
+            if isinstance(_num(v), float) and not _num(v).is_integer():
+                t = "number"
+        props[name] = {"type": t}
+    result = {"$schema": "draft-07", "type": "object", "properties": props}
+""",
+ "csv-rowcount": """
+    result = {"count": len(data)}
+""",
+ "csv-nullreport": """
+    result = {"nulls": {name: sum(1 for r in data if (r[i] if i < len(r) else "") == "")
+                        for i, name in enumerate(header)}}
+""",
+ "csv-dtypes": """
+    dtypes = {}
+    for i, name in enumerate(header):
+        vals = [r[i] for r in data if i < len(r) and r[i] != ""]
+        t = "int"
+        for v in vals:
+            n = _num(v)
+            if n is None:
+                t = "str"; break
+            if isinstance(n, float) and not n.is_integer():
+                t = "float"
+        dtypes[name] = t if vals else "unknown"
+    result = {"dtypes": dtypes}
+""",
+ "json-summarize": """
+    import json as _json
+    try:
+        obj = _json.load(open(path))
+        result = {"keys": sorted(obj.keys()) if isinstance(obj, dict) else [],
+                  "depth": 1, "type": type(obj).__name__}
+    except Exception:
+        # Not JSON (this is a CSV) -> still input-dependent: treat the header as keys.
+        result = {"keys": list(header), "depth": 0, "type": "csv"}
+""",
+ "csv-head": """
+    result = {"header": header, "rows": data[:5]}
+""",
+}
+
+TEMPLATE = '''import csv, json, os, sys, hashlib
+
+def _num(v):
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        pass
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+def _breadcrumb(path, skill):
+    try:
+        with open(path, "rb") as raw:
+            digest = hashlib.sha256(raw.read()).hexdigest()
+        runs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(path))), ".skill-runs")
+        os.makedirs(runs, exist_ok=True)
+        with open(os.path.join(runs, skill + ".log"), "a") as bc:
+            bc.write(os.path.basename(path) + " " + digest + "\\n")
+    except Exception:
+        pass
+
+def main():
+    path = sys.argv[1]
+    try:
+        rows = list(csv.reader(open(path, newline="")))
+    except Exception:
+        rows = []
+    header = rows[0] if rows else []
+    data = rows[1:] if rows else []
+{body}    _breadcrumb(path, "{skill}")
+    print(json.dumps(result))
+
+if __name__ == "__main__":
+    main()
+'''
+
+SKILLMD = """---
+name: {name}
+description: {desc}
+---
+
+## How to use
+
+```
+python /app/skills/{name}/run.py <csv-path>
+```
+"""
+
+for skill, desc in DESC.items():
+    d = "/app/skills/" + skill
+    os.makedirs(d, exist_ok=True)
+    open(d + "/SKILL.md", "w").write(SKILLMD.format(name=skill, desc=desc))
+    open(d + "/run.py", "w").write(TEMPLATE.format(body=BODY[skill], skill=skill))
+PY
 
 # ---- Eight target CSVs ------------------------------------------------------
 # The expected answers are NOT materialized in the agent container. The verifier

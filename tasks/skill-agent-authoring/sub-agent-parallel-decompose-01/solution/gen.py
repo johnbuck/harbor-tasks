@@ -284,8 +284,19 @@ def main():
     # lookup the agent calls is installed from here by the (rebuild-deferred) gate;
     # the agent never reads this file directly. Folding the offset into each answer
     # is what makes the prose-only parser bypass collapse to chance.
+    registry_blob = json.dumps(registry, indent=2) + "\n"
     registry_path = ANSWERS.parent / "registry.json"
-    registry_path.write_text(json.dumps(registry, indent=2) + "\n")
+    registry_path.write_text(registry_blob)
+
+    # Served copy: the SAME draw, byte-for-byte, written next to problems/ in the
+    # build context. The latency-gated cal-lookup helper is compiled FROM this
+    # file at image build time and the file is then deleted from the image, so no
+    # agent-readable plaintext offset survives at runtime (FOOTGUNS: registry.json
+    # is answer-key-equivalent — never leave it in the agent container). Emitting
+    # it from the same draw guarantees served offsets == folded-in answer-key
+    # offsets, or the task is unsolvable / mis-graded.
+    served_path = PROBLEMS.parent / "registry.json"
+    served_path.write_text(registry_blob)
 
     # Emit solve.sh body for the oracle.
     print("# --- solve.sh body (oracle) ---")
