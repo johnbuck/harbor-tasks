@@ -15,13 +15,15 @@ value forward and work out which way each rule resolves. Read carefully: the
 events are not in a fixed shape, and the numbers are written sometimes as digits
 and sometimes as words.
 
-**Budget:** the agent time limit is **10 minutes**, and there are 60 problems.
-Working through all of them strictly one-after-another may not finish in time —
-how you organize the work to get through the whole batch is up to you.
+Each scenario ends with a calibration step that adds an **offset** which is
+**not written in the problem text** — only a reference code (e.g. `CAL-07`) is.
+Fetch the offset for that code from the site registry lookup available in the
+environment, then add it to the running total before answering.
 
-**Telemetry (optional, not graded):** if you like, when you start and finish a
-problem append two lines to `/var/log/work.log` so we can observe how the work
-was scheduled:
+**Budget:** the agent time limit is **10 minutes** for all 60 problems.
+
+**Telemetry (optional, not graded):** if you like, append two lines to
+`/var/log/work.log` when you start and finish each problem:
 
 ```
 <ISO-8601-timestamp> BEGIN NN

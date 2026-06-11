@@ -26,6 +26,16 @@
 set -u
 mkdir -p /logs/verifier
 
+# Independent scratch-wipe assertion (workdir/setup.sh sources the canonical wipe;
+# multi_step treats its failure as only a warning). The clamp bound is a memory
+# discriminator, so a stashed note in scratch would void the result — fail loudly
+# (flat reward 0.0) if one survived.
+if find /tmp /var/tmp /logs/agent -maxdepth 3 -name 'clamp_note*' 2>/dev/null | grep -q .; then
+    echo '{"reward": 0.0}' > /logs/verifier/reward.json
+    echo "WIPE ASSERTION FAILED: scratch survived the pre-revise wipe" >&2
+    exit 1
+fi
+
 if [ -f /app/PLAN.md ]; then
     p=$(tr '[:upper:]' '[:lower:]' < /app/PLAN.md)
     if echo "$p" | grep -q subtract && echo "$p" | grep -q apply_op \
@@ -83,7 +93,7 @@ def _raises():
     except Exception:
         return False
 f_raises = c(_raises)
-f_names = c(lambda: list(calc.OP_NAMES) == ['add', 'multiply', 'subtract'])
+f_names = c(lambda: sorted(calc.OP_NAMES) == ['add', 'multiply', 'subtract'])
 func_hits = f_add + f_mul + f_sub + f_dispatch + f_raises + f_names
 func_score = 0.40 * (func_hits / 6.0)
 

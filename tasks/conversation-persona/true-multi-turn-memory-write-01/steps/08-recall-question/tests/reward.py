@@ -78,9 +78,11 @@ def _results(workspace_str: str) -> tuple:
                        and not _stale_leaked(tz, r'pacific|\bpst\b|\bpdt\b|\bpt\b')),
         "f_allergy": bool(re.search(r'\bpeanut', cell(4, r'allerg'))),
         "f_hobby": bool(re.search(r'boulder|climb', cell(5, r'\bhobby\b'))),
-        "f_climb_days": (bool(re.search('monday', climb)) and bool(re.search('wednesday', climb))
-                         and bool(re.search('friday', climb))
-                         and not _stale_leaked(climb, r'tuesday|thursday|saturday')),
+        "f_climb_days": (bool(re.search(r'\bmon(?:day)?\b', climb))
+                         and bool(re.search(r'\bwed(?:nesday)?\b', climb))
+                         and bool(re.search(r'\bfri(?:day)?\b', climb))
+                         and not _stale_leaked(
+                             climb, r'\btues?(?:day)?\b|\bthur?s?(?:day)?\b|\bsat(?:urday)?\b')),
         "f_coffee": (lambda c: bool(re.search(r'\boat', c)) and bool(re.search(r'latte|coffee', c)))(cell(7, r'coffee')),
         "f_daughter": bool(re.search(r'\bmira\b', cell(8, r'daughter'))),
     }

@@ -45,7 +45,7 @@ datasets:
   # Long-context — compaction on overflow, in-window rot
   - path: <repo>/tasks/context-management
     task_names:
-      - multistep-context-fill-02             # chunks deleted pre-recall (cheat-proof), graded /14
+      - multistep-context-fill-02             # chunks deleted pre-recall (cheat-proof), graded /12
   - path: <repo>/tasks/context-rot
     task_names:
       - context-rot-02                        # multi-hop lost-in-the-middle; normalized rot curve (#93)
@@ -57,7 +57,7 @@ datasets:
   - path: <repo>/tasks/tool-orchestration
     task_names:
       - tool-sprawl-precision-01              # tool-selection F1 + efficiency (grade-on-selection rework 2026-06-10; Δ to re-earn)
-      - plan-then-revise-01                   # mid-task replanning, graded re-plan /8
+      - plan-then-revise-01                   # mid-task replanning; clamp-memory 0.40 + functional 0.40 + cleanup 0.12 + replan-keyword 0.08
 
   # Delegation + skill acquisition
   - path: <repo>/tasks/skill-agent-authoring
@@ -68,4 +68,4 @@ datasets:
   # Stateful multi-step workflow
   - path: <repo>/tasks/real-world-workflows
     task_names:
-      - update-record-with-cleanup-01         # ledger dedup + preservation traps, leak-proof, /19
+      - update-record-with-cleanup-01         # ledger dedup + preservation traps, leak-proof, /16

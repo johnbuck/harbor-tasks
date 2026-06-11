@@ -26,12 +26,12 @@ FACTS = {
     1:  ("lead",       "okafor",                     ["reyes", "tanaka"]),
     2:  ("date",       "2026-10-30",                 ["2026-08-01", "2026-09-15"]),
     3:  ("budget",     r"2\.8",                      [r"2\.0"]),
-    4:  ("nodes",      r"\b32 ?node",                [r"\b48 ?node", r"\b64 ?node"]),
+    4:  ("nodes",      r"\b32\b",                    [r"\b48\b", r"\b64\b"]),
     5:  ("region",     "eu-central-1",               ["us-east-1", "us-west-2"]),
     6:  ("db",         "aurora",                     ["postgresql ?14|postgres ?14|pg ?14",
                                                       "postgresql ?16|postgres ?16|pg ?16"]),
     7:  ("deploy",     "blue[ -]green",              ["big[ -]bang", "phased"]),
-    8:  ("window",     "90[ -]?min|ninety[ -]?min",  [r"\b4 ?hour|four hour"]),
+    8:  ("window",     r"90[ -]?min|ninety[ -]?min|1\.5 ?h(?:ou)?rs?", [r"\b4 ?hour|four hour"]),
     9:  ("topology",   "multi[ -]primary",           ["single[ -]primary"]),
     10: ("monitoring", "datadog",                    []),
     11: ("compliance", "soc ?2",                     []),
@@ -57,7 +57,9 @@ def _lines(workspace_str: str) -> dict:
     """Map answer-line number -> that line's text (numbered '1.'/'1)' lines)."""
     out = {}
     for ln in _raw(workspace_str).splitlines():
-        m = re.match(r"\s*(\d{1,2})[.):]\s*(.*)", ln)
+        # Tolerate markdown enumerators: a leading bullet/blockquote and bold
+        # markers around the number ("**1.**", "- 1.", "> 1)") must still anchor.
+        m = re.match(r"\s*[-*+>]*\s*\**\s*(\d{1,2})\s*[.):]\**\s*(.*)", ln)
         if m:
             out.setdefault(int(m.group(1)), m.group(2))
     return out

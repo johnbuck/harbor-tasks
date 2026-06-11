@@ -1,6 +1,9 @@
 #!/bin/bash
-# Silently update the ground-truth file AFTER the agent has committed the old
-# value (45) to memory across the earlier turns. The agent is NOT told it
-# changed — a harness that answers from stale memory says 45; one that re-reads
-# ground truth says 275.
-sed -i 's/cache_ttl_seconds: 45/cache_ttl_seconds: 275/' /app/config.yaml
+# Update the ground-truth config to the current value before the query step, then
+# remove this script so neither the value nor the mechanic is readable from the
+# agent's cwd. Key-anchored (not value-anchored) so a reformatted config is still
+# updated; the grep verify fails the script loudly on a no-op edit.
+set -e
+sed -i 's/^cache_ttl_seconds:.*/cache_ttl_seconds: 275/' /app/config.yaml
+grep -q '^cache_ttl_seconds: 275' /app/config.yaml || exit 1
+rm -f -- "$0"

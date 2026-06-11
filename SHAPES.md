@@ -22,7 +22,7 @@ quality.
 | 11 | Code / spec review | `pr-diff-review` | judge (real issues found, no rubber-stamping, no piling on) | no |
 | 12 | Test authoring | `unit-tests` | mixed (tests run + judge for coverage quality) | no |
 | 13 | Tool orchestration | `tool-selection` | judge (right tool chosen) | no |
-| 14 | Skill / agent authoring | `sub-agent` | judge | no |
+| 14 | Skill / agent authoring | `sub-agent` | deterministic rewardkit (correct/60) | no |
 | 15 | Migration | `dep-bump-breaking` | pytest (post-migration suite passes) | no |
 | 16 | Compliance / security | `secret-scan` | pytest (catches planted secrets, no false positives) | no |
 | 17 | Backup / DR | `restore-runbook` | judge | no |

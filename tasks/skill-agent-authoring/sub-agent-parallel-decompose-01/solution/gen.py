@@ -146,11 +146,18 @@ def apply_op(t, op):
     raise ValueError(kind)
 
 
-def build_one(rng):
-    """Return (prose, answer) or None if the roll produced a degenerate chain."""
+def build_one(rng, code):
+    """Return (prose, answer, offset) or None if the roll produced a degenerate chain.
+
+    The final answer = running_total + a per-problem calibration OFFSET that is
+    NOT stated anywhere in the prose: the prose names a lookup CODE, and the
+    offset for that code is served only by the latency-gated site registry (see
+    main(); the agent must fetch it). This is the parser-bypass killer — a
+    pure-text parser can reconstruct the running total but cannot produce the
+    fact-dependent final answer, so it collapses to chance.
+    """
     place, unit, period = rng.choice(SCENES)
     start = rng.randint(20, 60)
-    t = start
     sentences = [
         "A {p} begins {per} with {s} {u}.".format(
             p=place, per=period, s=num(rng, start), u=unit)
@@ -185,7 +192,7 @@ def build_one(rng):
             if rng.random() < 0.5:
                 rendered.append(render_parity(rng, unit))
             else:
-                rendered.append(render_threshold(rng, unit, t_hint=t if t > 0 else start))
+                rendered.append(render_threshold(rng, unit, t_hint=start))
 
     # Ensure a mul is never first (so it actually scales accumulated work).
     for i, (_, op) in enumerate(rendered):
@@ -199,9 +206,12 @@ def build_one(rng):
         sim = apply_op(sim, op)
         if sim < 1:
             return None
-    answer = sim
-    if not (5 <= answer <= 500) or answer == start:
+    base = sim
+    # Leave headroom for the calibration offset so the final answer stays in range.
+    if not (5 <= base <= 450) or base == start:
         return None
+    offset = rng.randint(11, 49)   # per-problem; served only by the gated registry
+    answer = base + offset
 
     # Stitch prose with light connective variety, inserting 1-3 distractors.
     connectors = ["Then, ", "Next, ", "After that, ", "Later, ", "Soon after, ",
@@ -226,11 +236,17 @@ def build_one(rng):
             bi += 1
 
     sentences.extend(out_sentences)
+    # The final calibration step: the offset value is NOT in the prose — only the
+    # lookup code is. The agent must fetch it from the gated site registry.
+    sentences.append(
+        "Finally, look up the calibration offset published for reference code "
+        "{code} in the site registry and add that offset to the running "
+        "total.".format(code=code))
     sentences.append(
         "How many {u} remain at the very end? Respond with the single final "
         "integer only.".format(u=unit))
     prose = " ".join(sentences)
-    return prose, answer
+    return prose, answer, offset
 
 
 def main():
@@ -240,22 +256,36 @@ def main():
         old.unlink()
 
     answers = {}
+    registry = {}   # lookup code -> calibration offset (served by the gated registry)
     i = 1
     guard = 0
     while i <= N:
         guard += 1
         if guard > 100000:
             raise RuntimeError("generator could not fill N")
-        res = build_one(rng)
+        code = f"CAL-{i:02d}"
+        res = build_one(rng, code)
         if res is None:
             continue
-        prose, ans = res
+        prose, ans, offset = res
         nn = f"{i:02d}"
         (PROBLEMS / f"{nn}.txt").write_text(prose + "\n")
         answers[nn] = ans
+        registry[code] = offset
         i += 1
 
+    ANSWERS.parent.mkdir(parents=True, exist_ok=True)
     ANSWERS.write_text(json.dumps(answers, indent=2) + "\n")
+
+    # The registry of per-problem calibration offsets is ANSWER-KEY-equivalent
+    # (it determines each answer), so it lives VERIFIER-SIDE beside answers.json —
+    # NOT in the agent build context (environment/) — and is derived from ANSWERS
+    # so a redirected test run never mutates the repo. The latency-gated runtime
+    # lookup the agent calls is installed from here by the (rebuild-deferred) gate;
+    # the agent never reads this file directly. Folding the offset into each answer
+    # is what makes the prose-only parser bypass collapse to chance.
+    registry_path = ANSWERS.parent / "registry.json"
+    registry_path.write_text(json.dumps(registry, indent=2) + "\n")
 
     # Emit solve.sh body for the oracle.
     print("# --- solve.sh body (oracle) ---")
