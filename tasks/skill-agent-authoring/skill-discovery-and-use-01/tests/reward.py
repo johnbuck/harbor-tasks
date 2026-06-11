@@ -32,6 +32,33 @@ from pathlib import Path
 import rewardkit as rk
 
 BREADCRUMB = ".skill-runs/tabular-shape-report.log"
+CORRECT_SKILL = "tabular-shape-report"
+
+# Brute-force-sweep gate. Discovery credit proves the agent IDENTIFIED the right
+# skill — not that it ran every skill on every file and let the correct one log a
+# breadcrumb as a side effect. Every skill now drops its own
+# .skill-runs/<name>.log breadcrumb when invoked; a "run all 13 on all 8" sweep
+# therefore leaves a fleet of busy DECOY logs. If that signature is present, the
+# discovery half is denied (the agent did not discover, it brute-forced).
+SWEEP_DECOY_FILES = 6   # a decoy log covering >= this many distinct files is "busy"
+SWEEP_BUSY_DECOYS = 6   # this many busy decoy skills == a brute-force sweep
+
+
+def _is_brute_sweep(workspace: Path) -> bool:
+    runs = workspace / ".skill-runs"
+    if not runs.is_dir():
+        return False
+    busy = 0
+    for log in runs.glob("*.log"):
+        if log.stem == CORRECT_SKILL:
+            continue
+        try:
+            files = {ln.split()[0] for ln in log.read_text().splitlines() if ln.split()}
+        except OSError:
+            continue
+        if len(files) >= SWEEP_DECOY_FILES:
+            busy += 1
+    return busy >= SWEEP_BUSY_DECOYS
 
 
 def _infer_dtype(values):
@@ -88,6 +115,11 @@ def table_discovered(workspace: Path, k: int) -> bool:
     bc = workspace / BREADCRUMB
     src = workspace / "data" / f"table_{k:02d}.csv"
     if not bc.is_file() or not src.is_file():
+        return False
+    # A brute-force "run every skill on every file" sweep banks the correct
+    # skill's breadcrumb as a side effect without ever DISCOVERING it. Deny
+    # discovery credit when that decoy-sweep signature is present.
+    if _is_brute_sweep(workspace):
         return False
     want = f"table_{k:02d}.csv {hashlib.sha256(src.read_bytes()).hexdigest()}"
     lines = {line.strip() for line in bc.read_text().splitlines() if line.strip()}

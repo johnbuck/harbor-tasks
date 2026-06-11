@@ -56,12 +56,16 @@ def parse(path):
     if not path.exists():
         return rows
     with path.open(newline="") as f:
-        r = csv.reader(f)
-        next(r, None)  # header
-        for row in r:
-            if len(row) == 6 and any(c.strip() for c in row):
-                d, cat, v, amt, paid, notes = (c.strip() for c in row)
-                rows.append((d, cat, v, canon_amt(amt), paid, notes))
+        raw = list(csv.reader(f))
+    # Header detection: only skip the first line when it actually IS the header
+    # (first cell == "date"). A headerless agent file starts with a real data row
+    # whose first cell is a date string — skipping it would silently eat that row.
+    if raw and raw[0] and raw[0][0].strip().lower() == "date":
+        raw = raw[1:]
+    for row in raw:
+        if len(row) == 6 and any(c.strip() for c in row):
+            d, cat, v, amt, paid, notes = (c.strip() for c in row)
+            rows.append((d, cat, v, canon_amt(amt), paid, notes))
     return rows
 
 
@@ -74,8 +78,11 @@ def main():
     REWARD.parent.mkdir(parents=True, exist_ok=True)
     orig = parse(ORIGINAL)
     agent = parse(AGENT)
-    oc = Counter(orig)
-    ac = Counter(agent)
+    # Notes are not part of a record's IDENTITY (the rent split already matches on
+    # payer not notes). Drop the notes field from the dedup/preserve/collateral
+    # key so re-annotating a preserved duplicate does not forfeit preserve credit.
+    oc = Counter(row[:5] for row in orig)
+    ac = Counter(row[:5] for row in agent)
 
     dedup_rows, preserve_rows, singletons = [], [], []
     for row, c in oc.items():
@@ -93,7 +100,7 @@ def main():
     preserve_ok = sum(1 for row, c in preserve_rows if ac.get(row, 0) == c)
 
     def has_rent_half(name):
-        for (d, cat, v, amt, paid, notes), n in ac.items():
+        for (d, cat, v, amt, paid), n in ac.items():
             if (d == RENT_DATE and cat == "rent" and v == RENT_VENDOR
                     and amt == RENT_HALF and paid.lower() == name):
                 return True
@@ -102,6 +109,14 @@ def main():
     rent_split_ok = 1 if (has_rent_half("alex") and has_rent_half("sam")) else 0
     rent_orig_gone = 1 if not any(is_rent_orig(r) for r in ac) else 0
     collateral_frac = (sum(1 for row in singletons if ac.get(row, 0) >= 1) / len(singletons)) if singletons else 1.0
+
+    # FLOOR: the preserve + collateral units are trivially earned by doing NOTHING
+    # (leaving every original row in place), which let "do nothing" coast to ~0.50.
+    # Gate them on having actually deduped: zero real dedup collapses that credit so
+    # the floor drops below 0.50, while any genuine dedup unlocks full partial credit.
+    dedup_gate = min(1, dedup_ok)
+    preserve_ok *= dedup_gate
+    collateral_frac *= dedup_gate
 
     n_dedup, n_preserve = len(dedup_rows), len(preserve_rows)
     total = n_dedup + n_preserve + 2 + 1  # +2 rent units, +1 collateral unit
