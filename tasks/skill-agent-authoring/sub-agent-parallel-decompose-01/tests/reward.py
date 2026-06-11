@@ -21,9 +21,13 @@ KEY = Path("/tests/answers.json")
 
 @lru_cache(maxsize=1)
 def _answers() -> tuple:
+    # Narrow + explicit: a missing/corrupt key registers zero criteria (so the
+    # grader's crash fallback in test.sh emits a flat reward 0.0) rather than
+    # masking an unrelated bug behind a bare except.
     try:
         return tuple(sorted(json.loads(KEY.read_text()).items()))
-    except Exception:
+    except (OSError, ValueError) as exc:
+        print(f"answers.json unreadable ({exc}); registering 0 criteria")
         return ()
 
 

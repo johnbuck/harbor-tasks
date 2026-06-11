@@ -66,7 +66,16 @@ def _buckets(workspace_str: str):
 
 @rk.criterion(description="{label}")
 def needle(workspace: Path, i: int, pat: str, label: str) -> bool:
-    return re.search(pat, _cell_for(str(workspace), i), re.I) is not None
+    cell = _cell_for(str(workspace), i)
+    if re.search(pat, cell, re.I) is None:
+        return False
+    # S3 exclusivity: cell i must hold ONLY its own needle. Dumping every place
+    # name on every line (a hedge that needs no real positional recall) means each
+    # cell also carries a DIFFERENT needle, which forfeits the point.
+    for j, (other, _bk) in enumerate(PATTERNS, start=1):
+        if j != i and re.search(other, cell, re.I):
+            return False
+    return True
 
 
 @rk.criterion(description="{label}")

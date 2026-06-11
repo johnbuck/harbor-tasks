@@ -14,9 +14,20 @@
 # Reward = 0.6*correctness + 0.4*efficiency
 #   correctness = (payload_ok + token_ok)/2   (0 unless a real success emitted a nonce)
 #   efficiency  = 0 if not recovered, else clamp((CEIL - calls)/(CEIL - IDEAL), 0, 1)
-#     IDEAL = 6  (realistic error-driven discovery: missing-region, bad-region,
-#                 401, stale-lock, --release, success)
-#     CEIL  = 18 (still flailing at 3x the discovery cost)
+#     IDEAL = 4  (a clean error-driven recovery: bad-region, 401, stale-lock,
+#                 --release+success — the minimum that walks the progression)
+#     CEIL  = 18 (still flailing at >4x the discovery cost)
+#
+# FORGERY GATE (calls >= MIN_CALLS). The state file is agent-writable and its
+# format is published in the world-readable dfetch tool, so a STATUS=success +
+# self-consistent nonce can be FORGED with zero real recovery. A genuine adaptive
+# recovery must walk the error progression, which costs at least MIN_CALLS dfetch
+# calls; a success state with fewer calls cannot have done the work, so it earns
+# no credit (correctness 0 => reward 0, efficiency 0). REBUILD-DEFERRED hardening
+# (compiled dfetch with an embedded build-time secret; nonce = HMAC(secret,
+# region|token|counter); grader RECOMPUTES the expected nonce instead of trusting
+# the state file; tool writes an ordered error-progression log) closes the
+# remaining forge-with-N-junk-calls gap and cannot be exercised offline.
 # reward.json MUST be a FLAT scalar dict (Harbor rejects nested; FOOTGUNS #38).
 # Provenance / the emitted nonce go in the sibling reward-details.json.
 set -u
@@ -40,14 +51,32 @@ fi
 answer_present=0; [ -f /app/payload.txt ] && answer_present=1
 calls=$(cat /var/log/dfetch.counter 2>/dev/null || echo 0)
 
-read reward correctness efficiency <<<"$(python3 -c "
-p=$payload_ok; t=$token_ok; calls=$calls; recovered=$recovered
-IDEAL=6; CEIL=18
-correctness=(p+t)/2.0
+read reward correctness efficiency recovered calls <<<"$(python3 -c "
+p=$payload_ok; t=$token_ok; recovered=$recovered
+# Integer hygiene + S4 crash guard: a poisoned/non-integer counter must not crash
+# the grader (a missing reward.json => Harbor silently drops the trial). Treat an
+# unparseable counter as 'no valid recovery' and as 0 calls in the FLAT output.
+try:
+    calls=int('''$calls'''.strip()); calls_out=calls
+except Exception:
+    calls=-1; calls_out=0; recovered=0
+MIN_CALLS=4; IDEAL=4; CEIL=18
+# Forgery gate: a success with fewer than MIN_CALLS dfetch calls cannot have
+# walked the error progression -> no credit.
+if calls < MIN_CALLS:
+    recovered=0
+correctness=(p+t)/2.0 if recovered==1 else 0.0
 eff = 0.0 if recovered==0 else max(0.0, min(1.0, (CEIL-calls)/float(CEIL-IDEAL)))
 reward = 0.0 if correctness==0 else 0.6*correctness + 0.4*eff
-print(round(reward,4), round(correctness,4), round(eff,4))
-")"
+print(round(reward,4), round(correctness,4), round(eff,4), recovered, calls_out)
+" 2>/dev/null)"
+
+# Belt-and-suspenders fallback: if the scorer produced nothing (e.g. python
+# itself failed to start), still emit a FLAT numeric reward so the trial is not
+# silently dropped.
+if [ -z "${reward:-}" ]; then
+  reward=0.0; correctness=0.0; efficiency=0.0; recovered=0; calls=0
+fi
 
 cat > /logs/verifier/reward.json <<JSON
 {"reward": ${reward}, "correctness": ${correctness}, "efficiency": ${efficiency}, "calls": ${calls}, "recovered": ${recovered}, "answer_present": ${answer_present}}

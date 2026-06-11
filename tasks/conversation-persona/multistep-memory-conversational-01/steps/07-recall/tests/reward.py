@@ -25,7 +25,7 @@ import rewardkit as rk
 FACTS = {
     "cats":        (1,  ["pixel", "byte"],                       ["mochi"]),
     "allergy":     (2,  ["peanut"],                              ["shellfish"]),
-    "birthday":    (3,  ["march 1?4|3/14|03/14|march fourteen"], [r"march 4\b|march fourth|3/4\b|03/04"]),
+    "birthday":    (3,  [r"march 14\b|3/14|03/14|march fourteen"], [r"march 4\b|march fourth|3/4\b|03/04"]),
     "profession":  (4,  ["marine biologist"],                   ["geologist"]),
     "book":        (5,  ["left hand of darkness"],              [r"\bdune\b"]),
     "hometown":    (6,  ["asheville"],                          ["portland"]),
@@ -37,10 +37,15 @@ FACTS = {
     "anniversary": (12, ["june 2|6/2|june second"],            []),
 }
 
-# Negation / contrast cues that mark a sibling as deliberately excluded, not asserted.
+# Negation / contrast / attribution cues that mark a sibling as deliberately
+# excluded (not asserted as MY value). Checked on BOTH sides of the sibling token
+# so a trailing disambiguator ("March 4 is my neighbor's") counts as well as a
+# leading one ("not March 4").
 NEG_CUE = re.compile(
     r"\bnot\b|n't|no longer|\bnever\b|rather than|instead of|as opposed to|"
-    r"\bunlike\b|\bwas\b|\bwere\b|previously|formerly|used to|\bavoid"
+    r"\bunlike\b|\bwas\b|\bwere\b|previously|formerly|used to|\bavoid|"
+    r"neighbou?r|coworker|colleague|\bfriend|brother|sister|someone else|"
+    r"\bhis\b|\bher\b|\btheir\b|belongs to"
 )
 
 
@@ -74,10 +79,15 @@ def _cell_for(workspace_str: str, n: int) -> str:
 
 
 def _sibling_leaked(cell: str, pat: str) -> bool:
-    """True if the sibling value is asserted (present and NOT explicitly negated)."""
+    """True if the sibling value is asserted (present and NOT explicitly negated).
+
+    The disambiguator may sit before OR after the sibling token, so both windows
+    are inspected ("not March 4" and "March 4 is my neighbor's" both clear it).
+    """
     for m in re.finditer(pat, cell):
         pre = cell[max(0, m.start() - 28):m.start()]
-        if not NEG_CUE.search(pre):
+        post = cell[m.end():m.end() + 28]
+        if not (NEG_CUE.search(pre) or NEG_CUE.search(post)):
             return True
     return False
 
