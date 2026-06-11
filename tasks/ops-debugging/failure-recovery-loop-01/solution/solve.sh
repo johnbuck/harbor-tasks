@@ -1,7 +1,9 @@
 #!/bin/bash
-# Oracle: the adaptive recovery path — read each error, supply the specific fix.
+# Oracle: the adaptive recovery path — read each error, discover the missing
+# values from the provisioning manifest, supply the specific fix, stop on success.
 set -u
-TOKEN="$(cat /app/.dfetch_token)"
-dfetch --release                                                   # clear stale lock
-dfetch --region=eu-west --token="$TOKEN" /app/payload.txt          # all requirements met
+REGION="$(sed -n 's/^provisioned_region=//p' /app/dfetch.conf | head -1)"  # discovered, not announced
+TOKEN="$(sed -n 's/^session_token=//p' /app/dfetch.conf | head -1)"        # discovered, not announced
+dfetch --release                                              # clear the stale lock once
+dfetch --region="$REGION" --token="$TOKEN" /app/payload.txt   # all requirements met -> random nonce
 sed -n 's/^PAYLOAD: //p' /app/payload.txt > /app/token.txt

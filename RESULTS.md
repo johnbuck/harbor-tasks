@@ -8,14 +8,22 @@
 > caveats**, and the reproduction command — embedding the auto-computed split block, never a
 > hand-typed metrics table. (A richer FE-exportable report is a later follow-up.)
 
-**Status (2026-05-31):** INTERIM — the instrument is **proven to discriminate
-harness from model** on three axes (efficiency, memory reliability, recovery
-reliability); the final **n=5 pass^k** grid is pending a budget decision (the
-sharpened tasks turned out token-heavy, so a focused n=5 ≈ $60). Numbers below
-are from the **n=1 smoke (94 tasks)** + the **focused n=1 (17 sharpened/
-discriminating tasks)** + a single-task memory validation. n=1 reward is NOISY
-by design — the discrimination lives in pass^k reliability, which n=1 cannot
-capture (see Key Finding below). Treat single-run rewards as directional.
+**Status (2026-06-10):** VERDICT — the reworked **core eleven** (`configs/core-suite.yaml`)
+ran a full **n=5 pass^k grid** on the symmetric hindsight-only substrate (honcho +
+file-memory OFF). **The suite discriminates: effective overall Δ = 0.188 (meets the
+10% bar), leader hermes**, driven by both higher reward (raw 0.654 vs 0.485) and far
+better reliability (**hermes 4% error vs openclaw 20%** — 9% crash + 11% timeout).
+**All 7 categories split ≥10%, in BOTH directions** (hermes wins 5, openclaw wins 2 —
+ops-debugging Δ+0.33 and tool-orchestration Δ+0.15 favour openclaw), so it is not a
+one-sided artifact. context-rot is the weakest (Δ−0.10, was saturated at n=1 — a
+candidate for harder chains). Full per-category table + provenance:
+`backlog/2026-06-10-core-eleven-remediation.md` (run log) and the per-job
+`jobs/core-suite-n5__{openclaw,hermes}/result.json`. The earlier 2026-05-31 INTERIM
+(three-axis n=1) is superseded by this grid.
+
+> Construct-validity note: n=1 of this same suite gave a smaller, partly opposite
+> split (conversation-persona flipped sign n=1→n=5), confirming n=1 is a coin-toss
+> and the signal lives in **pass^k reliability** — see Key Finding below.
 
 **Same model both harnesses:** `deepseek/deepseek-v4-pro` (openclaw via the
 `xrouter` custom provider, hermes via OpenRouter), reasoning ON. Any gap is the

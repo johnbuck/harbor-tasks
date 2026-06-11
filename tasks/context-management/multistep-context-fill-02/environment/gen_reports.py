@@ -1,15 +1,28 @@
 #!/usr/bin/env python3
 """Generate 18 weekly status reports for PROJECT VEGA (datacenter migration).
 
-CONTEXT-SATURATION ladder rung 2 of 3 = UPDATE-CHURN. Same 1M-window overflow as
-rung 1 (~72K tokens/report, ~1.3M cumulative), but the stressor is DECISION CHURN:
-nearly every tracked fact is corrected TWO or THREE times across the quarter. The
-analyst must report the FINAL value of record and never an intermediate one. This
-isolates stale-value surfacing under a full window -- the harness must apply the
-latest correction, not echo an earlier (and now in- or out-of-window) value.
+CONTEXT-SATURATION ladder rung 2 of 3 = UPDATE-CHURN. The stressor is DECISION
+CHURN: nearly every tracked fact is corrected TWO or THREE times across the
+quarter. The analyst must report the FINAL value of record and never an
+intermediate one -- the harness must apply the latest correction, not echo an
+earlier value.
 
-Scoring (steps/19-recall/tests/test.sh): +1 per final value, -1 per superseded
-value (each fact may have up to TWO stale values), -1 for the DRAFT GCP decoy.
+READ-CAP SAFETY (2026-06-10): each report is kept UNDER a conservative single-read
+line budget (MAX_LINES_PER_FILE) so a harness file-read tool that caps output
+(commonly ~2000 lines) still sees EVERY injected fact -- including the section-8
+(ACTION ITEMS) ones. A report larger than the cap would silently truncate
+late-section facts and manufacture false zeros that look exactly like recall
+misses (adversarial-review finding, 2026-06-10). The build ASSERTS the bound, so a
+future edit that re-inflates the reports fails loudly instead of regressing. The
+context pressure comes from CUMULATIVE volume across the 18 reports (well above the
+~300-400K effective-attention knee, backlog/2026-06-01-methodology-evidence-base.md),
+not from any single oversized file; raw single-window overflow is re-confirmed
+after the multi-step threading change lands (spec 2026-06-10-core-eleven-remediation, D1).
+
+Scoring (steps/19-recall/tests/reward.py): each of the 12 facts is anchored to its
+numbered answer line; +1 if that line commits to the final value (one noted prior
+value is tolerated as honest disambiguation, dumping all churned values is not);
+the GCP cloud proposal is a decoy that must not be adopted as the plan of record.
 """
 import os
 
@@ -18,7 +31,12 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 PROJECT = "PROJECT VEGA"
 SUBTITLE = "DATACENTER MIGRATION - WEEKLY PLATFORM REVIEW"
-LINES_PER_SECTION = 300
+LINES_PER_SECTION = 180
+# Conservative single-read line budget. Keep every report -- and thus every
+# injected fact, even the section-8 ones -- under this so a ~2000-line-capped file
+# read never truncates a late fact into a false zero. Enforced by the assert in the
+# generation loop; lower LINES_PER_SECTION if a future change trips it.
+MAX_LINES_PER_FILE = 1700
 
 SECTIONS = [
     ("1. SCHEDULE & CUTOVER", "schedule"),
@@ -77,57 +95,61 @@ def filler_line(section, wk, idx):
     return forms[section]
 
 
-# Heavy churn: most facts corrected 2-3x. Final value = last statement.
+# Heavy churn: most facts are restated with a revised value 2-3x across the
+# quarter. Each statement reads as ordinary status prose (no marker keyword, no
+# special indentation) so the current value can only be found by reading, and the
+# latest statement -- which the analyst must infer supersedes the earlier ones --
+# is the value of record.
 INJECTIONS = {
     1: [
-        ("schedule", "The migration target date is set to 2026-08-01."),
-        ("staffing", "Migration lead: Maria Reyes."),
+        ("schedule", "Schedule of record puts the migration target date at 2026-08-01."),
+        ("staffing", "Maria Reyes is serving as the migration lead."),
     ],
     2: [
-        ("budget", "The approved migration budget is $2.0M."),
-        ("infra", "The target cluster is sized at 48 nodes."),
-        ("infra", "The primary region is us-east-1."),
+        ("budget", "Finance has the approved migration budget at $2.0M."),
+        ("infra", "Current sizing puts the target cluster at 48 nodes."),
+        ("infra", "Primary region for the build is us-east-1."),
     ],
-    3: [("data", "The target database engine is PostgreSQL 14.")],
+    3: [("data", "Database direction holds the target engine at PostgreSQL 14.")],
     4: [
-        ("schedule", "The cutover strategy is big-bang."),
+        ("schedule", "Cutover approach of record is big-bang."),
         ("data", "Replication topology is single-primary."),
     ],
     5: [
-        ("schedule", "CORRECTION: the migration target date moves from 2026-08-01 to 2026-09-15."),
-        ("compliance", "The rollback window is 4 hours."),
+        ("schedule", "Revised scheduling puts the migration target date at 2026-09-15."),
+        ("compliance", "Rollback window is held at 4 hours."),
     ],
     6: [
-        ("infra", "CORRECTION: the cluster is resized from 48 nodes to 64 nodes."),
+        ("infra", "Updated sizing puts the target cluster at 64 nodes."),
         ("compliance", "Compliance tier is confirmed as SOC2."),
     ],
     7: [
-        ("infra", "CORRECTION: the primary region moves from us-east-1 to us-west-2."),
-        ("compliance", "The disaster-recovery site is Dallas."),
+        ("infra", "Primary region for the build has been moved to us-west-2."),
+        ("compliance", "Disaster-recovery site is Dallas."),
     ],
     8: [
-        ("staffing", "CORRECTION: migration lead changes from Maria Reyes to Kenji Tanaka."),
-        ("testing", "The monitoring stack is standardised on Datadog."),
+        ("staffing", "Kenji Tanaka has taken over as the migration lead."),
+        ("testing", "Monitoring stack is standardised on Datadog."),
     ],
-    9: [("data", "CORRECTION: the target database engine moves from PostgreSQL 14 to PostgreSQL 16.")],
-    10: [("schedule", "CORRECTION: the cutover strategy changes from big-bang to phased.")],
-    11: [("infra", "CORRECTION (final): the cluster is resized again from 64 nodes to 32 nodes.")],
+    9: [("data", "Database direction holds the target engine at PostgreSQL 16.")],
+    10: [("schedule", "Cutover approach of record has shifted to phased.")],
+    11: [("infra", "Latest sizing puts the target cluster at 32 nodes.")],
     12: [
-        ("schedule", "CORRECTION (final): the migration target date moves from 2026-09-15 to 2026-10-30."),
-        ("budget", "CORRECTION (final): the migration budget is raised from $2.0M to $2.8M."),
+        ("schedule", "Rescheduled, the migration target date lands on 2026-10-30."),
+        ("budget", "Finance has raised the approved migration budget to $2.8M."),
     ],
-    13: [("staffing", "CORRECTION (final): migration lead changes from Kenji Tanaka to Amara Okafor.")],
+    13: [("staffing", "Amara Okafor has stepped in as the migration lead.")],
     14: [
-        ("infra", "CORRECTION (final): the primary region moves from us-west-2 to eu-central-1."),
-        ("data", "CORRECTION (final): replication topology changes from single-primary to multi-primary."),
+        ("infra", "Primary region for the build has been relocated to eu-central-1."),
+        ("data", "Replication topology has moved to multi-primary."),
     ],
-    15: [("schedule", "CORRECTION (final): the cutover strategy changes from phased to blue-green.")],
+    15: [("schedule", "Cutover approach of record is now blue-green.")],
     16: [
-        ("data", "CORRECTION (final): the target database engine moves from PostgreSQL 16 to Aurora."),
-        ("compliance", "DRAFT - NOT APPROVED: a proposal to switch the target cloud to GCP is under discussion only and must not be treated as the plan of record."),
+        ("data", "Database direction settles the target engine on Aurora."),
+        ("compliance", "A proposal to switch the target cloud to GCP is under discussion only and must not be treated as the plan of record."),
     ],
-    17: [("compliance", "CORRECTION (final): the rollback window is reduced from 4 hours to 90 minutes.")],
-    18: [("actions", "Closeout week: no new baseline changes; all prior decisions of record stand as last stated.")],
+    17: [("compliance", "Rollback window has been reduced to 90 minutes.")],
+    18: [("actions", "Closeout week: no new baseline changes; all prior decisions of record carry forward unchanged.")],
 }
 
 
@@ -140,12 +162,12 @@ def build_section(title, key, wk):
     for i in range(LINES_PER_SECTION):
         if i in spot_set:
             try:
-                lines.append("    " + next(inj_iter))
+                lines.append(next(inj_iter))
             except StopIteration:
                 pass
         lines.append(filler_line(key, wk, i))
     for s in inj_iter:
-        lines.append("    " + s)
+        lines.append(s)
     lines.append("")
     return lines
 
@@ -157,13 +179,20 @@ for wk in range(1, 19):
         f"WEEK {wk:02d} OF 18",
         "=" * 60,
         "",
-        "This report records the project state for the week. Decisions are revised",
-        "frequently; the value that counts for any item is always the LATEST one",
-        "stated, even when it was changed earlier in the program.",
+        "This report records the project state for the week.",
         "",
     ]
     for title, key in SECTIONS:
         body.extend(build_section(title, key, wk))
+    # Mechanical read-cap guard: if any report exceeds the single-read budget, a
+    # capped read tool would drop its late-section injected facts -> false zeros.
+    # Fail the build rather than ship a silently-truncating report.
+    n_lines = len(body)
+    assert n_lines <= MAX_LINES_PER_FILE, (
+        f"week_{wk:02d} is {n_lines} lines > MAX_LINES_PER_FILE={MAX_LINES_PER_FILE}; "
+        "a read-tool cap would truncate late-section facts into false zeros. "
+        "Lower LINES_PER_SECTION."
+    )
     text = "\n".join(body) + "\n"
     total_chars += len(text)
     with open(os.path.join(OUT_DIR, f"week_{wk:02d}.txt"), "w") as fh:

@@ -1,11 +1,14 @@
 # CORE SUITE — the load-bearing harness-vs-model discrimination set (2026-06-03).
 #
-# 11 tasks, one per harness-distinct capability, anchored on the three PROVEN
-# discriminators from RESULTS.md (memory-conversational-01 Δ0.50, failure-
-# recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls).
+# 11 tasks, one per harness-distinct capability. NOTE (2026-06-10): the three
+# former "PROVEN" anchors (memory-conversational-01 Δ0.50, failure-recovery-loop-01
+# 1.0-vs-0.0, tool-sprawl-precision-01 3-vs-7) are VOID — Δ0.50 died with the
+# recall-MCP removal; failure-recovery + tool-sprawl were bypassable. All three
+# were REWORKED and their evidence must be RE-EARNED on the new hindsight-only
+# substrate. See backlog/2026-06-10-core-eleven-remediation.md (adversarial review
+# + remediation) and 2026-06-03-core-suite-selection.md (original selection).
 # Same model both harnesses (deepseek-v4-pro, reasoning ON) ⇒ any gap is the
-# HARNESS, not the model. Selection rationale + alternates:
-# backlog/2026-06-03-core-suite-selection.md.
+# HARNESS, not the model.
 #
 # Capability coverage:
 #   Memory          ×3  recall-under-load / proactive-write+correct / stale-vs-file
@@ -35,7 +38,7 @@ datasets:
   # Memory — recall, proactive write+correction, stale-vs-live-file
   - path: <repo>/tasks/conversation-persona
     task_names:
-      - multistep-memory-conversational-01   # PROVEN Δ0.50 — recall under distractor load
+      - multistep-memory-conversational-01   # recall under distractor load (grader anchored 2026-06-10; Δ to re-earn)
       - true-multi-turn-memory-write-01       # proactive write + correction, latest-value /8
       - multistep-stale-memory-vs-file-01     # stale memory vs re-fetched live file (275 vs 45)
 
@@ -50,10 +53,10 @@ datasets:
   # Control loop — recovery/retry, replanning
   - path: <repo>/tasks/ops-debugging
     task_names:
-      - failure-recovery-loop-01              # PROVEN 1.0-vs-0.0 (4 vs 51 retries)
+      - failure-recovery-loop-01              # adaptive recovery (random-nonce rework 2026-06-10; Δ to re-earn)
   - path: <repo>/tasks/tool-orchestration
     task_names:
-      - tool-sprawl-precision-01              # PROVEN efficiency — selection among 57 decoys (F1)
+      - tool-sprawl-precision-01              # tool-selection F1 + efficiency (grade-on-selection rework 2026-06-10; Δ to re-earn)
       - plan-then-revise-01                   # mid-task replanning, graded re-plan /8
 
   # Delegation + skill acquisition

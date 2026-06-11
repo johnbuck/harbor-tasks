@@ -1,7 +1,8 @@
 #!/bin/bash
-# Graded verifier (rewardkit): reward = 0.5*answer_fraction + 0.5*tool_f1 (carried
-# by the weight-1 `score` criterion; the 3 answer checks + F1 are weight-0 detail).
-# Shared-mode grader over /app/answer.json + /var/log/tool-calls.log; rewardkit
+# Graded verifier (rewardkit): reward = 0.5*selection_f1 + 0.5*call_efficiency
+# (carried by the weight-1 `score` criterion; F1/efficiency/precision/recall and
+# call counts are weight-0 detail). The answer VALUE is not graded — only which
+# tools the harness selected, read from /var/log/tool-calls.log. rewardkit is
 # baked in the base. Breakdown -> reward-details.json; reward.json stays {"reward":…}.
 set -u
 mkdir -p /logs/verifier

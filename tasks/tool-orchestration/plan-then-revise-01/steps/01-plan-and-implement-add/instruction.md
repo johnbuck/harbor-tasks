@@ -1,26 +1,36 @@
-You are building a small Python module `/app/calc.py` over the next 4 steps.
+You are building a small Python calculator module `/app/calc.py` over the next
+few steps.
 
-**Before writing any code**, write a short plan to `/app/PLAN.md` describing
-the 4 functions you'll implement (function names, expected signatures,
-expected behavior). Treat this as a one-time plan you'll execute step by step.
+**Before writing any code**, write a short plan to `/app/PLAN.md` describing the
+four operations you'll implement (names, signatures, expected behavior) and the
+dispatch design below. Treat this as a one-time plan you execute step by step.
 
-**Project-wide rule (decided at kickoff — applies to EVERY arithmetic function
-in this module, now and later):** every result must be **clamped to the
-inclusive range [-1000, 1000]**. If a computed value exceeds 1000 it becomes
-1000; if it is below -1000 it becomes -1000. Implement this as a shared helper
-(e.g. `_clamp`) so all functions apply the identical policy. Record this rule in
-your PLAN.md so you don't lose it.
+**Project-wide rule (decided now, at kickoff — applies to EVERY arithmetic
+operation in this module, now and forever):** every numeric result must be
+**clamped to the inclusive range [-1000, 1000]**. A value above 1000 becomes
+1000; a value below -1000 becomes -1000. Implement this once as a shared helper
+(`_clamp`) so every operation applies the identical policy. Record this rule in
+your PLAN.md so the decision isn't lost.
 
-Then **for this step (step 1)**, implement just the first function:
+The four operations to plan for: `add`, `multiply`, `divide`, `compose`.
+
+We also want a **name-based dispatch layer** from the start so new operations
+just plug in:
+
+- a module-level `REGISTRY` dict mapping each op name (e.g. `"add"`) to its
+  function, and
+- a `dispatch(op, *args)` entry point that looks the op up in `REGISTRY`, calls
+  it, and raises `ValueError` on an unknown op.
+
+**For this step (step 1)**, implement the clamp helper plus the first two
+operations and wire them into the registry/dispatch:
 
 ```python
-def add(a: int, b: int) -> int:
-    """Return a + b, clamped to [-1000, 1000]."""
+def add(a, b):       # a + b, clamped
+def divide(a, b):    # integer division a // b, clamped; ValueError on b == 0
 ```
 
-Save it to `/app/calc.py`. The verifier will import `add` and check
-`add(2, 3) == 5` AND that the clamp policy holds: `add(900, 900) == 1000`.
-
-The 4 functions you should plan for: `add`, `multiply`, `divide`, `compose`.
-Use whatever signatures you think make sense for `divide` and `compose` — you
-can always adjust later if the environment changes.
+Register `add` and `divide` in `REGISTRY` and make `dispatch("add", 2, 3)`
+work. Save everything to `/app/calc.py`. The verifier will import the module and
+check `add(2, 3) == 5`, the clamp policy (`add(900, 900) == 1000`), `divide`,
+`dispatch`, and that `PLAN.md` exists.

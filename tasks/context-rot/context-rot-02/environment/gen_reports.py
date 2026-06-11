@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """Generate 18 inspection reports for THE WESTMARCH PRIORY CONSERVATION SURVEY.
 
-CONTEXT-ROT, MULTI-HOP variant (rung 2 of the rot family). Same in-window regime
-as rot-01 (~345K tokens << the 1M deepseek-v4-pro window, deep in the ~300-400K
-rot zone, NO overflow) but the recall requires CHAINING TWO facts buried at
+CONTEXT-ROT, MULTI-HOP variant (rung 2 of the rot family). The 18 records
+(~345K tokens << the 1M deepseek-v4-pro window, deep in the ~300-400K rot zone,
+NO overflow) are read one-per-step across 18 ingest steps that THREAD into ONE
+growing conversation (the task image bakes /opt/harness/thread-session; the thin
+adapters resume the session each step), so the records ACCUMULATE in-context and
+the buried facts are genuinely subject to lost-in-the-middle rot. Without that
+marker each ingest would run fresh and nothing would accumulate (the pre-2026-06-10
+bug that made this a memory test). Recall requires CHAINING TWO facts buried at
 different conversational depths:
 
     anchor fact  : "<feature> was made by/of <BRIDGE entity>"   (depth A)
@@ -13,12 +18,13 @@ different conversational depths:
 Both hops must survive for the chain to resolve, so rot on EITHER hop breaks it
 (RULER variable-tracking). 8 chains = 16 needles, bucketed by depth:
   * EARLY chains (both hops in visits 2-6)  -> primacy-protected, should survive
-  * MIDDLE chains (both hops in visits 8-12) -> rot-critical, both hops in the
-    lost-in-the-middle zone, should fail unless the harness actively manages context
+  * MIDDLE chains (both hops in visits 8-12) -> lost-in-the-middle, rot-critical
   * LATE chains (both hops in visits 14-18) -> recency-protected, should survive
-The early/middle/late subscores in steps/19-recall/tests/test.sh read the rot
-curve. Questions PARAPHRASE the bridge link (NoLiMa); no instruction mentions
-burial, hops, or rot. Reports are wiped before recall.
+Reward is matched/8 (steps/19-recall/tests/reward.py). The early/middle/late
+fractions are DIAGNOSTIC ONLY (weight-0): since the harness may also externalize
+to its hindsight MCP, the depth split is an observation of WHERE answers failed,
+not a load-bearing "rot curve" claim. Questions PARAPHRASE the bridge link
+(NoLiMa); no instruction mentions burial, hops, or rot. Reports wiped before recall.
 """
 import os
 

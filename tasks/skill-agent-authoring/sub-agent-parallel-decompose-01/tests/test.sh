@@ -1,14 +1,19 @@
 #!/bin/bash
 # Graded verifier (rewardkit): reward = correct/60 over the prose word-problems,
 # one criterion per problem (answer key in /tests/answers.json, verifier-only).
-# Shared-mode grader; rewardkit baked in the base. The fan-out concurrency
-# DIAGNOSTIC (not part of reward) is computed into a sidecar so it doesn't pollute
-# reward.json. Per-problem breakdown -> reward-details.json.
+# Shared-mode grader; rewardkit baked in the base.
+#
+# THERE IS NO CONCURRENCY SCORE. Delegation is NOT measured directly -- it shows
+# up as: a serial harness times out -> fewer outputs -> lower correct/60 base.
+# The mtime/work.log figures below are ADVISORY ONLY and are GAMEABLE (a single
+# batch-write at the end produces an mtime burst with zero real concurrency, and
+# work.log is agent-self-reported), so they are written to reward-details.json
+# clearly labelled and are NEVER part of reward.json.
 set -u
 mkdir -p /logs/verifier
 rewardkit /tests --workspace /app --output /logs/verifier/reward.json
 
-# --- concurrency diagnostic (advisory; NOT scored) -> sidecar ----------------
+# --- ADVISORY-ONLY diagnostics (NOT scored, gameable) -> reward-details.json ---
 python3 - <<'PY'
 import json, os, re, glob
 OUT, LOG = "/app/out", "/var/log/work.log"
@@ -40,7 +45,14 @@ if os.path.exists(LOG):
         openset.add(nn) if kind == 0 else openset.discard(nn)
         peak = max(peak, len(openset))
     self_reported_peak = peak
-json.dump({"mtime_burst_peak": max_burst, "mtime_span_sec": span,
-           "self_reported_peak": self_reported_peak},
-          open("/logs/verifier/concurrency.json", "w"))
+json.dump({
+    "_note": "ADVISORY ONLY -- NOT part of reward. Both fields are gameable "
+             "(end-of-run batch-write inflates mtime_burst_peak; work.log is "
+             "agent-self-reported). Delegation is reflected in reward.json via "
+             "correct/60 only (serial timeout -> fewer correct).",
+    "outputs_present": len(mtimes),
+    "mtime_burst_peak_advisory": max_burst,
+    "mtime_span_sec_advisory": span,
+    "worklog_self_reported_peak_advisory": self_reported_peak,
+}, open("/logs/verifier/reward-details.json", "w"), indent=2)
 PY

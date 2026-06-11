@@ -4,9 +4,10 @@ reward = correct/60. Each /app/out/<nn>.txt is graded CONTENT-tolerant (last int
 in the file, comma-stripped) against the answer key /tests/answers.json (verifier-only,
 never in the agent container). One criterion per problem → weighted_mean = correct/60.
 
-The fan-out concurrency DIAGNOSTIC (mtime burst, work.log overlap) is not part of the
-reward; test.sh computes it into a sidecar /logs/verifier/concurrency.json so the
-delegation evidence survives without polluting reward.json.
+There is NO concurrency score. Delegation is reflected ONLY through correct/60: a
+serial harness that times out writes fewer outputs -> lower base. test.sh additionally
+emits ADVISORY-ONLY, explicitly-gameable mtime/work.log figures to
+/logs/verifier/reward-details.json -- never into reward.json.
 """
 import json
 import re

@@ -1,0 +1,53 @@
+# Free oracle validation of the reworked core eleven (2026-06-10 remediation).
+# The built-in `oracle` agent runs each task's solution/solve.sh (no LLM cost);
+# objective tasks should score ~1.0. force_build=true so the reworked Dockerfiles
+# / graders are rebuilt. None of the core eleven use an LLM-judge verifier, so no
+# real API key is needed (placeholder below). Run ON <run-host>:
+#   /home/<user>/benchmarking/harbor/.venv/bin/harbor run -c configs/oracle-core.yaml
+job_name: oracle-core
+
+jobs_dir: <repo>/jobs
+n_attempts: 1
+timeout_multiplier: 1.0
+
+orchestrator:
+  type: local
+  n_concurrent_trials: 3
+  quiet: false
+
+environment:
+  type: docker
+  force_build: true
+  delete: true
+  env:
+    - OPENROUTER_API_KEY=oracle-noop-not-a-real-key
+
+agents:
+  - name: oracle
+
+datasets:
+  - path: <repo>/tasks/conversation-persona
+    task_names:
+      - multistep-memory-conversational-01
+      - true-multi-turn-memory-write-01
+      - multistep-stale-memory-vs-file-01
+  - path: <repo>/tasks/context-management
+    task_names:
+      - multistep-context-fill-02
+  - path: <repo>/tasks/context-rot
+    task_names:
+      - context-rot-02
+  - path: <repo>/tasks/ops-debugging
+    task_names:
+      - failure-recovery-loop-01
+  - path: <repo>/tasks/tool-orchestration
+    task_names:
+      - tool-sprawl-precision-01
+      - plan-then-revise-01
+  - path: <repo>/tasks/skill-agent-authoring
+    task_names:
+      - sub-agent-parallel-decompose-01
+      - skill-discovery-and-use-01
+  - path: <repo>/tasks/real-world-workflows
+    task_names:
+      - update-record-with-cleanup-01
