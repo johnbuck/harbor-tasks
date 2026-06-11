@@ -97,30 +97,55 @@ def filler_line(section, wk, idx):
 
 # 8 two-hop chains = 16 needles. (section, sentence) per visit. Two visits (9, 18)
 # carry two needles, placed in DIFFERENT sections.
+#
+# FICTIONALISED (rebuild 2026-06-11). Every bridge entity AND its attribute is
+# invented, so neither hop is answerable from parametric/web knowledge — the real
+# pairings (Maw & Co -> Jackfield, Whitefriars -> Thames, Frosterley -> Durham,
+# Taylor -> Loughborough, Riga -> Latvia) let a model shortcut hop 2 the moment it
+# recognised the entity from the anchor. With invented places the chain can only
+# resolve from genuinely accumulated in-context recall.
 INJECTIONS = {
     # --- EARLY chains (both hops visits 2-6) ---
-    2:  [("rooms", "The cloister vaulting was designed by the architect Crispin Vael.")],            # C-E1 anchor
-    4:  [("recs", "Crispin Vael trained as an architect in the city of Lyon.")],                     # C-E1 bridge -> Lyon
-    3:  [("joinery", "The refectory floor tiles were fired by the Maw and Co pottery.")],            # C-E2 anchor
-    6:  [("grounds", "The Maw and Co pottery was based in the town of Jackfield.")],                 # C-E2 bridge -> Jackfield
+    2:  [("rooms", "The cloister vaulting was designed by the architect Crispin Vael.")],             # C-E1 anchor
+    4:  [("recs", "Crispin Vael trained as an architect in the city of Mournholt.")],                 # C-E1 bridge -> Mournholt
+    3:  [("joinery", "The refectory floor tiles were fired by the Aldermarsh pottery.")],             # C-E2 anchor
+    6:  [("grounds", "The Aldermarsh pottery was based in the town of Penhollow.")],                  # C-E2 bridge -> Penhollow
     # --- MIDDLE chains (both hops visits 8-12) -- ROT-CRITICAL ---
-    8:  [("services", "The scriptorium windows are glazed with glass from the Whitefriars works.")], # C-M1 anchor
-    10: [("grounds", "The Whitefriars works stood on the bank of the river Thames.")],               # C-M1 bridge -> Thames
+    8:  [("services", "The scriptorium windows are glazed with glass from the Greymoor glassworks.")],# C-M1 anchor
+    10: [("grounds", "The Greymoor glassworks stood on the bank of the river Mereveil.")],            # C-M1 bridge -> Mereveil
     9:  [
-        ("joinery", "The prior's lodging staircase was built by the joiner Hugh Tarrant."),          # C-M2 anchor
-        ("rooms", "The chapter house floor is paved in Frosterley marble."),                         # C-M3 anchor
+        ("joinery", "The prior's lodging staircase was built by the joiner Hugh Tarrant."),           # C-M2 anchor
+        ("rooms", "The chapter house floor is paved in Brannock marble."),                            # C-M3 anchor
     ],
-    11: [("recs", "Hugh Tarrant rose to become master of the Guild of Saint Luke.")],                # C-M2 bridge -> Saint Luke
-    12: [("defects", "Frosterley marble is a dark limestone quarried in County Durham.")],           # C-M3 bridge -> Durham
+    11: [("recs", "Hugh Tarrant rose to become master of the Guild of Saint Dunmore.")],              # C-M2 bridge -> Saint Dunmore
+    12: [("defects", "Brannock marble is a dark limestone quarried in the county of Wessenshire.")],  # C-M3 bridge -> Wessenshire
     # --- LATE chains (both hops visits 14-18) ---
-    15: [("exterior", "The gatehouse lantern was wrought by the smith Owen Brace.")],                # C-L1 anchor
-    17: [("recs", "Owen Brace kept his forge in the city of Hereford.")],                            # C-L1 bridge -> Hereford
-    16: [("services", "The bell tower carillon was founded by the Taylor foundry.")],                # C-L2 anchor
-    14: [("roof", "The dorter roof timbers are of Baltic oak shipped through the port of Riga.")],   # C-L3 anchor
+    15: [("exterior", "The gatehouse lantern was wrought by the smith Owen Brace.")],                 # C-L1 anchor
+    17: [("recs", "Owen Brace kept his forge in the city of Calderwick.")],                           # C-L1 bridge -> Calderwick
+    16: [("services", "The bell tower carillon was founded by the Hartley foundry.")],                # C-L2 anchor
+    14: [("roof", "The dorter roof timbers are of seasoned oak shipped through the port of Kartheln.")], # C-L3 anchor
     18: [
-        ("services", "The Taylor foundry has its bell-works in the town of Loughborough."),          # C-L2 bridge -> Loughborough
-        ("grounds", "The port of Riga lies on the coast of the Baltic country of Latvia."),          # C-L3 bridge -> Latvia
+        ("services", "The Hartley foundry has its bell-works in the town of Bellforge."),             # C-L2 bridge -> Bellforge
+        ("grounds", "The port of Kartheln lies on the coast of the country of Vendreth."),            # C-L3 bridge -> Vendreth
     ],
+}
+
+# SAME-TYPE CONFUSABLE DISTRACTORS (rebuild 2026-06-11). One per chain: a SECOND
+# named entity of the SAME type with its OWN invented attribute, sprinkled through
+# the filler. This makes the bridge sentence no longer type-unique — there are now
+# two "architect trained in <city>" facts, two "pottery based in <town>" facts, and
+# so on — so the ANCHOR hop ("which architect designed the cloister vaulting?") is
+# genuinely load-bearing: a model that only remembers "some architect trained in X"
+# can no longer guess the right city. None of these values match a graded answer.
+DISTRACTORS = {
+    5:  [("recs", "The architect Edmund Roos trained in the city of Calleva.")],                      # vs C-E1
+    7:  [("grounds", "The Saltmoor pottery was based in the town of Ravensett.")],                    # vs C-E2
+    8:  [("grounds", "The Dunmere glassworks stood on the bank of the river Avenel.")],               # vs C-M1
+    11: [("recs", "Walter Frome rose to become master of the Guild of Saint Albic.")],               # vs C-M2
+    13: [("defects", "Corvenstone marble is a pale limestone quarried in the county of Harrowshire.")], # vs C-M3
+    15: [("recs", "The smith Reynold Hask kept his forge in the city of Dunmarrow.")],                # vs C-L1
+    16: [("services", "The Welland foundry has its bell-works in the town of Castermere.")],          # vs C-L2
+    14: [("grounds", "The port of Solvang lies on the coast of the country of Thessmark.")],          # vs C-L3
 }
 
 
@@ -138,10 +163,17 @@ def build_report(wk: int) -> str:
     by_sec: dict[str, list[str]] = {}
     for sec_key, sentence in INJECTIONS.get(wk, []):
         by_sec.setdefault(sec_key, []).append(sentence)
+    dist_by_sec: dict[str, list[str]] = {}
+    for sec_key, sentence in DISTRACTORS.get(wk, []):
+        dist_by_sec.setdefault(sec_key, []).append(sentence)
     for title, key in SECTIONS:
         lines.append(title)
         lines.append("-" * len(title))
         body = [filler_line(key, wk, i) for i in range(LINES_PER_SECTION)]
+        # Confusable distractors sit at a DIFFERENT depth (a third in) than the
+        # graded needle (mid-section), so the two same-type facts are not adjacent.
+        for distractor in dist_by_sec.get(key, []):
+            body.insert(LINES_PER_SECTION // 3, distractor)
         for needle in by_sec.get(key, []):
             body.insert(LINES_PER_SECTION // 2, needle)
         lines.extend(body)
