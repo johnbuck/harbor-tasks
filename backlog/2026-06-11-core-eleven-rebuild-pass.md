@@ -361,3 +361,30 @@ NOT been run — it is out of scope for this pipeline.**
   token count; run the severity-gated n=5 re-grid and record Δ + the lifted
   BLOCKED status (tasks 3/5/6/9) in RESULTS.md. "Good" = oracle 1.0, offline suite
   green, and a fan-out run clears more T9 problems than a serial walk within budget.
+
+### D7 progress — rebuild + oracle gate (2026-06-12)
+
+Operator ran the **rebuild + oracle** half of D7 (the n=5 sweep is deferred —
+the paid step).
+
+- **Rich image rebuilt** (`harbor-agents-rich:latest`): cached — correct, since
+  every change was to a *task* Dockerfile, not the base; the oracle's
+  `force_build=true` rebuilds each task image from the unchanged base.
+- **T6 pin bug found by the oracle and fixed.** The first oracle run scored
+  failure-recovery-loop-01 at **0.0** (`bin_ok=0`): the Dockerfile generated the
+  embedded HMAC secret from `/dev/urandom`, so the dfetch binary — and its
+  sha256 — changed on every build, and the committed `EXPECTED_DFETCH_SHA` pin
+  could never hold across a `force_build`. Pasting any single build's hash would
+  have passed once and then silently zeroed T6 for every harness on the next
+  rebuild. **Fix (commit on this branch):** fixed eval-internal secret +
+  reproducible compile (`-fno-ident`, `-Wl,--build-id=none`,
+  `SOURCE_DATE_EPOCH=0`); verified byte-identical across two `--no-cache` builds;
+  pinned sha `b524585f…ac932`. In-container security is unchanged (the agent only
+  ever sees the stripped binary; `verify_ok` via the pinned genuine binary stays
+  the non-forgeable gate). **Re-pin only if the base toolchain changes.**
+- **Oracle 11/11 = 1.0, 0 errors** after the fix.
+- **Offline suite: 55 passed** (grew from 37 as the rebuild-pass tests landed).
+
+Still gated on the paid n=5 sweep (and only it can prove): T3 seeding symmetry
+(acceptance 1b), T9 budget calibration (serial must fail / fan-out must fit), T4
+threaded token count, and the lifted BLOCKED status for tasks 3/5/6/9.
