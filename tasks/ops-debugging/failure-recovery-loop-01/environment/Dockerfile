@@ -26,16 +26,29 @@ WORKDIR /app
 # the secret; "no secret FILE on the fs" is proven, RE-resistance is the design bet
 # (the honest error-walk is strictly shorter). See remediation D1.
 
-# Compile dfetch from C with a build-time random secret, strip it, and delete the
-# source + secret header IN THE SAME LAYER so neither survives in the image.
+# Compile dfetch from C with a DETERMINISTIC build-time secret, strip it, and
+# delete the source + secret header IN THE SAME LAYER so neither survives in the
+# image. The secret is a FIXED eval-internal constant (not a real credential), and
+# the compile is reproducible (-fno-ident, --build-id=none, SOURCE_DATE_EPOCH=0),
+# so the binary — hence its sha256 — is BYTE-IDENTICAL across rebuilds. That
+# stability is required: the grader pins the genuine binary's sha256 in the trusted
+# post-agent test.sh to stop a root agent swapping in an exit-0 --verify stub, and
+# a pin can only be committed if the digest is reproducible. A per-build-random
+# secret (the previous design) made the digest change every force_build, so the pin
+# could never hold. Fixing the secret costs NOTHING in-container: the agent only
+# ever sees the stripped binary (never this Dockerfile), so RE-resistance — the
+# stated design bet — is identical. Re-pin (D7) only when the base-image TOOLCHAIN
+# (gcc/libc in harbor-agents-rich) changes; ordinary force_build keeps the sha.
 RUN sh <<'DFBUILD'
 set -eu
+export SOURCE_DATE_EPOCH=0
 if ! command -v gcc >/dev/null 2>&1; then
   apt-get update -qq
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gcc libc6-dev
   rm -rf /var/lib/apt/lists/*
 fi
-SEC=$(head -c32 /dev/urandom | od -An -tx1 | tr -d '[:space:]')
+# Fixed 32-byte eval-internal secret (hex). NOT a real credential; see header.
+SEC=7b3f9a1c5e2d8046b9f1a3c7e50d2841fa6c93b7e218d40592ac6f1b3d8e07a4
 python3 - "$SEC" > /tmp/dfetch_secret.h <<'GENPY'
 import sys
 sec = bytes.fromhex(sys.argv[1])
@@ -274,17 +287,17 @@ int main(int argc, char **argv) {
     return 0;
 }
 CSOURCE
-gcc -O2 -I/tmp -o /usr/local/bin/dfetch /tmp/dfetch.c
+gcc -O2 -fno-ident -Wl,--build-id=none -I/tmp -o /usr/local/bin/dfetch /tmp/dfetch.c
 strip /usr/local/bin/dfetch
 chmod 755 /usr/local/bin/dfetch
 rm -f /tmp/dfetch.c /tmp/dfetch_secret.h
 # AUTHENTICATOR INTEGRITY PIN (criterion 1). The grader (tests/test.sh) trusts the
 # dfetch binary for HMAC verification, but a root agent could swap it for an
 # exit-0 stub. The grader therefore requires the binary's sha256 to match a digest
-# PINNED in the trusted post-agent grader. Capture that digest here and paste it
-# into tests/test.sh's EXPECTED_DFETCH_SHA (the D7 build step). The secret — hence
-# the binary — is randomised per build, so the digest can only be known after this
-# build; it is printed to the build log AND written to a build-artifact file.
+# PINNED in the trusted post-agent grader. The secret is fixed and the compile is
+# reproducible (see header), so this digest is STABLE across rebuilds; capture it
+# once and paste it into tests/test.sh's EXPECTED_DFETCH_SHA (the D7 build step).
+# It is printed to the build log AND written to a build-artifact file.
 DFETCH_SHA="$(sha256sum /usr/local/bin/dfetch | cut -d' ' -f1)"
 printf '%s\n' "$DFETCH_SHA" > /usr/local/share/dfetch.sha256
 echo ">>> dfetch sha256 = ${DFETCH_SHA}"

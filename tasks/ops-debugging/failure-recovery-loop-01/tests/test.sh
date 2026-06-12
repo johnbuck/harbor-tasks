@@ -56,14 +56,15 @@ MSG="$(sed -n 's/^MSG=//p' "$ST" 2>/dev/null | head -1)"
 status_ok=0
 grep -qx 'STATUS=success' "$ST" 2>/dev/null && status_ok=1
 
-# Authenticator integrity pin. The genuine dfetch's sha256 is captured at build
-# (Dockerfile prints `sha256sum /usr/local/bin/dfetch`); paste that 64-hex digest
-# below, replacing the sentinel, as the D7 build step. The secret — hence the
-# binary — is randomised per build, so the real digest can only exist here, in the
-# trusted post-agent grader, after a build. Until pasted the pin fails closed
-# (bin_ok stays 0) for BOTH the genuine binary and any swapped stub.
+# Authenticator integrity pin. The genuine dfetch is compiled from a FIXED secret
+# with a reproducible toolchain (see environment/Dockerfile), so its sha256 is
+# stable across rebuilds and pinned here, in the trusted post-agent grader. A root
+# agent that swaps dfetch for an exit-0 --verify stub mismatches the pin → bin_ok
+# stays 0 → reward 0. Re-pin ONLY if the harbor-agents-rich base toolchain
+# (gcc/libc) changes: rebuild the task image and update the digest below
+# (verified reproducible across two no-cache builds, 2026-06-12).
 DFETCH=/usr/local/bin/dfetch
-EXPECTED_DFETCH_SHA="PASTE_DFETCH_SHA256_AT_BUILD_D7"   # 64-hex digest, filled at build
+EXPECTED_DFETCH_SHA="b524585fb2883ffc9fc2c8f80eb4aacb1da5529c1ec152b52a4e37ddf87ac932"   # 64-hex; re-pin on base-toolchain change
 bin_ok=0
 if [ -x "$DFETCH" ]; then
   actual_sha="$(sha256sum "$DFETCH" 2>/dev/null | cut -d' ' -f1)"
