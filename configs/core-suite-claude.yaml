@@ -1,0 +1,58 @@
+# CORE SUITE — ALTERNATE-MODEL axis. Same task set + harnesses as core-suite.yaml;
+# the only difference is WHICH model both harnesses run. The validity invariant is
+# unchanged: BOTH harnesses run the SAME model, so any gap is the HARNESS, not the
+# model. The model is a FREE VARIABLE — swap the two model_name values below to any
+# model you like (an Anthropic model, Kimi, another OpenRouter model, …) as long as
+# they stay identical. This file currently instantiates an Anthropic model so the
+# thesis can be re-tested off deepseek.
+#
+# Routing is general (off the model string, not a hardcoded id):
+#   - openclaw model_name is `<provider>/<model>` — `anthropic/*` → direct Anthropic
+#     API (ANTHROPIC_API_KEY); `xrouter/*` → the pinned OpenRouter host.
+#   - hermes: a Claude model_name → `--provider anthropic` (direct); anything else →
+#     baked OpenRouter default. reasoning_effort maps to the provider's native
+#     thinking surface — confirm with a 1-call smoke after any model/key change.
+#
+# ANTHROPIC_API_KEY is scoped to the Harbor Infisical project (env=prod,
+# path=/proxy/); run_track_a.sh injects it from there alongside the Shared
+# OpenRouter key. Run ON the harness host (REPO expands via run_track_a.sh):
+#   source ~/.config/infisical/agent-architect.env
+#   CONFIG=$PWD/configs/core-suite-claude.yaml N_ATTEMPTS=1 \
+#     JOB_NAME=core-suite-alt-n1 tools/run_track_a.sh
+
+job_name: core-suite-claude
+
+n_attempts: 1
+
+agents:
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: anthropic/claude-sonnet-4-6
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: claude-sonnet-4-6
+
+datasets:
+  - path: ${REPO}/tasks/conversation-persona
+    task_names:
+      - multistep-memory-conversational-01
+      - true-multi-turn-memory-write-01
+      - multistep-stale-memory-vs-file-01
+  - path: ${REPO}/tasks/context-management
+    task_names:
+      - multistep-context-fill-02
+  - path: ${REPO}/tasks/context-rot
+    task_names:
+      - context-rot-02
+  - path: ${REPO}/tasks/ops-debugging
+    task_names:
+      - failure-recovery-loop-01
+  - path: ${REPO}/tasks/tool-orchestration
+    task_names:
+      - tool-sprawl-precision-01
+      - plan-then-revise-01
+  - path: ${REPO}/tasks/skill-agent-authoring
+    task_names:
+      - sub-agent-parallel-decompose-01
+      - skill-discovery-and-use-01
+  - path: ${REPO}/tasks/real-world-workflows
+    task_names:
+      - update-record-with-cleanup-01

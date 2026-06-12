@@ -52,6 +52,24 @@ export INFISICAL_TOKEN="$(tr -d '\r\n' < "$TOK_TMP")"
 export INFISICAL_SITE_URL="$SITE_URL"
 export PATH="${HARBOR}/.venv/bin:${PATH}"
 
+# Optional ANTHROPIC_API_KEY, scoped to its own Infisical project (Harbor) and
+# used ONLY by Harbor — for the alternate-model (Anthropic) agent axis and the
+# LLM-judge verifiers. Fetched with the token we already acquired and EXPORTED so
+# the run inherits it (the value never lands on a command line). No-op when
+# INFISICAL_ANTHROPIC_PROJECT_ID is unset, so deepseek/OpenRouter runs are
+# unaffected. The OpenRouter key still comes from the Shared project below.
+if [ -n "${INFISICAL_ANTHROPIC_PROJECT_ID:-}" ]; then
+    # Secret is named BH_ANTHROPIC_API_KEY in Infisical but EXPORTED as the
+    # standard ANTHROPIC_API_KEY that the Anthropic SDK / both harnesses read.
+    ANTHROPIC_API_KEY="$(infisical secrets get "${INFISICAL_ANTHROPIC_SECRET_NAME:-BH_ANTHROPIC_API_KEY}" \
+        --projectId="$INFISICAL_ANTHROPIC_PROJECT_ID" \
+        --env="${INFISICAL_ANTHROPIC_ENV:-prod}" \
+        --path="${INFISICAL_ANTHROPIC_PATH:-/proxy}" \
+        --token="$INFISICAL_TOKEN" --domain="$SITE_URL" \
+        --plain --silent 2>/dev/null | tr -d '\r\n')"
+    export ANTHROPIC_API_KEY
+fi
+
 # Inject secrets and run the sweep programmatically (so we can register the
 # memory-wipe TrialEvent.START hook — the `harbor run -c <yaml>` CLI does NOT
 # load hooks).
