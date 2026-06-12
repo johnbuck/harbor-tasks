@@ -83,6 +83,15 @@ class OpenClawThin(OpenClawOpenRouter):
         if not openrouter_key:
             raise ValueError("No API key found. Set OPENROUTER_API_KEY.")
         env["OPENROUTER_API_KEY"] = openrouter_key
+        # Forward the Anthropic key too when present, so the baked config's
+        # `anthropic` provider can run a Claude model (same model BOTH harnesses
+        # — a Claude axis alongside the deepseek/OpenRouter axis). Optional: the
+        # deepseek runs don't need it, so absence is not an error.
+        anthropic_key = self._get_env("ANTHROPIC_API_KEY") or os.environ.get(
+            "ANTHROPIC_API_KEY"
+        )
+        if anthropic_key:
+            env["ANTHROPIC_API_KEY"] = anthropic_key
         # Also honor an explicit XROUTER_* override if the operator set one.
         for key in self._provider_env_keys(provider):
             val = self._get_env(key)

@@ -85,6 +85,27 @@ class HermesThin(HermesOpenRouter):
             "OPENROUTER_API_KEY": openrouter_key,
             "HARBOR_INSTRUCTION": instruction,
         }
+        # Forward the Anthropic key when present so the baked config's `anthropic`
+        # provider can run a Claude model (same model BOTH harnesses — a Claude
+        # axis alongside deepseek/OpenRouter). Optional: deepseek runs don't need
+        # it, so absence is not an error.
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY") or self._get_env(
+            "ANTHROPIC_API_KEY"
+        )
+        if anthropic_key:
+            env["ANTHROPIC_API_KEY"] = anthropic_key
+
+        # General provider routing off the model string (the model is a free
+        # variable; the invariant is that BOTH harnesses run the SAME one). A
+        # Claude model_name routes DIRECT to the Anthropic API (provider:
+        # anthropic, ANTHROPIC_API_KEY); anything else uses the baked OpenRouter
+        # default. The baked reasoning_effort maps to the provider's native
+        # thinking surface — confirm with a 1-call smoke after a model/key change.
+        provider_flag = (
+            "--provider anthropic "
+            if self.model_name.lower().startswith("claude")
+            else ""
+        )
 
         # Run against the BAKED config. --model honors Harbor's model selection;
         # provider + reasoning_effort + toolsets + skills come from config.yaml.
@@ -118,7 +139,7 @@ class HermesThin(HermesOpenRouter):
             "hermes --yolo chat "
             '-q "$HARBOR_INSTRUCTION" '
             "-Q $CONT "
-            f"--model {shlex.quote(self.model_name)} "
+            f"{provider_flag}--model {shlex.quote(self.model_name)} "
             "2>&1 | stdbuf -oL tee /logs/agent/hermes.txt"
         )
         try:
