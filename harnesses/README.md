@@ -64,14 +64,14 @@ hermes (do NOT let the adapter redirect HERMES_HOME away from this):
 
 ## Memory endpoints — DEPLOYED + verified (2026-05-29)
 
-All three live on <memory-host>, folded into the existing recall compose stack
+All three live on the memory host, folded into the existing recall compose stack
 (`~/Docker/recall/docker-compose.yml`; source mirror in repo `infra/`). recall
 was NOT relocated. All share `<memory-net>`; eval agents reach them over
 the LAN.
 
 | Service | URL used in configs | Status |
 |---|---|---|
-| recall (Graphiti MCP) — prod ontology | `http://internal-host:8407/mcp` | LIVE — <prod-group>/<prod-group>/<prod-group> groups |
+| recall (Graphiti MCP) — prod ontology | `http://internal-host:8407/mcp` | LIVE — the production memory groups |
 | recall-eval (Graphiti MCP) — coding ontology | `http://internal-host:8408/mcp` | LIVE — eval-openclaw/eval-hermes groups; both harnesses point here |
 | Hindsight MCP | `http://internal-host:8888/mcp/<bank>/` | LIVE (8888 API+MCP, 9999 UI) |
 | Honcho API | `http://internal-host:8000` | LIVE (hermes memory provider) |
@@ -98,7 +98,7 @@ for the design + 4-phase build + post-implementation review.
 
 Per-agent isolation (verified): recall `X-Group-ID` (openclaw DOES forward custom
 MCP headers — confirmed), Hindsight bank, and Honcho workspace are all
-`eval-openclaw` / `eval-hermes` — separate from prod groups (<prod-group>/<prod-group>) so eval
+`eval-openclaw` / `eval-hermes` — separate from prod groups (the production memory groups) so eval
 memory never pollutes production graphs.
 
 ## Resolved at test time (2026-05-29) — no longer guesses

@@ -4,7 +4,7 @@
 Reads LIVE state (no hand-typed data, so it can't drift):
   - rich image introspection (skills + their SKILL.md, persona/identity + config
     file CONTENTS, MCP servers, plugins) via a single `docker run`,
-  - memory-service health via HTTP pings to <memory-host>.
+  - memory-service health via HTTP pings to the memory host.
 
 Self-contained (works opened directly from disk): every persona/identity/config
 file AND every skill's SKILL.md is embedded, and clicking a chip opens a modal
@@ -38,7 +38,7 @@ MEMORY = [
     # recall-eval (port 8408, coding-eval entity ontology) is what the
     # eval harnesses (openclaw + hermes) point at; the dashboard tracks
     # eval-side health. recall-prod on :8407 (agent-memory ontology) serves
-    # the unrelated <prod-group>/<prod-group>/<prod-group> production groups.
+    # the unrelated production memory groups.
     # Internal endpoints from env (gitignored configs/local.env) — no topology in this public repo.
     ("recall", f"{os.environ.get('RECALL_URL', '')}/health", "Graphiti temporal KG (eval, 23 tools, coding ontology)"),
     ("hindsight", f"{os.environ.get('HINDSIGHT_URL', '')}/health", "learning memory (57 tools)"),
@@ -636,8 +636,8 @@ def render(data: dict, health: dict) -> str:
 <div class="ts">generated {ts} · source: {IMAGE} + live memory pings · re-run tools/agent_status.py to refresh</div>
 {err}
 <div class="grid">{cards}</div>
-<div class="legend"><div class="sec" style="margin-top:0;border:0;padding:0">Memory services (<memory-host>)</div>{mem_legend}
-<div class="muted" style="margin-top:8px">green = reachable · red = down · grey = n/a (internal). Per-agent keys isolate eval memory from prod (<prod-group>/<prod-group>).</div>
+<div class="legend"><div class="sec" style="margin-top:0;border:0;padding:0">Memory services (the memory host)</div>{mem_legend}
+<div class="muted" style="margin-top:8px">green = reachable · red = down · grey = n/a (internal). Per-agent keys isolate eval memory from prod (the production memory groups).</div>
 </div>
 
 <div id="ov" onclick="hideFile()"></div>

@@ -7,6 +7,12 @@
 # repo. Real values live here; commit only configs/local.env.example.
 configs/local.env
 
+# Internal memory-stack deployment mirror (docker-compose + recall config +
+# wrapper notes). Contains load-bearing internal topology (host paths, the
+# memory-host docker network); the canonical copy lives on the memory host.
+# Kept local on the run host, OUT of this PUBLIC repo.
+infra/
+
 # Harbor job outputs (kept local; opt-in upload to Harbor Hub if needed)
 jobs/
 
@@ -28,6 +34,12 @@ __pycache__/
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 
-# Generated dashboards are COMMITTED (so the suite is human-reviewable straight
-# from the repo, the whole point of the catalog). Regenerate before committing
-# task changes: `python3 tools/task_catalog.py` / `python3 tools/agent_status.py`.
+# Static generated dashboards are COMMITTED (so the suite is human-reviewable
+# straight from the repo). Regenerate before committing task/spec changes:
+# `python3 tools/task_catalog.py` / `python3 tools/roadmap.py`.
+#
+# EXCEPTION: agent-status.html is a LIVE-infra artifact — its generator embeds
+# real memory-service URLs (memory host) + container config on every regen, so a
+# committed copy always leaks internal topology. Kept local-only; regenerate to
+# view live health: `python3 tools/agent_status.py`.
+agent-status.html

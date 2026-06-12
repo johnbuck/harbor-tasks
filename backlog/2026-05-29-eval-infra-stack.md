@@ -9,7 +9,7 @@
 - **Goal:** Give both harnesses the external capabilities they need to perform at
   their best, in **one docker-compose stack** on the homelab: persistent memory
   (recall + Hindsight + Honcho) and a shared headless browser (CDP). Per-agent
-  isolation so eval memory never pollutes prod (<prod-group>/<prod-group>) graphs.
+  isolation so eval memory never pollutes prod (the production memory groups) graphs.
 - Companion (shipped):
   [`done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md`](done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md).
 
@@ -22,7 +22,7 @@
 ## Memory matrix (operator-specified)
 | Backend | openclaw | hermes | How wired |
 |---|---|---|---|
-| **recall** (Graphiti, EXISTS on <memory-host>) | ✅ | ✅ | MCP `http://internal-host:8407/mcp`; per-agent via `X-Group-ID` header + `Host: localhost:8407` rewrite (recall's DNS-rebind guard). groups `eval-openclaw` / `eval-hermes`. |
+| **recall** (Graphiti, EXISTS on the memory host) | ✅ | ✅ | MCP `http://internal-host:8407/mcp`; per-agent via `X-Group-ID` header + `Host: localhost:8407` rewrite (recall's DNS-rebind guard). groups `eval-openclaw` / `eval-hermes`. |
 | **Hindsight** (vectorize-io) | ✅ | ✅ | built-in streamable-HTTP MCP; per-agent **bank** via URL path `/mcp/<bank>/` or `X-Bank-Id`. banks `eval-openclaw` / `eval-hermes`. |
 | **Honcho** (plastic-labs) | ❌ | ✅ | hermes **native skill**, not MCP: `pip install honcho-ai` + `hermes honcho setup` → local → base URL = our Honcho API. Config in `~/.honcho/config.json` (HONCHO_API_KEY). |
 
@@ -42,7 +42,7 @@ network. Full doc: `homelab/<memory-host>/tenants/<run-host>/docs/recall/recall.
   volume for `~/.hindsight-docker/.pg0`. OR external-PG compose (`pgvector/pgvector:pg18`
   + hindsight) — env `HINDSIGHT_API_DATABASE_URL`, `HINDSIGHT_DB_PASSWORD`.
 - LLM provider: `HINDSIGHT_API_LLM_PROVIDER` + `HINDSIGHT_API_LLM_API_KEY`.
-  Supports `ollama`/`lmstudio`/openai-compatible → **point at <memory-host> llama-cpp or
+  Supports `ollama`/`lmstudio`/openai-compatible → **point at the memory host's llama-cpp or
   OpenRouter (data_collection deny)** to keep it private. Use the **slim** image +
   external embeddings to avoid bundling heavy models.
 - MCP: streamable-HTTP at `http://<host>:8888/mcp/` (multi-bank) or `/mcp/<bank>/`.
@@ -76,13 +76,13 @@ network. Full doc: `homelab/<memory-host>/tenants/<run-host>/docs/recall/recall.
 | recall-neo4j | 7688 / 7475 | exists |
 | Hindsight | 8888 (API+MCP) / 9999 (UI) | new |
 | Honcho api | 8000 | new |
-| Honcho pg / redis | 5432 / 6379 | keep INTERNAL (don't publish; recall uses neo4j not pg, but avoid clashing w/ other <memory-host> pg) |
+| Honcho pg / redis | 5432 / 6379 | keep INTERNAL (don't publish; recall uses neo4j not pg, but avoid clashing w/ other pg on the memory host) |
 | Browser CDP | e.g. 3000 / 9222 | new; pick free |
 - Honcho and Hindsight each want their own pgvector → **separate Postgres** (don't share).
 
 ## Privacy posture (homelab requirement)
 All memory-derivation LLM calls must use **no-train** routes: OpenRouter
-`data_collection: deny` OR local <memory-host> inference (llama-cpp / TEI). No cloud
+`data_collection: deny` OR local inference on the memory host (llama-cpp / TEI). No cloud
 Browserbase (use local CDP). No `app.honcho.dev`/`hindsight cloud` (self-host).
 
 ## Deployment note (the "one stack" ask)
@@ -92,8 +92,8 @@ recall already runs in its own working compose. Two options:
 2. **Single unified compose** folding recall in. Cleaner conceptually but risks the
    live recall deploy.
 Recommend option 1 first; consider folding recall in later. Location: a new dir on
-<memory-host>, e.g. `~/Docker/agent-eval-infra/`. Source-of-truth compose drafted in this
-repo under `infra/` (to be written), deployed to <memory-host> with operator approval.
+the memory host, e.g. `~/Docker/agent-eval-infra/`. Source-of-truth compose drafted in this
+repo under `infra/` (to be written), deployed to the memory host with operator approval.
 
 ## Open items
 - [ ] Draft the compose file(s) (Hindsight + Honcho + browser) — source in repo `infra/`.

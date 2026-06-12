@@ -8,10 +8,11 @@ to navigate, and the invariants you must not break.
 Task suite + run configs + harness adapters for the **openclaw-vs-hermes** comparison
 on [Harbor](https://github.com/harbor-framework/harbor). Thesis: *the harness matters
 more than the model* — both harnesses run the **same** model (`deepseek-v4-pro` via
-OpenRouter) so any gap is the harness. Lives on **<run-host>** at
+OpenRouter) so any gap is the harness. Lives on **the run host** at
 `~/benchmarking/harbor-tasks`; the Harbor framework fork is the sibling
-`~/benchmarking/harbor` (its `.venv` is what runs sweeps). Edited from <dev-host> over the
-`~/mnt/<run-host>/...` sshfs mount; **run git + `harbor run` on <run-host>**.
+`~/benchmarking/harbor` (its `.venv` is what runs sweeps). Edited from the dev
+workstation over the `~/mnt/<run-host>/...` sshfs mount; **run git + `harbor run`
+on the run host**.
 
 ## Code worth navigating with Serena (Python)
 - `lib/openclaw_thin.py` (`OpenClawThin`), `lib/hermes_thin.py` (`HermesThin`) — the

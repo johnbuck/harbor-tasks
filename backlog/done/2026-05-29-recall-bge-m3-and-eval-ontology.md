@@ -107,9 +107,9 @@ edges) from the 2026-04-30 LLM-swap smoke test. Cleared via
 confirmation. No production impact; the swap event is documented in
 `<memory-host>/tenants/<run-host>/docs/research/session-2026-05-01-recall-openrouter-swap.md`.
 
-### D3 — Community-build cron lives on <memory-host> as a systemd `--user` timer
+### D3 — Community-build cron lives on the memory host as a systemd `--user` timer
 
-Mirror of the existing `magellan-*` cron pattern on <memory-host>:
+Mirror of the existing `magellan-*` cron pattern on the memory host:
 
 - `/home/<user>/scripts/recall-build-communities.sh` — shell wrapper, `docker exec`s the python script into `recall-mcp`.
 - `/home/<user>/scripts/recall-build-communities.py` — instantiates
@@ -153,7 +153,7 @@ the new endpoint is reachable from the baked configs.
 - [x] `smoke-openrouter` group dropped (`MATCH (n) WHERE n.group_id=...
       RETURN count(n) → 0`).
 
-## Files changed on <memory-host> (canonical)
+## Files changed on the memory host (canonical)
 
 - `~/Docker/recall/config.yaml` — LLM model + embedder swap (backup: `*.bak-pre-bge-m3-20260529`)
 - `~/Docker/recall/docker-compose.yml` — added `recall-mcp-eval` service (backup `*.bak-pre-bge-m3-20260529`)

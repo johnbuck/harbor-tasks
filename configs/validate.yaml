@@ -24,4 +24,4 @@ agents:
   - name: oracle
 
 datasets:
-  - path: <repo>/tasks/marketing
+  - path: tasks/marketing

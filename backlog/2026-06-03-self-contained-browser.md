@@ -4,22 +4,22 @@
 **Status:** IMPLEMENTED 2026-06-03
 **Date:** 2026-06-03
 **Origin / triggered-by:** operator caught that the browser tool drove a **shared headless
-Chromium on <memory-host>** (`~/Docker/agent-cdp`, CDP `:9222`) over the LAN — a cross-machine
+Chromium on the memory host** (`~/Docker/agent-cdp`, CDP `:9222`) over the LAN — a cross-machine
 dependency that violates the explicit "keep things self-contained, no weird cross-computer
 situation" requirement. (I wired the <memory-host> version; this corrects it.)
 
 ## Problem
 
-Both harnesses' browser tools were pointed at a **remote** Chromium on <memory-host>:
+Both harnesses' browser tools were pointed at a **remote** Chromium on the memory host:
 `openclaw.json` `browser.cdpUrl` and `hermes/config.yaml` `browser.cdp_url` both =
 `http://internal-host:9222`. Consequences:
-- Cross-machine: every browser action is a LAN round-trip to <memory-host>; a <memory-host>/VPN/`agent-cdp`
+- Cross-machine: every browser action is a LAN round-trip to the memory host; a <memory-host>/VPN/`agent-cdp`
   hiccup breaks the eval. Not self-contained.
 - It also **disabled each harness's own built-in local browser** — setting `cdp_url` is exactly
   what makes hermes "skip the local headless launcher" (`browser_tool.py::_get_cdp_override`);
   openclaw likewise attaches instead of managing its own.
 - The image bakes **no Chromium** (only the `playwright-core` lib), which is *why* it was
-  pointed at <memory-host> in the first place — expedient, not principled.
+  pointed at the memory host in the first place — expedient, not principled.
 
 ## Goal / definition of done
 
@@ -41,7 +41,7 @@ for both harnesses with `browser_used=1`, driving the local browser.
   which is the variable under test. It's also the smallest delta from the working setup
   (swap `<memory-host>` → `127.0.0.1` + add an in-container launcher).
 - **Concurrency bonus:** because each trial container has its own Chromium (not one shared on
-  <memory-host>), browser trials no longer have to run sequentially — the `n_concurrent_trials: 1`
+  the memory host), browser trials no longer have to run sequentially — the `n_concurrent_trials: 1`
   constraint can be relaxed for browser tasks later (kept at 1 for the direct e2e comparison).
 
 **Chromium provisioning (validated in-container before writing this):**
@@ -68,7 +68,7 @@ for both harnesses with `browser_used=1`, driving the local browser.
 3. **`harnesses/openclaw/openclaw.json`**: `browser.cdpUrl` `internal-host` →
    `127.0.0.1`.
 4. **`harnesses/hermes/config.yaml`**: `browser.cdp_url` `internal-host` → `127.0.0.1`
-   (update the "running on <memory-host>" comment to "in-container").
+   (update the "running on the memory host" comment to "in-container").
 5. **`lib/openclaw_thin.py` + `lib/hermes_thin.py`**: prepend `bash /opt/harness/start-cdp.sh &&`
    to the agent command so the local browser is up before the agent runs.
 6. Rebuild `:latest`; verify `/usr/bin/chromium` present + a local CDP launch; run
@@ -94,7 +94,7 @@ The `&&` gate is the proof of locality: each agent only ran *because* `start-cdp
 exited 0 (local CDP up). A failed local launch would have aborted the run before the agent.
 Prior (<memory-host>) run for contrast: 18 `internal-host` references in the trajectory.
 
-## Note — memory stack is still on <memory-host> (separate, out of scope here)
+## Note — memory stack is still on the memory host (separate, out of scope here)
 
 This change makes the **browser** self-contained. The **hindsight memory** MCP
 (`openclaw.json` mcp.hindsight, hermes honcho/hindsight) still points at

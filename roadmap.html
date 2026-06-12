@@ -63,7 +63,7 @@
 </div>
 <div class="wrap">
 <h1>Roadmap — harness-vs-model eval, by epic</h1>
-<div class="ts">generated 2026-06-10 · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
+<div class="ts">generated 2026-06-12 · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>Prove the suite can detect a <b>HARNESS</b> difference (openclaw vs hermes) independent of the <b>MODEL</b>. Both harnesses run the same model (<span class='mono'>deepseek-v4-pro</span>), so any score gap is the harness. Until the suite demonstrably <i>can</i> discriminate, no “the harnesses are equivalent” conclusion is valid.</div>
 <div class="sec" style="margin-top:6px">Where we stand right now</div>
 <div class="now"><b>rewardkit grading rollout (2026-06-10) — COMPLETE: all 23 active graded tasks converted + oracle-validated.</b>
@@ -79,7 +79,7 @@ lost-in-the-middle recall (the #93 rot-curve fractions + <span class="mono">answ
 preserved as weight-0 criteria). Each oracle-validated with a verified criterion count, <b>$0
 OpenRouter</b>. Footguns found + documented: zero-arg criteria double-register (#45); a vestigial
 <span class="mono">verifier.env</span> LLM key breaks grading. <b>Keep bespoke:</b> the 4 pytest
-tasks (rewardkit would just wrap pytest). 5 commits sit on <run-host> <span class="mono">main</span>
+tasks (rewardkit would just wrap pytest). 5 commits sit on the run host <span class="mono">main</span>
 pending the operator's push (no GitHub auth in the non-interactive session).<br><br>
 <b>Verifier-integrity (2026-06-09) — TWO of three proven discriminators were
 GAMEABLE</b> (now fixed). Adopting Harbor's native <span class="mono">environment_mode="separate"</span> verifier
@@ -122,7 +122,7 @@ registry refresh. <b>Sequence:</b> confirm hermes browser parity → run core-11
 → n≥3 pass^k → thin verdict (E5).</div>
 <div class="sec">Epics</div>
 <div class="legend"><span><i class="ldot" style="background:#5fd07e"></i> done</span><span><i class="ldot" style="background:#e6c98a"></i> in progress</span><span><i class="ldot" style="background:#ef7a7a"></i> blocked</span><span><i class="ldot" style="background:#3a4150"></i> to do</span><span><i class="ldot" style="background:#6e4257"></i> deprecated</span><span style="margin-left:auto">click a row for detail · “open full spec” shows the backlog file</span></div>
-<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete.</div><button class="specbtn" onclick="openSpec('E1-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge ok">done</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host (novita)</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin had regressed to `only:[deepseek]` which, once DeepSeek's deepseek-v4-pro endpoint became training-flagged, left 0 endpoints under data_collection:deny → 404 on every hermes call. RESOLVED 2026-06-03: re-pinned both harnesses to **novita** (byte-identical provider.only in openclaw.json + hermes config.yaml). Fireworks was deny-eligible but lacks tool-use for this model; novita serves deepseek-v4-pro under deny + tool-use + reasoning + require_parameters (all verified via direct API probes + a live oracle/openclaw/hermes probe — all three reward 1.0). data_collection:deny preserved (privacy intact).</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge ok">done</span></div><div class="esum">The subsystems the harnesses actually use — memory + a shared browser. Both halves shipped: memory stack on <memory-host>, and the browser tool unblocked (stale-registry fix) + verified driving the shared Chromium end-to-end on BOTH harnesses.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — <memory-host> deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on <memory-host> and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory + browser both shipped</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. Memory half shipped earlier; the browser half closed 2026-06-03 (stale-registry fix below, verified e2e on both harnesses).</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — stale plugin registry (task #90)</div><span class="rref">2026-06-03-browser-tool-registry-fix.md</span></div><div class="detail"><div class="dtext">Both harnesses wired to a shared headless Chromium on <memory-host> (CDP :9222). 2026-06-03 REAL ROOT CAUSE (supersedes BOTH the CDP-reachability guess AND the embedded-vs-gateway theory): the rich image shipped a STALE persisted plugin registry (/root/.openclaw/plugins) indexed before the `browser` plugin's deps were present, so browser (+ canvas/file-transfer/phone-control/talk-voice) were never indexed and their tools never surfaced — embedded OR gateway-backed. Fix is one line baked into the image: `openclaw plugins registry --refresh` (46 → 64 enabled). Proven in-container: after refresh, plain embedded `openclaw agent --local` exposes the identical 59-tool catalog as gateway-backed (browser + full hindsight memory + sessions_spawn/subagents + 14 skills). Embedded is NOT a reduced runtime for anything the core-11 exercises — so the prior 'must go gateway-backed' conclusion was wrong (see the row below).</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-03-browser-tool-registry-fix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Self-contained in-container browser (no cross-machine CDP)</div><span class="rref">2026-06-03-self-contained-browser.md</span></div><div class="detail"><div class="dtext">The browser tool drove a shared Chromium on <memory-host> (CDP :9222) over the LAN — a cross-machine dependency that violated the self-contained requirement (and accidentally disabled each harness's own local browser). Fixed: bake a real `/usr/bin/chromium` (148) into the rich image + `/etc/chromium.d` no-sandbox flags (run-as-root) + an idempotent `start-cdp.sh` that launches a headless Chromium INSIDE each trial container; both harnesses' browser tools attach to `127.0.0.1:9222`. One controlled browser backend per container keeps the comparison fair (only the harness's tool differs). Verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectory shows `127.0.0.1` and ZERO <memory-host> refs (prior run had 18). Memory (hindsight :8888) is still the shared <memory-host> substrate by design — separate decision.</div><button class="specbtn" onclick="openSpec('E3-6','2026-06-03-self-contained-browser.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Gateway-backed full-harness execution — NOT NEEDED (was the #90 theory)</div><span class="rref">2026-06-03-gateway-backed-full-harness.md</span></div><div class="detail"><div class="dtext">Spec written on a premise that the experiments disproved. The theory: thin `--local` runs EMBEDDED, dropping the gateway's browser control server → no browser tool. Reality: the blocker was the stale plugin registry (row above); once refreshed, embedded `--local` exposes browser + memory + the full 59-tool catalog identically to gateway-backed. The gateway adds only channels/cron/device-pairing/multi-session-routing/sidecars — none of which the core-11 tasks touch. Operator decision (2026-06-03): ship the registry-refresh fix, KEEP the embedded `--local` invocation (simpler, no gateway lifecycle / port-collision / teardown risk, and proven fair). Gateway-backed left as rejected, not deferred — there is no capability gap to close.</div><button class="specbtn" onclick="openSpec('E3-7','2026-06-03-gateway-backed-full-harness.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task Suite</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-2','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench integration — oracle shipped; agent-run deprecated</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument proven (interim)</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes.</div><button class="specbtn" onclick="openSpec('E4-6','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E4-7','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E4-8','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E4-9','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E4-10','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E4-11','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Rework the ~22 salvageable deprecated tasks (task #89)</div></div><div class="detail"><div class="dtext">The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89.</div><button class="specbtn" disabled>tracked by task #</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-rot scoring integrity — false-zero audit + metric normalization</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work.</div><button class="specbtn" onclick="openSpec('E4-13','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Core suite — the 11 load-bearing harness-measuring tests</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">Designated the CORE comparison set: 11 tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Excludes prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild.</div><button class="specbtn" onclick="openSpec('E4-14','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall MCP dropped from both eval harnesses — memory substrate change</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">recall (Graphiti temporal-KG memory, <memory-host>:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the <memory-host> recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1.</div><button class="specbtn" onclick="openSpec('E4-15','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes write-persistence (#92) — false-zero root cause fixed</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: "."`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app &amp;&amp; hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression.</div><button class="specbtn" onclick="openSpec('E4-16','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE</div><span class="rref">2026-06-09-verifier-integrity-audit.md</span></div><div class="detail"><div class="dtext">7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical.</div><button class="specbtn" onclick="openSpec('E4-17','2026-06-09-verifier-integrity-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> rewardkit grading rollout — all 23 active graded tasks converted + validated</div><span class="rref">2026-06-09-verifier-sandbox-rollout.md</span></div><div class="detail"><div class="dtext">Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on <run-host> main pending operator push.</div><button class="specbtn" onclick="openSpec('E4-18','2026-06-09-verifier-sandbox-rollout.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → verdict (task #81)</div></div><div class="detail"><div class="dtext">The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild + the Wave-1 verifier-integrity fixes (a gameable discriminator must be closed before its numbers are trusted). Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E5-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task Suite page — review + work tracker for every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py → task-catalog.html (titled “Task Suite”). Drift-proof accordion over every task: what it asks, how it's graded, the oracle, the environment — plus a per-task WORK status (discriminating / needs-validation / needs-hardening / retired) and an OPERATOR-APPROVAL axis (every task is NEEDS REVIEW until its task.toml sets approved=true). Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E5-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page (epics + status)</div><span class="rref">2026-06-02-roadmap-page.md</span></div><div class="detail"><div class="dtext">tools/roadmap.py → roadmap.html — the PLAN view: the thesis, a where-we-stand callout, the epics, every backlog spec rolled up under one with a status dot, an expandable detail, and an open-full-spec modal. Hand-curated EPICS table; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E5-2','2026-06-02-roadmap-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Viewer Claude-analysis on subscription auth + durable fork launch</div><span class="rref">2026-06-02-viewer-subscription-auth.md</span></div><div class="detail"><div class="dtext">The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth.</div><button class="specbtn" onclick="openSpec('E5-3','2026-06-02-viewer-subscription-auth.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — thin verdict over the auto-computed report (task #81)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Retargeted 2026-06-03 (option a): the numbers are owned by Harbor reporting + metrics/track_a_weighted.py → track_a_report.json (split, pass^k, per-category, efficiency — auto-computed, never hand-typed, no drift/false-zero risk). RESULTS.md is demoted to the THIN layer no automated report can produce: the plain-English verdict + construct-validity caveats (honcho asymmetry, recall-removed, BLUNT controls, false-zero/VOID traps) + reproduction command, embedding the auto-computed split block and linking to the viewer. Written once the first core-suite grid runs.</div><button class="specbtn" onclick="openSpec('E5-4','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> FE exportable verdict report (follow-up)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run.</div><button class="specbtn" onclick="openSpec('E5-5','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div></div>
+<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete.</div><button class="specbtn" onclick="openSpec('E1-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge ok">done</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host (novita)</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin had regressed to `only:[deepseek]` which, once DeepSeek's deepseek-v4-pro endpoint became training-flagged, left 0 endpoints under data_collection:deny → 404 on every hermes call. RESOLVED 2026-06-03: re-pinned both harnesses to **novita** (byte-identical provider.only in openclaw.json + hermes config.yaml). Fireworks was deny-eligible but lacks tool-use for this model; novita serves deepseek-v4-pro under deny + tool-use + reasoning + require_parameters (all verified via direct API probes + a live oracle/openclaw/hermes probe — all three reward 1.0). data_collection:deny preserved (privacy intact).</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge ok">done</span></div><div class="esum">The subsystems the harnesses actually use — memory + a shared browser. Both halves shipped: memory stack on the memory host, and the browser tool unblocked (stale-registry fix) + verified driving the shared Chromium end-to-end on BOTH harnesses.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — the memory host deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on the memory host and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory + browser both shipped</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. Memory half shipped earlier; the browser half closed 2026-06-03 (stale-registry fix below, verified e2e on both harnesses).</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — stale plugin registry (task #90)</div><span class="rref">2026-06-03-browser-tool-registry-fix.md</span></div><div class="detail"><div class="dtext">Both harnesses wired to a shared headless Chromium on the memory host (CDP :9222). 2026-06-03 REAL ROOT CAUSE (supersedes BOTH the CDP-reachability guess AND the embedded-vs-gateway theory): the rich image shipped a STALE persisted plugin registry (/root/.openclaw/plugins) indexed before the `browser` plugin's deps were present, so browser (+ canvas/file-transfer/phone-control/talk-voice) were never indexed and their tools never surfaced — embedded OR gateway-backed. Fix is one line baked into the image: `openclaw plugins registry --refresh` (46 → 64 enabled). Proven in-container: after refresh, plain embedded `openclaw agent --local` exposes the identical 59-tool catalog as gateway-backed (browser + full hindsight memory + sessions_spawn/subagents + 14 skills). Embedded is NOT a reduced runtime for anything the core-11 exercises — so the prior 'must go gateway-backed' conclusion was wrong (see the row below).</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-03-browser-tool-registry-fix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Self-contained in-container browser (no cross-machine CDP)</div><span class="rref">2026-06-03-self-contained-browser.md</span></div><div class="detail"><div class="dtext">The browser tool drove a shared Chromium on &lt;MEMORY-HOST&gt; (CDP :9222) over the LAN — a cross-machine dependency that violated the self-contained requirement (and accidentally disabled each harness's own local browser). Fixed: bake a real `/usr/bin/chromium` (148) into the rich image + `/etc/chromium.d` no-sandbox flags (run-as-root) + an idempotent `start-cdp.sh` that launches a headless Chromium INSIDE each trial container; both harnesses' browser tools attach to `127.0.0.1:9222`. One controlled browser backend per container keeps the comparison fair (only the harness's tool differs). Verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectory shows `127.0.0.1` and ZERO &lt;memory-host&gt; refs (prior run had 18). Memory (hindsight :8888) is still the shared &lt;memory-host&gt; substrate by design — separate decision.</div><button class="specbtn" onclick="openSpec('E3-6','2026-06-03-self-contained-browser.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Gateway-backed full-harness execution — NOT NEEDED (was the #90 theory)</div><span class="rref">2026-06-03-gateway-backed-full-harness.md</span></div><div class="detail"><div class="dtext">Spec written on a premise that the experiments disproved. The theory: thin `--local` runs EMBEDDED, dropping the gateway's browser control server → no browser tool. Reality: the blocker was the stale plugin registry (row above); once refreshed, embedded `--local` exposes browser + memory + the full 59-tool catalog identically to gateway-backed. The gateway adds only channels/cron/device-pairing/multi-session-routing/sidecars — none of which the core-11 tasks touch. Operator decision (2026-06-03): ship the registry-refresh fix, KEEP the embedded `--local` invocation (simpler, no gateway lifecycle / port-collision / teardown risk, and proven fair). Gateway-backed left as rejected, not deferred — there is no capability gap to close.</div><button class="specbtn" onclick="openSpec('E3-7','2026-06-03-gateway-backed-full-harness.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task Suite</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-2','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench integration — oracle shipped; agent-run deprecated</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument proven (interim)</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes.</div><button class="specbtn" onclick="openSpec('E4-6','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E4-7','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E4-8','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E4-9','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E4-10','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E4-11','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Rework the ~22 salvageable deprecated tasks (task #89)</div></div><div class="detail"><div class="dtext">The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89.</div><button class="specbtn" disabled>tracked by task #</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-rot scoring integrity — false-zero audit + metric normalization</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work.</div><button class="specbtn" onclick="openSpec('E4-13','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Core suite — the 11 load-bearing harness-measuring tests</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">Designated the CORE comparison set: 11 tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Excludes prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild.</div><button class="specbtn" onclick="openSpec('E4-14','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall MCP dropped from both eval harnesses — memory substrate change</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">recall (Graphiti temporal-KG memory, &lt;memory-host&gt;:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the memory host recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1.</div><button class="specbtn" onclick="openSpec('E4-15','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes write-persistence (#92) — false-zero root cause fixed</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: "."`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app &amp;&amp; hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression.</div><button class="specbtn" onclick="openSpec('E4-16','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE</div><span class="rref">2026-06-09-verifier-integrity-audit.md</span></div><div class="detail"><div class="dtext">7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical.</div><button class="specbtn" onclick="openSpec('E4-17','2026-06-09-verifier-integrity-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> rewardkit grading rollout — all 23 active graded tasks converted + validated</div><span class="rref">2026-06-09-verifier-sandbox-rollout.md</span></div><div class="detail"><div class="dtext">Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on the run host main pending operator push.</div><button class="specbtn" onclick="openSpec('E4-18','2026-06-09-verifier-sandbox-rollout.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → verdict (task #81)</div></div><div class="detail"><div class="dtext">The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild + the Wave-1 verifier-integrity fixes (a gameable discriminator must be closed before its numbers are trusted). Tracked as task #81.</div><button class="specbtn" disabled>tracked by task #</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E5-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task Suite page — review + work tracker for every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py → task-catalog.html (titled “Task Suite”). Drift-proof accordion over every task: what it asks, how it's graded, the oracle, the environment — plus a per-task WORK status (discriminating / needs-validation / needs-hardening / retired) and an OPERATOR-APPROVAL axis (every task is NEEDS REVIEW until its task.toml sets approved=true). Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E5-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page (epics + status)</div><span class="rref">2026-06-02-roadmap-page.md</span></div><div class="detail"><div class="dtext">tools/roadmap.py → roadmap.html — the PLAN view: the thesis, a where-we-stand callout, the epics, every backlog spec rolled up under one with a status dot, an expandable detail, and an open-full-spec modal. Hand-curated EPICS table; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E5-2','2026-06-02-roadmap-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Viewer Claude-analysis on subscription auth + durable fork launch</div><span class="rref">2026-06-02-viewer-subscription-auth.md</span></div><div class="detail"><div class="dtext">The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth.</div><button class="specbtn" onclick="openSpec('E5-3','2026-06-02-viewer-subscription-auth.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — thin verdict over the auto-computed report (task #81)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Retargeted 2026-06-03 (option a): the numbers are owned by Harbor reporting + metrics/track_a_weighted.py → track_a_report.json (split, pass^k, per-category, efficiency — auto-computed, never hand-typed, no drift/false-zero risk). RESULTS.md is demoted to the THIN layer no automated report can produce: the plain-English verdict + construct-validity caveats (honcho asymmetry, recall-removed, BLUNT controls, false-zero/VOID traps) + reproduction command, embedding the auto-computed split block and linking to the viewer. Written once the first core-suite grid runs.</div><button class="specbtn" onclick="openSpec('E5-4','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> FE exportable verdict report (follow-up)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run.</div><button class="specbtn" onclick="openSpec('E5-5','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div></div>
 </div>
 <div id="srcs" style="display:none"><div id="src-E1-0"># Harbor adoption — retire rube, build on Harbor
 
@@ -403,7 +403,7 @@ export INFISICAL_TOKEN=$(infisical login --method=universal-auth --silent --plai
 infisical run \
   --projectId INFISICAL_PROJECT_ID --env=production \
   --path=/proxy/ --domain="${INFISICAL_SITE_URL%/}/api" -- \
-  uv run --project /home/<user>/harbor harbor run -c configs/verify-rich.yaml
+  uv run --project ~/harbor harbor run -c configs/verify-rich.yaml
 ```
 
 Expected result: both rows show `Reward 1.000 / Exceptions 0` and the post-run
@@ -486,7 +486,7 @@ image — the build is mostly **configuration**, not new installs.
 
 | Backend | openclaw | hermes | Integration |
 |---|---|---|---|
-| **recall** (existing Graphiti MCP on <memory-host> `recall-mcp:8407`) | ✅ | ✅ | MCP server; per-agent isolation via `group_id`. recall reads `X-Group-ID` header (Caddy injects it) OR explicit `group_id=` per call. **Each agent its own group_id** (e.g. `eval-openclaw`, `eval-hermes`) so memories don't collide AND don't pollute prod (<prod-group>/<prod-group>) graphs. |
+| **recall** (existing Graphiti MCP on the memory host `recall-mcp:8407`) | ✅ | ✅ | MCP server; per-agent isolation via `group_id`. recall reads `X-Group-ID` header (Caddy injects it) OR explicit `group_id=` per call. **Each agent its own group_id** (e.g. `eval-openclaw`, `eval-hermes`) so memories don't collide AND don't pollute prod (the production memory groups) graphs. |
 | **Hindsight** (`vectorize-io/hindsight`, self-host) | ✅ | ✅ | built-in streamable-HTTP MCP at `/mcp/`; per-agent via `bank_id` / `X-Bank-Id`. |
 | **Honcho** (`plastic-labs/honcho`, self-host) | ❌ | ✅ | hermes **native skill** (`hermes honcho setup` → local → base URL; `honcho.json`; `pip honcho-ai`). NOT a generic MCP for hermes. |
 
@@ -546,7 +546,7 @@ backends (recall+Hindsight both; Honcho hermes-only by design), equivalent skill
   hermes 0) — because the STOCK Harbor adapter never set `reasoning_effort`. Fix is
   the NATIVE `agent.reasoning_effort: high` (now in `harnesses/hermes/config.yaml`),
   NOT a custom-provider/extra_body hack. Re-verify on the rich image (task #53).
-- recall architecture: `homelab/<memory-host>/tenants/<run-host>/docs/recall/recall.md`.
+- recall architecture: `homelab/&lt;memory-host&gt;/tenants/&lt;run-host&gt;/docs/recall/recall.md`.
 
 ---
 
@@ -1033,7 +1033,7 @@ GROUPS: agent name → memory keys
                honcho workspace eval-hermes
 
 SECRET HYGIENE: Neo4j password is never read into this process. The recall wipe
-SSHes to <memory-host> and runs cypher-shell with the password read *inside* the
+SSHes to the memory host and runs cypher-shell with the password read *inside* the
 container (`printenv NEO4J_AUTH | cut -d/ -f2`) so it never enters our context.
 """
 
@@ -1058,11 +1058,11 @@ RECALL_CONTAINER = "recall-neo4j"
 # (exported into the harbor process env). Kept out of this public repo.
 HINDSIGHT_BASE = os.environ.get("HINDSIGHT_URL", "")
 HONCHO_BASE = os.environ.get("HONCHO_URL", "")
-<memory-host>_SSH = os.environ.get("<memory-host>_SSH", "")
+MEMORY_HOST_SSH = os.environ.get("MEMORY_HOST_SSH", "")
 
 # DATA-SAFETY INVARIANT: this hook deletes memory. It must only ever touch the
 # dedicated eval namespaces — NEVER the production agents that share the same
-# backends. recall-neo4j holds prod groups `<prod-group>`/`<prod-group>`/`<prod-group>`; honcho and
+# backends. recall-neo4j holds the production memory groups; honcho and
 # hindsight are likewise shared with real agents. Every group/workspace/bank id
 # this hook deletes MUST start with this prefix. `_assert_eval_scope` enforces it
 # at the destructive call site, so even a future GROUP_MAP typo cannot wipe prod.
@@ -1083,8 +1083,8 @@ GROUP_MAP = {
 def _assert_eval_scope(group_id: str) -&gt; None:
     """Refuse to operate on anything outside the eval-* namespace.
 
-    Defense in depth against accidentally wiping production memory (<prod-group>/<prod-group>/
-    <prod-group> in recall, real workspaces in honcho/hindsight). Raises ValueError on
+    Defense in depth against accidentally wiping production memory (the
+    production memory groups in recall, real workspaces in honcho/hindsight). Raises ValueError on
     any non-eval id; the caller logs it and skips the wipe rather than guessing.
     """
     if not isinstance(group_id, str) or not group_id.startswith(EVAL_PREFIX):
@@ -1106,14 +1106,14 @@ def _wipe_recall(group_id: str) -&gt; None:
 
     Password is read inside the container; never enters our process env.
     """
-    _assert_eval_scope(group_id)  # never delete prod groups (<prod-group>/<prod-group>/<prod-group>)
+    _assert_eval_scope(group_id)  # never delete the production memory groups
     cypher = f'MATCH (n {{group_id: "{group_id}"}}) DETACH DELETE n'
     inner = (
         f'PASS=$(printenv NEO4J_AUTH | cut -d/ -f2); '
         f'cypher-shell -u neo4j -p "$PASS" {shlex.quote(cypher)}'
     )
     cmd = [
-        "ssh", <memory-host>_SSH,
+        "ssh", MEMORY_HOST_SSH,
         f'docker exec {RECALL_CONTAINER} sh -c {shlex.quote(inner)}',
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -1256,16 +1256,16 @@ async def wipe_memory_state(event: "TrialHookEvent") -&gt; None:
         if isinstance(result, Exception):
             logger.warning("wipe_memory_state: %s wipe failed for group=%s: %s",
                            backend, group_id, result)
-</div><div id="src-E3-0"># Eval memory stack — <memory-host> deployment (SHIPPED 2026-05-29)
+</div><div id="src-E3-0"># Eval memory stack — the memory host deployment (SHIPPED 2026-05-29)
 
 **Epic:** E3 — Capability infrastructure (memory + browser)
 **Status:** memory portion shipped + reachable from LAN. Browser/CDP is
-explicitly out of scope here (task #54). Canonical compose file lives on <memory-host>
+explicitly out of scope here (task #54). Canonical compose file lives on the memory host
 at `~/Docker/recall/docker-compose.yml`; mirror in this repo at
 `infra/recall-memory-stack.docker-compose.yml`.
 
 **Decision rationale (operator-chosen 2026-05-29):**
-- **Add into the existing recall compose, don't relocate** — recall (<prod-group>/<prod-group>
+- **Add into the existing recall compose, don't relocate** — recall (&lt;prod-group&gt;/&lt;prod-group&gt;
   prod memory) stays exactly as-is; new services are appended.
 - **bge-m3 everywhere** (1024-dim, 8192-token) for new memory services; recall
   stays on bge-small until a separate re-embed migration (task #57).
@@ -1276,13 +1276,13 @@ at `~/Docker/recall/docker-compose.yml`; mirror in this repo at
 
 ## Topology
 
-All on the shared external `<memory-net>` docker network. Eval agents on
-<dev-host> reach them over the LAN via published <memory-host> host ports.
+All on the shared external `&lt;memory-net&gt;` docker network. Eval agents on
+the dev workstation reach them over the LAN via published &lt;memory-host&gt; host ports.
 
 ```
-                              <memory-host> host
+                              &lt;memory-host&gt; host
    ┌─────────────────────────────────────────────────────────────────┐
-   │  <memory-net>                                             │
+   │  &lt;memory-net&gt;                                                   │
    │                                                                 │
    │  recall stack (pre-existing)         eval memory (added 5/29)   │
    │  ────────────────────────────        ────────────────────────   │
@@ -1312,7 +1312,7 @@ All on the shared external `<memory-net>` docker network. Eval agents on
 - **No healthcheck.** The TEI image has no `wget` / `curl` / `nc` and a
   near-distroless base — a CMD-SHELL HTTP probe can't run. Dependents use
   `condition: service_started`. The model caches in
-  `/mnt/<storage-host>/docker/mem-embed/cache` (volume), so restarts after first
+  `/mnt/&lt;storage-host&gt;/docker/mem-embed/cache` (volume), so restarts after first
   load are fast.
 
 ### `hindsight` — vectorize-io learning memory MCP
@@ -1326,7 +1326,7 @@ All on the shared external `<memory-net>` docker network. Eval agents on
 
 ### `honcho` — plastic-labs ambient user model (BUILT FROM SOURCE)
 - No prebuilt image; we clone `https://github.com/plastic-labs/honcho` to
-  `~/Docker/recall/honcho-src/` on <memory-host> and let the compose build from it.
+  `~/Docker/recall/honcho-src/` on the memory host and let the compose build from it.
 - Services: `honcho-postgres` (pgvector pg15), `honcho-redis`,
   `honcho-api` (FastAPI, port `8000`), `honcho-deriver` (background worker).
 - Memory-derivation LLM (per-module — DERIVER, SUMMARY, DIALECTIC_LEVELS,
@@ -1343,7 +1343,7 @@ All on the shared external `<memory-net>` docker network. Eval agents on
 - Compose stanza copied verbatim from the pre-existing
   `~/Docker/recall/docker-compose.yml`.
 - One change to the recall **server wrapper** (`~/Docker/recall/wrapper_main.py`)
-  on <memory-host>: widened `TransportSecuritySettings.allowed_hosts` to include
+  on the memory host: widened `TransportSecuritySettings.allowed_hosts` to include
   `internal-host:*`, `internal-host:*`, `recall-mcp:*` (alongside the
   defaults `127.0.0.1:*`, `localhost:*`, `[::1]:*`). DNS-rebind protection
   stays ON; we just permit the trusted LAN host.
@@ -1359,47 +1359,47 @@ All on the shared external `<memory-net>` docker network. Eval agents on
 These steps assume a fresh recall stack with the original 3 services running.
 
 ```bash
-# 1. Back up the live compose on <memory-host>
-ssh <memory-host>@internal-host 'cp ~/Docker/recall/docker-compose.yml \
+# 1. Back up the live compose on the memory host
+ssh &lt;memory-host&gt;@internal-host 'cp ~/Docker/recall/docker-compose.yml \
                               ~/Docker/recall/docker-compose.yml.bak-pre-memory-stack-$(date +%Y%m%d)'
 
 # 2. Generate the two new DB passwords (never echoed; values stay only in .env)
-ssh <memory-host>@internal-host 'cd ~/Docker/recall
+ssh &lt;memory-host&gt;@internal-host 'cd ~/Docker/recall
   grep -q "^HINDSIGHT_DB_PASSWORD=" .env || \
     printf "HINDSIGHT_DB_PASSWORD=%s\n" "$(openssl rand -hex 24)" &gt;&gt; .env
   grep -q "^HONCHO_DB_PASSWORD=" .env || \
     printf "HONCHO_DB_PASSWORD=%s\n" "$(openssl rand -hex 24)" &gt;&gt; .env'
 
 # 3. Volume dirs + honcho source
-ssh <memory-host>@internal-host 'mkdir -p \
-  /mnt/<storage-host>/docker/mem-embed/cache \
-  /mnt/<storage-host>/docker/hindsight/pgdata \
-  /mnt/<storage-host>/docker/honcho/pgdata \
-  /mnt/<storage-host>/docker/honcho/redis
+ssh &lt;memory-host&gt;@internal-host 'mkdir -p \
+  /mnt/&lt;storage-host&gt;/docker/mem-embed/cache \
+  /mnt/&lt;storage-host&gt;/docker/hindsight/pgdata \
+  /mnt/&lt;storage-host&gt;/docker/honcho/pgdata \
+  /mnt/&lt;storage-host&gt;/docker/honcho/redis
   cd ~/Docker/recall
   [ -d honcho-src/.git ] || git clone --depth 1 https://github.com/plastic-labs/honcho honcho-src'
 
 # 4. Push the new compose
 scp infra/recall-memory-stack.docker-compose.yml \
-    <memory-host>@internal-host:~/Docker/recall/docker-compose.yml
+    &lt;memory-host&gt;@internal-host:~/Docker/recall/docker-compose.yml
 
 # 5. Bring up the NEW services only (recall is untouched by `up -d &lt;named&gt;`)
-ssh <memory-host>@internal-host 'cd ~/Docker/recall &amp;&amp; \
+ssh &lt;memory-host&gt;@internal-host 'cd ~/Docker/recall &amp;&amp; \
   docker compose up -d mem-embed hindsight-db honcho-postgres honcho-redis &amp;&amp; \
   docker compose build honcho-api'
 
 # 6. Honcho schema is created at dim 1536 by default; reconfigure to 1024
-ssh <memory-host>@internal-host 'cd ~/Docker/recall &amp;&amp; \
+ssh &lt;memory-host&gt;@internal-host 'cd ~/Docker/recall &amp;&amp; \
   docker compose run --rm --no-deps \
     --entrypoint "/app/.venv/bin/python scripts/configure_embeddings.py --yes" honcho-api'
 
 # 7. Bring up hindsight + honcho
-ssh <memory-host>@internal-host 'cd ~/Docker/recall &amp;&amp; \
+ssh &lt;memory-host&gt;@internal-host 'cd ~/Docker/recall &amp;&amp; \
   docker compose up -d hindsight honcho-api honcho-deriver'
 ```
 
-Apply the recall wrapper allowlist fix once (separate change on <memory-host>); after
-that, all three memory services are reachable from <dev-host> over the LAN.
+Apply the recall wrapper allowlist fix once (separate change on the memory host); after
+that, all three memory services are reachable from the dev workstation over the LAN.
 
 ## Health checks
 
@@ -1411,7 +1411,7 @@ curl -s -o /dev/null -w "honcho    %{http_code}\n" http://internal-host:8000/hea
 ```
 
 Or just open `agent-status.html` (generated by `tools/agent_status.py`) — the
-"Memory services (<memory-host>)" legend at the bottom pings these endpoints and shows
+"Memory services (the memory host)" legend at the bottom pings these endpoints and shows
 green/red dots.
 
 ## Gotchas captured during deploy (already in FOOTGUNS.md, recap)
@@ -1427,7 +1427,7 @@ green/red dots.
 ## Open follow-ups
 
 - `#54` Browser/CDP server — separate spec, not folded in here.
-- `#57` Migrate recall to bge-m3 (re-embeds prod <prod-group>/<prod-group> graph; requires
+- `#57` Migrate recall to bge-m3 (re-embeds prod &lt;prod-group&gt;/&lt;prod-group&gt; graph; requires
   backup + custom re-embed script since Graphiti has no in-place tool).
 </div><div id="src-E3-1">---
 name: recall-bge-m3-and-eval-ontology
@@ -1474,7 +1474,7 @@ extraction backbone*:
 
 (A fifth gap — backups for `:BankConfig`/`:Directive`/`:MentalModel` — was
 flagged but resolved as "covered by existing restic-docker-backup
-of `/mnt/<storage-host>/docker/`" without code changes.)
+of `/mnt/&lt;storage-host&gt;/docker/`" without code changes.)
 
 ## Scope
 
@@ -1487,7 +1487,7 @@ of `/mnt/<storage-host>/docker/`" without code changes.)
 2. **LLM swap to `deepseek/deepseek-v4-flash`.** Same OpenRouter route, same
    account-level `data_collection:deny` (no privacy regression).
 3. **Community-build systemd timer.** Daily 03:30, calls `graphiti.build_communities()`
-   for the active prod groups `[<prod-group>, <prod-group>, <prod-group>]`. First-run on the
+   for the active prod groups `[&lt;prod-group&gt;, &lt;prod-group&gt;, &lt;prod-group&gt;]`. First-run on the
    current graph found 0 communities (sparse, valid result); will fill as
    the graph grows.
 4. **Parallel `recall-mcp-eval` container with eval ontology.** Same image,
@@ -1513,8 +1513,8 @@ of `/mnt/<storage-host>/docker/`" without code changes.)
 
 ### D1 — In-place vector refresh (not a parallel-stack migration)
 
-The recall graph is **tiny** at audit time (~860 nodes across `<prod-group>`,
-`<prod-group>`, `<prod-group>`, `smoke-openrouter` groups, with 1,078 RELATES_TO edges).
+The recall graph is **tiny** at audit time (~860 nodes across `&lt;prod-group&gt;`,
+`&lt;prod-group&gt;`, `&lt;prod-group&gt;`, `smoke-openrouter` groups, with 1,078 RELATES_TO edges).
 At TEI bge-m3 CPU throughput (~20-30 rows/s) the entire re-embed runs in
 ~135 seconds. The complexity of a parallel-stack migration (new MCP
 container, dual-write, cutover) is not worth ~2 minutes of downtime.
@@ -1536,16 +1536,16 @@ Audit found a leftover group `smoke-openrouter` (10 entities, 1 episode, 17
 edges) from the 2026-04-30 LLM-swap smoke test. Cleared via
 `MATCH (n {group_id:"smoke-openrouter"}) DETACH DELETE n` after operator
 confirmation. No production impact; the swap event is documented in
-`<memory-host>/tenants/<run-host>/docs/research/session-2026-05-01-recall-openrouter-swap.md`.
+`&lt;memory-host&gt;/tenants/&lt;run-host&gt;/docs/research/session-2026-05-01-recall-openrouter-swap.md`.
 
-### D3 — Community-build cron lives on <memory-host> as a systemd `--user` timer
+### D3 — Community-build cron lives on the memory host as a systemd `--user` timer
 
-Mirror of the existing `magellan-*` cron pattern on <memory-host>:
+Mirror of the existing `magellan-*` cron pattern on the memory host:
 
-- `/home/<user>/scripts/recall-build-communities.sh` — shell wrapper, `docker exec`s the python script into `recall-mcp`.
-- `/home/<user>/scripts/recall-build-communities.py` — instantiates
+- `/home/&lt;user&gt;/scripts/recall-build-communities.sh` — shell wrapper, `docker exec`s the python script into `recall-mcp`.
+- `/home/&lt;user&gt;/scripts/recall-build-communities.py` — instantiates
   `GraphitiService` via the upstream `graphiti_mcp_server` config and calls
-  `graphiti.build_communities(group_ids=[<prod-group>, <prod-group>, <prod-group>])`.
+  `graphiti.build_communities(group_ids=[&lt;prod-group&gt;, &lt;prod-group&gt;, &lt;prod-group&gt;])`.
 - `~/.config/systemd/user/recall-build-communities.{service,timer}` — daily
   03:30, `RandomizedDelaySec=300`, ntfy on failure via `ExecStopPost`.
 
@@ -1560,7 +1560,7 @@ LLM, same wrapper.
 
 ### D5 — Eval harness repointing
 
-`<repo>/harnesses/openclaw/openclaw.json` and
+`&lt;repo&gt;/harnesses/openclaw/openclaw.json` and
 `harnesses/hermes/config.yaml` — `recall.url` `:8407` → `:8408`. Rich-image
 rebuilt. `hermes mcp test recall` → `✓ Connected (134ms), 9 tools` confirms
 the new endpoint is reachable from the baked configs.
@@ -1572,7 +1572,7 @@ the new endpoint is reachable from the baked configs.
       size(...)` in Neo4j Browser).
 - [x] `recall-mcp` boot log shows `Using LLM provider: openai / deepseek/deepseek-v4-flash`
       and `Using Embedder provider: openai` (the openai-compatible TEI endpoint).
-- [x] `search_memory_facts(query="openrouter")` against `<prod-group>` group returns
+- [x] `search_memory_facts(query="openrouter")` against `&lt;prod-group&gt;` group returns
       ranked facts on the new bge-m3 path; LLM extraction reaches deepseek-v4-flash.
 - [x] `systemctl --user list-timers recall-build-communities.timer` shows next
       fire at next 03:30. Manual `systemctl --user start
@@ -1584,7 +1584,7 @@ the new endpoint is reachable from the baked configs.
 - [x] `smoke-openrouter` group dropped (`MATCH (n) WHERE n.group_id=...
       RETURN count(n) → 0`).
 
-## Files changed on <memory-host> (canonical)
+## Files changed on the memory host (canonical)
 
 - `~/Docker/recall/config.yaml` — LLM model + embedder swap (backup: `*.bak-pre-bge-m3-20260529`)
 - `~/Docker/recall/docker-compose.yml` — added `recall-mcp-eval` service (backup `*.bak-pre-bge-m3-20260529`)
@@ -1698,7 +1698,7 @@ parity needs both or neither.)
 ### D1 — Server-side, both containers
 
 All changes go in `wrapper_main.py` (and its new sibling modules; see D5).
-The same image runs as both `recall-mcp` (prod groups: <prod-group>, <prod-group>, <prod-group>)
+The same image runs as both `recall-mcp` (the production memory groups)
 and `recall-mcp-eval` (eval groups: eval-openclaw, eval-hermes), so both
 pick up the new surface automatically. Per-container customization via
 env-var description overrides (D6).
@@ -2010,7 +2010,7 @@ Idempotent.
 ### D8 — Backward compatibility
 
 - Existing 9 tool **names + signatures** are unchanged. Only their
-  descriptions change. Existing prod openclaw agents (<prod-group>, <prod-group>, <prod-group>)
+  descriptions change. Existing prod openclaw agents (the production memory groups)
   keep working. FastMCP's `Tool.parameters` (the input JSON schema) is
   derived from Python **type hints**, not the docstring `Args:` block —
   verified live against the running recall-mcp — so rewriting docstrings
@@ -2182,7 +2182,7 @@ Methodology:
   1. **recall-pre** — current 9-tool surface, technical-reference descriptions
   2. **recall-post** — P1–P4 surface (22 tools, coaching descriptions, reflect, mental models, dispositions, directives)
   3. **hindsight** — already running, 57 tools, full hindsight surface
-- Prod recall (<prod-group>/<prod-group>/<prod-group>) does **NOT** auto-upgrade until the
+- Prod recall (the production memory groups) does **NOT** auto-upgrade until the
   three-way eval result is documented. Decision to roll P1–P4 into prod
   recall is an explicit operator call after evidence, not a default.
 - The eval task spec needs an explicit memory-config dimension; capture
@@ -2204,7 +2204,7 @@ Methodology:
 ### AC2 — `reflect` works end-to-end
 
 - [ ] `tools/list` includes `reflect`. Total tool count = 10 (before AC3/4).
-- [ ] `reflect("openrouter swap on 2026-04-30", group_id="<prod-group>")` returns
+- [ ] `reflect("openrouter swap on 2026-04-30", group_id="&lt;prod-group&gt;")` returns
       a synthesized paragraph that cites the underlying facts. (Verify
       against the dump we just generated.)
 - [ ] When no facts match, response says so explicitly — no hallucination.
@@ -2213,9 +2213,9 @@ Methodology:
 
 ### AC3 — `:BankConfig` round-trips
 
-- [ ] `get_bank_config(group_id="<prod-group>")` returns defaults the first time;
+- [ ] `get_bank_config(group_id="&lt;prod-group&gt;")` returns defaults the first time;
       auto-creates the node.
-- [ ] `update_bank_config(group_id="<prod-group>", disposition_skepticism=5,
+- [ ] `update_bank_config(group_id="&lt;prod-group&gt;", disposition_skepticism=5,
       mission="be ruthlessly skeptical")` persists.
 - [ ] Two `reflect` calls with same query but skepticism=1 vs 5 produce
       visibly different outputs (skepticism=5 calls out unsupported claims;
@@ -2227,7 +2227,7 @@ Methodology:
 
 - [ ] `create_directive(name="always cite uuid", content="Every claim must
       reference the source fact UUID inline.", priority=10)` persists.
-- [ ] `list_directives(group_id="<prod-group>")` returns it; `list_directives(...,
+- [ ] `list_directives(group_id="&lt;prod-group&gt;")` returns it; `list_directives(...,
       active_only=true)` honors the flag.
 - [ ] `reflect` calls fetch active directives (sorted by priority DESC,
       capped at ~10) and inject them between disposition and facts in the
@@ -2273,7 +2273,7 @@ Methodology:
       - `harnesses/README.md` capability table — "recall: 9 tools" → "recall: 22 tools (P4)"
       - `tools/agent_status.py` MCP section — `tools/list` count expectation updated
       - `backlog/FOOTGUNS.md` — new entry for the FastMCP `_tool_manager._tools` private-API forward-compat pattern (D6 / R-10)
-      - `~/sambashare/homelab/<memory-host>/<run-host>/CLAUDE.md` — recall section to note the new tool surface
+      - `~/sambashare/homelab/&lt;memory-host&gt;/&lt;run-host&gt;/CLAUDE.md` — recall section to note the new tool surface
 - [ ] **Restart timing measured, not asserted (R-22):** actual cold-start
       time of `recall-mcp` after each phase is captured in the PR commit
       message; deploys scheduled outside the 03:00–04:30 window already
@@ -2311,7 +2311,7 @@ starting P2+. Hypothesis: P1 alone closes most of the observed
 - One additive Neo4j constraint per phase (P3, P4) — idempotent
   `CREATE CONSTRAINT ... IF NOT EXISTS`, runs at wrapper boot.
 - No prod data is touched. Existing graph keeps working; new tools light up.
-- Backups (restic at `/mnt/<storage-host>/docker/recall/`) cover the new node
+- Backups (restic at `/mnt/&lt;storage-host&gt;/docker/recall/`) cover the new node
   types automatically — no scheduling change needed.
 
 ## Follow-up tickets (deferred)
@@ -2320,7 +2320,7 @@ starting P2+. Hypothesis: P1 alone closes most of the observed
   ~25 and creates noise).
 - `retain_mission` (per-bank extraction directive for `add_memory`) —
   status depends on D9 #1's three-outcome resolution.
-- Migrate prod recall (<prod-group>/<prod-group>/<prod-group>) to use coaching descriptions
+- Migrate prod recall (the production memory groups) to use coaching descriptions
   in the SOUL.md instructions instead of/in addition to the MCP layer
   (belt-and-suspenders for proactive use).
 
@@ -2331,7 +2331,7 @@ starting P2+. Hypothesis: P1 alone closes most of the observed
 - Hindsight default descriptions: `/app/api/hindsight_api/config.py:772–790`.
 - Hindsight actual tool count: **57** (verified via
   `grep -cE "@mcp\.tool" mcp_tools.py`), not 27 as casual references suggest.
-- Current recall wrapper: `~/Docker/recall/wrapper_main.py` on <memory-host>.
+- Current recall wrapper: `~/Docker/recall/wrapper_main.py` on &lt;memory-host&gt;.
 - Current recall MCP server: `/app/mcp/src/graphiti_mcp_server.py` in
   `recall-mcp` container (graphiti_mcp_server 1.26.0 / graphiti-core 0.28.2).
 - FastMCP tool registry verified live: `Tool.description` mutable;
@@ -2545,7 +2545,7 @@ running — confusing and wrong-looking. With the union approach:
 - **Goal:** Give both harnesses the external capabilities they need to perform at
   their best, in **one docker-compose stack** on the homelab: persistent memory
   (recall + Hindsight + Honcho) and a shared headless browser (CDP). Per-agent
-  isolation so eval memory never pollutes prod (<prod-group>/<prod-group>) graphs.
+  isolation so eval memory never pollutes prod (the production memory groups) graphs.
 - Companion (shipped):
   [`done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md`](done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md).
 
@@ -2558,7 +2558,7 @@ running — confusing and wrong-looking. With the union approach:
 ## Memory matrix (operator-specified)
 | Backend | openclaw | hermes | How wired |
 |---|---|---|---|
-| **recall** (Graphiti, EXISTS on <memory-host>) | ✅ | ✅ | MCP `http://internal-host:8407/mcp`; per-agent via `X-Group-ID` header + `Host: localhost:8407` rewrite (recall's DNS-rebind guard). groups `eval-openclaw` / `eval-hermes`. |
+| **recall** (Graphiti, EXISTS on the memory host) | ✅ | ✅ | MCP `http://internal-host:8407/mcp`; per-agent via `X-Group-ID` header + `Host: localhost:8407` rewrite (recall's DNS-rebind guard). groups `eval-openclaw` / `eval-hermes`. |
 | **Hindsight** (vectorize-io) | ✅ | ✅ | built-in streamable-HTTP MCP; per-agent **bank** via URL path `/mcp/&lt;bank&gt;/` or `X-Bank-Id`. banks `eval-openclaw` / `eval-hermes`. |
 | **Honcho** (plastic-labs) | ❌ | ✅ | hermes **native skill**, not MCP: `pip install honcho-ai` + `hermes honcho setup` → local → base URL = our Honcho API. Config in `~/.honcho/config.json` (HONCHO_API_KEY). |
 
@@ -2569,16 +2569,16 @@ the new pieces in "the same stack" — see Deployment note below.
 
 ### recall (existing — reference only)
 `recall-mcp:8407` (Graphiti MCP) + `recall-neo4j:7688/7475` + `recall-embed` (TEI),
-on `<memory-net>`. LLM extraction via OpenRouter `z-ai/glm-4.6` (no-train).
+on `&lt;memory-net&gt;`. LLM extraction via OpenRouter `z-ai/glm-4.6` (no-train).
 Source `~/Docker/recall/`. Don't rewrite the working deploy; new services join its
-network. Full doc: `homelab/<memory-host>/tenants/<run-host>/docs/recall/recall.md`.
+network. Full doc: `homelab/&lt;memory-host&gt;/tenants/&lt;run-host&gt;/docs/recall/recall.md`.
 
 ### Hindsight (`ghcr.io/vectorize-io/hindsight`)
 - One image w/ **embedded Postgres**: ports **8888** (API+MCP) + **9999** (UI),
   volume for `~/.hindsight-docker/.pg0`. OR external-PG compose (`pgvector/pgvector:pg18`
   + hindsight) — env `HINDSIGHT_API_DATABASE_URL`, `HINDSIGHT_DB_PASSWORD`.
 - LLM provider: `HINDSIGHT_API_LLM_PROVIDER` + `HINDSIGHT_API_LLM_API_KEY`.
-  Supports `ollama`/`lmstudio`/openai-compatible → **point at <memory-host> llama-cpp or
+  Supports `ollama`/`lmstudio`/openai-compatible → **point at the memory host's llama-cpp or
   OpenRouter (data_collection deny)** to keep it private. Use the **slim** image +
   external embeddings to avoid bundling heavy models.
 - MCP: streamable-HTTP at `http://&lt;host&gt;:8888/mcp/` (multi-bank) or `/mcp/&lt;bank&gt;/`.
@@ -2612,30 +2612,30 @@ network. Full doc: `homelab/<memory-host>/tenants/<run-host>/docs/recall/recall.
 | recall-neo4j | 7688 / 7475 | exists |
 | Hindsight | 8888 (API+MCP) / 9999 (UI) | new |
 | Honcho api | 8000 | new |
-| Honcho pg / redis | 5432 / 6379 | keep INTERNAL (don't publish; recall uses neo4j not pg, but avoid clashing w/ other <memory-host> pg) |
+| Honcho pg / redis | 5432 / 6379 | keep INTERNAL (don't publish; recall uses neo4j not pg, but avoid clashing w/ other pg on the memory host) |
 | Browser CDP | e.g. 3000 / 9222 | new; pick free |
 - Honcho and Hindsight each want their own pgvector → **separate Postgres** (don't share).
 
 ## Privacy posture (homelab requirement)
 All memory-derivation LLM calls must use **no-train** routes: OpenRouter
-`data_collection: deny` OR local <memory-host> inference (llama-cpp / TEI). No cloud
+`data_collection: deny` OR local inference on the memory host (llama-cpp / TEI). No cloud
 Browserbase (use local CDP). No `app.honcho.dev`/`hindsight cloud` (self-host).
 
 ## Deployment note (the "one stack" ask)
 recall already runs in its own working compose. Two options:
 1. **New compose for the new services** (Hindsight + Honcho + browser) joining
-   `<memory-net>`, adjacent to recall. Safest — doesn't touch the working recall.
+   `&lt;memory-net&gt;`, adjacent to recall. Safest — doesn't touch the working recall.
 2. **Single unified compose** folding recall in. Cleaner conceptually but risks the
    live recall deploy.
 Recommend option 1 first; consider folding recall in later. Location: a new dir on
-<memory-host>, e.g. `~/Docker/agent-eval-infra/`. Source-of-truth compose drafted in this
-repo under `infra/` (to be written), deployed to <memory-host> with operator approval.
+the memory host, e.g. `~/Docker/agent-eval-infra/`. Source-of-truth compose drafted in this
+repo under `infra/` (to be written), deployed to the memory host with operator approval.
 
 ## Open items
 - [ ] Draft the compose file(s) (Hindsight + Honcho + browser) — source in repo `infra/`.
 - [ ] Decide Hindsight LLM provider (local llama-cpp vs OpenRouter-deny) + image (full vs slim).
 - [ ] Honcho LLM provider (same decision).
-- [ ] Secrets via Infisical (HONCHO/HINDSIGHT keys) — <memory-host>-homelab identity gap (same as recall).
+- [ ] Secrets via Infisical (HONCHO/HINDSIGHT keys) — &lt;memory-host&gt;-homelab identity gap (same as recall).
 - [ ] Per-agent group/bank provisioning (eval-openclaw / eval-hermes) — isolated from prod.
 - [ ] CDP wiring keys per harness (task #54).
 - [ ] Backups for new volumes (recall has none today either — known gap).
@@ -2752,27 +2752,27 @@ attribution. The `browser_used` gate guarantees a real browse, not the memorizat
 **Status:** IMPLEMENTED 2026-06-03
 **Date:** 2026-06-03
 **Origin / triggered-by:** operator caught that the browser tool drove a **shared headless
-Chromium on <memory-host>** (`~/Docker/agent-cdp`, CDP `:9222`) over the LAN — a cross-machine
+Chromium on the memory host** (`~/Docker/agent-cdp`, CDP `:9222`) over the LAN — a cross-machine
 dependency that violates the explicit "keep things self-contained, no weird cross-computer
-situation" requirement. (I wired the <memory-host> version; this corrects it.)
+situation" requirement. (I wired the &lt;memory-host&gt; version; this corrects it.)
 
 ## Problem
 
-Both harnesses' browser tools were pointed at a **remote** Chromium on <memory-host>:
+Both harnesses' browser tools were pointed at a **remote** Chromium on the memory host:
 `openclaw.json` `browser.cdpUrl` and `hermes/config.yaml` `browser.cdp_url` both =
 `http://internal-host:9222`. Consequences:
-- Cross-machine: every browser action is a LAN round-trip to <memory-host>; a <memory-host>/VPN/`agent-cdp`
+- Cross-machine: every browser action is a LAN round-trip to the memory host; a &lt;memory-host&gt;/VPN/`agent-cdp`
   hiccup breaks the eval. Not self-contained.
 - It also **disabled each harness's own built-in local browser** — setting `cdp_url` is exactly
   what makes hermes "skip the local headless launcher" (`browser_tool.py::_get_cdp_override`);
   openclaw likewise attaches instead of managing its own.
 - The image bakes **no Chromium** (only the `playwright-core` lib), which is *why* it was
-  pointed at <memory-host> in the first place — expedient, not principled.
+  pointed at the memory host in the first place — expedient, not principled.
 
 ## Goal / definition of done
 
 Each trial container runs its **own** headless Chromium; each harness's browser tool drives
-**that** in-container browser. No <memory-host>, no LAN, no `agent-cdp`. `browser-find-fact-01` passes
+**that** in-container browser. No &lt;memory-host&gt;, no LAN, no `agent-cdp`. `browser-find-fact-01` passes
 for both harnesses with `browser_used=1`, driving the local browser.
 
 ## Design decisions
@@ -2787,14 +2787,14 @@ for both harnesses with `browser_used=1`, driving the local browser.
   *confound* a harness-vs-harness comparison. Pointing both at one controlled in-container
   Chromium keeps the browser backend **identical** — only the harness's tool/strategy differs,
   which is the variable under test. It's also the smallest delta from the working setup
-  (swap `<memory-host>` → `127.0.0.1` + add an in-container launcher).
+  (swap `&lt;memory-host&gt;` → `127.0.0.1` + add an in-container launcher).
 - **Concurrency bonus:** because each trial container has its own Chromium (not one shared on
-  <memory-host>), browser trials no longer have to run sequentially — the `n_concurrent_trials: 1`
+  the memory host), browser trials no longer have to run sequentially — the `n_concurrent_trials: 1`
   constraint can be relaxed for browser tasks later (kept at 1 for the direct e2e comparison).
 
 **Chromium provisioning (validated in-container before writing this):**
 - Base is **Debian 13 (trixie)**; `apt-get install chromium` yields a real `/usr/bin/chromium`
-  **148.0.7778.215** (matches the <memory-host> Chrome 148 we replaced) — no Ubuntu snap-stub problem.
+  **148.0.7778.215** (matches the &lt;memory-host&gt; Chrome 148 we replaced) — no Ubuntu snap-stub problem.
 - Container gotcha: Chromium as **root** needs `--no-sandbox` (+ `--disable-dev-shm-usage`).
   Debian's `/usr/bin/chromium` is a wrapper that sources `/etc/chromium.d/*` and honors
   `$CHROMIUM_FLAGS`, so a drop-in flags file applies the flags to **every** launch (covers the
@@ -2816,11 +2816,11 @@ for both harnesses with `browser_used=1`, driving the local browser.
 3. **`harnesses/openclaw/openclaw.json`**: `browser.cdpUrl` `internal-host` →
    `127.0.0.1`.
 4. **`harnesses/hermes/config.yaml`**: `browser.cdp_url` `internal-host` → `127.0.0.1`
-   (update the "running on <memory-host>" comment to "in-container").
+   (update the "running on the memory host" comment to "in-container").
 5. **`lib/openclaw_thin.py` + `lib/hermes_thin.py`**: prepend `bash /opt/harness/start-cdp.sh &amp;&amp;`
    to the agent command so the local browser is up before the agent runs.
 6. Rebuild `:latest`; verify `/usr/bin/chromium` present + a local CDP launch; run
-   `configs/browser-e2e.yaml` and confirm `browser_used=1` for both with **no** <memory-host> reference
+   `configs/browser-e2e.yaml` and confirm `browser_used=1` for both with **no** &lt;memory-host&gt; reference
    in the trajectory.
 
 ## Acceptance criteria
@@ -2829,20 +2829,20 @@ for both harnesses with `browser_used=1`, driving the local browser.
 - [x] `start-cdp.sh` brings up `127.0.0.1:9222` in-container (readiness-gated, idempotent) — verified in a clean container (`Chrome/148.0.7778.215`, ~2s).
 - [x] openclaw `browser` tool drives the **local** Chromium (`browser_used=1`, 13 calls, answer correct, no decoy).
 - [x] hermes `browser_navigate` drives the **local** Chromium (`browser_used=1`, 60 calls, answer correct, no decoy).
-- [x] No `internal-host:9222` reference remains — configs use `127.0.0.1`; the self-contained trajectory shows `127.0.0.1` and **0** <memory-host> refs (vs 18 <memory-host> refs in the prior run).
+- [x] No `internal-host:9222` reference remains — configs use `127.0.0.1`; the self-contained trajectory shows `127.0.0.1` and **0** &lt;memory-host&gt; refs (vs 18 &lt;memory-host&gt; refs in the prior run).
 
 ## Result (live e2e, `configs/browser-e2e.yaml`, n=1 each, 2026-06-03)
 
 | | reward | browser_used | browser calls | answer | CDP host in trajectory |
 |---|---|---|---|---|---|
-| openclaw | 1.0 | 1 | 13 (`browser`) | correct, no decoy | `127.0.0.1` (0 <memory-host>) |
-| hermes | 1.0 | 1 | 60 (`browser_navigate`/…) | correct, no decoy | (0 <memory-host>) |
+| openclaw | 1.0 | 1 | 13 (`browser`) | correct, no decoy | `127.0.0.1` (0 &lt;memory-host&gt;) |
+| hermes | 1.0 | 1 | 60 (`browser_navigate`/…) | correct, no decoy | (0 &lt;memory-host&gt;) |
 
 The `&amp;&amp;` gate is the proof of locality: each agent only ran *because* `start-cdp.sh`
 exited 0 (local CDP up). A failed local launch would have aborted the run before the agent.
-Prior (<memory-host>) run for contrast: 18 `internal-host` references in the trajectory.
+Prior (&lt;memory-host&gt;) run for contrast: 18 `internal-host` references in the trajectory.
 
-## Note — memory stack is still on <memory-host> (separate, out of scope here)
+## Note — memory stack is still on the memory host (separate, out of scope here)
 
 This change makes the **browser** self-contained. The **hindsight memory** MCP
 (`openclaw.json` mcp.hindsight, hermes honcho/hindsight) still points at
@@ -2857,7 +2857,7 @@ self-containment should extend to memory too, that's its own spec.
   `harnesses/hermes/config.yaml` (`browser.cdp_url`).
 - Adapters: `lib/openclaw_thin.py`, `lib/hermes_thin.py`.
 - Predecessor: `2026-06-03-browser-tool-registry-fix.md` (made the tool *exist*; this makes its
-  backend *local*). The shared-<memory-host> wiring traces to `2026-06-02-browser-and-pin-findings.md`.
+  backend *local*). The shared-&lt;memory-host&gt; wiring traces to `2026-06-02-browser-and-pin-findings.md`.
 - hermes local-launch internals: `tools/browser_tool.py` (agent-browser local mode),
   `hermes_cli/browser_connect.py` (chromium resolver). openclaw managed launch:
   `dist/chrome-*.js` (`--no-sandbox` gated on `browser.noSandbox`), `dist/config-bkMW3D5-.js`
@@ -2913,7 +2913,7 @@ openclaw, not *full* openclaw. Same risk to re-audit on the hermes side.
    one-shot test — so exposure is a **3-step chain**, not a single flag:
    (a) gateway reaches a real listening/ready state; (b) the agent actually connects
    gateway-backed (no silent embedded fallback); (c) the gateway's browser control server
-   initializes and attaches to the <memory-host> CDP, exposing the `browser` tool.
+   initializes and attaches to the &lt;memory-host&gt; CDP, exposing the `browser` tool.
 
 ## Validity implication (must disclose)
 
@@ -2927,7 +2927,7 @@ this in RESULTS.md.
 Both harnesses run their **full runtime** in every trial, exposing all baked capabilities:
 
 1. openclaw runs **gateway-backed** (gateway up with a token, agent connects to it, no embedded
-   fallback); the `browser` tool surfaces and drives the <memory-host> CDP.
+   fallback); the `browser` tool surfaces and drives the &lt;memory-host&gt; CDP.
 2. hermes runs its full stack; its native browser (`browser_navigate`) is verified to actually
    navigate (not just be listed).
 3. `browser-find-fact-01` passes for BOTH harnesses with `browser_used=1` (real browse, not a
@@ -2973,7 +2973,7 @@ Both harnesses run their **full runtime** in every trial, exposing all baked cap
   readiness detection, clean teardown so a hung gateway doesn't wedge the trial.
 - **Cost/behaviour shift** — gateway-backed routing may change token/cost vs embedded; that's
   why Phase 4 re-baselines rather than trusting old numbers.
-- **Shared <memory-host> CDP** — one Chromium for all trials → browser trials run sequentially
+- **Shared &lt;memory-host&gt; CDP** — one Chromium for all trials → browser trials run sequentially
   (`n_concurrent_trials: 1`), already known.
 - **controlUi allowedOrigins / auth** — the gateway seeds localhost origins; confirm nothing
   else (CSRF/origin, TLS ws:// vs wss://) blocks the agent↔gateway connection.
@@ -2983,7 +2983,7 @@ Both harnesses run their **full runtime** in every trial, exposing all baked cap
 ## Acceptance criteria
 
 - [ ] openclaw runs gateway-backed every trial (token + readiness wait + no embedded fallback);
-      `browser` tool present in the catalog and drives <memory-host> CDP.
+      `browser` tool present in the catalog and drives &lt;memory-host&gt; CDP.
 - [ ] hermes full stack verified; `browser_navigate` navigates end-to-end.
 - [ ] `browser-find-fact-01` → `browser_used=1` + correct answer for BOTH harnesses.
 - [ ] core-11 re-runs green under gateway-backed openclaw (no regression).
@@ -3092,7 +3092,7 @@ instances per shape. Code-editing is the only category with tasks so far.
 
 ## How to run a sweep (operational quickref)
 
-From <dev-host>, model = Kimi K2.6 pinned to Io Net (privacy-allowed, deterministic):
+From the dev workstation, model = Kimi K2.6 pinned to Io Net (privacy-allowed, deterministic):
 
 ```bash
 cd /tmp/harbor   # the Harbor checkout with uv env + bun-built viewer
@@ -3100,10 +3100,10 @@ set -a; source ~/.config/infisical/infisical-identity.env; set +a
 TOKEN=$(infisical login --method=universal-auth \
   --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" \
   --domain="$INFISICAL_SITE_URL/api" --plain --silent)
-PYTHONPATH=<repo> infisical run \
+PYTHONPATH=$REPO infisical run \
   --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ \
   --domain="$INFISICAL_SITE_URL" --token="$TOKEN" \
-  -- uv run harbor run -c <repo>/configs/first-real-trial.yaml \
+  -- uv run harbor run -c $REPO/configs/first-real-trial.yaml \
        --job-name &lt;NAME&gt; --n-concurrent 3 -y
 ```
 
@@ -4674,7 +4674,7 @@ Jobs persist in `jobs/` (gitignored). Dashboard: `harbor view jobs --port 8089`
   oracle-eyeball misses the pydantic schema layer.
 - `jobs_dir` must be absolute + persistent (`/tmp` is tmpfs, wiped on reboot).
 - Memory wipes are **eval-* scoped only** (`hooks/wipe_memory_state.py` guards;
-  never touches prod groups <prod-group>/<prod-group>/<prod-group>).
+  never touches the production memory groups).
 - Task Dockerfiles MUST `FROM harbor-agents-rich:latest` (baked openclaw.json +
   xrouter); prebaked silently boots default config.
 
@@ -5407,14 +5407,14 @@ depth comes from running each at n=5, not from duplicate tasks.
 
 ## Substrate decision — `recall` removed from both harnesses (2026-06-03)
 
-While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, <memory-host> `:8408`)
+While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, the memory host `:8408`)
 was **erroring on every hermes invocation**, so it was **removed from both eval harness
 configs** to keep the comparison fair and unblocked (commits `597070b` + `8f812e1`):
 
 - `harnesses/openclaw/openclaw.json` → `mcp.servers`: `recall` dropped, `hindsight` kept.
 - `harnesses/hermes/config.yaml` → `mcp_servers`: `recall` dropped (restore breadcrumb
   left as a comment), `hindsight` kept.
-- **Scope is the two eval harnesses only.** The <memory-host> recall MCP server (`:8408`) and all
+- **Scope is the two eval harnesses only.** The memory host recall MCP server (`:8408`) and all
   its support functionality are untouched; hermes's honcho provider is untouched. The
   harnesses simply no longer mount recall.
 
@@ -5503,14 +5503,14 @@ depth comes from running each at n=5, not from duplicate tasks.
 
 ## Substrate decision — `recall` removed from both harnesses (2026-06-03)
 
-While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, <memory-host> `:8408`)
+While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, the memory host `:8408`)
 was **erroring on every hermes invocation**, so it was **removed from both eval harness
 configs** to keep the comparison fair and unblocked (commits `597070b` + `8f812e1`):
 
 - `harnesses/openclaw/openclaw.json` → `mcp.servers`: `recall` dropped, `hindsight` kept.
 - `harnesses/hermes/config.yaml` → `mcp_servers`: `recall` dropped (restore breadcrumb
   left as a comment), `hindsight` kept.
-- **Scope is the two eval harnesses only.** The <memory-host> recall MCP server (`:8408`) and all
+- **Scope is the two eval harnesses only.** The memory host recall MCP server (`:8408`) and all
   its support functionality are untouched; hermes's honcho provider is untouched. The
   harnesses simply no longer mount recall.
 
@@ -5970,7 +5970,7 @@ weight-0 criteria). Commits 5ae5b83, c55a2be, e20870e, e7c26c7.
 
 **✅ ROLLOUT COMPLETE — all 23 active graded tasks grade via rewardkit.** (12 single-step
 + 11 multistep.) Every conversion oracle-validated with a verified criterion count, $0
-OpenRouter. The 5 commits are local on <run-host> `main` pending the operator push.
+OpenRouter. The 5 commits are local on the run host `main` pending the operator push.
 
 **Keep bespoke (pytest — provably the right tool, rewardkit would just wrap it):**
 `refactor-multi-file-01`, `dep-bump-breaking-01`, `unit-tests-01`, `reasoning-parity-01`.
@@ -6125,7 +6125,7 @@ hand. Re-runnable; the data is always live.
 ## Architecture
 
 ```
-                    <dev-host>
+                    &lt;dev-host&gt;
    ┌──────────────────────────────────────────────────┐
    │  python3 tools/agent_status.py                   │
    │                                                  │
@@ -6139,7 +6139,8 @@ hand. Re-runnable; the data is always live.
    │         .yaml file contents).                    │
    │         emits ONE JSON blob to stdout.           │
    │                                                  │
-   │   2) urllib pings memory services on <memory-host>.      │
+   │   2) urllib pings memory services on the memory  │
+   │      host.                                       │
    │                                                  │
    │   3) python templating → agent-status.html       │
    │      (inline CSS + JS, embeds all file content   │
@@ -6163,7 +6164,7 @@ hand. Re-runnable; the data is always live.
 | hermes skills (active vs not) | `hermes skills list` (rich table parsed) | active = Status column == `enabled` |
 | **hermes plugins** | **filesystem walk of `/usr/local/lib/hermes-agent/plugins/&lt;cat&gt;/&lt;name&gt;/`** + `hermes plugins list` (rich table) + `config.yaml` config-driven keys | **dual-system computation; see FOOTGUNS #20** |
 | hermes persona | `/root/.hermes/SOUL.md` | |
-| Memory service health | HTTPS pings from <dev-host>: `http://internal-host:{8407,8888,8000}/health` | colored dots in the legend |
+| Memory service health | HTTPS pings from the dev workstation: `http://internal-host:{8407,8888,8000}/health` | colored dots in the legend |
 
 ## Dual-system activation (hermes plugins)
 
@@ -6235,7 +6236,7 @@ Re-run after any of these and the dashboard reflects the change:
 - editing a baked persona/config file in `harnesses/` and rebuilding the image,
 - flipping `memory.provider:` or `agent.context.engine:` in `harnesses/hermes/config.yaml`,
 - adding a plugin to `plugins.enabled` in the hermes config,
-- starting/stopping a memory service on <memory-host>.
+- starting/stopping a memory service on the memory host.
 </div><div id="src-E5-1"># Task Suite page (was "Task Catalog") — visual review + work tracker for every eval task
 
 **Epic:** E5 — Observability &amp; reporting
@@ -6505,7 +6506,7 @@ Two independent issues:
 2. **The runtime ran from an ephemeral checkout.** The live dashboard on :8089 was
    launched with `uv run --project /tmp/harbor …`. `/tmp/harbor` is a **separate**
    git checkout of **upstream** (`origin = harbor-framework/harbor`) sitting in
-   scratch space, *not* the canonical fork at `/home/<user>/harbor`
+   scratch space, *not* the canonical fork at `&lt;harbor-fork&gt;`
    (`origin = johnbuck/harbor`) referenced in the harbor-tasks README. `/tmp` is
    wiped on reboot, so any fix applied only there is non-durable, and there is **no
    persistent launcher** — the viewer was started by an ad-hoc command, so a reboot
@@ -6516,7 +6517,7 @@ Two independent issues:
 In:
 - Soften the `ANTHROPIC_API_KEY` gate in `analyze/backend.py` and the parallel one in
   `cli/quality_checker/quality_checker.py` to accept the logged-in `claude` CLI.
-- Make the canonical fork (`/home/<user>/harbor`) the tree the live viewer runs from.
+- Make the canonical fork (`&lt;harbor-fork&gt;`) the tree the live viewer runs from.
 - A small persistent launcher so the fork-launch survives reboot (task #91 — proposed).
 
 Out:
@@ -6542,7 +6543,7 @@ Out:
 
 - **Patch both checkouts, but make the fork canonical.** Applied the patch to the live
   `/tmp/harbor` (fixes the button *now*) AND to the fork (durable), then repointed the
-  running viewer at the fork via `uv run --project /home/<user>/harbor`. One source of
+  running viewer at the fork via `uv run --project &lt;harbor-fork&gt;`. One source of
   truth going forward.
 
 - **Reuse the prebuilt UI instead of building fresh.** `view.py` builds the SPA with
@@ -6568,8 +6569,8 @@ Out:
       summary), served by the **fork** viewer; UI + `/assets/*` load 200.
 - [x] Patch committed to the fork (`42e37e59` on `local/subscription-auth-analyze`);
       fork working tree clean apart from the untracked built `static/`.
-- [x] Live :8089 viewer confirmed running from `/home/<user>/harbor/.venv` (the fork).
-- [x] **Durable launcher** `tools/view.sh` pins `--project /home/<user>/harbor …
+- [x] Live :8089 viewer confirmed running from `&lt;harbor-fork&gt;/.venv` (the fork).
+- [x] **Durable launcher** `tools/view.sh` pins `--project &lt;harbor-fork&gt; …
       --no-build` (port arg + `HARBOR_FORK`/`HARBOR_JOBS`/`HARBOR_HOST` overrides),
       preflights fork/UI/jobs/auth and waits out the TIME_WAIT restart race. Verified:
       launched the live viewer from the script → fork tree, UI 200, summarize 200.

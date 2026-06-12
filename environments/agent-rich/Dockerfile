@@ -65,9 +65,9 @@ RUN . ~/.nvm/nvm.sh && nvm use 22 >/dev/null 2>&1 \
 
 # --- self-contained browser: bake Chromium INTO the image --------------------
 # Both harnesses' browser tools attach to a headless Chromium running INSIDE the
-# trial container (127.0.0.1:9222), not a shared one on <memory-host>. Debian trixie's
-# `chromium` package gives a real /usr/bin/chromium (148, matches the old <memory-host>
-# Chrome). /etc/chromium.d/* is sourced by Debian's chromium wrapper, so the
+# trial container (127.0.0.1:9222), not a shared one on the memory host. Debian
+# trixie's `chromium` package gives a real /usr/bin/chromium (148, matches the old
+# Chrome on the memory host). /etc/chromium.d/* is sourced by Debian's chromium wrapper, so the
 # container flags (--no-sandbox etc., required to run as root) apply to every
 # launch. start-cdp.sh brings it up per-trial. Spec:
 # backlog/2026-06-03-self-contained-browser.md.
@@ -90,7 +90,7 @@ RUN chmod +x /opt/harness/start-cdp.sh
 COPY harnesses/hermes/config.yaml /root/.hermes/config.yaml
 COPY harnesses/hermes/SOUL.md /root/.hermes/SOUL.md
 # Honcho memory provider: client lib + self-hosted instance config.
-# ($HERMES_HOME/honcho.json takes precedence; baseUrl points at <memory-host>, no auth.)
+# ($HERMES_HOME/honcho.json takes precedence; baseUrl points at the memory host, no auth.)
 COPY harnesses/hermes/honcho.json /root/.hermes/honcho.json
 # hermes uses a uv-managed venv (no pip); install honcho-ai into it via uv.
 RUN /root/.local/bin/uv pip install --python /usr/local/lib/hermes-agent/venv/bin/python \

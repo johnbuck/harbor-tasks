@@ -52,14 +52,14 @@ depth comes from running each at n=5, not from duplicate tasks.
 
 ## Substrate decision — `recall` removed from both harnesses (2026-06-03)
 
-While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, <memory-host> `:8408`)
+While readying the suite, the `recall` MCP (Graphiti temporal-KG memory, the memory host `:8408`)
 was **erroring on every hermes invocation**, so it was **removed from both eval harness
 configs** to keep the comparison fair and unblocked (commits `597070b` + `8f812e1`):
 
 - `harnesses/openclaw/openclaw.json` → `mcp.servers`: `recall` dropped, `hindsight` kept.
 - `harnesses/hermes/config.yaml` → `mcp_servers`: `recall` dropped (restore breadcrumb
   left as a comment), `hindsight` kept.
-- **Scope is the two eval harnesses only.** The <memory-host> recall MCP server (`:8408`) and all
+- **Scope is the two eval harnesses only.** The memory host recall MCP server (`:8408`) and all
   its support functionality are untouched; hermes's honcho provider is untouched. The
   harnesses simply no longer mount recall.
 

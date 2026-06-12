@@ -608,7 +608,7 @@ environment:
   - EXTERNAL=http://internal-host:9222
 ```
 
-Consumers then get back `ws://internal-host:9222/` and connect successfully. Verified at `~/Docker/agent-cdp/docker-compose.yml` on <memory-host>.
+Consumers then get back `ws://internal-host:9222/` and connect successfully. Verified at `~/Docker/agent-cdp/docker-compose.yml` on the memory host.
 
 ---
 
@@ -771,9 +771,9 @@ AttributeError: 'NoneType' object has no attribute 'lower'
 - **hindsight 405 silent no-op:** the old `_wipe_hindsight` DELETEd `/memories /entities /mental-models /directives /documents`, but only `/memories` supports DELETE — the other four are GET/POST-only and returned **405**, which the code *tolerated*, so entities/mental-models/directives/documents leaked across trials. Fix: bulk `DELETE /memories` + `DELETE /observations` (both exist), then list+per-id-delete `mental-models`/`directives`/`documents`. Bank shell + eval entity-type config (task #59) preserved. Verified: 1→0.
 
 **DATA-SAFETY hardening (operator-requested — recall/honcho are shared with real agents):**
-- recall, honcho, hindsight ALL share their backend with production agents (recall-neo4j holds prod groups `<prod-group>`/`<prod-group>`/`<prod-group>`; both `recall-mcp` and `recall-mcp-eval` point at the same neo4j, isolated only by `group_id`).
+- recall, honcho, hindsight ALL share their backend with production agents (recall-neo4j holds the production memory groups; both `recall-mcp` and `recall-mcp-eval` point at the same neo4j, isolated only by `group_id`).
 - The wipe targets are **exact-match** (`eval-openclaw`/`eval-hermes`), never wildcards, so they physically cannot match prod groups. Confirmed eval recall writes land in `eval-openclaw`/`eval-hermes` via the `X-Group-ID` header in `harnesses/openclaw/openclaw.json` + `harnesses/hermes/config.yaml` (the MCP's `GRAPHITI_GROUP_ID=eval-default` is only a no-header fallback).
-- Added `_assert_eval_scope(id)` — every destructive call raises `ValueError` unless `id` starts with `eval-`. Verified it rejects `<prod-group>`/`<prod-group>`/`<prod-group>`/`''`/`None`/`prod-default` and accepts only `eval-*`. So even a future GROUP_MAP typo cannot wipe prod. gather() exceptions are now logged (no silent guard trips).
+- Added `_assert_eval_scope(id)` — every destructive call raises `ValueError` unless `id` starts with `eval-`. Verified it rejects the production memory groups, `''`/`None`/`prod-default` and accepts only `eval-*`. So even a future GROUP_MAP typo cannot wipe prod. gather() exceptions are now logged (no silent guard trips).
 - **NOTE:** these fixes landed AFTER the running n=1 smoke imported the hook, so the smoke still uses the old (contaminating) wipe — fine for grid/plumbing validation. The fixed hook is picked up by the next launch (the n=5 real run), where memory-axis fidelity matters.
 
 Keeping all four entries because each chase produced a real lesson about Harbor's env / network / config-propagation paths.
@@ -804,7 +804,7 @@ rewards.per_file.int    Input should be a valid integer [input_value={...dict...
 **Symptom:** expensive run results (a $13 sweep) silently at risk of vanishing; also runs scattered between `/tmp/harbor-jobs` and `<repo>/jobs` so the post-run report + dashboard couldn't find them.
 
 **Root cause (two parts):**
-1. `/tmp` on <dev-host> is **tmpfs** (`findmnt -no FSTYPE /tmp` → `tmpfs`, 31G RAM-backed) — wiped on reboot AND consuming RAM. 142M of trajectory data lived there.
+1. `/tmp` on the dev workstation is **tmpfs** (`findmnt -no FSTYPE /tmp` → `tmpfs`, 31G RAM-backed) — wiped on reboot AND consuming RAM. 142M of trajectory data lived there.
 2. Harbor's `JobConfig.jobs_dir` defaults to `Path("jobs")` — **CWD-relative**, not absolute. So where output lands depends on the launch CWD, and the wrapper's separate `JOBS_DIR` (for the post-report) defaulted to `/tmp/harbor-jobs`, diverging from where Harbor actually wrote.
 
 **Fix:** pin `jobs_dir` to an ABSOLUTE persistent path. `run_track_a.sh` now sets `JOBS_DIR="${REPO}/jobs"` AND passes it into the JobConfig (`raw["jobs_dir"]`), so Harbor + the report + the dashboard all agree. `harbor-tasks/jobs/` is on the encrypted `/home` (327G) and is gitignored (`.gitignore:7`) — persists without bloating the repo. Moved all 84 existing runs there.
@@ -827,7 +827,7 @@ rewards.per_file.int    Input should be a valid integer [input_value={...dict...
 ## 41. Harbor 0.13.1 added an interactive env-var confirmation prompt — `harbor run` CLI hangs/aborts non-interactively without `-y`
 
 **Context:** harbor was upgraded **0.8.0 → 0.13.1** on 2026-06-03 (both checkouts:
-durable fork `/home/<user>/harbor` on branch `local/v0.13.1-subscription-auth`
+durable fork `~/harbor` on branch `local/v0.13.1-subscription-auth`
 = v0.13.1 + the subscription-auth patch; eval runtime `/tmp/harbor` detached at
 the `v0.13.1` tag). Rebuild each `.venv` with `uv sync` after a checkout.
 
@@ -944,3 +944,24 @@ ALL your checks (including special ones like a red-herring gate), registered in 
 single `for key,label in ALL: rk.rule(key, label)` loop. Always confirm the
 criterion COUNT in `reward-details.json` matches what you intended (not just that
 the oracle scores 1.0).
+
+---
+
+## 46. Internal topology must never land in tracked files — run `tools/check_topology.sh`
+
+**Rule:** harbor-tasks is a **public** repo. No internal-infrastructure
+coordinates may appear in tracked (or untracked-non-ignored) files: home-dir
+paths (`/home/<user>`), internal hostnames (the memory-host name, any
+internal-DNS or Tailscale host, private `10.x` IPs), Infisical/org UUIDs, or the
+bare run-host/dev-host machine
+nicknames. The real values live **only** in the gitignored `configs/local.env`;
+everywhere else use the placeholders (`<repo>`, `<run-host>`, `<dev-host>`,
+`<memory-host>`, `<user>`, `<infisical-project-id>`, `<shared-project-id>`,
+`<anthropic-scoped-project-id>`, and the literal `LAN-IP`).
+
+**Gate:** `tools/check_topology.sh` `git grep`s the tree for those token SHAPES
+and exits non-zero on any hit (printing the offending lines) — exactly like the
+`grep -L 'FROM harbor-agents-rich' tasks/*/*/environment/Dockerfile` check
+(#35). Run it before any commit/push. Its patterns are shape-obfuscated so the
+gate never flags its own source; add new patterns the same way. Full plan +
+the pending scrub of pre-existing leaks: `backlog/2026-06-12-topology-scrub.md`.

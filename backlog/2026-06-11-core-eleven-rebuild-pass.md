@@ -126,7 +126,7 @@ The stale value must reach BOTH harnesses' memory backends identically:
   **write** `cache_ttl_seconds=45` into the trial's `eval-<harness>` hindsight
   bank (the substrate is hindsight-only + symmetric post the 2026-06-10
   rework), reusing `HINDSIGHT_URL` and the same `_assert_eval_scope` guard so it
-  can never touch a prod bank (`<prod-group>`/`<prod-group>`/`<prod-group>`).
+  can never touch a prod bank (the production memory groups).
 - Wire it into `tools/run_track_a.sh` as a `TrialEvent` hook (or a step-00
   pre-step) that fires **after** the wipe — the bare `harbor run` CLI does not
   load hooks (same footgun the wipe hook documents), so the driver is the only
@@ -156,7 +156,7 @@ with the **measured** number, not an estimate.
 
 ### D7 — Rebuild + validation gate (the whole point of this pass)
 
-1. Rebuild `harbor-agents-rich:latest` on <run-host> after all Dockerfile/baked
+1. Rebuild `harbor-agents-rich:latest` on the run host after all Dockerfile/baked
    changes (D1, D2, D6-T10).
 2. **Oracle 11/11 = 1.0** (Docker build + schema + plumbing, no LLM cost) —
    catches TOML/heredoc/schema breakage before paying for a sweep.
@@ -197,7 +197,7 @@ with the **measured** number, not an estimate.
 D1–D6 are **code** (Dockerfiles, `gen.py`, a C helper, a seeding hook, grader
 recompute logic, offline tests proving each) and go through baton like the
 offline pass. **D7 is manual** — the Docker rebuild, oracle, and n=5 sweep need
-<run-host>'s Docker + `.venv` + Infisical creds and cost real money; baton's
+the run host's Docker + `.venv` + Infisical creds and cost real money; baton's
 pipeline forbids builds/sweeps, so the operator runs D7 after baton merges the
 reviewed branch. Acceptance criteria 2 (T9 budget), 3 (T5 oracle), 4 (T3
 symmetry), 5 (T4 tokens), and 7 (the grid) are inherently run-dependent and are
@@ -348,7 +348,7 @@ NOT been run — it is out of scope for this pipeline.**
 
 ### How to verify
 
-- **Offline (what baton can prove, all green):** on <run-host>,
+- **Offline (what baton can prove, all green):** on the run host,
   `~/benchmarking/harbor/.venv/bin/python -m pytest tests/exploits tests/regrade -q`
   → **37 passed** (run 2026-06-11). These cover the T6 ordered-progression gate,
   the T9 served-lookup + registry-equality invariants, the T10 brute-sweep denial,

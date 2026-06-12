@@ -74,7 +74,7 @@ non-training) in BOTH `harnesses/openclaw/openclaw.json`
 + unblocks hermes. **OPERATOR: pick fireworks or novita.** Then rebuild + the pin
 is finally real (also fixes the long-standing "neither harness pinned" issue).
 Test script: `/tmp/confirm_hermes_endpoint.py` + `/tmp/find_pin_host.py` (rerun via
-`infisical run --domain=http://internal-host:8380 --projectId=<infisical-project-id>... --env=production --path=/proxy/ -- python3 <script>`; key never printed).
+`infisical run --domain=http://internal-host:8380 --projectId=<infisical-project-id> --env=production --path=/proxy/ -- python3 <script>`; key never printed).
 
 ## Problem 2 — browser task is memorization-confounded (mitigated by gating)
 `quotes.toscrape.com` is a top scraping-tutorial site, so its quote→author data
@@ -101,7 +101,7 @@ switch to a non-memorized target later; gating is sufficient for now.)
 - Oracle `solution/solve.sh` writes "Jim Henson" (validates the answer-check).
 
 ## Browser wiring facts (verified)
-- Both harnesses wired to a SHARED headless Chromium on <memory-host> via CDP:
+- Both harnesses wired to a SHARED headless Chromium on the memory host via CDP:
   openclaw `browser.cdpUrl`, hermes `browser.cdp_url` = `http://internal-host:9222`
   (LIVE: Chrome 148, `ws://...:9222/`). Shared → run browser trials SEQUENTIALLY
   (`n_concurrent_trials:1`, as `configs/browser-e2e.yaml` does) or they collide.

@@ -92,7 +92,7 @@ instances per shape. Code-editing is the only category with tasks so far.
 
 ## How to run a sweep (operational quickref)
 
-From <dev-host>, model = Kimi K2.6 pinned to Io Net (privacy-allowed, deterministic):
+From the dev workstation, model = Kimi K2.6 pinned to Io Net (privacy-allowed, deterministic):
 
 ```bash
 cd /tmp/harbor   # the Harbor checkout with uv env + bun-built viewer
@@ -100,10 +100,10 @@ set -a; source ~/.config/infisical/infisical-identity.env; set +a
 TOKEN=$(infisical login --method=universal-auth \
   --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" \
   --domain="$INFISICAL_SITE_URL/api" --plain --silent)
-PYTHONPATH=<repo> infisical run \
+PYTHONPATH=$REPO infisical run \
   --projectId=INFISICAL_PROJECT_ID --env=production --path=/proxy/ \
   --domain="$INFISICAL_SITE_URL" --token="$TOKEN" \
-  -- uv run harbor run -c <repo>/configs/first-real-trial.yaml \
+  -- uv run harbor run -c $REPO/configs/first-real-trial.yaml \
        --job-name <NAME> --n-concurrent 3 -y
 ```
 

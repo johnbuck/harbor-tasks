@@ -138,7 +138,7 @@ export INFISICAL_TOKEN=$(infisical login --method=universal-auth --silent --plai
 infisical run \
   --projectId INFISICAL_PROJECT_ID --env=production \
   --path=/proxy/ --domain="${INFISICAL_SITE_URL%/}/api" -- \
-  uv run --project /home/<user>/harbor harbor run -c configs/verify-rich.yaml
+  uv run --project ~/harbor harbor run -c configs/verify-rich.yaml
 ```
 
 Expected result: both rows show `Reward 1.000 / Exceptions 0` and the post-run

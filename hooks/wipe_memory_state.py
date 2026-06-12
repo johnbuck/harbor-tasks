@@ -18,7 +18,7 @@ GROUPS: agent name → memory keys
                honcho workspace eval-hermes
 
 SECRET HYGIENE: Neo4j password is never read into this process. The recall wipe
-SSHes to <memory-host> and runs cypher-shell with the password read *inside* the
+SSHes to the memory host and runs cypher-shell with the password read *inside* the
 container (`printenv NEO4J_AUTH | cut -d/ -f2`) so it never enters our context.
 """
 
@@ -43,11 +43,11 @@ RECALL_CONTAINER = "recall-neo4j"
 # (exported into the harbor process env). Kept out of this public repo.
 HINDSIGHT_BASE = os.environ.get("HINDSIGHT_URL", "")
 HONCHO_BASE = os.environ.get("HONCHO_URL", "")
-<memory-host>_SSH = os.environ.get("<memory-host>_SSH", "")
+MEMORY_HOST_SSH = os.environ.get("MEMORY_HOST_SSH", "")
 
 # DATA-SAFETY INVARIANT: this hook deletes memory. It must only ever touch the
 # dedicated eval namespaces — NEVER the production agents that share the same
-# backends. recall-neo4j holds prod groups `<prod-group>`/`<prod-group>`/`<prod-group>`; honcho and
+# backends. recall-neo4j holds the production memory groups; honcho and
 # hindsight are likewise shared with real agents. Every group/workspace/bank id
 # this hook deletes MUST start with this prefix. `_assert_eval_scope` enforces it
 # at the destructive call site, so even a future GROUP_MAP typo cannot wipe prod.
@@ -68,8 +68,8 @@ GROUP_MAP = {
 def _assert_eval_scope(group_id: str) -> None:
     """Refuse to operate on anything outside the eval-* namespace.
 
-    Defense in depth against accidentally wiping production memory (<prod-group>/<prod-group>/
-    <prod-group> in recall, real workspaces in honcho/hindsight). Raises ValueError on
+    Defense in depth against accidentally wiping production memory (the
+    production memory groups in recall, real workspaces in honcho/hindsight). Raises ValueError on
     any non-eval id; the caller logs it and skips the wipe rather than guessing.
     """
     if not isinstance(group_id, str) or not group_id.startswith(EVAL_PREFIX):
@@ -91,14 +91,14 @@ def _wipe_recall(group_id: str) -> None:
 
     Password is read inside the container; never enters our process env.
     """
-    _assert_eval_scope(group_id)  # never delete prod groups (<prod-group>/<prod-group>/<prod-group>)
+    _assert_eval_scope(group_id)  # never delete the production memory groups
     cypher = f'MATCH (n {{group_id: "{group_id}"}}) DETACH DELETE n'
     inner = (
         f'PASS=$(printenv NEO4J_AUTH | cut -d/ -f2); '
         f'cypher-shell -u neo4j -p "$PASS" {shlex.quote(cypher)}'
     )
     cmd = [
-        "ssh", <memory-host>_SSH,
+        "ssh", MEMORY_HOST_SSH,
         f'docker exec {RECALL_CONTAINER} sh -c {shlex.quote(inner)}',
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)

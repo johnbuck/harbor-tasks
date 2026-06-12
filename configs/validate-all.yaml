@@ -25,20 +25,20 @@ agents:
   - name: oracle
 
 datasets:
-  - path: <repo>/tasks/code-editing
-  - path: <repo>/tasks/ops-debugging
-  - path: <repo>/tasks/research-rag
-  - path: <repo>/tasks/conversation-persona
-  - path: <repo>/tasks/building-prototypes
-  - path: <repo>/tasks/building-designs
-  - path: <repo>/tasks/insights-research
-  - path: <repo>/tasks/marketing
-  - path: <repo>/tasks/data-analytics
-  - path: <repo>/tasks/documentation
-  - path: <repo>/tasks/code-spec-review
-  - path: <repo>/tasks/test-authoring
-  - path: <repo>/tasks/tool-orchestration
-  - path: <repo>/tasks/skill-agent-authoring
-  - path: <repo>/tasks/migration
-  - path: <repo>/tasks/compliance-security
-  - path: <repo>/tasks/backup-dr
+  - path: tasks/code-editing
+  - path: tasks/ops-debugging
+  - path: tasks/research-rag
+  - path: tasks/conversation-persona
+  - path: tasks/building-prototypes
+  - path: tasks/building-designs
+  - path: tasks/insights-research
+  - path: tasks/marketing
+  - path: tasks/data-analytics
+  - path: tasks/documentation
+  - path: tasks/code-spec-review
+  - path: tasks/test-authoring
+  - path: tasks/tool-orchestration
+  - path: tasks/skill-agent-authoring
+  - path: tasks/migration
+  - path: tasks/compliance-security
+  - path: tasks/backup-dr

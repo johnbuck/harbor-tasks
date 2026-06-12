@@ -77,21 +77,21 @@ hermes's honcho+recall under load.
 > plugins registry --refresh` into the image; both harnesses keep the plain
 > embedded `--local` invocation. Live e2e (`configs/browser-e2e.yaml`): **openclaw
 > reward 1.0 (24 browser calls), hermes reward 1.0 (69 calls)** — both genuinely
-> drove the shared <memory-host> Chromium (the `browser_used` gate defeats memorization).
+> drove the shared memory-host Chromium (the `browser_used` gate defeats memorization).
 > Construct-validity scope: only **browser-dependent** tasks were affected by the
 > prior gap (the rest of the tool catalog — exec/read/write/memory/sub-agents —
 > was always present); the lone browser task is BLUNT (both 1.0), so no other
 > baseline shifts from this fix.
 >
 > **Self-contained browser (2026-06-03, `backlog/2026-06-03-self-contained-browser.md`).**
-> The browser tool initially drove a shared Chromium **on <memory-host>** over the LAN; that
+> The browser tool initially drove a shared Chromium **on the memory host** over the LAN; that
 > cross-machine dependency is removed. A real `/usr/bin/chromium` (148) is now baked
 > into the rich image and a per-trial `start-cdp.sh` launches a headless Chromium
 > **inside each trial container**; both harnesses attach to `127.0.0.1:9222`. One
 > controlled browser backend per container (only the harness's tool differs ⇒ fair).
 > Re-verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectories show
-> `127.0.0.1` and **0** <memory-host> references. (Memory/hindsight `:8888` remains the shared
-> <memory-host> substrate by design — a separate decision.)
+> `127.0.0.1` and **0** memory-host references. (Memory/hindsight `:8888` remains the shared
+> memory-host substrate by design — a separate decision.)
 
 ---
 
@@ -152,11 +152,11 @@ n=5 to surface their reliability gap.
   (operator decision, task #72). Both share **hindsight**. `recall` was shared
   too until 2026-06-03 (commit `597070b`), when it was dropped from both
   harnesses for erroring on every hermes call — so the current memory substrate
-  is openclaw=hindsight vs hermes=honcho+hindsight (the <memory-host> recall server at
+  is openclaw=hindsight vs hermes=honcho+hindsight (the memory-host recall server at
   :8408 is untouched; the harnesses just no longer mount it).
 - **Anti-contamination**: `hooks/wipe_memory_state.py` wipes the eval recall
   group / hindsight bank / honcho workspace before every trial — scoped to
-  `eval-*` only (guarded; can never touch prod `<prod-group>/<prod-group>/<prod-group>`). honcho 409 +
+  `eval-*` only (guarded; can never touch the production memory groups). honcho 409 +
   hindsight 405 wipe bugs fixed 2026-05-31 (FOOTGUNS #37).
 
 ## How to reproduce

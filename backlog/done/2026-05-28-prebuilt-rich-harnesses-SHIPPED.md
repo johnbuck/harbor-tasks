@@ -65,7 +65,7 @@ image — the build is mostly **configuration**, not new installs.
 
 | Backend | openclaw | hermes | Integration |
 |---|---|---|---|
-| **recall** (existing Graphiti MCP on <memory-host> `recall-mcp:8407`) | ✅ | ✅ | MCP server; per-agent isolation via `group_id`. recall reads `X-Group-ID` header (Caddy injects it) OR explicit `group_id=` per call. **Each agent its own group_id** (e.g. `eval-openclaw`, `eval-hermes`) so memories don't collide AND don't pollute prod (<prod-group>/<prod-group>) graphs. |
+| **recall** (existing Graphiti MCP on the memory host `recall-mcp:8407`) | ✅ | ✅ | MCP server; per-agent isolation via `group_id`. recall reads `X-Group-ID` header (Caddy injects it) OR explicit `group_id=` per call. **Each agent its own group_id** (e.g. `eval-openclaw`, `eval-hermes`) so memories don't collide AND don't pollute prod (the production memory groups) graphs. |
 | **Hindsight** (`vectorize-io/hindsight`, self-host) | ✅ | ✅ | built-in streamable-HTTP MCP at `/mcp/`; per-agent via `bank_id` / `X-Bank-Id`. |
 | **Honcho** (`plastic-labs/honcho`, self-host) | ❌ | ✅ | hermes **native skill** (`hermes honcho setup` → local → base URL; `honcho.json`; `pip honcho-ai`). NOT a generic MCP for hermes. |
 

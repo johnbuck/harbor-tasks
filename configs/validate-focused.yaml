@@ -13,6 +13,6 @@ agents:
     model_name: deepseek/deepseek-v4-pro
 
 datasets:
-  - path: <repo>/tasks/conversation-persona
+  - path: tasks/conversation-persona
     task_names:
       - multistep-memory-conversational-01

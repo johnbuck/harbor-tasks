@@ -34,7 +34,7 @@ Two independent issues:
 2. **The runtime ran from an ephemeral checkout.** The live dashboard on :8089 was
    launched with `uv run --project /tmp/harbor …`. `/tmp/harbor` is a **separate**
    git checkout of **upstream** (`origin = harbor-framework/harbor`) sitting in
-   scratch space, *not* the canonical fork at `/home/<user>/harbor`
+   scratch space, *not* the canonical fork at `<harbor-fork>`
    (`origin = johnbuck/harbor`) referenced in the harbor-tasks README. `/tmp` is
    wiped on reboot, so any fix applied only there is non-durable, and there is **no
    persistent launcher** — the viewer was started by an ad-hoc command, so a reboot
@@ -45,7 +45,7 @@ Two independent issues:
 In:
 - Soften the `ANTHROPIC_API_KEY` gate in `analyze/backend.py` and the parallel one in
   `cli/quality_checker/quality_checker.py` to accept the logged-in `claude` CLI.
-- Make the canonical fork (`/home/<user>/harbor`) the tree the live viewer runs from.
+- Make the canonical fork (`<harbor-fork>`) the tree the live viewer runs from.
 - A small persistent launcher so the fork-launch survives reboot (task #91 — proposed).
 
 Out:
@@ -71,7 +71,7 @@ Out:
 
 - **Patch both checkouts, but make the fork canonical.** Applied the patch to the live
   `/tmp/harbor` (fixes the button *now*) AND to the fork (durable), then repointed the
-  running viewer at the fork via `uv run --project /home/<user>/harbor`. One source of
+  running viewer at the fork via `uv run --project <harbor-fork>`. One source of
   truth going forward.
 
 - **Reuse the prebuilt UI instead of building fresh.** `view.py` builds the SPA with
@@ -97,8 +97,8 @@ Out:
       summary), served by the **fork** viewer; UI + `/assets/*` load 200.
 - [x] Patch committed to the fork (`42e37e59` on `local/subscription-auth-analyze`);
       fork working tree clean apart from the untracked built `static/`.
-- [x] Live :8089 viewer confirmed running from `/home/<user>/harbor/.venv` (the fork).
-- [x] **Durable launcher** `tools/view.sh` pins `--project /home/<user>/harbor …
+- [x] Live :8089 viewer confirmed running from `<harbor-fork>/.venv` (the fork).
+- [x] **Durable launcher** `tools/view.sh` pins `--project <harbor-fork> …
       --no-build` (port arg + `HARBOR_FORK`/`HARBOR_JOBS`/`HARBOR_HOST` overrides),
       preflights fork/UI/jobs/auth and waits out the TIME_WAIT restart race. Verified:
       launched the live viewer from the script → fork tree, UI 200, summarize 200.

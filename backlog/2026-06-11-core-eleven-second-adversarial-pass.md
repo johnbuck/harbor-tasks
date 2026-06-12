@@ -539,7 +539,7 @@ relabelled to the real weight blend); `SHAPES.md` shape-14 verifier "judge"→
 "deterministic rewardkit (correct/60)".
 
 **Bypass-regression harness (new `tests/` tree, design decision 2).** 37 offline
-checks, runnable on <run-host>'s harbor venv with no docker/sweep:
+checks, runnable on the run host's harbor venv with no docker/sweep:
 `tests/helpers.py` + `conftest.py` (rewardkit-driving + shell-grader remap
 helpers); `tests/exploits/` (T3 spoiler, T6 forgery, T8 opnames, T9 parser +
 `t9_parser.py` the recorded exploit); `tests/wipe/test_s1_wipe.py`;
@@ -613,7 +613,7 @@ attacks fail); `tests/s4/test_s4_crash_guard.py`; `tests/hygiene/test_s5_drift.p
 
 ### How to verify
 
-Offline, on <run-host> (no docker, no sweep):
+Offline, on the run host (no docker, no sweep):
 ```
 ssh <run-host>@LAN-IP 'cd ~/benchmarking/.baton-worktrees/baton-2026-06-11-core-eleven-second-adversarial-pass \
   && ~/benchmarking/harbor/.venv/bin/python -m pytest tests/ -q'

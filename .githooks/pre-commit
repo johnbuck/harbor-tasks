@@ -13,9 +13,17 @@ set -uo pipefail
 PAT='\.lan\b|\.ts\.net\b|\b(10|192\.168|172\.(1[6-9]|2[0-9]|3[01]))\.[0-9]{1,3}\.[0-9]{1,3}\b'
 
 # Scan only ADDED lines in staged changes; the template may show placeholder shapes.
+# Excludes: configs/local.env.example (placeholder template); this hook itself; and
+# the generated dashboards roadmap.html / task-catalog.html, which embed eval
+# task+backlog fixtures verbatim (e.g. ops-debugging logs with SYNTHETIC private
+# IPs — legitimate task content, not infra topology). Those dashboards' SOURCES
+# (tasks/, backlog/) are still scanned here, and tools/check_topology.sh guards
+# them for host nicknames / home paths.
 bad=$(git diff --cached --no-color -U0 -- . \
         ':(exclude)configs/local.env.example' \
         ':(exclude).githooks/pre-commit' \
+        ':(exclude)roadmap.html' \
+        ':(exclude)task-catalog.html' \
       | grep -E '^\+' | grep -nE "$PAT" || true)
 
 if [ -n "$bad" ]; then

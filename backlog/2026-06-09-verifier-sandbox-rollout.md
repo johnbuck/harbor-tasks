@@ -121,7 +121,7 @@ weight-0 criteria). Commits 5ae5b83, c55a2be, e20870e, e7c26c7.
 
 **✅ ROLLOUT COMPLETE — all 23 active graded tasks grade via rewardkit.** (12 single-step
 + 11 multistep.) Every conversion oracle-validated with a verified criterion count, $0
-OpenRouter. The 5 commits are local on <run-host> `main` pending the operator push.
+OpenRouter. The 5 commits are local on the run host `main` pending the operator push.
 
 **Keep bespoke (pytest — provably the right tool, rewardkit would just wrap it):**
 `refactor-multi-file-01`, `dep-bump-breaking-01`, `unit-tests-01`, `reasoning-parity-01`.

@@ -20,4 +20,4 @@ agents:
   - name: oracle
 
 datasets:
-  - path: <repo>/pilot
+  - path: pilot

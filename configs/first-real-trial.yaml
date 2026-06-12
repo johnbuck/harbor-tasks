@@ -39,4 +39,4 @@ agents:
     model_name: moonshotai/kimi-k2.6
 
 datasets:
-  - path: <repo>/tasks/code-editing
+  - path: tasks/code-editing

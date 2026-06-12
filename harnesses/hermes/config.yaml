@@ -181,7 +181,7 @@ terminal:
 # -----------------------------------------------------------------------------
 # terminal:
 #   backend: "ssh"
-#   cwd: "/home/myuser/project"  # Path on the REMOTE server
+#   cwd: "/home/<user>/project"  # Path on the REMOTE server
 #   timeout: 180
 #   lifetime_seconds: 300
 #   ssh_host: "my-server.example.com"
@@ -319,7 +319,7 @@ browser:
   # Local CDP endpoint — SELF-CONTAINED headless Chromium running INSIDE this
   # trial container (started by /opt/harness/start-cdp.sh; /usr/bin/chromium baked
   # into the rich image). Set instead of browser.cloud_provider so we use the
-  # in-container browser instead of Browserbase. NOT <memory-host> — every browser action
+  # in-container browser instead of Browserbase. NOT the memory host — every browser action
   # stays in-container, no cross-machine dependency. Spec:
   # backlog/2026-06-03-self-contained-browser.md.
   # Read by tools/browser_tool.py::_get_cdp_override → browser.cdp_url.
@@ -478,7 +478,7 @@ prompt_caching:
 # Disabled by default in batch_runner.
 #
 memory:
-  # External memory provider: Honcho (self-hosted on <memory-host>). Built-in file
+  # External memory provider: Honcho (self-hosted on the memory host). Built-in file
   # memory (MEMORY.md/USER.md) stays active alongside it; recall + hindsight
   # are separate MCP tools. Honcho config (baseUrl, workspace) is in
   # $HERMES_HOME/honcho.json. Only ONE external provider may be active — honcho.
@@ -584,7 +584,7 @@ skills:
   # when names collide.
   # external_dirs:
   #   - ~/.agents/skills
-  #   - /home/shared/team-skills
+  #   - /home/<user>/team-skills
 
 # =============================================================================
 # Agent Behavior
@@ -819,8 +819,8 @@ platform_toolsets:
 #
 # Evaluation harness memory servers (HTTP MCP; per-agent isolation).
 mcp_servers:
-  # recall (Graphiti temporal-KG memory, <memory-host> port 8408) was REMOVED from this
-  # eval harness 2026-06-03 — it errored on every hermes invocation. The <memory-host>
+  # recall (Graphiti temporal-KG memory, the memory host port 8408) was REMOVED from this
+  # eval harness 2026-06-03 — it errored on every hermes invocation. The memory host
   # recall MCP server itself is untouched; this harness simply no longer mounts
   # it. hindsight remains the active eval memory MCP. To restore, re-add:
   #   recall:
@@ -837,7 +837,7 @@ mcp_servers:
 #     args: ["mcp-server-time"]
 #   filesystem:
 #     command: npx
-#     args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/user"]
+#     args: ["-y", "@modelcontextprotocol/server-filesystem", "/home/<user>"]
 #   notion:
 #     url: https://mcp.notion.com/mcp
 #   github:

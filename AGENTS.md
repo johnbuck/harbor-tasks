@@ -29,23 +29,23 @@ precondition for any "they're equivalent" conclusion.
 
 ## Where it runs (read this first)
 
-Both repos live on **<run-host>** (`LAN-IP`), co-located so the run scripts
+Both repos live on **the run host** (`LAN-IP`), co-located so the run scripts
 resolve `../harbor` automatically:
 
-| Repo | Path on <run-host> | What |
+| Repo | Path on the run host | What |
 |---|---|---|
 | Harbor framework (fork) | `~/benchmarking/harbor` | `johnbuck/harbor`; has its own `.venv` |
 | This repo | `~/benchmarking/harbor-tasks` | `johnbuck/harbor-tasks`; tasks, configs, adapters |
 
 > **History:** this moved 2026-06-09 from `/tmp/harbor` + `~/harbor-tasks` on
-> <dev-host> to `~/benchmarking/{harbor,harbor-tasks}` on <run-host>. Any doc/memory
-> citing `/tmp/harbor` or `~/harbor-tasks` (<dev-host>) is pre-move.
+> the dev workstation to `~/benchmarking/{harbor,harbor-tasks}` on the run host. Any doc/memory
+> citing `/tmp/harbor` or `~/harbor-tasks` (the dev workstation) is pre-move.
 
-**Working from <dev-host> (architect-<dev-host>):** edit over the sshfs mount at
-`~/mnt/<run-host>/benchmarking/harbor-tasks/` — edits land on the real <run-host>
-files instantly. **But run git commits/pushes and `harbor run` ON <run-host>**
+**Working from the dev workstation (architect-<dev-host>):** edit over the sshfs mount at
+`~/mnt/<run-host>/benchmarking/harbor-tasks/` — edits land on the real run-host
+files instantly. **But run git commits/pushes and `harbor run` ON the run host**
 (`ssh <run-host>@LAN-IP`): git-over-sshfs stats every file and is slow, and the
-sweep needs <run-host>'s Docker + `.venv`.
+sweep needs the run host's Docker + `.venv`.
 
 ---
 
@@ -166,7 +166,7 @@ memory):
 
 ## Running a sweep
 
-Run on **<run-host>**. The driver handles the Infisical footguns (login ignores
+Run on **the run host**. The driver handles the Infisical footguns (login ignores
 `INFISICAL_SITE_URL` → needs `--domain`; `--plain` token has a trailing newline
 that must be stripped) and registers the memory-wipe hook the bare CLI can't load:
 
@@ -183,7 +183,7 @@ tools/run_track_a.sh                              # full Track-A weighted sweep
   (`INFISICAL_PROJECT_ID`), env `production`, path `/proxy/`.
 - **Infisical is SELF-HOSTED** (`http://internal-host:8380`) — never the
   cloud endpoint, always `--domain`. **Secret writes** go through the
-  `infisical-identity` identity on <dev-host> (the <run-host> creds are read-only). See
+  `infisical-identity` identity on the dev workstation (the run host creds are read-only). See
   [SECRETS.md](../../../SECRETS.md).
 
 ---

@@ -130,7 +130,7 @@ Jobs persist in `jobs/` (gitignored). Dashboard: `harbor view jobs --port 8089`
   oracle-eyeball misses the pydantic schema layer.
 - `jobs_dir` must be absolute + persistent (`/tmp` is tmpfs, wiped on reboot).
 - Memory wipes are **eval-* scoped only** (`hooks/wipe_memory_state.py` guards;
-  never touches prod groups <prod-group>/<prod-group>/<prod-group>).
+  never touches the production memory groups).
 - Task Dockerfiles MUST `FROM harbor-agents-rich:latest` (baked openclaw.json +
   xrouter); prebaked silently boots default config.
 

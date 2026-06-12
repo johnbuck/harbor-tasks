@@ -45,7 +45,8 @@ hand. Re-runnable; the data is always live.
    │         .yaml file contents).                    │
    │         emits ONE JSON blob to stdout.           │
    │                                                  │
-   │   2) urllib pings memory services on <memory-host>.      │
+   │   2) urllib pings memory services on the memory  │
+   │      host.                                       │
    │                                                  │
    │   3) python templating → agent-status.html       │
    │      (inline CSS + JS, embeds all file content   │
@@ -69,7 +70,7 @@ hand. Re-runnable; the data is always live.
 | hermes skills (active vs not) | `hermes skills list` (rich table parsed) | active = Status column == `enabled` |
 | **hermes plugins** | **filesystem walk of `/usr/local/lib/hermes-agent/plugins/<cat>/<name>/`** + `hermes plugins list` (rich table) + `config.yaml` config-driven keys | **dual-system computation; see FOOTGUNS #20** |
 | hermes persona | `/root/.hermes/SOUL.md` | |
-| Memory service health | HTTPS pings from <dev-host>: `http://internal-host:{8407,8888,8000}/health` | colored dots in the legend |
+| Memory service health | HTTPS pings from the dev workstation: `http://internal-host:{8407,8888,8000}/health` | colored dots in the legend |
 
 ## Dual-system activation (hermes plugins)
 
@@ -141,4 +142,4 @@ Re-run after any of these and the dashboard reflects the change:
 - editing a baked persona/config file in `harnesses/` and rebuilding the image,
 - flipping `memory.provider:` or `agent.context.engine:` in `harnesses/hermes/config.yaml`,
 - adding a plugin to `plugins.enabled` in the hermes config,
-- starting/stopping a memory service on <memory-host>.
+- starting/stopping a memory service on the memory host.

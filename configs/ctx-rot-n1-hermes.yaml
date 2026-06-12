@@ -14,7 +14,7 @@
 #   source ~/.config/infisical/infisical-identity.env
 #   CONFIG=configs/ctx-rot-n1-hermes.yaml JOB_NAME=ctx-rot-n1-hermes tools/run_track_a.sh
 
-jobs_dir: <repo>/jobs/ctx-rot-n1-hermes
+jobs_dir: jobs/ctx-rot-n1-hermes
 n_attempts: 1
 timeout_multiplier: 1.0
 

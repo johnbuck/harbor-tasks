@@ -81,7 +81,7 @@ parity needs both or neither.)
 ### D1 — Server-side, both containers
 
 All changes go in `wrapper_main.py` (and its new sibling modules; see D5).
-The same image runs as both `recall-mcp` (prod groups: <prod-group>, <prod-group>, <prod-group>)
+The same image runs as both `recall-mcp` (the production memory groups)
 and `recall-mcp-eval` (eval groups: eval-openclaw, eval-hermes), so both
 pick up the new surface automatically. Per-container customization via
 env-var description overrides (D6).
@@ -393,7 +393,7 @@ Idempotent.
 ### D8 — Backward compatibility
 
 - Existing 9 tool **names + signatures** are unchanged. Only their
-  descriptions change. Existing prod openclaw agents (<prod-group>, <prod-group>, <prod-group>)
+  descriptions change. Existing prod openclaw agents (the production memory groups)
   keep working. FastMCP's `Tool.parameters` (the input JSON schema) is
   derived from Python **type hints**, not the docstring `Args:` block —
   verified live against the running recall-mcp — so rewriting docstrings
@@ -565,7 +565,7 @@ Methodology:
   1. **recall-pre** — current 9-tool surface, technical-reference descriptions
   2. **recall-post** — P1–P4 surface (22 tools, coaching descriptions, reflect, mental models, dispositions, directives)
   3. **hindsight** — already running, 57 tools, full hindsight surface
-- Prod recall (<prod-group>/<prod-group>/<prod-group>) does **NOT** auto-upgrade until the
+- Prod recall (the production memory groups) does **NOT** auto-upgrade until the
   three-way eval result is documented. Decision to roll P1–P4 into prod
   recall is an explicit operator call after evidence, not a default.
 - The eval task spec needs an explicit memory-config dimension; capture
@@ -703,7 +703,7 @@ starting P2+. Hypothesis: P1 alone closes most of the observed
   ~25 and creates noise).
 - `retain_mission` (per-bank extraction directive for `add_memory`) —
   status depends on D9 #1's three-outcome resolution.
-- Migrate prod recall (<prod-group>/<prod-group>/<prod-group>) to use coaching descriptions
+- Migrate prod recall (the production memory groups) to use coaching descriptions
   in the SOUL.md instructions instead of/in addition to the MCP layer
   (belt-and-suspenders for proactive use).
 

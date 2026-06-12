@@ -36,36 +36,36 @@ agents:
 
 datasets:
   # Memory — recall, proactive write+correction, stale-vs-live-file
-  - path: ${REPO}/tasks/conversation-persona
+  - path: tasks/conversation-persona
     task_names:
       - multistep-memory-conversational-01   # recall under distractor load (grader anchored 2026-06-10; Δ to re-earn)
       - true-multi-turn-memory-write-01       # proactive write + correction, latest-value /8
       - multistep-stale-memory-vs-file-01     # stale memory vs re-fetched live file (275 vs 45)
 
   # Long-context — compaction on overflow, in-window rot
-  - path: ${REPO}/tasks/context-management
+  - path: tasks/context-management
     task_names:
       - multistep-context-fill-02             # chunks deleted pre-recall (cheat-proof), graded /12
-  - path: ${REPO}/tasks/context-rot
+  - path: tasks/context-rot
     task_names:
       - context-rot-02                        # multi-hop lost-in-the-middle; normalized rot curve (#93)
 
   # Control loop — recovery/retry, replanning
-  - path: ${REPO}/tasks/ops-debugging
+  - path: tasks/ops-debugging
     task_names:
       - failure-recovery-loop-01              # adaptive recovery (random-nonce rework 2026-06-10; Δ to re-earn)
-  - path: ${REPO}/tasks/tool-orchestration
+  - path: tasks/tool-orchestration
     task_names:
       - tool-sprawl-precision-01              # tool-selection F1 + efficiency (grade-on-selection rework 2026-06-10; Δ to re-earn)
       - plan-then-revise-01                   # mid-task replanning; clamp-memory 0.40 + functional 0.40 + cleanup 0.12 + replan-keyword 0.08
 
   # Delegation + skill acquisition
-  - path: ${REPO}/tasks/skill-agent-authoring
+  - path: tasks/skill-agent-authoring
     task_names:
       - sub-agent-parallel-decompose-01       # sub-agent fan-out (60 vs budget), /60
       - skill-discovery-and-use-01            # discover right skill among decoys, /16
 
   # Stateful multi-step workflow
-  - path: ${REPO}/tasks/real-world-workflows
+  - path: tasks/real-world-workflows
     task_names:
       - update-record-with-cleanup-01         # ledger dedup + preservation traps, leak-proof, /16

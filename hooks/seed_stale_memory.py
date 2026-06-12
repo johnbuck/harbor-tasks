@@ -19,7 +19,7 @@ SCOPE / SAFETY:
   * Fires only when event.task_name names the T3 task (TASK_MATCH substring), so
     it never poisons unrelated trials.
   * Reuses GROUP_MAP + _assert_eval_scope from the wipe hook, so it can only ever
-    touch an eval-<harness> bank — never a production bank (<prod-group>/<prod-group>/<prod-group>).
+    touch an eval-<harness> bank — never a production bank (<prod-group>).
   * Hindsight unreachable / non-2xx => log a warning and continue; like the wipe
     hook it must not block the trial on an infra flake.
 

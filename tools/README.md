@@ -1,7 +1,7 @@
 # `tools/` — operator utilities
 
 Standalone scripts for inspecting / refreshing the eval setup. Stdlib-only
-where possible; runs on <dev-host>'s system python (or whatever python3 is on
+where possible; runs on the dev workstation's system python (or whatever python3 is on
 PATH).
 
 ## Scripts
@@ -23,7 +23,7 @@ python3 tools/agent_status.py --open     # also opens it in the browser
    `hermes skills list`, `hermes plugins list`, a filesystem walk of
    `/usr/local/lib/hermes-agent/plugins/`, and the full contents of every
    persona/SKILL.md/plugin.yaml/config.
-2. Pings `recall:8407 / hindsight:8888 / honcho:8000` on <memory-host> from <dev-host>.
+2. Pings `recall:8407 / hindsight:8888 / honcho:8000` on an internal host from the dev workstation.
 3. Templates everything into a self-contained ~1.4 MB `agent-status.html`
    with inline CSS + JS and embedded file contents (works opened from
    `file://`).

@@ -105,7 +105,7 @@ instead of starting fresh. The container persists (finding 1), so the session st
 is already on disk; we only pass the resume flag.
 
 - **Flags confirmed in-image** (ran `--help` inside `harbor-agents-rich` on
-  <run-host> via ssh, not guessed): openclaw `agent --session-id <id>` (explicit,
+  the run host via ssh, not guessed): openclaw `agent --session-id <id>` (explicit,
   create-or-target); hermes `chat -c/--continue [NAME]` (= most recent session if
   no name). The per-trial container is isolated, so a fixed id / "most recent" is
   unambiguous and `pass^k` repeats can't collide.
@@ -120,7 +120,7 @@ is already on disk; we only pass the resume flag.
   harbor-trial`; hermes → first step plain, later steps `-c` gated on a
   `/tmp/.harbor_hermes_started` marker). Marker added to context-fill-02's
   Dockerfile.
-- **Validated end-to-end (paid smoke on <run-host>, memory ON):** plant a codeword in
+- **Validated end-to-end (paid smoke on the run host, memory ON):** plant a codeword in
   call 1, ask in call 2. openclaw threaded session recalled it; a **fresh-session
   control did NOT** (despite the shared hindsight bank) → recall came from the
   threaded conversation, not memory. hermes `-c` likewise recalled. Both confirmed.
@@ -301,7 +301,7 @@ enumerator, pattern-match), not the whole `answer.md`:
   exposed to the adapter via `AgentContext`?) or mint one in step 1 and stash it
   in a known container path the next step reads.
 - **O3:** does `configs/core-suite.yaml`'s `path:` (`<repo>/…`,
-  the pre-move <dev-host> path) still resolve on <run-host>, or does it need updating to
+  the pre-move <dev-host> path) still resolve on the run host, or does it need updating to
   `~/benchmarking/harbor-tasks`? Verify before the run.
 
 ## Follow-up tickets
