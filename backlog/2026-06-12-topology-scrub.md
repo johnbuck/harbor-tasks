@@ -1,5 +1,5 @@
 ---
-status: PROPOSED
+status: IMPLEMENTED
 epic: E5
 date: 2026-06-12
 ---
@@ -8,11 +8,35 @@ date: 2026-06-12
 
 **Epic:** E5 — Infra / Ops hygiene
 **Date:** 2026-06-12
-**Status:** PROPOSED — audit done; sweep not yet executed.
+**Status:** IMPLEMENTED — executed via two fan-out workflows + manual fixes; committed `773cebe`.
 **Origin / triggered-by:** while committing the alternate-model axis
 (`2026-06-11-alt-model-axis.md`), the operator asked to confirm we aren't exposing
 topographical data. The new files were scrubbed in commit `e8a1279`; this spec
 covers the **pre-existing** leaks the audit surfaced across the rest of the repo.
+
+## Outcome (2026-06-12, commit `773cebe`)
+
+The executed scope was **much broader than the initial audit** below (which only
+matched the run-host / dev-host / memory-host nicknames). A broadened sweep found a
+second tier of host nicknames — the memory host (~174 refs), the production
+memory-group names, the storage host, and the memory-host docker network — across
+~70 files.
+
+What shipped:
+- **Removed from the repo** (live-infra artifacts that re-leak on every regen; kept
+  local + gitignored): `infra/` (memory-stack docker-compose mirror + recall config)
+  and `agent-status.html` (generator embeds real service URLs + container config).
+- **Scrubbed** host nicknames → "run host / dev workstation / memory host / storage
+  host / production memory groups"; `/home/<user>` → `<repo>` or repo-relative;
+  Infisical UUID → placeholder. Across docs, comments, dashboard generator sources.
+- **Path strategy = relative** (operator-confirmed via Harbor source: CWD-relative
+  `iterdir` at `config.py:141`); all configs unified + validated (parse + resolve).
+- **Renamed the memory-host SSH env var to `MEMORY_HOST_SSH`** (the old name
+  embedded the host nickname).
+- **`tools/check_topology.sh`** added (nickname/home gate); the pre-existing
+  `.githooks/pre-commit` network gate now excludes the generated dashboards (they
+  embed synthetic task-fixture IPs).
+- Dashboards `roadmap.html` + `task-catalog.html` regenerated clean.
 
 ## Problem
 
