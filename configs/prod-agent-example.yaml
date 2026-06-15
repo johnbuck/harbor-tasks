@@ -1,0 +1,57 @@
+# Production-agent eval mode — attach to an EXISTING agent container instead of
+# building a throwaway one. Spec: backlog/2026-06-12-production-agent-eval-mode.md.
+#
+# This wires the three import_path seams (no Harbor-core fork):
+#   * environment -> lib.external_container:ExternalContainerEnvironment
+#       attaches to a named, already-running container; NEVER builds or destroys it.
+#   * agent       -> lib.external_agent:ExternalAgentAdapter
+#       drives the agent via its REAL entrypoint and captures the response.
+#   * verifier    -> lib.external_verifier:ExternalTranscriptVerifier
+#       grades the captured transcript HOST-side (ignores the prod container).
+#
+# SAFETY: read the "safety model" section of the spec before pointing this at a real
+# agent. Defaults are read-only (memory_policy: preserve); a wipe requires BOTH
+# allow_wipe AND a disposable_pattern match. Validate attachment with the preflight
+# first: tools/prod_agent_preflight.py (it attaches + reports, mutating nothing).
+
+jobs_dir: jobs
+job_name: prod-agent-example
+n_attempts: 1
+timeout_multiplier: 1.0
+
+n_concurrent_trials: 1
+quiet: false
+
+environment:
+  import_path: lib.external_container:ExternalContainerEnvironment
+  # force_build/delete are IGNORED by this environment (it never builds or destroys).
+  force_build: false
+  delete: false
+  kwargs:
+    container: my-prod-agent        # name OR id of the already-running target
+    memory_policy: preserve         # preserve (default) | wipe | snapshot (Phase 2)
+    docker_host: null               # Phase 2: remote daemon, e.g. ssh://host
+    # --- wipe knobs (only consulted when memory_policy: wipe) ---
+    # allow_wipe: false             # MUST be true to wipe; destructive, opt-in only
+    # disposable_pattern: evalcopy  # target name MUST match this regex to be wiped
+    # wipe_cmd: "rm -rf /agent/memory/*"   # the exact wipe to run (else memory_paths)
+    # memory_paths: ["/agent/memory"]      # cleared when wipe_cmd is unset
+
+agents:
+  - import_path: lib.external_agent:ExternalAgentAdapter
+    kwargs:
+      # {instruction} is templated in shell-quoted; set this to the agent's real CLI.
+      invoke: "myagent chat --json --message {instruction}"
+      response: json:result.answer   # stdout | file:<path> | json:<jsonpath>
+      workdir: /home/agent
+
+verifier:
+  import_path: lib.external_verifier:ExternalTranscriptVerifier
+  kwargs:
+    # The rewardkit grader for the conversational task, on the HOST. Point this at
+    # the task's tests dir. The captured transcript is staged as answer_filename.
+    tests_dir: tasks/prod-behavioral/conversational-01/tests
+    answer_filename: answer.md
+
+tasks:
+  - path: tasks/prod-behavioral/conversational-01
