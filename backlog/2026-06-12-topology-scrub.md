@@ -8,7 +8,10 @@ date: 2026-06-12
 
 **Epic:** E5 — Infra / Ops hygiene
 **Date:** 2026-06-12
-**Status:** IMPLEMENTED — executed via two fan-out workflows + manual fixes; committed `773cebe`.
+**Status:** IMPLEMENTED + history rewritten & force-pushed 2026-06-15 (see the
+"History rewrite" section at the end). NOTE: the commit SHAs cited below (`e8a1279`,
+`773cebe`, …) predate the `git filter-repo` rewrite and no longer exist — they are
+kept only as logical references.
 **Origin / triggered-by:** while committing the alternate-model axis
 (`2026-06-11-alt-model-axis.md`), the operator asked to confirm we aren't exposing
 topographical data. The new files were scrubbed in commit `e8a1279`; this spec
@@ -37,6 +40,37 @@ What shipped:
   `.githooks/pre-commit` network gate now excludes the generated dashboards (they
   embed synthetic task-fixture IPs).
 - Dashboards `roadmap.html` + `task-catalog.html` regenerated clean.
+
+## History rewrite + publish (2026-06-15, force-pushed)
+
+The working-tree scrub above only cleaned HEAD; the topology was still in the
+PUBLIC GitHub history (already pushed). On operator instruction, all history was
+rewritten and force-pushed.
+
+- **Secrets pre-check (none real → no rotation):** the `sk-ant-…` hits were doc
+  prefixes; `BEGIN RSA PRIVATE` is the `compliance-security/secret-scan-01` task
+  fixture; `client_secret` was embedded skill-doc text; `configs/oracle-placeholder.env`
+  holds only a non-`sk-or-` placeholder. Real keys were never committed (they live
+  in Infisical).
+- **Method:** `git filter-repo`, two passes (case-sensitive, then case-INSENSITIVE)
+  over all 127 commits: removed `infra/` + `agent-status.html` from all history;
+  replaced every host nickname / `/home/<user>` path / Infisical UUID in **blobs AND
+  commit messages** with placeholders. The git author persona is preserved via a
+  negative lookahead. Verified: HEAD tree byte-identical (no over-match), 0 topology
+  tokens across all history (blobs + messages, case-insensitive), `check_topology` green.
+- **Pushed** (`--force-with-lease`): `main` → `5d19809`,
+  `remediation/core-eleven-2026-06-10` → `6a579a5` (scrub base + concurrent
+  baton-pipeline prod-agent-eval commits, verified topology-clean).
+- **Auth note:** the push MUST run from the **dev workstation** (where `gh` is
+  authed) over the mount — the run host has no GitHub credentials. (Cost several
+  failed attempts pushing from the run host.)
+- **Backup:** full pre-rewrite bundle in the run host's home
+  (`~/harbor-tasks-pre-rewrite.bundle`); restore via `git clone` from it.
+- **Residual limit (not fixable by git):** GitHub keeps the OLD pre-rewrite commits
+  reachable by SHA until its own GC. For true removal: ask GitHub Support to purge
+  unreachable commits, or make the repo private. Exposure was topology only
+  (usernames, host nicknames, a docker network name, the Shared Infisical project
+  UUID) — no credentials.
 
 ## Problem
 
