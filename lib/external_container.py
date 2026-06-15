@@ -239,18 +239,30 @@ class ExternalContainerEnvironment(BaseEnvironment):
 
     async def _run_wipe(self) -> None:
         if self._wipe_cmd:
-            await self.exec(self._wipe_cmd, user="root")
+            self._assert_wiped(await self.exec(self._wipe_cmd, user="root"), self._wipe_cmd)
             return
         if self._memory_paths:
             cmd = " && ".join(
                 f"rm -rf {shlex.quote(p.rstrip('/'))}/*" for p in self._memory_paths
             )
-            await self.exec(cmd, user="root")
+            self._assert_wiped(await self.exec(cmd, user="root"), cmd)
             return
         raise RuntimeError(
             "memory_policy='wipe' authorized but neither wipe_cmd nor "
             "memory_paths is configured; nothing to wipe."
         )
+
+    @staticmethod
+    def _assert_wiped(result, cmd: str) -> None:
+        # A wipe that exits nonzero (bad path, permission, non-root) must NOT look
+        # like success: returning normally would leave stale memory across trials
+        # while the caller believes it was cleared.
+        if getattr(result, "return_code", 0) != 0:
+            raise RuntimeError(
+                f"memory_policy='wipe' FAILED: command exited "
+                f"{result.return_code}: {cmd!r}. Memory was NOT cleared; refusing "
+                "to proceed as if it had been."
+            )
 
     # --------------------------------------------------------------------- #
     # exec / cp

@@ -63,6 +63,25 @@ def test_response_file_is_downloaded_and_captured(tmp_path):
     assert "FILE_ANSWER_TOKEN" in transcript
 
 
+def test_failed_invoke_writes_no_transcript_so_trial_is_void(tmp_path):
+    # A nonzero invoke is an INFRA failure, not a wrong answer. The adapter must
+    # NOT write external.txt, so the verifier scores the trial VOID
+    # (answer_present=0) rather than a false 0.0 LOSS.
+    fe = FakeEnvironment()
+    fe.exec_stdout = "partial junk before the agent crashed"
+    fe.exec_returncode = 137  # e.g. OOM-killed
+    adapter = make_agent_adapter(
+        tmp_path, invoke="myagent --message {instruction}", response="stdout"
+    )
+
+    run_async(adapter.run("question", fe, AgentContext()))
+
+    assert not (tmp_path / "external.txt").exists(), (
+        "a failed invoke must not produce a transcript (else a real infra failure "
+        "is graded as a wrong answer)"
+    )
+
+
 def test_response_json_path_is_extracted_and_captured(tmp_path):
     fe = FakeEnvironment()
     fe.exec_stdout = '{"result": {"answer": "JSON_ANSWER_TOKEN"}, "noise": 1}'

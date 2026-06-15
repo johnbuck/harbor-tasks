@@ -164,6 +164,24 @@ def test_wipe_allowed_emits_exactly_the_configured_wipe(monkeypatch, tmp_path):
     assert all("agent-evalcopy" not in c for c in wipe_cmds)
 
 
+def test_wipe_that_fails_raises_instead_of_looking_like_success(monkeypatch, tmp_path):
+    # A wipe exec that exits nonzero (bad path, permission, non-root) must raise:
+    # returning normally would retain stale memory across trials while the caller
+    # believes it was cleared.
+    env, fake = make_external_container_env(
+        monkeypatch,
+        tmp_path,
+        container="agent-evalcopy",
+        memory_policy="wipe",
+        allow_wipe=True,
+        disposable_pattern="evalcopy",
+        wipe_cmd="rm -rf /agent/memory/*",
+    )
+    fake.default_returncode = 1  # the wipe exec fails (inspect stays 0)
+    with pytest.raises(RuntimeError):
+        run_async(env.start(force_build=False))
+
+
 def test_preserve_emits_no_memory_command(monkeypatch, tmp_path):
     env, fake = make_external_container_env(
         monkeypatch,

@@ -79,6 +79,15 @@ class ExternalAgentAdapter(BaseAgent):
             pass
 
         result = await environment.exec(command, cwd=self._workdir)
+
+        # A nonzero invoke (crash, CLI error, OOM) is an INFRA failure, not a wrong
+        # answer. Do NOT write external.txt in that case: the host-side verifier
+        # keys answer_present on the file's existence, so a missing file scores the
+        # trial VOID (answer_present=0) instead of manufacturing a false 0.0 LOSS
+        # that is indistinguishable from a genuinely wrong response.
+        if result.return_code != 0:
+            return
+
         captured = await self._capture(result, environment)
 
         (self.logs_dir / "external.txt").write_text(captured)
