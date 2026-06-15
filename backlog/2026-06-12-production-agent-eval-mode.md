@@ -224,3 +224,56 @@ container** (built in the worktree — a plain `sleep` image with a sentinel mem
 file), so nothing real is touched. Pointing the mode at an actual production
 agent, and the Phase-2 snapshot/fixture-injection work, are deferred operator
 steps after the MVP merges and is reviewed.
+
+## Implementation log / as-built (2026-06-15)
+
+MVP built via baton (run wf_dbf51153-cbd) + a post-build review pass. baton's
+own review/document/merge stages did NOT run: the pipeline halted at Integrate
+when it tried to merge the STALE origin ref (origin had force-diverged from the
+local branch because the remediation branch's history was rewritten mid-run).
+The build itself completed and committed before that halt, so the code was intact
+and verified separately.
+
+### What landed (16 files, ~1.4k lines, all NEW — synthetic path untouched)
+- `lib/external_container.py` — `ExternalContainerEnvironment(BaseEnvironment)`:
+  attaches to a named running container (resolves to the exact container Id at
+  start, addresses only that Id thereafter), exec/`docker cp` via the resolved
+  id, `-H <docker_host>` injected on every call. `stop()` NEVER emits
+  down/rm/stop/kill/--volumes under any policy or `delete` value. memory_policy
+  preserve=no-op / wipe=double-guarded (allow_wipe AND disposable_pattern match,
+  fail-closed) / snapshot=raises NotImplementedError (no silent no-op).
+- `lib/external_agent.py` — `ExternalAgentAdapter`: renders `{instruction}`
+  shell-quoted into a configurable `invoke`, captures response via
+  stdout|file:<path>|json:<jsonpath>, writes to the HOST `logs_dir/external.txt`.
+- `lib/external_verifier.py` — host-side verifier (open question #1 RESOLVED
+  fork-free): grades the captured transcript via rewardkit on the host using the
+  custom-verifier import_path in SHARED mode; never touches the prod container.
+- `configs/prod-agent-example.yaml`, `tools/prod_agent_preflight.py` (dry-run),
+  `tasks/prod-behavioral/conversational-01/`, and `tests/prod_agent/` (25 offline
+  checks).
+
+### Open question #1 — RESOLVED, fork-free
+A custom `BaseVerifier` via `VerifierFactory.create_verifier_from_import_path`
+grades host-side off `logs_dir/external.txt`; SHARED verifier mode is used
+(SEPARATE mode would reuse the trial's env import_path and wrongly re-attach to
+the prod container). The spec's literal "/logs/agent/external.txt" is the HOST
+`agent_dir` file, not an in-container path — there is no /logs bind mount in a
+foreign container.
+
+### Post-build review (MINOR) + fixes applied (commit a593409)
+All six safety invariants verified HELD (no prod-destroying path). Two MED
+eval-integrity bugs fixed: F1 a failed invoke now writes no transcript (VOID, not
+a false 0.0 LOSS); F2 a failed wipe now raises instead of looking like success.
+Two regression tests added for the previously-uncovered nonzero-return-code paths.
+Final: **25/25 offline checks pass.**
+
+### Deferred (unchanged from Scope)
+Phase-2 snapshot+restore memory policy and filesystem-task fixture injection;
+remote DOCKER_HOST sweeps; pointing the mode at a real production agent (an
+operator run — baton only exercised it against fakes/a throwaway stand-in).
+
+### Landing note
+Merged locally via fast-forward onto `remediation/core-eleven-2026-06-10`. NOT
+pushed: origin/remediation has force-diverged from local (the branch history was
+rewritten), so reconciling origin (force-push or reset) is an operator decision
+separate from this feature.
