@@ -11,15 +11,28 @@ WORKDIR /app
 #   text-sort-last — lexicographic last line ("1.9.0" > "1.10.2" as strings)
 #   csv-col-sum    — naive float sum of a column (cannot parse a leading "$")
 # A harness with weak tool-selection discipline reaches for the adjacent tool
-# and gets the wrong number. Every tool logs its invocation to
-# /var/log/tool-calls.log so the verifier can read the selection trajectory.
+# and gets the wrong number. Every tool logs its invocation to BOTH the
+# agent-facing /var/log/tool-calls.log (diagnostic) and the root-owned
+# /logs/tool-calls.log (the SCORED selection trajectory the verifier reads).
 
 RUN mkdir -p /opt/tools /var/log && touch /var/log/tool-calls.log && chmod 666 /var/log/tool-calls.log
+
+# Trusted selection channel: the SCORED tool_f1 source (reward.py TRUSTED_LOG).
+# Root-owned + non-world-writable so a NON-root principal can't forge it; it
+# persists agent->verifier alongside /logs/agent + /logs/verifier. _logwrap below
+# appends every invocation here AS WELL AS to the agent-facing /var/log copy, so
+# an honest tool trajectory populates it and the oracle reaches tool_f1=1.0. The
+# agent runs as root in harbor-agents-rich, so this is best-effort vs a root
+# forger; that residual is documented in FOOTGUNS #44.
+RUN mkdir -p /logs && touch /logs/tool-calls.log && chmod 755 /logs && chmod 644 /logs/tool-calls.log
 
 RUN cat > /usr/local/bin/_logwrap <<'EOF' && chmod +x /usr/local/bin/_logwrap
 #!/bin/bash
 NAME="$1"; shift
-echo "$(date -Iseconds) $NAME $*" >> /var/log/tool-calls.log
+LINE="$(date -Iseconds) $NAME $*"
+echo "$LINE" >> /var/log/tool-calls.log
+mkdir -p /logs 2>/dev/null || true
+echo "$LINE" >> /logs/tool-calls.log 2>/dev/null || true
 "$@"
 EOF
 

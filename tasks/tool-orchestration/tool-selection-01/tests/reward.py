@@ -3,13 +3,15 @@
 reward = 0.5 * answer_fraction + 0.5 * tool_f1, where answer_fraction = correct/3
 over the 3 sub-answers and tool_f1 is the harmonic mean of precision (fraction of
 logged tool calls that were to one of the 3 correct tools) and recall (how many of
-the 3 correct tools were invoked), read from /var/log/tool-calls.log. Same formula
-+ comparisons as the prior bash grader.
+the 3 correct tools were invoked). The SCORED tool_f1 reads the root-owned
+/logs/tool-calls.log (TRUSTED_LOG), which the tool wrappers populate alongside the
+agent-facing /var/log copy; an honest tool trajectory therefore scores tool_f1=1.0.
 
 Blend isn't an additive criterion-mean, so the exact reward lives in a weight-1
 `score` criterion; the 3 answer checks + the F1 ride along as weight-0 detail.
-(NOTE: tool_f1 is read from an agent-writable log — an adversarial agent could
-forge it, but honest harnesses produce a genuine trace; see FOOTGUNS #44.)
+(NOTE: the agent runs as root, so even the trusted channel is forgeable by a root
+principal; scoring the wrappers' own channel rather than the agent-facing log
+raises the bar against a NON-root forger. See FOOTGUNS #44.)
 """
 import json
 from functools import lru_cache

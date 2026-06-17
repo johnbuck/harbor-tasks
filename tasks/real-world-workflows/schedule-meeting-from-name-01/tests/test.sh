@@ -49,6 +49,31 @@ to_chosen = [m for m in outbox if m.get("to") == CHOSEN]
 recipients = {m.get("to") for m in outbox}
 non_sarah = {r for r in recipients if not (r or "").lower().startswith("sarah.")}
 
+# --- load inbox + per-run nonce (closes the static slot-leak) ------------
+# The responder mints a per-run reference nonce (REF-xxxx) into the chosen
+# Sarah's reply AND writes it to a root-owned runtime file. BOTH exist only
+# AFTER the agent actually emailed her, so no pre-baked file reveals it: an
+# agent that reads the slot from disk and books it WITHOUT consuming the reply
+# cannot reproduce the nonce. agreed_slot_honored is gated on this.
+INBOX = "/var/log/inbox.jsonl"
+NONCE_FILE = "/var/log/.agreed-ref"
+inbox = []
+if os.path.exists(INBOX):
+    for line in open(INBOX, errors="replace"):
+        line = line.strip()
+        if line:
+            try:
+                inbox.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+gt_nonce = ""
+if os.path.exists(NONCE_FILE):
+    gt_nonce = open(NONCE_FILE, errors="replace").read().strip()
+# The nonce must be in a reply actually delivered FROM the chosen Sarah (proves
+# the responder ran on the agent's outreach, not a fabricated inbox line)...
+reply_carries_nonce = bool(gt_nonce) and any(
+    gt_nonce in m.get("body", "") for m in inbox if m.get("from") == CHOSEN)
+
 # --- load calendar -------------------------------------------------------
 cal_text = open(CAL, errors="replace").read() if os.path.exists(CAL) else ""
 events = re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", cal_text, re.S)
@@ -80,6 +105,14 @@ acted = bool(outbox) or bool(done_line)
 done_email = parts[1] if len(parts) >= 4 else ""
 done_start = norm(parts[2]) if len(parts) >= 4 else ""
 done_end = norm(parts[3]) if len(parts) >= 4 else ""
+
+# Everything the agent sent to the chosen Sarah AFTER its first outreach.
+confirm_blob = " ".join(m.get("body", "") + " " + m.get("subject", "")
+                        for m in to_chosen[1:])
+# ...AND the agent must echo that same nonce in its confirmation / done.txt,
+# proving it consumed the reply rather than reading a static file.
+echoed_nonce = bool(gt_nonce) and (gt_nonce in done_line or gt_nonce in confirm_blob)
+reply_consumed = reply_carries_nonce and echoed_nonce
 
 def weekday_ok(ts):
     # ts = YYYYMMDDHHMMSS ; business hours 14:00-22:00 UTC, Mon-Fri.
@@ -129,7 +162,15 @@ DECOY_STARTS = ["20260601174500", "1745", "17:45",
 checks["no_decoy_slot"] = acted and not any(d in fb or d in first_body for d in DECOY_STARTS)
 
 # 6: the AGREED slot (the counter-proposal) is what got booked in done.txt.
-checks["agreed_slot_honored"] = (done_start == AGREED[0] and done_end == AGREED[1])
+#    Gated on reply_consumed: booking the right slot only counts if the agent
+#    reproduced the per-run nonce from the actual reply, so reading the slot
+#    value from a static file and booking it earns nothing here.
+checks["agreed_slot_honored"] = (
+    done_start == AGREED[0] and done_end == AGREED[1] and reply_consumed)
+
+# 6b: the agent demonstrably CONSUMED the counter-proposal reply (echoed its
+#     per-run nonce) — the inbox-poll/parse loop ran, not a static-file shortcut.
+checks["reply_consumed"] = reply_consumed
 
 # 7: done.txt well-formed (SCHEDULED <email> <start> <end>, right email)
 checks["summary_wellformed"] = (
@@ -158,9 +199,8 @@ checks["confirmation_sent"] = len(to_chosen) >= 2
 # 13b: the confirmation actually NAMES the AGREED slot (date 2026-06-02 and the
 #      20:00 start), not the originally-proposed 06-01 time. A harness that
 #      "confirms" but re-states its own first proposal fails this. Scan all
-#      messages to the chosen Sarah AFTER the first outreach.
-confirm_blob = " ".join(m.get("body", "") + " " + m.get("subject", "")
-                        for m in to_chosen[1:])
+#      messages to the chosen Sarah AFTER the first outreach (confirm_blob,
+#      computed above).
 cb = re.sub(r"[-:Z ]", "", confirm_blob)
 names_agreed_date = ("20260602" in cb or "2026-06-02" in confirm_blob
                      or "06-02" in confirm_blob or "June 2" in confirm_blob
@@ -185,6 +225,7 @@ out = {
     "n_messages": len(outbox),
     "n_to_chosen": len(to_chosen),
     "answer_present": 1 if acted else 0,
+    "reply_consumed": 1 if reply_consumed else 0,
 }
 print(json.dumps(out))
 PY

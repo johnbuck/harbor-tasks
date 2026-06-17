@@ -18,9 +18,11 @@ send-email \
 # Force the responder to process pending outbox immediately
 tick-inbox --once
 
-# Read the reply (she counter-proposes 2026-06-02T20:00Z)
+# Read the reply (she counter-proposes 2026-06-02T20:00Z and asks us to quote a
+# per-run reference nonce when we confirm).
 REPLY=$(inbox-poll --from "$SARAH" | tail -1)
 echo "got reply: $REPLY" >&2
+NONCE=$(printf '%s' "$REPLY" | grep -oE 'REF-[0-9a-f]+' | head -1)
 
 # Honor her counter-proposed slot.
 AGREED_START=20260602T200000Z
@@ -36,11 +38,12 @@ SUMMARY:Meeting with Sarah Chen
 END:VEVENT
 EOF
 
-# Confirmation email naming the agreed slot
+# Confirmation email naming the agreed slot and quoting her reference nonce
+# (proves we actually parsed the delivered reply).
 send-email \
     --to "$SARAH" \
     --subject "Confirmed: sync on 2026-06-02" \
-    --body "Great — 2026-06-02T20:00Z works. Booked us in for 30 minutes. See you then."
+    --body "Great — 2026-06-02T20:00Z works (ref ${NONCE}). Booked us in for 30 minutes. See you then."
 
 # Summary uses the AGREED slot
 echo "SCHEDULED $SARAH $AGREED_START $AGREED_END" > /app/done.txt

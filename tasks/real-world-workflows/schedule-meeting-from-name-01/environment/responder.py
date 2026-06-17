@@ -14,6 +14,7 @@ file at /var/log/.outbox.cursor.
 from __future__ import annotations
 
 import json
+import secrets
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,10 @@ from pathlib import Path
 OUTBOX = Path("/var/log/outbox.jsonl")
 INBOX = Path("/var/log/inbox.jsonl")
 CURSOR = Path("/var/log/.outbox.cursor")
+# Per-run ground-truth nonce file. Written at REPLY time (so it exists only AFTER
+# the agent emailed the chosen Sarah), it is the verifier's source of truth that
+# the booking was driven by the delivered reply — not by reading a static file.
+NONCE_FILE = Path("/var/log/.agreed-ref")
 DELAY = 5  # seconds before reply lands
 POLL = 2
 
@@ -33,8 +38,9 @@ TEMPLATES = {
         "body": (
             "Thanks for the proposal, but that exact time doesn't work for me — "
             "I have a hard stop right after. Could we instead do "
-            "{agreed} (30 minutes)? That window is clear for me and "
-            "I'll plan on it unless I hear otherwise. — Sarah"
+            "{agreed} (30 minutes)? That window is clear for me. Please quote "
+            "reference {nonce} in your confirmation so I can match it to this "
+            "thread. I'll plan on it unless I hear otherwise. — Sarah"
         )
     },
     "sarah.patel@homelab.example": {
@@ -53,12 +59,20 @@ def _user() -> str:
 
 
 def _agreed() -> str:
-    """The counter-proposal slot, read from a root-only file (NOT baked into this
-    world-readable source) so the agent must run the inbox loop to learn it."""
+    """The counter-proposal slot, kept out of this world-readable source. The
+    agent runs as root so file mode can't hide it; the booking is instead gated
+    on the per-run nonce minted below, so reading this value alone earns nothing."""
     try:
         return Path("/etc/sim/agreed-slot").read_text().strip()
     except OSError:
         return ""
+
+
+def _new_nonce() -> str:
+    """A fresh per-run reference the verifier requires the agent to echo back. It
+    is generated only when a reply is actually produced, so it appears in no
+    pre-baked file."""
+    return "REF-" + secrets.token_hex(4)
 
 
 def process(lines: list[str], me: str) -> None:
@@ -75,14 +89,23 @@ def process(lines: list[str], me: str) -> None:
             continue
         # Schedule the reply
         time.sleep(DELAY)
+        body = tmpl["body"]
+        if "{agreed}" in body or "{nonce}" in body:
+            nonce = _new_nonce()
+            body = body.format(agreed=_agreed(), nonce=nonce)
+            # Record the per-run nonce as the verifier's ground truth (runtime-
+            # only; created here, after the agent emailed).
+            try:
+                NONCE_FILE.write_text(nonce)
+            except OSError:
+                pass
         reply = {
             "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "from": msg["to"],
             "to": me,
             "cc": [],
             "subject": tmpl["subject_prefix"] + msg.get("subject", ""),
-            "body": (tmpl["body"].format(agreed=_agreed())
-                     if "{agreed}" in tmpl["body"] else tmpl["body"]),
+            "body": body,
         }
         with INBOX.open("a") as f:
             f.write(json.dumps(reply) + "\n")

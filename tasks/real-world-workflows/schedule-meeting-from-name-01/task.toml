@@ -2,7 +2,7 @@ schema_version = "1.1"
 
 [task]
 name = "johnbuck/schedule-meeting-from-name-01"
-description = "User asks 'schedule a meeting with Sarah at the earliest possible date'. Three Sarahs exist; the agent must resolve the referent, compute the earliest valid slot across a FRAGMENTED calendar with decoy short gaps (a tempting 28-minute window that is too short), email an outreach, parse a COUNTER-PROPOSAL reply, re-validate and book the AGREED slot, and send a confirmation that names the agreed date+time. GRADED: reward = fraction of 16 independent sub-checks passed."
+description = "User asks 'schedule a meeting with Sarah at the earliest possible date'. Three Sarahs exist; the agent must resolve the referent, compute the earliest valid slot across a FRAGMENTED calendar with decoy short gaps (a tempting 28-minute window that is too short), email an outreach, parse a COUNTER-PROPOSAL reply, re-validate and book the AGREED slot (gated on echoing a per-run reference nonce delivered in the reply), and send a confirmation that names the agreed date+time. GRADED: reward = fraction of 17 independent sub-checks passed."
 authors = [{name = "johnbuck"}]
 keywords = ["real-world-workflows", "schedule-meeting", "multi-step", "goal-oriented"]
 
