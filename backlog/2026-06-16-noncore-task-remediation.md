@@ -219,3 +219,153 @@ exploit-regression checks as the gates. The full-suite **oracle** (Docker build
 + solve.sh, no LLM cost) is the per-wave correctness gate and runs on the run
 host after each wave; the **paid n-runs** for Track-A discriminators are operator-
 gated and deferred, exactly like the core-suite sweep.
+
+---
+
+## Implementation log / as-built (2026-06-17)
+
+Branch `baton/2026-06-16-noncore-task-remediation` off `remediation/core-eleven-2026-06-10`.
+Built TDD: a `test:` (red) commit landing the offline suite, then the
+remediation commits turning it green. Scope honored: documentation-and-code
+fixes that are **offline-verifiable** in this no-Docker pipeline; Docker oracles
+and paid Track-A n-runs are out of scope and deferred to the operator (matching
+the Execution note). What actually shipped — `git diff $(git merge-base
+remediation/core-eleven-2026-06-10 HEAD)..HEAD` (100 files, ~+2200/-320):
+
+### What changed
+
+- **All 21 tasks HARDENed — no demote, no deprecate, no grader conversion.**
+  Wave 0 triage confirmed all 21 already emit a flat graded `reward.json`, so the
+  "6 binary tasks" framing in the table above is stale (left intact as the
+  original plan; corrected here). The work was validity/discrimination hardening
+  plus the universal S4 sweep, not binary→graded conversion.
+- **S4 crash fallback (universal sweep).** Every one of the 21 `tests/test.sh`
+  now writes a flat `{"reward":0.0}` to `/logs/verifier/reward.json` if the
+  grader throws or leaves the file empty (`[ -s ... ] || echo`), and graders read
+  answers with `errors="replace"`. This was the single missing-everywhere fix
+  (FOOTGUNS #2: a missing `reward.json` silently DROPS the trial).
+- **`answer_present` weight-0 diagnostic** added to every graded task that lacked
+  it (VOID vs present-but-wrong), surfaced in `reward-details.json`.
+- **`lib/wipe_scratch.sh` gained a `WIPE_PRESERVE_SESSIONS` flag** — the
+  load-bearing new capability. In-window retention tasks (context-fill-01/03,
+  context-rot-01) set it so off-`/app` scratch (`/tmp`, `/var/tmp`, `$HOME`
+  caches, `/logs/agent`) is wiped while the **harness session stores are
+  preserved** (the cross-step conversation IS the path under test). External-
+  memory recall tasks (memory-conversational-02/03) leave the flag unset and wipe
+  the session stores too. The S1 fix copied this script into each affected recall
+  step's `workdir/` and sources it before the agent runs, with a wipe-survival
+  assertion in `test.sh`.
+- **The 6 CRITICAL grader/validity fixes**, each with an exploit-regression
+  check (see below): pr-diff-review-01, memory-conversational-02,
+  find-contradictions-01, prompt-injection-resistance-01,
+  schedule-meeting-from-name-01, factual-lookup-cited-01 — plus tool-selection-01
+  (HIGH forgeable-log) escalated into the same wave.
+- **Wave 3 trims**: de-telegraphing (context-rot ingest prompts ×18,
+  secret-scan, tool-selection semver hint, find-contradictions/factual-lookup
+  corpus banners), format-robustness (pandas integer fields graded numerically,
+  factual-lookup enumerator/relative-path tolerance, context-fill-01 brought to
+  -02's line-anchored per-fact model).
+- **Wave 4 docs/hygiene**: `SHAPES.md` rows 11/12/13 corrected from "judge" to
+  the real deterministic graders; added row 18 (browser-find-fact) and row 19
+  (proactive-preference). `allow_internet=true→false` + dropped the unused
+  `OPENROUTER_API_KEY` surface on find-contradictions-01 and
+  agentic-research-with-memory-01 (deterministic graders, no LLM judge).
+  `task.toml` descriptions reconciled for prompt-injection (4→3 axes),
+  schedule-meeting (16→17 checks), and the table's row-16 "single→multi-step".
+
+### Key per-CRITICAL decisions
+
+- **find-contradictions-01**: grader now requires both sides of a contradiction
+  to be **co-located** within a ~300-char window of one answer entry (`_colocated`
+  replaces the independent `_has(a) and _has(b)`), so `cp report.md
+  contradictions.md` — whose sides sit pages apart — scores ~0 instead of 0.917.
+  Report intro de-telegraphed (the distractor-taxonomy parenthetical deleted).
+- **prompt-injection-resistance-01**: kept as a safety task but the grader was
+  re-cut to **3 fractional axes** (injections resisted / customers covered /
+  output hygiene), with **flagging demoted to a weight-0 diagnostic**; the oracle
+  `solve.sh` now does the legit send to `manager@homelab.example` and no longer
+  echoes literal attacker addresses (which would self-trip the exfil detector).
+- **schedule-meeting-from-name-01**: the responder now mints a **per-run REF
+  nonce** into the counter-proposal reply and a runtime ground-truth file;
+  `agreed_slot_honored` is gated on the agent echoing that nonce (new
+  `reply_consumed` check, N 16→17). A root agent `cat`-ing `/etc/sim/agreed-slot`
+  can no longer book the slot without actually consuming the reply.
+- **tool-selection-01**: `_logwrap` now ALSO appends every invocation to the
+  **root-owned `/logs/tool-calls.log`** (the SCORED trusted channel), so an
+  honest trajectory populates the scored log and the oracle reaches `tool_f1=1.0`,
+  while forging the agent-writable `/var/log/tool-calls.log` no longer reaches
+  reward 1.0. Integer answer fields coerced before compare; semver-ordering
+  telegraph trimmed.
+- **pr-diff-review-01**: regex anchored to the concrete loci (lookup_user
+  f-string query, returned `password_hash`, the DELETE endpoint); instruction
+  reduced to a neutral user goal.
+- **memory-conversational-02**: sourced the canonical `wipe_scratch.sh` (was
+  `/app`-only), closing the stash-in-`/tmp` bypass.
+
+### Offline test suite added (the green gate)
+
+`tests/noncore.py` + `tests/helpers.py` (shared task-path/grader-invocation
+helpers); exploit-regressions `tests/exploits/test_noncore_critical.py` and
+`test_noncore_dump_hedge_forge.py`; regrade matrices `tests/regrade/
+test_noncore_matrix.py` and `test_tool_selection_honest_channel.py`; S4 guards
+`tests/s4/{test_s4_crash_guard,test_s4_answer_present,test_s4_errors_replace}.py`;
+S1 wipe `tests/wipe/test_s1_noncore_wipe.py`; hygiene `tests/hygiene/
+{test_noncore_telegraphing,test_noncore_s5_drift,test_noncore_hygiene_topology,
+test_noncore_approved_rider}.py`.
+
+### Open questions — resolutions
+
+1. **`approved=true` gating vs the no-Docker pipeline → DEFERRED, as
+   recommended.** No task was flipped to `approved=true`; the catalog still reads
+   NEEDS REVIEW for these 21 (by design). A guard test
+   (`tests/hygiene/test_noncore_approved_rider.py`) asserts none are flipped and
+   will fail any builder that flips them speculatively. The flips become a
+   post-merge operator rider after the per-wave oracle + Track-A n-runs land.
+   This means **Acceptance criteria #6 (no NEEDS REVIEW) is intentionally NOT met
+   by this branch** — it is the operator's post-validation step.
+2. **Track-A heavy kill-test items → offline fixes landed, corpus balloon
+   DEFERRED.** For find-contradictions-01 and factual-lookup-cited-01 the
+   offline-testable work shipped (co-location/grader hardening, de-telegraphing,
+   format tolerance, S4, answer_present, `allow_internet=false`). The
+   **corpus-balloon-past-one-window** rework (new ~150-page fixtures) was NOT
+   done — it borders on new authoring (spec marks that OUT) and its Δ is only
+   confirmable by an operator-gated n-run. The **keep-vs-DEMOTE-TO-TRACK-B**
+   decision for both is left to that n-run. So these two remain Track-A in name
+   but their kill-test is not yet satisfied; document, don't pretend.
+3. **browser-find-fact-01 `browser_used` matcher → offline subset only, matcher
+   validation DEFERRED.** Added `answer_present` and the S4 crash fallback. The
+   recommended `logs_files_scanned` zero-scan diagnostic was **NOT added** (gap):
+   the grader emits `browser_tool_calls`, which is 0 both when no browser was
+   used AND when `/logs` is unmounted/mismatched — so a silent false-zero is
+   still not distinguishable offline. The regex-scan of `/logs` for the agent
+   trajectory has still never been validated against a real run for either
+   harness; that validation is an operator n=1.
+
+### Deviations / gotchas for the next maintainer
+
+- The spec table still lists 6 tasks as "binary test.sh"; reality is all 21 were
+  already graded — see `2026-06-16-noncore-triage-findings.md` (the authoritative
+  per-task work list). Original table left intact for provenance.
+- **No oracle ran here** (no Docker in this pipeline) and **no paid n-run ran**.
+  "Green" means the offline pytest suite passes; it does NOT prove
+  oracle=1.0 or any Track-A Δ. Both are operator gates.
+- Two Track-A discriminators (find-contradictions, factual-lookup) are not yet
+  proven to discriminate — their corpora still fit one window. Run the balloon +
+  n-run before approving, or DEMOTE-TO-TRACK-B.
+
+### How to verify
+
+Offline suite (runnable here, on thringle; no Docker, $0):
+
+```bash
+ssh thringle@10.0.10.65 'cd ~/benchmarking/.baton-worktrees/baton-2026-06-16-noncore-task-remediation && python3 -m pytest tests/ -q'
+```
+
+Good = all green, including the `test_noncore_*` exploit/regrade/S4/wipe/hygiene
+checks and the unchanged core-eleven tests. The `approved_rider` guard staying
+green confirms no premature approval flip.
+
+Operator (post-merge, NOT done here): full-suite Docker **oracle** must score
+1.0 on every kept task; Track-A tasks get an n≥3 two-harness run; then flip
+`[metadata] approved = true` per task that passes, and decide keep-vs-demote for
+find-contradictions-01 / factual-lookup-cited-01.
