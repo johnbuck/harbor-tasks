@@ -65,6 +65,7 @@ reward = 1.0 if (answer_correct and browser_used) else 0.0
 
 print(json.dumps({
     "reward": reward,
+    "answer_present": int(bool(ans.strip())),
     "correctness": int(reward == 1.0),
     "answer_correct": answer_correct,        # oracle validates this sub-field
     "has_correct_author": int(has_correct),
@@ -73,3 +74,8 @@ print(json.dumps({
     "browser_used": browser_used,            # reward is GATED on this
 }))
 PY
+
+# S4 crash guard: if the grader above crashed before emitting a parseable
+# reward.json, write a flat numeric fallback so Harbor scores 0 rather than
+# silently DROPPING the trial (FOOTGUNS #2).
+[ -s /logs/verifier/reward.json ] || echo '{"reward":0.0}' > /logs/verifier/reward.json

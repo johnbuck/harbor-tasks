@@ -27,7 +27,7 @@ def _seen(workspace_str: str) -> frozenset:
     if not p.exists():
         return frozenset()
     out = set()
-    for line in p.read_text().splitlines():
+    for line in p.read_text(errors="replace").splitlines():
         s = line.strip()
         if not s:
             continue
@@ -47,7 +47,8 @@ def _found_fp(workspace: Path):
 def check(workspace: Path, key: str, label: str):
     found, fp = _found_fp(workspace)
     if key == "score":
-        return max(0, found - fp) / N
+        # 2x FP weight: a zero-precision dump-everything drives the score to ~0.
+        return max(0, found - 2 * fp) / N
     if key == "no_false_positives":
         return fp == 0
     return key in _seen(str(workspace))  # per-secret-file detection
@@ -57,3 +58,13 @@ rk.check("score", "reward = max(0, found - false_positives) / 4", weight=1.0)
 for _f in sorted(SECRET):
     rk.check(_f, f"detected secret in {_f}", weight=0.0)
 rk.check("no_false_positives", "precision: flagged no clean/decoy files", weight=0.0)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "findings.txt"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

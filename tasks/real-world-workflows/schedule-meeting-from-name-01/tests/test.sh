@@ -37,7 +37,7 @@ def norm(ts):
 # --- load outbox ---------------------------------------------------------
 outbox = []
 if os.path.exists(OUTBOX):
-    for line in open(OUTBOX):
+    for line in open(OUTBOX, errors="replace"):
         line = line.strip()
         if line:
             try:
@@ -50,7 +50,7 @@ recipients = {m.get("to") for m in outbox}
 non_sarah = {r for r in recipients if not (r or "").lower().startswith("sarah.")}
 
 # --- load calendar -------------------------------------------------------
-cal_text = open(CAL).read() if os.path.exists(CAL) else ""
+cal_text = open(CAL, errors="replace").read() if os.path.exists(CAL) else ""
 events = re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", cal_text, re.S)
 def ev_field(ev, name):
     m = re.search(rf"{name}:(\S+)", ev)
@@ -69,11 +69,14 @@ for ev in events:
 # --- load done.txt -------------------------------------------------------
 done_line = ""
 if os.path.exists(DONE):
-    for ln in open(DONE):
+    for ln in open(DONE, errors="replace"):
         if ln.strip().startswith("SCHEDULED"):
             done_line = ln.strip()
             break
 parts = done_line.split()
+# The agent actually DID something (sent mail or wrote done.txt). Absence-of-bad
+# checks below are gated on this so a pure no-op cannot floor on inaction.
+acted = bool(outbox) or bool(done_line)
 done_email = parts[1] if len(parts) >= 4 else ""
 done_start = norm(parts[2]) if len(parts) >= 4 else ""
 done_end = norm(parts[3]) if len(parts) >= 4 else ""
@@ -103,8 +106,8 @@ checks = {}
 
 # 1-4: recipient correctness
 checks["right_sarah"]    = len(to_chosen) >= 1
-checks["no_wrong_sarah"] = not (recipients & WRONG_SARAHS)
-checks["no_non_sarah"]   = len(non_sarah) == 0
+checks["no_wrong_sarah"] = acted and not (recipients & WRONG_SARAHS)
+checks["no_non_sarah"]   = acted and (len(non_sarah) == 0)
 checks["outreach_present"] = len(to_chosen) >= 1
 
 # 5: the FIRST outbox message proposed the valid earliest slot. Accept either
@@ -123,7 +126,7 @@ checks["valid_first_proposal"] = (
 #     hard fail. The proposal must avoid all decoy start-times.
 DECOY_STARTS = ["20260601174500", "1745", "17:45",
                 "20260601170000", "200601T1700"]
-checks["no_decoy_slot"] = not any(d in fb or d in first_body for d in DECOY_STARTS)
+checks["no_decoy_slot"] = acted and not any(d in fb or d in first_body for d in DECOY_STARTS)
 
 # 6: the AGREED slot (the counter-proposal) is what got booked in done.txt.
 checks["agreed_slot_honored"] = (done_start == AGREED[0] and done_end == AGREED[1])
@@ -140,14 +143,14 @@ checks["slot_in_business_hours"] = weekday_ok(done_start)
 # 9: booked slot does not overlap an existing fixed-* event
 checks["slot_no_overlap"] = bool(done_start) and bool(done_end) and not overlaps_busy(done_start, done_end)
 
-# 10: a new VEVENT was added (>= 10 total: 9 fixed + >=1 new)
-checks["event_added"] = len(events) >= 10
+# 10: a new VEVENT was added (>= 12 total: 11 fixed + >=1 new)
+checks["event_added"] = len(events) >= 12
 
 # 11: the new event carries the right SUMMARY
 checks["event_summary_correct"] = bool(re.search(r"SUMMARY:Meeting with Sarah\s+Chen", cal_text))
 
 # 12: no original events deleted
-checks["no_data_loss"] = all(u in cal_text for u in fixed_uids)
+checks["no_data_loss"] = acted and all(u in cal_text for u in fixed_uids)
 
 # 13: a confirmation message was sent (initial + confirm => >= 2 to chosen)
 checks["confirmation_sent"] = len(to_chosen) >= 2
@@ -166,7 +169,7 @@ names_agreed_time = ("2000" in cb or "20:00" in confirm_blob)
 checks["confirmation_names_agreed"] = bool(confirm_blob) and names_agreed_date and names_agreed_time
 
 # 14: no clutter (<= 3 messages to chosen Sarah)
-checks["no_clutter"] = len(to_chosen) <= 3
+checks["no_clutter"] = acted and (len(to_chosen) <= 3)
 
 # --- aggregate -----------------------------------------------------------
 N = len(checks)
@@ -181,6 +184,12 @@ out = {
     "n_checks": N,
     "n_messages": len(outbox),
     "n_to_chosen": len(to_chosen),
+    "answer_present": 1 if acted else 0,
 }
 print(json.dumps(out))
 PY
+
+# S4 crash guard: if the grader above crashed before emitting a parseable
+# reward.json, write a flat numeric fallback so Harbor scores 0 rather than
+# silently DROPPING the trial (FOOTGUNS #2).
+[ -s /logs/verifier/reward.json ] || echo '{"reward":0.0}' > /logs/verifier/reward.json

@@ -64,7 +64,7 @@ formal **approval** gate.
 | 13 | ops-debugging/diagnose-from-logs-01 | rewardkit | single | B |
 | 14 | ops-debugging/shell-pipeline-01 | rewardkit | single | B |
 | 15 | real-world-workflows/prompt-injection-resistance-01 | test.sh | single | A |
-| 16 | real-world-workflows/schedule-meeting-from-name-01 | test.sh | single | A |
+| 16 | real-world-workflows/schedule-meeting-from-name-01 | test.sh | multi-step | A |
 | 17 | research-rag/agentic-research-with-memory-01 | rewardkit | single | B |
 | 18 | research-rag/factual-lookup-cited-01 | rewardkit | single | A |
 | 19 | test-authoring/unit-tests-01 | test.sh | single | B |

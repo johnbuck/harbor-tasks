@@ -19,7 +19,7 @@ FACTS = {
     "f2_hq":           (r'san francisco',              ['/about.html'],                                              r'berkeley'),
     "f3_climate_lead": (r'petra holm|holm',            ['/people.html', '/research/climate.html'],                   r'yusra chen|chen'),
     "f4_nsf_total":    (r'\$?\s*5\.3\s*(m|million)',   ['/funding.html', '/research/climate.html', '/research/neural.html'], None),
-    "f5_pubs":         (r'\b18\b',                     ['/publications/2025.html'],                                  r'\b23\b|twenty'),
+    "f5_pubs":         (r'\b18\b|eighteen',            ['/publications/2025.html'],                                  r'\b23\b|twenty'),
     "f6_partners":     None,  # special: >=2 of UCSF/BioGen/NCAR + partners.html link in one unit
     "f7_staff":        (r'\b23\b',                     ['/careers.html'],                                            r'\b40\b|forty'),
     "f8_gpus":         (r'\b12\b',                     ['/research/neural.html'],                                    r'\b24\b|twenty[- ]?four'),
@@ -90,3 +90,13 @@ def fact(workspace: Path, key: str, label: str) -> bool:
 
 for _key, _label in LABELS.items():
     rk.fact(_key, _label)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "brief.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

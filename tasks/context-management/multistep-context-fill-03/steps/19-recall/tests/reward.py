@@ -37,7 +37,7 @@ TOTAL = 12
 @lru_cache(maxsize=4)
 def _text(workspace_str: str) -> str:
     p = Path(workspace_str) / "answer.md"
-    return p.read_text().lower() if p.exists() else ""
+    return p.read_text(errors="replace").lower() if p.exists() else ""
 
 
 def _line(text: str, project: str, attr: str) -> str:
@@ -68,3 +68,13 @@ rk.check("score", "reward = max(0, net slot score - distractor)/12", weight=1.0)
 for _k in SLOT:
     rk.check(_k, f"correct on its line: {_k}", weight=0.0)
 rk.check("no_distractor", "no nova/reykjavik distractor leaked", weight=0.0)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "answer.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

@@ -5,7 +5,7 @@ Write a one-page brief about Mirador Labs and save it to `/app/brief.md`. The br
 1. **The year the lab was founded.**
 2. **The city where the lab is headquartered.**
 3. **The name of the climate-modeling lead.**
-4. **The lab's TOTAL NSF funding for 2025**, as a single dollar figure. Note: the lab has more than one 2025 NSF award (in different research areas) — add them up. Funding from *other* agencies (e.g. DOE) and NSF awards from *other years* do **not** count toward the 2025 NSF total.
+4. **The lab's TOTAL NSF funding for 2025**, as a single dollar figure. The lab has more than one 2025 NSF award in different research areas — add those together into one 2025 NSF total.
 5. **The total number of publications released in 2025** (the official published count).
 6. **At least two named partner organizations.**
 7. **The number of full-time staff in 2025.**

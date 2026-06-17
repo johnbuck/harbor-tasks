@@ -19,13 +19,15 @@ quality.
 | 8 | Marketing | `email-copy` | judge | no |
 | 9 | Data analytics | `pandas-sql-from-nl` | pytest (result equality) | no |
 | 10 | Documentation writing | `readme` | judge | no |
-| 11 | Code / spec review | `pr-diff-review` | judge (real issues found, no rubber-stamping, no piling on) | no |
-| 12 | Test authoring | `unit-tests` | mixed (tests run + judge for coverage quality) | no |
-| 13 | Tool orchestration | `tool-selection` | judge (right tool chosen) | no |
+| 11 | Code / spec review | `pr-diff-review` | deterministic rewardkit (precision+recall over planted issues, /3) | no |
+| 12 | Test authoring | `unit-tests` | deterministic mutation-coverage (mutants killed/4) | no |
+| 13 | Tool orchestration | `tool-selection` | deterministic rewardkit (0.5*answer + 0.5*tool-F1) | no |
 | 14 | Skill / agent authoring | `sub-agent` | deterministic rewardkit (correct/60) | no |
 | 15 | Migration | `dep-bump-breaking` | pytest (post-migration suite passes) | no |
 | 16 | Compliance / security | `secret-scan` | pytest (catches planted secrets, no false positives) | no |
 | 17 | Backup / DR | `restore-runbook` | judge | no |
+| 18 | Tool orchestration | `browser-find-fact` | deterministic (correct author + browser-use gate) | no |
+| 19 | Conversation / persona | `proactive-preference` | deterministic rewardkit (preferences applied/4) | **yes** (multi-step) |
 
 ## Reward axes (every task emits these)
 

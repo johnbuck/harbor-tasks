@@ -24,7 +24,7 @@ def _answer(workspace: Path) -> dict:
     out = {}
     p = workspace / "answer.txt"
     if p.exists():
-        for line in p.read_text().splitlines():
+        for line in p.read_text(errors="replace").splitlines():
             if "=" in line:
                 k, _, v = line.partition("=")
                 out[k.strip()] = v.strip()
@@ -48,3 +48,13 @@ def field(workspace: Path, key: str) -> bool:
 
 for _key in EXPECTED:
     rk.field(_key)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "answer.txt"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

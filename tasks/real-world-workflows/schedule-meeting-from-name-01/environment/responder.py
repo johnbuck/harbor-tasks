@@ -33,7 +33,7 @@ TEMPLATES = {
         "body": (
             "Thanks for the proposal, but that exact time doesn't work for me — "
             "I have a hard stop right after. Could we instead do "
-            "2026-06-02T20:00Z (30 minutes)? That window is clear for me and "
+            "{agreed} (30 minutes)? That window is clear for me and "
             "I'll plan on it unless I hear otherwise. — Sarah"
         )
     },
@@ -50,6 +50,15 @@ TEMPLATES = {
 
 def _user() -> str:
     return Path("/etc/sim/user-email").read_text().strip()
+
+
+def _agreed() -> str:
+    """The counter-proposal slot, read from a root-only file (NOT baked into this
+    world-readable source) so the agent must run the inbox loop to learn it."""
+    try:
+        return Path("/etc/sim/agreed-slot").read_text().strip()
+    except OSError:
+        return ""
 
 
 def process(lines: list[str], me: str) -> None:
@@ -72,7 +81,8 @@ def process(lines: list[str], me: str) -> None:
             "to": me,
             "cc": [],
             "subject": tmpl["subject_prefix"] + msg.get("subject", ""),
-            "body": tmpl["body"],
+            "body": (tmpl["body"].format(agreed=_agreed())
+                     if "{agreed}" in tmpl["body"] else tmpl["body"]),
         }
         with INBOX.open("a") as f:
             f.write(json.dumps(reply) + "\n")

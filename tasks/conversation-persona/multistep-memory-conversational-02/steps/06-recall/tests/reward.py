@@ -29,7 +29,7 @@ FACTS = {
 @lru_cache(maxsize=4)
 def _answer(workspace_str: str) -> str:
     p = Path(workspace_str) / "answer.md"
-    return p.read_text().lower() if p.exists() else ""
+    return p.read_text(errors="replace").lower() if p.exists() else ""
 
 
 @rk.criterion(description="recalled: {key}")
@@ -43,3 +43,13 @@ def fact(workspace: Path, key: str) -> bool:
 
 for _key in FACTS:
     rk.fact(_key)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "answer.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

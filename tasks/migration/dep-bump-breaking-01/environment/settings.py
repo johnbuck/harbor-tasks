@@ -12,8 +12,7 @@ from pydantic import BaseSettings, Field, validator, root_validator
 class AppSettings(BaseSettings):
     host: str = "localhost"
     port: int = 8080
-    # v1 Field(env=...) — in pydantic v2 + pydantic-settings, env binding moved
-    # to validation_alias / the settings config; `env=` is no longer accepted.
+    # Field(env=...) is a v1-ism: this env binding must be migrated for v2.
     log_level: str = Field("INFO", env="APP_LOG_LEVEL")
     # CSV string in the environment that must parse into a list.
     allowed_hosts: List[str] = Field(default_factory=list, env="APP_ALLOWED_HOSTS")
@@ -47,7 +46,7 @@ class AppSettings(BaseSettings):
 
 
 def settings_as_dict(s: AppSettings) -> dict:
-    # v1 serialization API.
+    # Serialize the settings to a plain dict.
     return s.dict()
 
 

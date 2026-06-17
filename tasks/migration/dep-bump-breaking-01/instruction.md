@@ -13,6 +13,5 @@ Constraints:
 - You may install packages (you have internet access).
 - Do not modify the test file (`/app/tests/test_settings.py`).
 - Keep the field **names** and **default values** in `AppSettings` unchanged,
-  and preserve every documented behavior (port range check, CSV-to-list
-  splitting, `replica_port` defaulting to `port`, env-var binding for
-  `log_level`/`allowed_hosts`).
+  and preserve the module's existing behavior (its validators, settings config,
+  and serialization helpers must keep working as before).

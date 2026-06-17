@@ -31,7 +31,7 @@ PATTERNS = [
 @lru_cache(maxsize=4)
 def _lines(workspace_str: str) -> tuple:
     p = Path(workspace_str) / "answer.md"
-    return tuple((p.read_text() if p.exists() else "").split("\n"))
+    return tuple((p.read_text(errors="replace") if p.exists() else "").split("\n"))
 
 
 def _is_preamble(ln: str) -> bool:
@@ -69,7 +69,14 @@ def _buckets(workspace_str: str):
 
 @rk.criterion(description="{label}")
 def needle(workspace: Path, i: int, pat: str, label: str) -> bool:
-    return re.search(pat, _cell_for(str(workspace), i), re.I) is not None
+    cell = _cell_for(str(workspace), i)
+    if re.search(pat, cell, re.I) is None:
+        return False
+    # Anti-dump: dumping every fact into every line recalls the SET, not the
+    # question->fact mapping (the NoLiMa axis). Credit needle i only if its cell
+    # matches exactly ONE of the 12 patterns (its own); >1 match scores 0.
+    n_match = sum(1 for p, _ in PATTERNS if re.search(p, cell, re.I))
+    return n_match == 1
 
 
 @rk.criterion(description="{label}")

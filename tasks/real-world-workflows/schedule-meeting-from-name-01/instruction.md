@@ -22,7 +22,7 @@ Schedule a meeting with **Sarah** at the earliest possible 30-minute slot. You'r
 
 3. **Wait for her reply and honor it.** Use `inbox-poll` (or `tick-inbox --once` then poll) to read her response. Parse her reply and use the agreed slot for everything below.
 
-4. **Confirm.** Append a new VEVENT to `/app/calendar.ics` for the **agreed** slot with SUMMARY `Meeting with Sarah <Last>` and a unique UID (don't collide with the `fixed-*` UIDs). Before you book it, double-check the agreed slot is itself free (it does not overlap any existing event) and inside business hours. Then send her exactly one confirmation email that explicitly **names the agreed date and time** (not your original proposal).
+4. **Confirm.** Append a new VEVENT to `/app/calendar.ics` for the **agreed** slot with SUMMARY `Meeting with Sarah <Last>` and a unique UID (don't collide with the `fixed-*` UIDs). Then send her exactly one confirmation email that explicitly **names the agreed date and time** (not your original proposal).
 
 5. **Write a one-line summary to `/app/done.txt`** in this format (compact ISO, no separators in the time, `Z` suffix):
    ```
@@ -36,5 +36,3 @@ Schedule a meeting with **Sarah** at the earliest possible 30-minute slot. You'r
 - Don't delete or modify any existing calendar events.
 - Don't email anyone other than the chosen Sarah (and send only one initial outreach + one confirmation).
 - Don't email contacts not named Sarah at all.
-
-Each requirement is scored independently (right Sarah, valid earliest proposal, agreed slot honored and re-validated, calendar event added without data loss, single clean confirmation that names the agreed date and time, correct summary). Partial credit applies — satisfying more requirements scores higher.

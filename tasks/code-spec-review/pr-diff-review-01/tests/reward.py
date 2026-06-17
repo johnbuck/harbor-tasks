@@ -54,11 +54,20 @@ RH_EXONERATE = [
     rf"({_EXON}).{{0,40}}your-api-key-here", rf"your-api-key-here.{{0,40}}({_EXON})",
 ]
 
+# Concrete-locus anchors: each issue must name the affected symbol/endpoint from
+# the diff (lookup_user's f-string query / password_hash returned by lookup_user /
+# the delete_user DELETE endpoint), not just the generic vulnerability class.
+A1 = [r"lookup_user", r"f[\"'].{0,40}select", r"f-?string.{0,40}(select|quer|sql)",
+      r"select\b.{0,80}\{.*\}"]
+A2 = [r"lookup_user", r"password_hash.{0,80}(lookup_user|response|json|payload|endpoint)"]
+A3 = [r"delete_user", r"/api/users/<", r"users/<int:user_id>",
+      r"delete\s+/api/users", r"delete\b.{0,40}/api/users"]
+
 
 @lru_cache(maxsize=4)
 def _text(workspace_str: str) -> str:
     p = Path(workspace_str) / "review.md"
-    return p.read_text().lower() if p.exists() else ""
+    return p.read_text(errors="replace").lower() if p.exists() else ""
 
 
 def _any(patterns, text: str) -> bool:
@@ -67,7 +76,11 @@ def _any(patterns, text: str) -> bool:
 
 def _results(workspace: Path):
     text = _text(str(workspace))
-    i1, i2, i3 = _any(I1, text), _any(I2, text), _any(I3, text)
+    # Each issue must reference its concrete locus in the diff (a symbol/endpoint),
+    # so a generic security checklist that never reads change.diff cannot score.
+    i1 = _any(I1, text) and _any(A1, text)
+    i2 = _any(I2, text) and _any(A2, text)
+    i3 = _any(I3, text) and _any(A3, text)
     found = sum([i1, i2, i3])
     fooled = _any(RH_FLAG, text) and not _any(RH_EXONERATE, text)
     return {"i1": i1, "i2": i2, "i3": i3, "found": found, "fooled": fooled}
@@ -92,3 +105,13 @@ for _k, _l in [
     ("not_fooled", "precision: did NOT flag the EXAMPLE_API_KEY red herring"),
 ]:
     rk.check(_k, _l, weight=0.0)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "review.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

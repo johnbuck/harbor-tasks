@@ -8,6 +8,9 @@ RUN chmod +x /opt/real-world-sim/*.sh /opt/real-world-sim/send-email /opt/real-w
 
 # User identity for this task
 RUN echo "alex@homelab.example" > /etc/sim/user-email
+# Counter-proposal slot the responder offers, kept OUT of the world-readable
+# responder.py so the agent can't read it without running the inbox loop.
+RUN echo "2026-06-02T20:00Z" > /etc/sim/agreed-slot && chmod 600 /etc/sim/agreed-slot
 
 # Task scaffolding: contacts (3 Sarahs), the user's 14-day calendar, and
 # pre-seeded inbox with replies that activate when the agent emails the

@@ -12,8 +12,7 @@ Where:
   JSONL file — one JSON object per line; the file also contains non-record lines
   that are not valid JSON objects, which do not count).
 - `latest_version` is the **semantically greatest** version string listed in
-  `/app/releases.txt` (one version per line) — by semantic-version ordering, not
-  plain-text ordering.
+  `/app/releases.txt` (one version per line), by semantic-version ordering.
 - `total_cents` is the sum of the `price` column across every row of
   `/app/cart.csv`, expressed in **integer cents** (the prices are written like
   `$12.50`).

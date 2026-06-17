@@ -3,11 +3,7 @@
 This packet consolidates four independently-authored sections: the Executive
 Summary, the Finance Appendix, the Operations Report, and the Investor Outlook.
 Because the sections were drafted by different teams and merged without a final
-reconciliation pass, the document contains numerous internal contradictions.
-Some are blatant; others require cross-referencing figures that appear pages
-apart in different sections. A few figure pairs may look conflicting but are
-actually consistent (a current value vs a future target, an explicitly-superseded
-forecast, or a subtotal vs its total) — those are not contradictions.
+reconciliation pass, figures may not always line up across sections.
 
 ---
 

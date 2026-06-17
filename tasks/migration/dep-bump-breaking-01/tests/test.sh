@@ -24,11 +24,14 @@ set -u
 mkdir -p /logs/verifier
 cd /app
 
+# answer_present (VOID vs wrong): settings.py written & non-empty, read tolerantly.
+ap=$(python3 -c "print(1 if open('/app/settings.py', errors='replace').read().strip() else 0)" 2>/dev/null || echo 0)
+
 # Tamper check: the agent must not have edited the pinned test file. If it did,
 # every site is unverifiable -> reward 0.
 if ! diff -q /app/tests/test_settings.py /opt/canonical/test_settings.py >/dev/null 2>&1; then
     cat > /logs/verifier/reward.json <<EOF
-{"reward": 0.0, "correctness": 0, "instruction_following": 0, "satisfied": 0, "n_checks": 9}
+{"reward": 0.0, "correctness": 0, "instruction_following": 0, "satisfied": 0, "n_checks": 9, "answer_present": ${ap}}
 EOF
     echo "test file tampered — reward 0" > /logs/verifier/note.log
     exit 0
@@ -65,5 +68,10 @@ reward=$(python3 -c "print(round(${satisfied}/${N}, 4))")
 if [ "${satisfied}" -eq "${N}" ]; then correctness=1; else correctness=0; fi
 
 cat > /logs/verifier/reward.json <<EOF
-{"reward": ${reward}, "correctness": ${correctness}, "instruction_following": 1, "satisfied": ${satisfied}, "n_checks": ${N}}
+{"reward": ${reward}, "correctness": ${correctness}, "instruction_following": 1, "satisfied": ${satisfied}, "n_checks": ${N}, "answer_present": ${ap}}
 EOF
+
+# S4 crash guard: if the grader above crashed before emitting a parseable
+# reward.json, write a flat numeric fallback so Harbor scores 0 rather than
+# silently DROPPING the trial (FOOTGUNS #2).
+[ -s /logs/verifier/reward.json ] || echo '{"reward":0.0}' > /logs/verifier/reward.json

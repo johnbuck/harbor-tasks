@@ -40,7 +40,7 @@ vis_total = vis_pass + vis_fail
 visible_fraction = (vis_pass / vis_total) if vis_total else 0.0
 
 try:
-    hidden = json.load(open("/logs/verifier/hidden.json"))
+    hidden = json.load(open("/logs/verifier/hidden.json", errors="replace"))
 except Exception:
     hidden = {}
 if "_import_error" in hidden or not hidden:
@@ -59,8 +59,14 @@ reward = round(0.40 * visible_fraction + 0.40 * hidden_fraction
 correctness = 1 if (visible_fraction == 1.0 and hidden_fraction == 1.0
                     and quality_fraction == 1.0) else 0
 
+try:
+    answer_present = 1 if open("/app/main.py", errors="replace").read().strip() else 0
+except OSError:
+    answer_present = 0
+
 print(json.dumps({
     "reward": reward,
+    "answer_present": answer_present,
     "correctness": correctness,
     "visible_fraction": round(visible_fraction, 4),
     "hidden_fraction": round(hidden_fraction, 4),
@@ -73,3 +79,8 @@ print(json.dumps({
     "no_dead_import": no_dead_import,
 }))
 PY
+
+# S4 crash guard: if the grader above crashed before emitting a parseable
+# reward.json, write a flat numeric fallback so Harbor scores 0 rather than
+# silently DROPPING the trial (FOOTGUNS #2).
+[ -s /logs/verifier/reward.json ] || echo '{"reward":0.0}' > /logs/verifier/reward.json

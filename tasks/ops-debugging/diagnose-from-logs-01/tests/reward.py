@@ -1,9 +1,9 @@
 """rewardkit grader for diagnose-from-logs-01 — connection-pool outage diagnosis.
 
-9 criteria over /app/diagnosis.md: 8 content OR-groups (proximate cause, pool
+10 criteria over /app/diagnosis.md: 9 content OR-groups (proximate cause, pool
 exhaustion, report-job hog, computed hold-duration, undersized pool, + 3 evidence
 cites, + an actionable fix) and 1 red-herring criterion (NOT fooled into blaming
-the disk-capacity warning). reward = satisfied/9. Each content criterion is
+the disk-capacity warning). reward = satisfied/10. Each content criterion is
 satisfied if ANY pattern in its OR-group matches the lowercased text — same
 patterns as the prior grade.py, restructured as rewardkit criteria.
 """
@@ -93,7 +93,7 @@ LABELS = {
 @lru_cache(maxsize=4)
 def _text(workspace_str: str) -> str:
     p = Path(workspace_str) / "diagnosis.md"
-    return p.read_text().lower() if p.exists() else ""
+    return p.read_text(errors="replace").lower() if p.exists() else ""
 
 
 def _any(patterns, text: str) -> bool:
@@ -110,8 +110,27 @@ def _check(key: str, text: str) -> bool:
     return _any(CRITERIA[key], text)
 
 
+@lru_cache(maxsize=4)
+def _is_copy(workspace_str: str) -> bool:
+    """True if diagnosis.md is substantially a verbatim subset of incident.log -- a
+    `cp incident.log diagnosis.md` dump that satisfies content/cite criteria from raw
+    log lines with no diagnosis. Voids all criteria when detected (anti-copy guard)."""
+    diag = Path(workspace_str) / "diagnosis.md"
+    log = Path(workspace_str) / "incident.log"
+    if not diag.exists() or not log.exists():
+        return False
+    dlines = [l.strip() for l in diag.read_text(errors="replace").splitlines() if l.strip()]
+    if not dlines:
+        return False
+    logset = {l.strip() for l in log.read_text(errors="replace").splitlines() if l.strip()}
+    verbatim = sum(1 for l in dlines if l in logset)
+    return verbatim / len(dlines) >= 0.5
+
+
 @rk.criterion(description="{label}")
 def rule(workspace: Path, key: str, label: str) -> bool:
+    if _is_copy(str(workspace)):
+        return False
     return _check(key, _text(str(workspace)))
 
 
@@ -119,3 +138,13 @@ ALL = list(LABELS.items()) + [
     ("RH", "RH: not fooled by the disk-capacity red herring")]
 for _key, _label in ALL:
     rk.rule(_key, _label)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "diagnosis.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

@@ -46,17 +46,27 @@ CL = r'contradict|inconsist|conflict|discrepan|mismatch|does not match|do not ma
 @lru_cache(maxsize=4)
 def _text(workspace_str: str) -> str:
     p = Path(workspace_str) / "contradictions.md"
-    return p.read_text().lower() if p.exists() else ""
+    return p.read_text(errors="replace").lower() if p.exists() else ""
 
 
 def _has(pat: str, text: str) -> bool:
     return re.search(pat, text) is not None
 
 
+def _colocated(a: str, b: str, text: str, window: int = 300) -> bool:
+    """Both contradiction sides must sit within one ~paragraph-sized window of the
+    SAME answer entry, so copying the source (whose sides are pages apart) fails."""
+    for m in re.finditer(a, text):
+        seg = text[max(0, m.start() - window):m.end() + window]
+        if re.search(b, seg):
+            return True
+    return False
+
+
 @lru_cache(maxsize=4)
 def _results(workspace_str: str):
     t = _text(workspace_str)
-    contra = {k: (_has(a, t) and _has(b, t)) for k, a, b in CONTRA}
+    contra = {k: _colocated(a, b, t) for k, a, b in CONTRA}
 
     # Distractors: flagged (a FALSE POSITIVE) only if the values appear AND
     # contradiction-language sits near the distractor's context (per-line).
@@ -91,3 +101,13 @@ for _k, _label in CONTRA_LABELS.items():
     rk.check(_k, f"found: {_label}", weight=0.0)
 for _k, _label in DISTRACTOR_LABELS.items():
     rk.check(_k, f"avoided distractor: {_label}", weight=0.0)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "contradictions.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)

@@ -26,10 +26,13 @@ set -u
 mkdir -p /logs/verifier
 cd /app
 
+# answer_present (VOID vs wrong): the test file written & non-empty, read tolerantly.
+ap=$(python3 -c "import os;print(1 if os.path.exists('/app/tests/test_slugify.py') and open('/app/tests/test_slugify.py', errors='replace').read().strip() else 0)" 2>/dev/null || echo 0)
+
 TEST=tests/test_slugify.py
 if [ ! -f "$TEST" ]; then
     cat > /logs/verifier/reward.json <<EOF
-{"reward": 0, "correctness": 0, "instruction_following": 0, "pass_correct": 0, "impl_untouched": 0, "killed": 0, "total_mutants": 4, "m1": 0, "m2": 0, "m3": 0, "m4": 0}
+{"reward": 0, "correctness": 0, "instruction_following": 0, "pass_correct": 0, "impl_untouched": 0, "killed": 0, "total_mutants": 4, "m1": 0, "m2": 0, "m3": 0, "m4": 0, "answer_present": ${ap}}
 EOF
     exit 0
 fi
@@ -83,5 +86,10 @@ print(reward, corr, killed)
 ")
 
 cat > /logs/verifier/reward.json <<EOF
-{"reward": ${reward}, "correctness": ${correctness}, "instruction_following": ${instruction_following}, "pass_correct": ${pass_correct}, "impl_untouched": ${impl_untouched}, "killed": ${killed}, "total_mutants": 4, "m1_lowercase": ${m1}, "m2_collapse": ${m2}, "m3_strip_hyphens": ${m3}, "m4_digits": ${m4}}
+{"reward": ${reward}, "correctness": ${correctness}, "instruction_following": ${instruction_following}, "pass_correct": ${pass_correct}, "impl_untouched": ${impl_untouched}, "killed": ${killed}, "total_mutants": 4, "m1_lowercase": ${m1}, "m2_collapse": ${m2}, "m3_strip_hyphens": ${m3}, "m4_digits": ${m4}, "answer_present": ${ap}}
 EOF
+
+# S4 crash guard: if the grader above crashed before emitting a parseable
+# reward.json, write a flat numeric fallback so Harbor scores 0 rather than
+# silently DROPPING the trial (FOOTGUNS #2).
+[ -s /logs/verifier/reward.json ] || echo '{"reward":0.0}' > /logs/verifier/reward.json

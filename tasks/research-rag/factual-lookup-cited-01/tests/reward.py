@@ -31,7 +31,7 @@ URL = re.compile(r'https?://\S+')
 @lru_cache(maxsize=4)
 def _blocks(answer_text: str) -> tuple:
     """Split answer.md into per-item blocks on leading 'N.' / 'N)' markers."""
-    parts = re.split(r'(?m)^\s*(10|[1-9])[\.\)]\s', answer_text)
+    parts = re.split(r'(?m)^\s*\**\s*(?:Q(?:uestion)?\.?\s*)?(10|[1-9])[\.\)]\**\s', answer_text)
     blocks = {}
     for i in range(1, len(parts) - 1, 2):
         blocks[int(parts[i])] = parts[i + 1]
@@ -53,7 +53,7 @@ def item(workspace: Path, n: int) -> bool:
     value_ok = bool(re.search(value_rx, low))
     wrong_value_present = bool(re.search(bad_value_rx, low))
     urls = [u.lower().rstrip('.,);') for u in URL.findall(body)]
-    cites_authoritative = any(good_path in u for u in urls)
+    cites_authoritative = any(good_path in u for u in urls) or (good_path in low)
     cites_archive = any(bad_path in u for u in urls)
     # Credit: correct value, not the archive's wrong value, cites the
     # authoritative page, and doesn't rely solely on the archive.
@@ -66,3 +66,13 @@ def item(workspace: Path, n: int) -> bool:
 
 for _n in range(1, 11):
     rk.item(_n)
+
+
+# VOID-vs-wrong diagnostic (weight-0; never moves the FLAT reward -- FOOTGUNS #2).
+@rk.criterion(description="{label}")
+def present(workspace: Path, key: str, label: str):
+    p = Path(workspace) / "answer.md"
+    return p.exists() and bool(p.read_text(errors="replace").strip())
+
+
+rk.present("answer_present", "answer persisted (VOID vs present-but-wrong)", weight=0.0)
