@@ -355,10 +355,10 @@ test_noncore_approved_rider}.py`.
 
 ### How to verify
 
-Offline suite (runnable here, on thringle; no Docker, $0):
+Offline suite (runnable here, on the run host; no Docker, $0):
 
 ```bash
-ssh thringle@10.0.10.65 'cd ~/benchmarking/.baton-worktrees/baton-2026-06-16-noncore-task-remediation && python3 -m pytest tests/ -q'
+ssh <run-host>@LAN-IP 'cd ~/benchmarking/.baton-worktrees/baton-2026-06-16-noncore-task-remediation && python3 -m pytest tests/ -q'
 ```
 
 Good = all green, including the `test_noncore_*` exploit/regrade/S4/wipe/hygiene
