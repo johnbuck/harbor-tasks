@@ -56,6 +56,49 @@ def grade_rewardkit(tests_dir: Path, workspace: Path) -> dict:
     return result
 
 
+def grade_inprocess(reward_py: Path, workspace: Path, patches: dict | None = None) -> dict:
+    """Drive a rewardkit ``reward.py`` IN-PROCESS so module-level ABSOLUTE roots
+    can be redirected (the analogue of ``run_shell_grader``'s root remap for the
+    bash graders).
+
+    Needed for graders that read a hardcoded absolute path the offline host can't
+    provide: ``pandas-sql-from-nl-01`` (``/opt/canonical``) and ``tool-selection-01``
+    (``/var/log/tool-calls.log``). ``patches`` maps a module global name to the
+    value to overwrite it with AFTER import (e.g. ``{"CANONICAL": tmp_canon}``);
+    the criterion closures read the module ``__dict__`` so the override takes.
+
+    Returns the same shape as ``grade_rewardkit``: ``_score`` (weighted mean over
+    the registered weights) plus each criterion keyed by its registered name.
+    """
+    import importlib.util
+
+    import rewardkit.session as _S
+
+    sess = _S.Session()
+    token = _S._current_session.set(sess)
+    try:
+        spec = importlib.util.spec_from_file_location("_inproc_grader", reward_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)          # registers criteria into `sess`
+        for k, v in (patches or {}).items():
+            setattr(mod, k, v)
+        result: dict = {}
+        acc = 0.0
+        total_w = 0.0
+        for check, weight in sess.criteria:
+            val = check(Path(workspace))
+            name = getattr(check, "_criterion_name", getattr(check, "__name__", "?"))
+            fval = float(val) if isinstance(val, (bool, int, float)) else val
+            result[name] = fval
+            if weight:
+                acc += float(fval) * weight
+                total_w += weight
+        result["_score"] = acc / total_w if total_w else 0.0
+        return result
+    finally:
+        _S._current_session.reset(token)
+
+
 def crit(result: dict, name_substr: str) -> float:
     """Fetch the value of the (single) criterion whose name contains ``name_substr``."""
     matches = [(k, v) for k, v in result.items()

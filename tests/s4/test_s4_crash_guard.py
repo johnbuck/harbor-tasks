@@ -51,3 +51,42 @@ def test_rewardkit_grader_has_crash_fallback(label, rel):
     assert has_fallback_write, f"{label}: no '|| ... reward.json' crash fallback"
     assert re.search(r'"reward"\s*:\s*0\.0', txt), \
         f"{label}: crash fallback must write a flat {{\"reward\": 0.0}}"
+
+
+# --- 2026-06-16 non-core remediation: extend S4 to ALL 21 active tasks ------
+#
+# Every grader must guarantee a parseable FLAT numeric reward.json (0.0) on
+# crash/empty output, in the shape matching its writer (criterion 1).
+#
+# RED expectation: the triage found crashFallback=MISSING on all 21 (findings
+# "Cross-cutting", line 13) — none of the 21 graders carry a fallback today.
+from noncore import HEREDOC, REWARDKIT, TASKS  # noqa: E402
+
+
+def _flat_zero_write(txt: str) -> bool:
+    """A literal flat {"reward":0.0} (numbers only) written to reward.json."""
+    return bool(re.search(r'"reward"\s*:\s*0(\.0+)?\b', txt))
+
+
+@pytest.mark.parametrize("tid", REWARDKIT, ids=REWARDKIT)
+def test_noncore_rewardkit_crash_fallback(tid):
+    """rewardkit shape: `rewardkit ... || echo '{"reward": 0.0}' > reward.json`
+    (or an ERR/EXIT trap). Currently MISSING -> a grader exception silently drops
+    the trial (FOOTGUNS #2). Required: present."""
+    txt = (REPO_ROOT / TASKS[tid]["grader"]).read_text()
+    guarded = bool(re.search(r"\|\|[^\n]*reward\.json", txt)) or "trap" in txt
+    assert guarded, f"{tid}: rewardkit call has no '|| ... reward.json' / trap fallback"
+    assert _flat_zero_write(txt), f"{tid}: fallback must write a flat {{\"reward\":0.0}}"
+
+
+@pytest.mark.parametrize("tid", HEREDOC, ids=HEREDOC)
+def test_noncore_heredoc_crash_fallback(tid):
+    """heredoc shape: a stdout-redirect heredoc cannot use `||`, so a post-heredoc
+    `[ -s reward.json ] || echo '{"reward":0.0}' > reward.json` guard (or trap) is
+    required. Currently MISSING -> a heredoc that raises before the final print
+    leaves an empty/invalid reward.json and Harbor drops the trial. Required:
+    present."""
+    txt = (REPO_ROOT / TASKS[tid]["grader"]).read_text()
+    post_guard = bool(re.search(r"\[\s*-s\s+[^\]]*reward\.json\s*\]", txt)) or "trap" in txt
+    assert post_guard, f"{tid}: no post-heredoc `[ -s reward.json ]`/trap crash guard"
+    assert _flat_zero_write(txt), f"{tid}: guard must write a flat {{\"reward\":0.0}}"
