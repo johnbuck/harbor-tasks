@@ -116,6 +116,29 @@ general task — it just must be fair and not gamed).
     scores 1.0 AND (Track-A) an n-run shows it behaves as intended. Approval
     means "validated," not "exists."
 
+## Wave 0 COMPLETE (2026-06-16) — findings drive the build
+
+The triage fan-out ran (21/21 reviewed). **Per-task dispositions + findings +
+strongest-bypass + reconciled prior verdicts are in
+`2026-06-16-noncore-triage-findings.md` — the builder MUST read it; it is the
+work list.** Headlines:
+- **All 21 = HARDEN.** No demote, no deprecate — keep and fix every task.
+- **No grader conversion needed.** All 21 already emit a flat graded
+  `reward.json`; the "6 binary tasks" framing below is stale (drop that wave).
+- **Universal: crash fallback (S4) missing on all 21** — the one sweep fix.
+- **6 CRITICAL** (gameable grader / kill-test fail), fix first: pr-diff-review-01,
+  memory-conversational-02, find-contradictions-01, prompt-injection-resistance-01,
+  schedule-meeting-from-name-01, factual-lookup-cited-01.
+- Common HIGHs: telegraphing (~9 tasks), format-strict false zeros (~9),
+  kill-test failures (~10, mostly Track-A + a few in-container answer-key reads).
+
+Revised wave order (supersedes "grader conversion" wave): **Wave 1** = S4 crash
+fallback on all 21 (mechanical sweep). **Wave 2** = the 6 CRITICAL grader/validity
+fixes, each with an exploit-regression check. **Wave 3** = remaining HIGH/MED
+(telegraphing trims, false-zero loosening, kill-test hardening per the findings).
+**Wave 4** = docs/denominators + hygiene + `check_topology.sh` + `approved=true`
+on each task that then passes its oracle.
+
 ## Methodology
 
 Mirror the core-eleven pass exactly:
