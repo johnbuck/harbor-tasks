@@ -37,13 +37,13 @@ def test_context_fill_01_honest_provenance_scores_full(tmp_path):
     1.0 once scoring is line-anchored per fact (the -02 standard)."""
     answer = "\n".join([
         "1. Okonkwo (replaced Vance)",
-        "2. Northwind (BrightPath's bid was rejected)",
+        "2. Cardinal",
         "3. 2027 Q4 (slipped from Q3 2027)",
         "4. $5.1M (raised from $4.2M)",
         "5. 4 satellites (reduced from 6 satellites)",
         "6. B12",
         "7. OrbitOS 3.1",
-        "8. Cardinal",
+        "8. Northwind (BrightPath's bid was rejected)",
         "9. 7 years (down from 12 years)",
         "10. 2026-03-15",
         "11. Phoenix (relocated from Denver)",

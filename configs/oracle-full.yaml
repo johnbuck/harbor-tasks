@@ -3,9 +3,9 @@
 # are exercised. Excludes deprecated tasks, the _verify fixtures, and
 # prod-behavioral/conversational-01 (a conversational task with no oracle solution
 # by design). Run on the run host:
-#   OPENROUTER_API_KEY=oracle-noop /home/thringle/benchmarking/harbor/.venv/bin/harbor run -c configs/oracle-full.yaml
+#   OPENROUTER_API_KEY=oracle-noop harbor run -c configs/oracle-full.yaml
 job_name: oracle-full
-jobs_dir: /home/thringle/benchmarking/harbor-tasks/jobs
+jobs_dir: jobs
 n_attempts: 1
 timeout_multiplier: 1.0
 orchestrator:
@@ -21,25 +21,25 @@ environment:
 agents:
   - name: oracle
 datasets:
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/code-editing
+  - path: tasks/code-editing
     task_names:
       - refactor-multi-file-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/code-spec-review
+  - path: tasks/code-spec-review
     task_names:
       - pr-diff-review-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/compliance-security
+  - path: tasks/compliance-security
     task_names:
       - secret-scan-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/context-management
+  - path: tasks/context-management
     task_names:
       - multistep-context-fill-01
       - multistep-context-fill-02
       - multistep-context-fill-03
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/context-rot
+  - path: tasks/context-rot
     task_names:
       - context-rot-01
       - context-rot-02
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/conversation-persona
+  - path: tasks/conversation-persona
     task_names:
       - multistep-memory-conversational-01
       - multistep-memory-conversational-02
@@ -47,37 +47,37 @@ datasets:
       - multistep-proactive-preference-01
       - multistep-stale-memory-vs-file-01
       - true-multi-turn-memory-write-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/data-analytics
+  - path: tasks/data-analytics
     task_names:
       - pandas-sql-from-nl-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/insights-research
+  - path: tasks/insights-research
     task_names:
       - find-contradictions-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/migration
+  - path: tasks/migration
     task_names:
       - dep-bump-breaking-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/ops-debugging
+  - path: tasks/ops-debugging
     task_names:
       - diagnose-from-logs-01
       - failure-recovery-loop-01
       - shell-pipeline-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/real-world-workflows
+  - path: tasks/real-world-workflows
     task_names:
       - prompt-injection-resistance-01
       - schedule-meeting-from-name-01
       - update-record-with-cleanup-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/research-rag
+  - path: tasks/research-rag
     task_names:
       - agentic-research-with-memory-01
       - factual-lookup-cited-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/skill-agent-authoring
+  - path: tasks/skill-agent-authoring
     task_names:
       - skill-discovery-and-use-01
       - sub-agent-parallel-decompose-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/test-authoring
+  - path: tasks/test-authoring
     task_names:
       - unit-tests-01
-  - path: /home/thringle/benchmarking/harbor-tasks/tasks/tool-orchestration
+  - path: tasks/tool-orchestration
     task_names:
 # (browser-find-fact-01 excluded: grader gates on browser_used; a shell oracle can't drive the browser — validate via n=1)
       - plan-then-revise-01
