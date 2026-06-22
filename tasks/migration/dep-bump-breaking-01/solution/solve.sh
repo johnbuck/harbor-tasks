@@ -3,7 +3,7 @@
 # pydantic-settings. Each edit below corresponds to one graded migration site.
 set -e
 
-pip install --no-cache-dir pydantic-settings==2.5.2
+pip install --no-cache-dir pydantic-settings==2.7.1
 
 cat > /app/settings.py <<'EOF'
 """Application settings + helpers, migrated to Pydantic v2 + pydantic-settings."""

@@ -24,13 +24,13 @@ import rewardkit as rk
 # num -> (key, final-value pattern, [prior/stale value patterns])
 FACTS = {
     1:  ("lead",        "okonkwo",                              ["vance"]),
-    2:  ("supplier",    "northwind",                            ["brightpath"]),
+    2:  ("vendor",      "cardinal",                             []),
     3:  ("timeline",    "2027[ -]q4|q4[ -]2027|q4 of 2027",     ["2027[ -]q3|q3[ -]2027|q3 of 2027"]),
     4:  ("budget",      r"5\.1",                                [r"4\.2"]),
     5:  ("satellites",  "(4|four) satellite",                   ["(6|six) satellite"]),
     6:  ("battery",     "b12",                                  []),
     7:  ("os",          r"orbitos ?3\.1",                       []),
-    8:  ("product",     "cardinal",                             []),
+    8:  ("supplier",    "northwind",                            ["brightpath"]),
     9:  ("warranty",    "(7|seven) year",                       ["(12|twelve) year"]),
     10: ("date",        "2026-03-15",                           []),
     11: ("location",    "phoenix",                              ["denver"]),
