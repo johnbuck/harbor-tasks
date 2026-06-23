@@ -159,6 +159,94 @@ EPICS = [
     },
 ]
 
+# ── The 11 core tests — how each one actually works ───────────────────────────
+# Sequential, one per harness-distinct capability (configs/core-suite.yaml). Each
+# entry: number, task slug, capability axis, a short scoring tag (right-rail), and
+# the expandable trap / scoring / harness-isolation detail. `ev` = discrimination
+# evidence status: "ok" = mechanics built + oracle-clean; "mid" = built but the Δ
+# must be RE-EARNED on the hindsight-only substrate (the three 2026-06-10 reworks).
+CORE_TESTS_INTRO = (
+    "Every core test is built from the same four parts, so once you see the pattern you can read all 11. "
+    "<b>(1) A surface goal stated like a real user</b> — no hint of the trap, the hidden check, or the "
+    "required strategy (“no telegraphing”). <b>(2) A hidden mechanism that makes the answer "
+    "uncomputable without the harness</b>, enforced <i>mechanically</i> by a step's "
+    "<span class='mono'>setup.sh</span> — it wipes all scratch before grading, silently rewrites a file, "
+    "strips a value that was only ever spoken, or gates on latency. <b>(3) A graded scorer</b> "
+    "(<span class='mono'>tests/test.sh</span>) — partial credit across weighted dimensions, never pass/fail "
+    "(binary tasks saturate to 1.0 for two competent harnesses). <b>(4) The kill test</b> — if "
+    "<span class='mono'>python3 -c</span> or one file-read could solve it, it measures the <i>model</i>; "
+    "every core task defeats this. A <span class='mono'>0</span> on a <i>completed</i> run is VOID, not a "
+    "loss — weight-0 <span class='mono'>diagnostics</span> tell the two apart."
+)
+
+CORE_TESTS = [
+    {"group": "Memory ×3 — state must survive a filesystem wipe, through the harness", "tests": [
+        {"n": 1, "ev": "mid", "name": "multistep-memory-conversational-01", "axis": "recall precision under distraction",
+         "score": "correct / 12",
+         "trap": "Learns 12 of Dana's facts, then 4 distractor turns inject confusable siblings (Sam's allergy, Jess's red Honda…); step 07's setup.sh wipes all scratch + deletes /app before the recall, so answers must come from harness memory alone.",
+         "scoring": "reward = correct / 12. A precise fact = 1.0; stating the distractor value or hedging both ≈ 0.33. Flat 0.0 if the wipe assertion fails (VOID).",
+         "why": "No scratch survives between steps — only the harness's session memory does."},
+        {"n": 2, "ev": "ok", "name": "true-multi-turn-memory-write-01", "axis": "proactive memory update on correction",
+         "score": "(correct/8) × (0.85+0.15·dinner)",
+         "trap": "Mid-conversation the user CORRECTS two facts (timezone Pacific→Mountain, climbing nights Tue/Thu/Sat→Mon/Wed/Fri); the next step wipes scratch. Passive listening keeps the stale values.",
+         "scoring": "reward = (correct_fields / 8) × (0.85 + 0.15·dinner_ok); the dinner plan must respect the CORRECTED constraints. Stale values score 0.",
+         "why": "A model can't force the harness to write/update memory — without an UPDATE the old values survive the wipe."},
+        {"n": 3, "ev": "ok", "name": "multistep-stale-memory-vs-file-01", "axis": "trust the live file over stale memory",
+         "score": "1.0 iff 275 (not 45)",
+         "trap": "Agent reads & repeatedly computes with cache_ttl_seconds: 45 (cementing it in memory); step 04's setup.sh SILENTLY rewrites the file to 275 (then deletes itself) and asks for the current value.",
+         "scoring": "reward = 1.0 iff the answer is 275 AND not also 45 — dumping both forfeits it (an honest “275 (was 45)” is carved out).",
+         "why": "The silent rewrite forces a choice between repeatedly-used memory (45) and a re-fetch (275); bare code never sees the change."},
+    ]},
+    {"group": "Long-context ×2 — retention as the window fills", "tests": [
+        {"n": 4, "ev": "ok", "name": "multistep-context-fill-02", "axis": "final-vs-stale value under window overflow",
+         "score": "max(0, current−stale) / 12",
+         "trap": "18 weekly reports (~1.3M tokens, >1× the 1M window); nearly every fact is corrected 2–3× over the quarter (lead Reyes→Tanaka→Okafor…). Reports deleted before recall.",
+         "scoring": "reward = max(0, current_hits − stale_hits) / 12. Each fact: +1 for the FINAL value with ≤1 prior value present; −1 for adopting the GCP decoy. Dumping churned values = 0.",
+         "why": "A script can't tell the final value from a stale one buried mid-context under saturation — it needs the harness to manage retention across 18 steps."},
+        {"n": 5, "ev": "ok", "name": "context-rot-02", "axis": "multi-hop lost-in-the-middle recall",
+         "score": "matched / 8",
+         "trap": "18 inspection records (~345K — FITS the window, so this tests retention not overflow) threaded into one growing conversation; 8 questions each chain two facts buried at different depths via a bridge entity.",
+         "scoring": "reward = matched / 8; each needle must be positional + exclusive. Weight-0 early/middle/late fractions trace the rot curve.",
+         "why": "Resolving a two-hop chain across facts at different conversational depths needs the harness's threaded context, not offline lookup."},
+    ]},
+    {"group": "Control loop ×2 + Tool precision ×1 — recovery, replanning, selection", "tests": [
+        {"n": 6, "ev": "mid", "name": "failure-recovery-loop-01", "axis": "adaptive error-recovery ladder",
+         "score": "0.6·correct + 0.4·efficiency",
+         "trap": "dfetch fails with 4 DIFFERENT actionable errors in sequence (bad-region→401→stale-lock→success); correct values are found only by exploring /app/dfetch.conf. Success emits an HMAC nonce whose secret lives in the stripped binary — forged answers fail --verify; the binary sha256 is pinned against swaps.",
+         "scoring": "reward = 0.6·correctness + 0.4·efficiency, where efficiency = clamp((18−calls)/(18−3)). 1.0 = HMAC-verified files + an ordered progression log ending in “release”, ≤18 calls.",
+         "why": "Each error demands interaction with live system state; there's no static answer, and only correct sequential calls unlock the secret."},
+        {"n": 7, "ev": "ok", "name": "plan-then-revise-01", "axis": "retain a bound across a mid-task context wipe",
+         "score": "clamp 0.40 + fn 0.40 + cleanup 0.12 + replan 0.08",
+         "trap": "A numeric clamp bound [−1000, 1000] is stated ONLY in conversation in steps 1–2; step 3's setup.sh strips the helper and the bound from disk + instructions, then asks for a refactor that must re-apply it. Leaked scratch notes → reward 0.0.",
+         "scoring": "reward = clamp_memory 0.40 + functional 0.40 + cleanup 0.12 + replan 0.08. Without recalling the bound, the score caps ≈ 0.60.",
+         "why": "The bound is unrecoverable from step 3's files/instructions — only harness-threaded conversation state unlocks the full score."},
+        {"n": 8, "ev": "mid", "name": "tool-sprawl-precision-01", "axis": "tool selection among decoys",
+         "score": "0.5·F1 + 0.5·efficiency",
+         "trap": "60 tools, exactly 3 correct (opaque names — function only in --help); 9 name-collision decoys (count, analyze, rank) match the verbs but do the wrong thing. The answer VALUE is deliberately not scored (a script could compute it) — only logged tool invocations are.",
+         "scoring": "reward = 0.5·selection_F1 + 0.5·call_efficiency. Computing offline without invoking tools = 0.0 (VOID).",
+         "why": "Grading is purely on invocation discipline; a pure python3 solver scores 0."},
+    ]},
+    {"group": "Delegation + skill acquisition ×2", "tests": [
+        {"n": 9, "ev": "ok", "name": "sub-agent-parallel-decompose-01", "axis": "parallel sub-agent fan-out",
+         "score": "correct / 60",
+         "trap": "60 independent problems, each needing a value from a latency-gated binary (8s/call). Serial = 60×8s = 480s, blowing the 600s timeout even with instant math; only parallel sub-agent sessions clear enough in time.",
+         "scoring": "reward = correct / 60. No concurrency bonus — a serial harness simply finishes fewer (mtime logs are advisory only).",
+         "why": "A single synchronous token-stream hits a hard 480s floor; only independent parallel sessions beat the clock."},
+        {"n": 10, "ev": "ok", "name": "skill-discovery-and-use-01", "axis": "find the right skill by reading metadata",
+         "score": "passed / 16",
+         "trap": "13 skills; only tabular-shape-report is correct — and its name does NOT echo “shape”, while 3 better-named decoys emit near-miss output. The required --null=empty flag is documented only in the right SKILL.md. A SHA256 breadcrumb proves real discovery; running all 13 (brute sweep) trips a gate and denies credit.",
+         "scoring": "reward = passed / 16 (8 files × {correct, discovered}). Near-miss = 1/2; swept = 0/2.",
+         "why": "Discovery needs parsing structured tool metadata, not reasoning; the sweep gate + hash breadcrumb block reimplementation cheats."},
+    ]},
+    {"group": "Stateful workflow ×1", "tests": [
+        {"n": 11, "ev": "ok", "name": "update-record-with-cleanup-01", "axis": "precise multi-axis ledger edit",
+         "score": "per-decision / N",
+         "trap": "A 340-row budget CSV; the agent must DISCOVER the dedup rule (identical date+vendor+amount+category) by inspection — never told. 6 May grocery dup-groups to remove, 7 lookalike groups (near-amounts 55.00/55.10, same-date-different-category…) to PRESERVE, plus a rent row to split 50/50. No answer key ever exists in the container.",
+         "scoring": "reward = (dedup + preserve + rent_split + rent_orig_gone + collateral) / total, per decision — with a dedup gate that floors preserve/collateral at 0 if nothing was actually deduped (so “do nothing” can't score ≈0.5).",
+         "why": "Requires empirically inferring the rule from the data, then a precise stateful transform — there's no key to learn from."},
+    ]},
+]
+
 STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked",
                 "todo": "to do", "deprecated": "deprecated", "rejected": "rejected"}
 STATUS_CLASS = {"done": "ok", "partial": "mid", "blocked": "bad",
@@ -234,6 +322,32 @@ def resolve(ref: str):
         if cand.is_file():
             return cand
     return None
+
+
+def render_core_tests() -> str:
+    """The 11 core tests as a sequential accordion (reuses .row/.detail + tog())."""
+    blocks = []
+    for grp in CORE_TESTS:
+        rows = []
+        for t in grp["tests"]:
+            rows.append(
+                f'<div class="row" onclick="tog(this)">'
+                f'<div class="dot {t["ev"]}" title="{"built + oracle-clean" if t["ev"]=="ok" else "built; Δ to re-earn"}"></div>'
+                f'<div class="rlabel"><span class="caret">▶</span> '
+                f'<b>{t["n"]}.</b> <span class="mono">{esc(t["name"])}</span> — {esc(t["axis"])}</div>'
+                f'<span class="rref">{esc(t["score"])}</span></div>'
+                f'<div class="detail"><div class="dtext">'
+                f'<b>Trap:</b> {esc(t["trap"])}<br>'
+                f'<b>Scoring:</b> {esc(t["scoring"])}<br>'
+                f'<b>Harness-only:</b> {esc(t["why"])}'
+                f'</div></div>'
+            )
+        blocks.append(
+            f'<div class="epic"><div class="ehead">'
+            f'<span class="etitle" style="font-size:13.5px">{esc(grp["group"])}</span></div>'
+            f'{"".join(rows)}</div>'
+        )
+    return "".join(blocks)
 
 
 def render() -> str:
@@ -351,6 +465,14 @@ registry refresh. <b>Sequence:</b> confirm hermes browser parity → run core-11
 <div class="sec">Epics</div>
 {legend}
 {''.join(cards)}
+<div class="sec" style="margin-top:30px">The 11 core tests — how each one measures the harness</div>
+<div class="thesis"><span class="lbl">How every test works</span>{CORE_TESTS_INTRO}</div>
+<div class="legend">
+  <span><i class="ldot" style="background:#5fd07e"></i> mechanics built + oracle-clean</span>
+  <span><i class="ldot" style="background:#e6c98a"></i> built; Δ to re-earn (2026-06-10 rework)</span>
+  <span style="margin-left:auto">click a test for its trap · scoring · why it's the harness, not the model</span>
+</div>
+{render_core_tests()}
 </div>
 <div id="srcs" style="display:none">{''.join(sources)}</div>
 <div id="ov" onclick="closeSpec()"></div>
