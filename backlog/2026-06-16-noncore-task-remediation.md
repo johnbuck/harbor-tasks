@@ -1,5 +1,5 @@
 ---
-status: APPROVED
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-16
 ---
@@ -8,8 +8,13 @@ date: 2026-06-16
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-16
-**Status:** APPROVED 2026-06-16 — operator asked for a clear spec to run an
-adversarial review on each of the 21 active non-core tasks and remediate them
+**Status:** IMPLEMENTED + offline-green 2026-06-17 (as-built log below) — all 21
+tasks HARDENed and merged via baton; the remaining items (Docker oracle=1.0,
+Track-A n≥3 runs, `approved=true` flips, the 2 corpus-balloon/keep-vs-demote
+calls, browser matcher validation) are OPERATOR gates explicitly out of the
+no-Docker pipeline. Originally APPROVED 2026-06-16 — operator asked for a clear
+spec to run an adversarial review on each of the 21 active non-core tasks and
+remediate them
 until "fully converted."
 **Origin / triggered-by:** the core-eleven discriminator set has been hardened
 twice and validated (oracle 11/11, 80 offline checks). But the suite has **55
