@@ -103,13 +103,13 @@ EPICS = [
              "Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem."),
             ("done", "Sub-agent spawning + research tasks", "2026-05-29-new-eval-tasks-subagent-research.md",
              "Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task."),
-            ("partial", "Goal-oriented real-world workflows", "2026-05-30-goal-oriented-real-world-tasks.md",
-             "Workflows modelled on how users actually drive agents (3 shapes + a simulator). The category was built (task #83) but the spec is still PROPOSED — design is settling."),
+            ("done", "Goal-oriented real-world workflows", "2026-05-30-goal-oriented-real-world-tasks.md",
+             "Workflows modelled on how users actually drive agents. All 3 shapes shipped + oracle-validated and now LIVE in configs/core-suite.yaml (update-record-with-cleanup-01, schedule-meeting-from-name-01, prompt-injection-resistance-01); update-record carried the n=5 grid as the stateful-workflow discriminator. Design has settled — the category is built and scoring."),
             ("done", "tau3-bench integration — oracle shipped; agent-run deprecated", "2026-05-28-tau3-bench-integration.md",
              "Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped."),
             # ── discrimination & validity: do the authored tasks actually measure the harness? ──
-            ("partial", "Harness-vs-model discriminating suite — instrument proven (interim)", "2026-05-30-harness-vs-model-discriminating-suite.md",
-             "The core spec: evaluate the SCAFFOLDING, not the LLM. Proven interim — a precision-memory task split openclaw 12/12 vs hermes 8/12 (Δ=0.33) with a visible memory failure in hermes's trajectory. The n=5 pass^k verdict is pending the E2 fixes."),
+            ("done", "Harness-vs-model discriminating suite — instrument PROVEN at n=5", "2026-05-30-harness-vs-model-discriminating-suite.md",
+             "The core spec: evaluate the SCAFFOLDING, not the LLM. The interim caveat is now discharged — the reworked core-11 ran a full n=5 pass^k grid (110 trials) on the symmetric hindsight-only substrate and the suite DISCRIMINATES: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in BOTH directions (hermes 5, openclaw 2). Reliability is the signal — hermes 4% error vs openclaw 20%. See the n≥3 verdict-grid row below + RESULTS.md."),
             ("done", "Methodology evidence base — approach grounded in published work", "2026-06-01-methodology-evidence-base.md",
              "Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity."),
             ("done", "Discrimination-hardening sweep — difficulty is the lever", "2026-05-31-discrimination-hardening-session.md",
@@ -120,8 +120,10 @@ EPICS = [
              "37 of 50 tasks told the agent the very strategy the verifier secretly measured (\"the latest value supersedes earlier ones\"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically."),
             ("done", "Retired-task coverage matrix — no capability left untested", "2026-06-01-retired-task-coverage-matrix.md",
              "Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested."),
-            ("todo", "Rework the ~22 salvageable deprecated tasks (task #89)", "—",
-             "The deprecated-but-salvageable tasks still need the difficulty + de-telegraph treatment before they re-enter the discriminating grid. Tracked as task #89."),
+            ("rejected", "Rework the ~22 salvageable deprecated tasks (task #89) — DROPPED, superseded", "2026-06-01-retired-task-coverage-matrix.md",
+             "DROPPED 2026-06-23. Audited: 20 (not 22) tasks are deprecated-on-disk (task.toml status=\"deprecated\"), auto-excluded by run_track_a.sh — they feed NO live config and are never scored. Per the retired-task coverage matrix every capability axis they covered is already exercised by a HARDER live task (memory→memory-conversational, sub-agent→parallel-decompose, tool-orch→tool-sprawl, etc.), so reworking them adds redundancy, not coverage. The label had drifted: #89 was originally 'rework the live cover tasks' — that work shipped as the core-eleven remediation. The genuine remaining rework is the 21 ACTIVE non-core tasks (row below), not the dead ones. Deprecated tasks stay dormant on disk as a non-destructive audit trail."),
+            ("partial", "Non-core task remediation — adversarially review + convert the 21 active tasks", "2026-06-16-noncore-task-remediation.md",
+             "The real remaining E4 rework (replaces the mislabelled #89). The suite has 21 ACTIVE non-core eval tasks that never got the discrimination-hardening / adversarial / verifier-integrity treatment the core-11 received — the 2026-06-01 KILL verdicts became the 20 deprecations, but the REWORKs were deferred while energy went to the core eleven. APPROVED 2026-06-16; in flight via the baton pipeline (rewardkit graded-scoring already done for 16/21). Wave-0 triage done; per-task adversarial review + full conversion ongoing. Not in the core-11 verdict chain — additive validity work."),
             ("done", "Context-rot scoring integrity — false-zero audit + metric normalization", "2026-06-02-context-rot-scoring-integrity.md",
              "A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work."),
             ("done", "Core suite — the 11 load-bearing harness-measuring tests", "2026-06-03-core-suite-selection.md",
@@ -134,8 +136,8 @@ EPICS = [
              "7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical."),
             ("done", "rewardkit grading rollout — all 23 active graded tasks converted + validated", "2026-06-09-verifier-sandbox-rollout.md",
              "Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on the run host main pending operator push."),
-            ("todo", "Run n≥3 pass^k grid → verdict (task #81)", "—",
-             "The verdict run: pass^k (all-of-k) across the core suite, because n=1 is a coin-toss and the harness signal is reliability variance + efficiency. Numbers are auto-computed by metrics/track_a_weighted.py → track_a_report.json (split + pass^k + per-category + efficiency); the verdict layer on top is the thin RESULTS.md (see E5). Gated on the E2 fixes + the image rebuild + the Wave-1 verifier-integrity fixes (a gameable discriminator must be closed before its numbers are trusted). Tracked as task #81."),
+            ("done", "Run n≥3 pass^k grid → verdict (task #81) — core-11 grid DONE", "2026-06-10-core-eleven-remediation.md",
+             "DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the REMEDIATED core-11 over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/track_a_weighted.py → track_a_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the 21 active non-core tasks once their remediation (row above) lands; re-confirm context-rot (Δ−0.10, thin)."),
         ],
     },
     {
@@ -151,8 +153,8 @@ EPICS = [
              "tools/roadmap.py → roadmap.html — the PLAN view: the thesis, a where-we-stand callout, the epics, every backlog spec rolled up under one with a status dot, an expandable detail, and an open-full-spec modal. Hand-curated EPICS table; re-run after backlog changes."),
             ("done", "Viewer Claude-analysis on subscription auth + durable fork launch", "2026-06-02-viewer-subscription-auth.md",
              "The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth."),
-            ("todo", "RESULTS.md — thin verdict over the auto-computed report (task #81)", "2026-06-03-results-verdict-thin-over-report.md",
-             "Retargeted 2026-06-03 (option a): the numbers are owned by Harbor reporting + metrics/track_a_weighted.py → track_a_report.json (split, pass^k, per-category, efficiency — auto-computed, never hand-typed, no drift/false-zero risk). RESULTS.md is demoted to the THIN layer no automated report can produce: the plain-English verdict + construct-validity caveats (honcho asymmetry, recall-removed, BLUNT controls, false-zero/VOID traps) + reproduction command, embedding the auto-computed split block and linking to the viewer. Written once the first core-suite grid runs."),
+            ("done", "RESULTS.md — thin verdict over the auto-computed report (task #81)", "2026-06-03-results-verdict-thin-over-report.md",
+             "WRITTEN 2026-06-10 once the first core-suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/track_a_weighted.py → track_a_report.json. Will refresh when the non-core grid lands."),
             ("todo", "FE exportable verdict report (follow-up)", "2026-06-03-results-verdict-thin-over-report.md",
              "Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run."),
         ],
@@ -181,7 +183,7 @@ CORE_TESTS_INTRO = (
 
 CORE_TESTS = [
     {"group": "Memory ×3 — state must survive a filesystem wipe, through the harness", "tests": [
-        {"n": 1, "ev": "mid", "name": "multistep-memory-conversational-01", "axis": "recall precision under distraction",
+        {"n": 1, "ev": "ok", "name": "multistep-memory-conversational-01", "axis": "recall precision under distraction",
          "score": "correct / 12",
          "trap": "Learns 12 of Dana's facts, then 4 distractor turns inject confusable siblings (Sam's allergy, Jess's red Honda…); step 07's setup.sh wipes all scratch + deletes /app before the recall, so answers must come from harness memory alone.",
          "scoring": "reward = correct / 12. A precise fact = 1.0; stating the distractor value or hedging both ≈ 0.33. Flat 0.0 if the wipe assertion fails (VOID).",
@@ -210,7 +212,7 @@ CORE_TESTS = [
          "why": "Resolving a two-hop chain across facts at different conversational depths needs the harness's threaded context, not offline lookup."},
     ]},
     {"group": "Control loop ×2 + Tool precision ×1 — recovery, replanning, selection", "tests": [
-        {"n": 6, "ev": "mid", "name": "failure-recovery-loop-01", "axis": "adaptive error-recovery ladder",
+        {"n": 6, "ev": "ok", "name": "failure-recovery-loop-01", "axis": "adaptive error-recovery ladder",
          "score": "0.6·correct + 0.4·efficiency",
          "trap": "dfetch fails with 4 DIFFERENT actionable errors in sequence (bad-region→401→stale-lock→success); correct values are found only by exploring /app/dfetch.conf. Success emits an HMAC nonce whose secret lives in the stripped binary — forged answers fail --verify; the binary sha256 is pinned against swaps.",
          "scoring": "reward = 0.6·correctness + 0.4·efficiency, where efficiency = clamp((18−calls)/(18−3)). 1.0 = HMAC-verified files + an ordered progression log ending in “release”, ≤18 calls.",
@@ -220,7 +222,7 @@ CORE_TESTS = [
          "trap": "A numeric clamp bound [−1000, 1000] is stated ONLY in conversation in steps 1–2; step 3's setup.sh strips the helper and the bound from disk + instructions, then asks for a refactor that must re-apply it. Leaked scratch notes → reward 0.0.",
          "scoring": "reward = clamp_memory 0.40 + functional 0.40 + cleanup 0.12 + replan 0.08. Without recalling the bound, the score caps ≈ 0.60.",
          "why": "The bound is unrecoverable from step 3's files/instructions — only harness-threaded conversation state unlocks the full score."},
-        {"n": 8, "ev": "mid", "name": "tool-sprawl-precision-01", "axis": "tool selection among decoys",
+        {"n": 8, "ev": "ok", "name": "tool-sprawl-precision-01", "axis": "tool selection among decoys",
          "score": "0.5·F1 + 0.5·efficiency",
          "trap": "60 tools, exactly 3 correct (opaque names — function only in --help); 9 name-collision decoys (count, analyze, rank) match the verbs but do the wrong thing. The answer VALUE is deliberately not scored (a script could compute it) — only logged tool invocations are.",
          "scoring": "reward = 0.5·selection_F1 + 0.5·call_efficiency. Computing offline without invoking tools = 0.0 (VOID).",
@@ -460,16 +462,21 @@ the rest of the catalog was always present.<br><br>
 (privacy-intact, deny+tool-use+reasoning); hermes write-persistence (<b>#92</b>) fixed +
 verified; <b>core-11</b> defined; context-rot scoring (<b>#93</b>) fixed; recall removed
 (substrate openclaw=hindsight vs hermes=honcho+hindsight); browser tool (<b>#90</b>) fixed via
-registry refresh. <b>Sequence:</b> confirm hermes browser parity → run core-11 n=1 separation
-→ n≥3 pass^k → thin verdict (E5).</div>
+registry refresh. <b>Verdict landed (2026-06-10):</b> the reworked core-11 ran a full n=5
+pass^k grid (110 trials) on the symmetric hindsight-only substrate — <b>the suite discriminates,
+effective Δ=0.188, leader hermes</b> (driven by reliability: hermes 4% vs openclaw 20% error),
+all 7 categories split ≥10% in both directions; written up in RESULTS.md. <b>Now in flight:</b>
+adversarially review + fully convert the 21 active NON-core tasks
+(<span class="mono">2026-06-16-noncore-task-remediation</span>), then extend the grid to them +
+ship the FE-exportable verdict (E5). The old #89 "rework the deprecated tasks" was dropped as
+redundant — every axis they covered is already exercised by a harder live task.</div>
 <div class="sec">Epics</div>
 {legend}
 {''.join(cards)}
 <div class="sec" style="margin-top:30px">The 11 core tests — how each one measures the harness</div>
 <div class="thesis"><span class="lbl">How every test works</span>{CORE_TESTS_INTRO}</div>
 <div class="legend">
-  <span><i class="ldot" style="background:#5fd07e"></i> mechanics built + oracle-clean</span>
-  <span><i class="ldot" style="background:#e6c98a"></i> built; Δ to re-earn (2026-06-10 rework)</span>
+  <span><i class="ldot" style="background:#5fd07e"></i> all 11 built + oracle-clean + n=5 validated (grid Δ=0.188, leader hermes)</span>
   <span style="margin-left:auto">click a test for its trap · scoring · why it's the harness, not the model</span>
 </div>
 {render_core_tests()}
