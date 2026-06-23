@@ -21,10 +21,10 @@ environment:
     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 
 agents:
-  - import_path: lib.openclaw_no_install:OpenClawNoInstallOpenRouter
-    model_name: openrouter/moonshotai/kimi-k2.6
-  - import_path: lib.hermes_no_install:HermesNoInstall
-    model_name: moonshotai/kimi-k2.6
+  - import_path: lib.openclaw_thin:OpenClawThin
+    model_name: xrouter/deepseek/deepseek-v4-pro
+  - import_path: lib.hermes_thin:HermesThin
+    model_name: deepseek/deepseek-v4-pro
 
 datasets:
   - path: tasks/code-editing

@@ -1,5 +1,5 @@
-"""TrialEvent.START hook: wipe per-agent memory state on each of the three eval
-memory backends (recall / hindsight / honcho) before every trial.
+"""TrialEvent.START hook: wipe per-agent memory state on the eval memory backends
+(hindsight / honcho) before every trial.
 
 WHY: cross-run memory contamination is the single biggest confound the
 literature flags ([2502.01534], Mem0 2026). Without this, harness-A's writes
@@ -12,14 +12,11 @@ WIRE-UP in the sweep driver:
     job.add_hook(TrialEvent.START, wipe_memory_state)
 
 GROUPS: agent name → memory keys
-    openclaw → recall group eval-openclaw, hindsight bank eval-openclaw,
-               honcho workspace eval-openclaw
-    hermes   → recall group eval-hermes, hindsight bank eval-hermes,
-               honcho workspace eval-hermes
+    openclaw → hindsight bank eval-openclaw, honcho workspace eval-openclaw
+    hermes   → hindsight bank eval-hermes, honcho workspace eval-hermes
 
-SECRET HYGIENE: Neo4j password is never read into this process. The recall wipe
-SSHes to the memory host and runs cypher-shell with the password read *inside* the
-container (`printenv NEO4J_AUTH | cut -d/ -f2`) so it never enters our context.
+NOTE: the recall/neo4j backend was removed from both harnesses on 2026-06-03
+(hindsight-only substrate); its wipe path has been dropped from this hook.
 """
 
 from __future__ import annotations
@@ -27,8 +24,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import shlex
-import subprocess
 from typing import TYPE_CHECKING
 
 import httpx
@@ -38,19 +33,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-RECALL_CONTAINER = "recall-neo4j"
 # Internal endpoints injected at runtime from the gitignored configs/local.env
 # (exported into the harbor process env). Kept out of this public repo.
 HINDSIGHT_BASE = os.environ.get("HINDSIGHT_URL", "")
 HONCHO_BASE = os.environ.get("HONCHO_URL", "")
-MEMORY_HOST_SSH = os.environ.get("MEMORY_HOST_SSH", "")
 
 # DATA-SAFETY INVARIANT: this hook deletes memory. It must only ever touch the
 # dedicated eval namespaces — NEVER the production agents that share the same
-# backends. recall-neo4j holds the production memory groups; honcho and
-# hindsight are likewise shared with real agents. Every group/workspace/bank id
-# this hook deletes MUST start with this prefix. `_assert_eval_scope` enforces it
-# at the destructive call site, so even a future GROUP_MAP typo cannot wipe prod.
+# backends. honcho and hindsight are shared with real agents. Every
+# workspace/bank id this hook deletes MUST start with this prefix.
+# `_assert_eval_scope` enforces it at the destructive call site, so even a future
+# GROUP_MAP typo cannot wipe prod.
 EVAL_PREFIX = "eval-"
 
 # agent name (lowercase, as Harbor reports) → eval group key
@@ -68,9 +61,9 @@ GROUP_MAP = {
 def _assert_eval_scope(group_id: str) -> None:
     """Refuse to operate on anything outside the eval-* namespace.
 
-    Defense in depth against accidentally wiping production memory (the
-    production memory groups in recall, real workspaces in honcho/hindsight). Raises ValueError on
-    any non-eval id; the caller logs it and skips the wipe rather than guessing.
+    Defense in depth against accidentally wiping production memory (real
+    workspaces/banks in honcho/hindsight). Raises ValueError on any non-eval id;
+    the caller logs it and skips the wipe rather than guessing.
     """
     if not isinstance(group_id, str) or not group_id.startswith(EVAL_PREFIX):
         raise ValueError(
@@ -84,26 +77,6 @@ def _resolve_group(agent_name: str | None) -> str | None:
         return None
     key = agent_name.lower().replace("-", "").replace("_", "")
     return GROUP_MAP.get(key)
-
-
-def _wipe_recall(group_id: str) -> None:
-    """Wipe Graphiti graph rows for the given group_id via cypher.
-
-    Password is read inside the container; never enters our process env.
-    """
-    _assert_eval_scope(group_id)  # never delete the production memory groups
-    cypher = f'MATCH (n {{group_id: "{group_id}"}}) DETACH DELETE n'
-    inner = (
-        f'PASS=$(printenv NEO4J_AUTH | cut -d/ -f2); '
-        f'cypher-shell -u neo4j -p "$PASS" {shlex.quote(cypher)}'
-    )
-    cmd = [
-        "ssh", MEMORY_HOST_SSH,
-        f'docker exec {RECALL_CONTAINER} sh -c {shlex.quote(inner)}',
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-    if result.returncode != 0:
-        logger.warning("recall wipe failed for %s: %s", group_id, result.stderr.strip())
 
 
 def _hindsight_delete_listed(client: "httpx.Client", base: str, resource: str) -> None:
@@ -207,7 +180,7 @@ def _wipe_honcho(workspace_id: str) -> None:
 
 async def wipe_memory_state(event: "TrialHookEvent") -> None:
     """TrialEvent.START callback. Resolves the eval group from the trial's
-    agent name and wipes recall + hindsight + honcho state for that group.
+    agent name and wipes hindsight + honcho state for that group.
 
     Safe to fire when memory backends are unreachable; logs a warning and
     continues so the trial isn't blocked by infrastructure flakes.
@@ -227,12 +200,11 @@ async def wipe_memory_state(event: "TrialHookEvent") -> None:
 
     logger.info("wiping memory state for trial=%s group=%s", event.trial_id, group_id)
 
-    # Run all three wipes concurrently; each is independent. return_exceptions
-    # keeps one backend's flake (or the eval-scope guard tripping) from blocking
-    # the trial — but surface any failure so a misconfiguration isn't silent.
-    backends = ("recall", "hindsight", "honcho")
+    # Run both wipes concurrently; each is independent. return_exceptions keeps
+    # one backend's flake (or the eval-scope guard tripping) from blocking the
+    # trial — but surface any failure so a misconfiguration isn't silent.
+    backends = ("hindsight", "honcho")
     results = await asyncio.gather(
-        asyncio.to_thread(_wipe_recall, group_id),
         asyncio.to_thread(_wipe_hindsight, group_id),
         asyncio.to_thread(_wipe_honcho, group_id),
         return_exceptions=True,
