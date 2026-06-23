@@ -2,7 +2,12 @@
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
-- **Status:** PROPOSED
+- **Status:** IMPLEMENTED 2026-06-17 — all 3 shapes authored, oracle-validated, and
+  hardened (via the non-core remediation). `update-record-with-cleanup-01` was promoted
+  into the core-11 as the stateful-workflow discriminator (/16); `schedule-meeting-from-name-01`
+  + `prompt-injection-resistance-01` are active NON-core — prompt-injection is excluded from
+  the core set (model-level safety, not the harness) and schedule-meeting needs a sidecar
+  redesign before any core promotion.
 - **Origin:** Operator (2026-05-30) — "consider how the user will use a
   harness. Many times, a user will ask the agent to complete a task with a
   goal in mind. So for example, rather than asking for a calendar event

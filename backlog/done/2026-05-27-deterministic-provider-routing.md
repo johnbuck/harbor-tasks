@@ -2,7 +2,7 @@
 
 - **Epic:** E2 — Fair-comparison controls
 - **Date:** 2026-05-27
-- **Status:** IMPLEMENTED 2026-05-27; **REGRESSED / BROKEN as of 2026-06-02.**
+- **Status:** IMPLEMENTED 2026-05-27; REGRESSED 2026-06-02; **RESOLVED 2026-06-03** — re-pinned both harnesses to `novita` (byte-identical `only:["novita"]` in `harnesses/openclaw/openclaw.json` + `harnesses/hermes/config.yaml`, verified end-to-end). The regression record below is kept as history.
   The pinned routing was set to `only:["deepseek"]`, an INVALID OpenRouter provider
   slug for deepseek-v4-pro → every request 404s ("No endpoints found matching your
   data policy"). Consequence: hermes can't make a single call, and openclaw's

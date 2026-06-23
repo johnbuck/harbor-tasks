@@ -2,7 +2,10 @@
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
-- **Status:** IN PROGRESS
+- **Status:** IN PROGRESS (living document). As of 2026-06: the suite has grown well past
+  this early plan — 22 categories / 55 task dirs on disk (the per-section "remaining: only
+  code-editing exists" notes below are historical, from 2026-05-27). The taxonomy + shape
+  framework here is shipped; new shapes continue to be added via downstream specs.
 - **Origin:** Operator — "we need to define the tasks we want to use."
 
 ## Problem

@@ -8,8 +8,9 @@ date: 2026-06-09
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-09
-**Status:** IN PROGRESS — pattern proven on `skill-discovery-and-use-01`; rewardkit
-baked into the verifier image; Wave 1 conversions underway.
+**Status:** IMPLEMENTED 2026-06-10 — all 23 active graded tasks converted + oracle-validated;
+rewardkit baked into the verifier image. (Body said "IN PROGRESS" mid-rollout; frontmatter
+is authoritative — the rollout completed.)
 **Companion:** `2026-06-09-verifier-integrity-audit.md` (which tasks, and why).
 
 ## Why

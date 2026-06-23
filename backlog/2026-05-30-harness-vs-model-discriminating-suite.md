@@ -2,8 +2,11 @@
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-30
-- **Status:** INSTRUMENT PROVEN (interim), n=5 pass^k pending budget. As of
-  2026-05-31:
+- **Status:** DONE 2026-06-10 — the n=5 pass^k verdict landed on the reworked core-11:
+  the suite DISCRIMINATES (effective Δ=0.188, leader hermes, all 7 categories split ≥10%
+  in both directions; reliability is the signal — hermes 4% vs openclaw 20% error). See
+  2026-06-10-core-eleven-remediation.md + RESULTS.md. The interim notes below are historical.
+  As of 2026-05-31:
   - n=1 smoke (94 tasks) ran clean (0 infra errors) → **36/45 BLUNT**, confirming
     the pre-sharpening suite was model-dominated. Two real discriminators found
     (failure-recovery retry-efficiency; find-contradictions precision) + robust

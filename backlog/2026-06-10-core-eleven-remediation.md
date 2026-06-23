@@ -1,5 +1,5 @@
 ---
-status: IN PROGRESS
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-10
 ---
