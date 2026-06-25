@@ -1,4 +1,4 @@
-"""S1 — scratch-wipe scope extended to the four non-core recall steps (criterion 7).
+"""S1 — scratch-wipe scope extended to the four suite recall steps (criterion 7).
 
 Each recall step must source ``lib/wipe_scratch.sh`` (copied into its workdir)
 BEFORE the /app wipe, with no ``|| true`` swallowing, and its ``tests/test.sh``

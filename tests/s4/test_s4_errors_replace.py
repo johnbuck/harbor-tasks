@@ -18,7 +18,7 @@ import re
 import pytest
 
 from helpers import REPO_ROOT
-from noncore import HEREDOC, REWARDKIT, TASKS
+from suite_helpers import HEREDOC, REWARDKIT, TASKS
 
 _TOLERANT = re.compile(r'errors\s*=\s*["\'](replace|ignore|surrogateescape)["\']')
 _BARE_READ_TEXT = re.compile(r'\.read_text\(\s*\)')

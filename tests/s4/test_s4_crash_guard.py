@@ -53,14 +53,14 @@ def test_rewardkit_grader_has_crash_fallback(label, rel):
         f"{label}: crash fallback must write a flat {{\"reward\": 0.0}}"
 
 
-# --- 2026-06-16 non-core remediation: extend S4 to ALL 21 active tasks ------
+# --- 2026-06-16 suite remediation: extend S4 to ALL 21 active tasks --------
 #
 # Every grader must guarantee a parseable FLAT numeric reward.json (0.0) on
 # crash/empty output, in the shape matching its writer (criterion 1).
 #
 # RED expectation: the triage found crashFallback=MISSING on all 21 (findings
 # "Cross-cutting", line 13) — none of the 21 graders carry a fallback today.
-from noncore import HEREDOC, REWARDKIT, TASKS  # noqa: E402
+from suite_helpers import HEREDOC, REWARDKIT, TASKS  # noqa: E402
 
 
 def _flat_zero_write(txt: str) -> bool:
@@ -69,7 +69,7 @@ def _flat_zero_write(txt: str) -> bool:
 
 
 @pytest.mark.parametrize("tid", REWARDKIT, ids=REWARDKIT)
-def test_noncore_rewardkit_crash_fallback(tid):
+def test_suite_rewardkit_crash_fallback(tid):
     """rewardkit shape: `rewardkit ... || echo '{"reward": 0.0}' > reward.json`
     (or an ERR/EXIT trap). Currently MISSING -> a grader exception silently drops
     the trial (FOOTGUNS #2). Required: present."""
@@ -80,7 +80,7 @@ def test_noncore_rewardkit_crash_fallback(tid):
 
 
 @pytest.mark.parametrize("tid", HEREDOC, ids=HEREDOC)
-def test_noncore_heredoc_crash_fallback(tid):
+def test_suite_heredoc_crash_fallback(tid):
     """heredoc shape: a stdout-redirect heredoc cannot use `||`, so a post-heredoc
     `[ -s reward.json ] || echo '{"reward":0.0}' > reward.json` guard (or trap) is
     required. Currently MISSING -> a heredoc that raises before the final print

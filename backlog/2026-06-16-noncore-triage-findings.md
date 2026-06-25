@@ -4,6 +4,9 @@ epic: E4
 date: 2026-06-16
 ---
 
+> **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+
 # Non-core triage findings (Wave 0)
 
 Output of the 21-way adversarial triage (workflow wf_22117f62-468), 2026-06-16. Drives the baton remediation waves for 2026-06-16-noncore-task-remediation.md. All 21 disposition = HARDEN (no demote/deprecate). Each section is verbatim reviewer output; verify file:line before acting.

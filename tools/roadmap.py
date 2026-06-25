@@ -29,6 +29,14 @@ THESIS = (
     "Evaluate performance between <b>Agentic harnesses</b>, independent of model."
 )
 
+# High-level, user-facing project status — ONE sentence, MAX.
+# Keep it outcome-oriented: NO eval-internal mechanics, methodology, or
+# agent-facing constraints belong here (those stay out of the public roadmap).
+STATUS = (
+    "The harness comparison runs end-to-end and has produced an initial "
+    "head-to-head verdict; work now focuses on broadening task coverage and validation."
+)
+
 # status: done | partial | blocked | todo
 EPICS = [
     {
@@ -123,7 +131,7 @@ EPICS = [
             ("done", "Context-rot scoring integrity — false-zero audit + metric normalization", "2026-06-02-context-rot-scoring-integrity.md",
              "A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work."),
             ("done", "The 11 load-bearing harness-measuring tasks (now part of the unified suite)", "2026-06-03-core-suite-selection.md",
-             "Selected 11 load-bearing tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Left prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families out of this initial discriminator set; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. SUPERSEDED 2026-06-25: the old curated-subset split is retired — all 33 tasks are one unified suite (see the unify spec), and discrimination is a per-task outcome at n≥3, not a tier. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild."),
+             "Selected 11 load-bearing tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Left prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families out of this initial discriminator set; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. SUPERSEDED 2026-06-25: the old curated-subset split is retired — all 33 tasks are one unified suite (see the unify spec), and discrimination is a per-task outcome at n≥3, not a tier. Wired as configs/suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild."),
             ("done", "Recall MCP dropped from both eval harnesses — memory substrate change", "2026-06-03-core-suite-selection.md",
              "recall (Graphiti temporal-KG memory, <memory-host>:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the memory host recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1."),
             ("done", "Hermes write-persistence (#92) — false-zero root cause fixed", "2026-06-02-context-rot-scoring-integrity.md",
@@ -135,7 +143,7 @@ EPICS = [
             ("done", "Overnight verifier-integrity decisions — honest-shortcut fixes + NORTH_STAR.md", "2026-06-10-overnight-verifier-integrity-decisions.md",
              "Threat-model refinement (2026-06-10): this eval measures HONEST harnesses, so the priority is closing honest-shortcut leaks (a capable agent legitimately reading a baked answer — a KILL-test fail) over adversarial-forge hardening (fabricating a log honest harnesses never touch). DONE + oracle-validated on the free oracle ($0 OpenRouter): unit-tests-01 (the 4 grading mutants relocated environment/→tests/ so Harbor uploads them only AFTER the agent runs — answer-key leak closed) and the proven discriminator failure-recovery-loop-01 (the plaintext `PAYLOAD: …` literal in the agent-readable dfetch script → DERIVED from the session token, sha256(token)[:11], at emit time; the task now passes the KILL test on the identical 2-call honest path, so discrimination is unchanged — only the emitted/expected string moved in lockstep). Adversarial-forge tasks (tool-sprawl / tool-selection / browser-find-fact / prompt-injection) deprioritized as speculative for an honest-harness verdict; schedule-meeting-from-name-01 deferred (its fix isn't safe to do unsupervised). New: NORTH_STAR.md — the canonical value hierarchy (validity > measure-the-harness > no-telegraphing > pass^k > fair-comparison > simplicity) for unsupervised judgment calls. Feeds the n≥3 verdict grid (#81) below — failure-recovery's supervised re-baseline is incorporated there."),
             ("done", "Run n≥3 pass^k grid → verdict (task #81) — first grid DONE", "2026-06-10-core-eleven-remediation.md",
-             "DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the 11 remediated discriminator tasks over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/track_a_weighted.py → track_a_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the other 21 active tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin)."),
+             "DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the 11 remediated discriminator tasks over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/suite_weighted.py → suite_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the other 21 active tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin)."),
         ],
     },
     {
@@ -152,7 +160,7 @@ EPICS = [
             ("done", "Viewer Claude-analysis on subscription auth + durable fork launch", "2026-06-02-viewer-subscription-auth.md",
              "The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth."),
             ("done", "RESULTS.md — thin verdict over the auto-computed report (task #81)", "2026-06-03-results-verdict-thin-over-report.md",
-             "WRITTEN 2026-06-10 once the first suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/track_a_weighted.py → track_a_report.json. Will refresh when the full-suite grid lands."),
+             "WRITTEN 2026-06-10 once the first suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/suite_weighted.py → suite_report.json. Will refresh when the full-suite grid lands."),
             ("todo", "FE exportable verdict report (follow-up)", "2026-06-03-results-verdict-thin-over-report.md",
              "Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run."),
         ],
@@ -181,6 +189,9 @@ CSS = """
   .thesis{background:#13182098;border:1px solid #2a3550;border-left:3px solid #5fd0d0;border-radius:10px;
     padding:14px 18px;margin-bottom:20px;font-size:13.5px;line-height:1.6;color:#cdd6e4}
   .thesis .lbl{color:#5fd0d0;font-size:11px;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px}
+  .status{background:#101a13;border:1px solid #1f3a28;border-left:3px solid #5fd07e;border-radius:10px;
+    padding:13px 18px;margin-bottom:20px;font-size:13.5px;line-height:1.55;color:#d8ecdc}
+  .status .lbl{color:#5fd07e;font-size:11px;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px}
   .legend{display:flex;gap:16px;flex-wrap:wrap;color:#8a8f98;font-size:11.5px;margin:0 0 18px}
   .legend span{display:flex;gap:6px;align-items:center} .ldot{width:11px;height:11px;border-radius:50%}
   .epic{background:#171a22;border:1px solid #262b36;border-radius:12px;padding:15px 18px;margin-bottom:15px}
@@ -238,6 +249,16 @@ def resolve(ref: str):
     return None
 
 
+def current_status() -> str:
+    """The high-level, one-sentence project status block for the top of the page.
+
+    Edit the STATUS constant to update. Strictly user-facing: keep eval-internal
+    mechanics and agent-facing constraints OUT of this — they don't belong on the
+    public roadmap.
+    """
+    return f'<div class="status"><span class="lbl">Current status</span>{STATUS}</div>'
+
+
 def render() -> str:
     cards, sources = [], []
     for e in EPICS:
@@ -288,14 +309,16 @@ def render() -> str:
 <title>Roadmap</title>
 <style>{CSS}</style></head><body>
 <div class="nav">
-  <a href="agent-status.html">Agent status</a>
-  <a href="task-catalog.html">Task Suite</a>
+  <a href="index.html">Home</a>
   <a href="roadmap.html" class="active">Roadmap</a>
+  <a href="task-catalog.html">Task Suite</a>
+  <a href="results.html">Results</a>
 </div>
 <div class="wrap">
 <h1>Roadmap — harness-vs-model eval, by epic</h1>
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">Goal</span>{THESIS}</div>
+{current_status()}
 <div class="sec" style="margin-top:6px">Epics</div>
 {legend}
 {''.join(cards)}

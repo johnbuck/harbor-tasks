@@ -1,4 +1,4 @@
-"""S2 format-robustness regrade matrix for the non-core tasks (criterion 6).
+"""S2 format-robustness regrade matrix for the suite tasks (criterion 6).
 
 Documented NATURAL-phrasing answers must score full credit; the grader must
 tolerate FORMAT (enumerators, word-numbers, relative citations, honest

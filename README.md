@@ -15,12 +15,12 @@ harbor-tasks/
 ├── RESULTS.md          # comparison-grid template / final report
 ├── SHAPES.md           # first-sweep task shapes (one per category)
 ├── backlog/            # specs (PROPOSED → IN PROGRESS → IMPLEMENTED → done/)
-├── configs/            # JobConfig YAMLs + Track A category weights
+├── configs/            # JobConfig YAMLs + suite category weights
 ├── environments/       # shared task-environment helpers (real-world-sim CLIs)
 ├── harnesses/          # baked openclaw + hermes configs (rich harness image)
 ├── hooks/              # Harbor TrialEvent hooks (memory-wipe, …)
 ├── lib/                # adapter subclasses (thin + install-capable)
-├── metrics/            # post-run analyzers (Track A weighted aggregator)
+├── metrics/            # post-run analyzers (suite weighted aggregator)
 ├── rubrics/            # Rubric TOMLs for harbor analyze
 ├── tools/              # sweep drivers + the three status dashboards (below)
 └── tasks/              # Harbor task directories

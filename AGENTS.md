@@ -183,7 +183,7 @@ that must be stripped) and registers the memory-wipe hook the bare CLI can't loa
 ssh <run-host>@LAN-IP
 cd ~/benchmarking/harbor-tasks
 source ~/.config/infisical/infisical-identity.env   # universal-auth creds, never echoed
-tools/run_track_a.sh                              # full Track-A weighted sweep
+tools/run_suite.sh                              # full suite weighted sweep
 # single task: harbor run --path tasks/<cat>/<shape>-NN --agent openclaw --agent hermes
 # view:        tools/view.sh   (subscription-auth viewer; reads ./jobs)
 ```
@@ -204,12 +204,12 @@ harbor-tasks/
 ├── AGENTS.md / CLAUDE.md   # this file (CLAUDE.md → AGENTS.md symlink)
 ├── README.md, RESULTS.md, SHAPES.md
 ├── backlog/                # specs (PROPOSED→IN PROGRESS→IMPLEMENTED→done/) + FOOTGUNS.md
-├── configs/                # JobConfig YAMLs + Track-A weights
+├── configs/                # JobConfig YAMLs + suite weights
 ├── environments/           # agent-rich (the baked image) + agent-prebaked + real-world-sim
 ├── harnesses/              # baked openclaw.json + hermes config.yaml + personas (→ rich image)
 ├── hooks/                  # Harbor TrialEvent hooks (memory-wipe, …)
 ├── lib/                    # adapter subclasses: *_thin.py (baked config) + *_no_install.py
-├── metrics/                # post-run analyzers (Track-A weighted aggregator)
+├── metrics/                # post-run analyzers (suite weighted aggregator)
 ├── rubrics/, pilot/        # rubric TOMLs / rewardkit experiments
 ├── tools/                  # sweep drivers + the 3 dashboards + view.sh
 ├── jobs/                   # run outputs (GITIGNORED, persistent — never /tmp)

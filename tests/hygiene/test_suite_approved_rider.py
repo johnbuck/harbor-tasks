@@ -1,7 +1,7 @@
 """Approval-gate guard (criterion 12).
 
 ``[metadata] approved = true`` means VALIDATED — it may be set ONLY after a task
-passes its oracle (1.0) and, for Track-A, an n-run. This pipeline cannot run the
+passes its oracle (1.0) and, for tasks meant to discriminate, an n-run. This pipeline cannot run the
 oracle / paid sweeps, so it MUST NOT flip approval on any of the 21 tasks; the
 flips are staged as an explicit post-merge operator rider instead.
 
@@ -14,7 +14,7 @@ import re
 import pytest
 
 from helpers import REPO_ROOT
-from noncore import TASKS
+from suite_helpers import TASKS
 
 
 @pytest.mark.parametrize("tid", list(TASKS), ids=list(TASKS))

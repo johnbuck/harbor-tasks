@@ -10,7 +10,7 @@
 #
 # Run:
 #   source ~/.config/infisical/infisical-identity.env
-#   CONFIG=configs/browser-e2e.yaml JOB_NAME=browser-e2e tools/run_track_a.sh
+#   CONFIG=configs/browser-e2e.yaml JOB_NAME=browser-e2e tools/run_suite.sh
 
 jobs_dir: jobs/browser-e2e
 n_attempts: 1

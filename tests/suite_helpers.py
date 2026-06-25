@@ -1,4 +1,4 @@
-"""Registry of the 21 active non-core tasks under remediation by
+"""Registry of the 21 suite tasks under remediation by
 2026-06-16-noncore-task-remediation.
 
 Shared by the offline s4 / hygiene / drift suites so the task list + grader
