@@ -242,7 +242,7 @@ def badge(text, cls="muted"):
 TIER_ORDER = ["todo", "oracle", "smoke", "verdict"]
 TIER = {
     "todo":    ("to do",           "muted",   "Authored + offline grader tests. Not yet run end-to-end."),
-    "oracle":  ("passes oracle ✓", "mid",     "Builds and the reference solve.sh scores 1.0 (Docker oracle, no LLM cost)."),
+    "oracle":  ("oracle ✓",        "mid",     "Builds and the reference solve.sh scores 1.0 (Docker oracle, no LLM cost)."),
     "smoke":   ("e2e smoke ✓",     "ok",      "Both harnesses ran it end-to-end at n=1 — indicative separation captured."),
     "verdict": ("n≥3 verdict ✓",   "verdict", "Cleared the n≥3 pass^k reliability grid — banked into the comparison."),
     "retired": ("archived",        "retired", "Retired from the active suite; kept in archive/ for reference, out of the grid."),
@@ -430,7 +430,7 @@ def render(tasks: list, weights: dict) -> str:
     summary = f"""
     <div class="summary">
       <div class="stat"><b>{n_active}</b><span>active tasks</span></div>
-      <div class="stat work-done"><b>{n_oracle}</b><span>✓ passes oracle</span></div>
+      <div class="stat work-done"><b>{n_oracle}</b><span>✓ oracle</span></div>
       <div class="stat work-done"><b>{n_smoke}</b><span>✓ e2e smoke</span></div>
       <div class="stat"><b>{n_verdict}</b><span>n≥3 verdict</span></div>
       <div class="stat"><b>{n_archived}</b><span>archived</span></div>
@@ -667,7 +667,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 {err_html}
 {summary}
 <div class="filterbar">
-  <select id="f-archived"><option value="">live + archived</option><option value="0">live only</option><option value="1">archived only</option></select>
+  <select id="f-archived"><option value="0" selected>live only</option><option value="">live + archived</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
   <select id="f-tier"><option value="">any progress</option>{tier_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
