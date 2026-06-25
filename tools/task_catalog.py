@@ -489,9 +489,8 @@ def render_card(t: dict) -> str:
     wkey, wlabel, wcls, wmeaning = tier_meta(t)
     archived = t.get("archived", False)
 
-    # Archived tasks (moved out of the live suite) get a clear flag; live ones don't.
-    archived_badge = badge("archived", "review") if archived else ""
-    # WORK status, then difficulty/grading/flags.
+    # (Archived tasks are flagged by their tier badge = "archived"; no separate flag.)
+    # progress tier badge, then difficulty/grading/flags (in the body).
     head_badges = [badge(wlabel, wcls)]
     flags = []
     if t["focused"]:
@@ -542,7 +541,6 @@ def render_card(t: dict) -> str:
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">{escape(t["dir"])}</span>
-        {archived_badge}
         {"".join(head_badges)}
       </div>
       <div class="acc-body">
