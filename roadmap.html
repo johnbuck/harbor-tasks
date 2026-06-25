@@ -67,10 +67,10 @@
 <h1>Roadmap — harness-vs-model eval, by epic</h1>
 <div class="ts">generated 2026-06-25 · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">Goal</span>Evaluate performance between <b>Agentic harnesses</b>, independent of model.</div>
-<div class="status"><span class="lbl">Current status</span>The harness comparison runs end-to-end and has produced an initial head-to-head verdict; work now focuses on broadening task coverage and validation.</div>
+<div class="status"><span class="lbl">Current status</span>The harness comparison runs end-to-end on one unified 33-task suite and has produced an initial head-to-head verdict; work now focuses on validating every task and making the scenarios realistic.</div>
 <div class="sec" style="margin-top:6px">Epics</div>
 <div class="legend"><span><i class="ldot" style="background:#5fd07e"></i> done</span><span><i class="ldot" style="background:#e6c98a"></i> in progress</span><span><i class="ldot" style="background:#ef7a7a"></i> blocked</span><span><i class="ldot" style="background:#3a4150"></i> to do</span><span><i class="ldot" style="background:#6e4257"></i> deprecated</span><span style="margin-left:auto">click a row for detail · “open full spec” shows the backlog file</span></div>
-<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge ok">done</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host (novita)</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin had regressed to `only:[deepseek]` which, once DeepSeek's deepseek-v4-pro endpoint became training-flagged, left 0 endpoints under data_collection:deny → 404 on every hermes call. RESOLVED 2026-06-03: re-pinned both harnesses to **novita** (byte-identical provider.only in openclaw.json + hermes config.yaml). Fireworks was deny-eligible but lacks tool-use for this model; novita serves deepseek-v4-pro under deny + tool-use + reasoning + require_parameters (all verified via direct API probes + a live oracle/openclaw/hermes probe — all three reward 1.0). data_collection:deny preserved (privacy intact).</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge ok">done</span></div><div class="esum">The subsystems the harnesses actually use — memory + a shared browser. Both halves shipped: memory stack on the memory host, and the browser tool unblocked (stale-registry fix) + verified driving the shared Chromium end-to-end on BOTH harnesses.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — the memory host deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on the memory host and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory + browser both shipped</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. Memory half shipped earlier; the browser half closed 2026-06-03 (stale-registry fix below, verified e2e on both harnesses).</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — stale plugin registry (task #90)</div><span class="rref">2026-06-03-browser-tool-registry-fix.md</span></div><div class="detail"><div class="dtext">Both harnesses wired to a shared headless Chromium on the memory host (CDP :9222). 2026-06-03 REAL ROOT CAUSE (supersedes BOTH the CDP-reachability guess AND the embedded-vs-gateway theory): the rich image shipped a STALE persisted plugin registry (/root/.openclaw/plugins) indexed before the `browser` plugin's deps were present, so browser (+ canvas/file-transfer/phone-control/talk-voice) were never indexed and their tools never surfaced — embedded OR gateway-backed. Fix is one line baked into the image: `openclaw plugins registry --refresh` (46 → 64 enabled). Proven in-container: after refresh, plain embedded `openclaw agent --local` exposes the identical 59-tool catalog as gateway-backed (browser + full hindsight memory + sessions_spawn/subagents + 14 skills). Embedded is NOT a reduced runtime for anything the suite exercises — so the prior 'must go gateway-backed' conclusion was wrong (see the row below).</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-03-browser-tool-registry-fix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Self-contained in-container browser (no cross-machine CDP)</div><span class="rref">2026-06-03-self-contained-browser.md</span></div><div class="detail"><div class="dtext">The browser tool drove a shared Chromium on &lt;MEMORY-HOST&gt; (CDP :9222) over the LAN — a cross-machine dependency that violated the self-contained requirement (and accidentally disabled each harness's own local browser). Fixed: bake a real `/usr/bin/chromium` (148) into the rich image + `/etc/chromium.d` no-sandbox flags (run-as-root) + an idempotent `start-cdp.sh` that launches a headless Chromium INSIDE each trial container; both harnesses' browser tools attach to `127.0.0.1:9222`. One controlled browser backend per container keeps the comparison fair (only the harness's tool differs). Verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectory shows `127.0.0.1` and ZERO &lt;memory-host&gt; refs (prior run had 18). Memory (hindsight :8888) is still the shared &lt;memory-host&gt; substrate by design — separate decision.</div><button class="specbtn" onclick="openSpec('E3-6','2026-06-03-self-contained-browser.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Gateway-backed full-harness execution — NOT NEEDED (was the #90 theory)</div><span class="rref">2026-06-03-gateway-backed-full-harness.md</span></div><div class="detail"><div class="dtext">Spec written on a premise that the experiments disproved. The theory: thin `--local` runs EMBEDDED, dropping the gateway's browser control server → no browser tool. Reality: the blocker was the stale plugin registry (row above); once refreshed, embedded `--local` exposes browser + memory + the full 59-tool catalog identically to gateway-backed. The gateway adds only channels/cron/device-pairing/multi-session-routing/sidecars — none of which the eval tasks touch. Operator decision (2026-06-03): ship the registry-refresh fix, KEEP the embedded `--local` invocation (simpler, no gateway lifecycle / port-collision / teardown risk, and proven fair). Gateway-backed left as rejected, not deferred — there is no capability gap to close.</div><button class="specbtn" onclick="openSpec('E3-7','2026-06-03-gateway-backed-full-harness.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task Suite</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task remediation — 21 active tasks HARDENed (validation pending)</div><span class="rref">2026-06-16-noncore-task-remediation.md</span></div><div class="detail"><div class="dtext">The real remaining E4 rework (replaces the mislabelled #89). IMPLEMENTED + offline-green 2026-06-17, merged into this branch via baton (as-built in the spec) — NOT a build-in-progress. Wave 0 triage (21/21) found all 21 already emit graded reward.json, so the work was validity/discrimination hardening, not binary→graded conversion. Shipped: universal S4 crash-fallback + answer_present on all 21; the 6 CRITICAL grader fixes + tool-selection honest-channel, each with an exploit-regression test; WIPE_PRESERVE_SESSIONS for in-window retention; Wave-3 de-telegraphing + format-robustness; Wave-4 docs/hygiene — all backed by a full offline pytest suite (exploit/regrade/S4/wipe/hygiene) that passes. REMAINING = OPERATOR gates only (explicitly out of the no-Docker pipeline): Docker oracle=1.0 + n≥3 runs, then flip approved=true per task (0 flipped by design — a guard test enforces it, so the catalog still reads NEEDS REVIEW), plus the corpus-balloon / keep-vs-demote call for find-contradictions-01 + factual-lookup-cited-01 and the browser_used matcher validation. Additive validity work — outside the first verdict grid.</div><button class="specbtn" onclick="openSpec('E4-2','2026-06-16-noncore-task-remediation.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents. All 3 shapes shipped + oracle-validated + hardened. update-record-with-cleanup-01 is the stateful-workflow discriminator (/16 — it carried the n=5 grid); schedule-meeting-from-name-01 + prompt-injection-resistance-01 are also in the suite — prompt-injection measures model-level safety, not the harness (so it isn't expected to discriminate), and schedule-meeting needs a sidecar redesign. Category built + scoring.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument PROVEN at n=5</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The central spec: evaluate the SCAFFOLDING, not the LLM. The interim caveat is now discharged — a full n=5 pass^k grid (110 trials) ran on the symmetric hindsight-only substrate and the suite DISCRIMINATES: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in BOTH directions (hermes 5, openclaw 2). Reliability is the signal — hermes 4% error vs openclaw 20%. See the n≥3 verdict-grid row below + RESULTS.md.</div><button class="specbtn" onclick="openSpec('E4-6','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E4-7','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E4-8','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E4-9','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E4-10','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E4-11','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-rot scoring integrity — false-zero audit + metric normalization</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work.</div><button class="specbtn" onclick="openSpec('E4-12','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> The 11 load-bearing harness-measuring tasks (now part of the unified suite)</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">Selected 11 load-bearing tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Left prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families out of this initial discriminator set; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. SUPERSEDED 2026-06-25: the old curated-subset split is retired — all 33 tasks are one unified suite (see the unify spec), and discrimination is a per-task outcome at n≥3, not a tier. Wired as configs/core-suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild.</div><button class="specbtn" onclick="openSpec('E4-13','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall MCP dropped from both eval harnesses — memory substrate change</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">recall (Graphiti temporal-KG memory, &lt;memory-host&gt;:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the memory host recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1.</div><button class="specbtn" onclick="openSpec('E4-14','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes write-persistence (#92) — false-zero root cause fixed</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: "."`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app &amp;&amp; hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression.</div><button class="specbtn" onclick="openSpec('E4-15','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE</div><span class="rref">2026-06-09-verifier-integrity-audit.md</span></div><div class="detail"><div class="dtext">7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical.</div><button class="specbtn" onclick="openSpec('E4-16','2026-06-09-verifier-integrity-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> rewardkit grading rollout — all 23 active graded tasks converted + validated</div><span class="rref">2026-06-09-verifier-sandbox-rollout.md</span></div><div class="detail"><div class="dtext">Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on the run host main pending operator push.</div><button class="specbtn" onclick="openSpec('E4-17','2026-06-09-verifier-sandbox-rollout.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Overnight verifier-integrity decisions — honest-shortcut fixes + NORTH_STAR.md</div><span class="rref">2026-06-10-overnight-verifier-integrity-decisions.md</span></div><div class="detail"><div class="dtext">Threat-model refinement (2026-06-10): this eval measures HONEST harnesses, so the priority is closing honest-shortcut leaks (a capable agent legitimately reading a baked answer — a KILL-test fail) over adversarial-forge hardening (fabricating a log honest harnesses never touch). DONE + oracle-validated on the free oracle ($0 OpenRouter): unit-tests-01 (the 4 grading mutants relocated environment/→tests/ so Harbor uploads them only AFTER the agent runs — answer-key leak closed) and the proven discriminator failure-recovery-loop-01 (the plaintext `PAYLOAD: …` literal in the agent-readable dfetch script → DERIVED from the session token, sha256(token)[:11], at emit time; the task now passes the KILL test on the identical 2-call honest path, so discrimination is unchanged — only the emitted/expected string moved in lockstep). Adversarial-forge tasks (tool-sprawl / tool-selection / browser-find-fact / prompt-injection) deprioritized as speculative for an honest-harness verdict; schedule-meeting-from-name-01 deferred (its fix isn't safe to do unsupervised). New: NORTH_STAR.md — the canonical value hierarchy (validity &gt; measure-the-harness &gt; no-telegraphing &gt; pass^k &gt; fair-comparison &gt; simplicity) for unsupervised judgment calls. Feeds the n≥3 verdict grid (#81) below — failure-recovery's supervised re-baseline is incorporated there.</div><button class="specbtn" onclick="openSpec('E4-18','2026-06-10-overnight-verifier-integrity-decisions.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → verdict (task #81) — first grid DONE</div><span class="rref">2026-06-10-core-eleven-remediation.md</span></div><div class="detail"><div class="dtext">DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the 11 remediated discriminator tasks over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/track_a_weighted.py → track_a_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the other 21 active tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin).</div><button class="specbtn" onclick="openSpec('E4-19','2026-06-10-core-eleven-remediation.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench — REMOVED from scope (not part of the comparison)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Decided long ago: tau3 (an external benchmark) is NOT part of this harness-vs-harness eval and produces no comparison data. The thin adapter can't forward Harbor's injected tau3 MCP, and building an install-during-trial adapter wasn't worth it for one external benchmark. Out of scope — kept only as an inert reference; nothing downstream depends on it.</div><button class="specbtn" onclick="openSpec('E4-20','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Rework the 20 salvageable deprecated tasks (task #89) — DROPPED, superseded</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">DROPPED 2026-06-23. Audited: 20 (not 22) tasks are deprecated-on-disk (task.toml status="deprecated"), auto-excluded by the sweep driver — they feed NO live config and are never scored. Per the retired-task coverage matrix every capability axis they covered is already exercised by a HARDER live task (memory→memory-conversational, sub-agent→parallel-decompose, tool-orch→tool-sprawl, etc.), so reworking them adds redundancy, not coverage. The label had drifted: #89 was originally 'rework the live cover tasks' — that work shipped as the suite-remediation pass. The genuine remaining rework is the other 21 active tasks (row below), not the dead ones. Deprecated tasks stay dormant on disk as a non-destructive audit trail.</div><button class="specbtn" onclick="openSpec('E4-21','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E5-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task Suite page — review + work tracker for every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py → task-catalog.html (titled “Task Suite”). Drift-proof accordion over every task: what it asks, how it's graded, the oracle, the environment — plus a per-task WORK status (discriminating / needs-validation / needs-hardening / retired) and an OPERATOR-APPROVAL axis (every task is NEEDS REVIEW until its task.toml sets approved=true). Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E5-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page (epics + status)</div><span class="rref">2026-06-02-roadmap-page.md</span></div><div class="detail"><div class="dtext">tools/roadmap.py → roadmap.html — the PLAN view: the thesis, a where-we-stand callout, the epics, every backlog spec rolled up under one with a status dot, an expandable detail, and an open-full-spec modal. Hand-curated EPICS table; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E5-2','2026-06-02-roadmap-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Viewer Claude-analysis on subscription auth + durable fork launch</div><span class="rref">2026-06-02-viewer-subscription-auth.md</span></div><div class="detail"><div class="dtext">The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth.</div><button class="specbtn" onclick="openSpec('E5-3','2026-06-02-viewer-subscription-auth.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — thin verdict over the auto-computed report (task #81)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">WRITTEN 2026-06-10 once the first suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/track_a_weighted.py → track_a_report.json. Will refresh when the full-suite grid lands.</div><button class="specbtn" onclick="openSpec('E5-4','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> FE exportable verdict report (follow-up)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run.</div><button class="specbtn" onclick="openSpec('E5-5','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div></div>
+<div class="epic"><div class="ehead"><span class="eid">E1</span><span class="etitle">Harness runtime &amp; adapters</span><span class="badge ok">done</span></div><div class="esum">Run both harnesses identically on Harbor — the foundation everything else sits on. Core path shipped; the one open runtime-install adapter was deprecated.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harbor adoption — retire rube, build on Harbor</div><span class="rref">done/2026-05-27-harbor-adoption.md</span></div><div class="detail"><div class="dtext">Retired the bespoke `rube` runner and rebuilt on Harbor (Terminal-Bench / Terminus-2 lineage): tasks are task.toml + steps + a verifier; the oracle runs solve.sh with no LLM. Buys a maintained harness, schema validation, and a job dashboard.</div><button class="specbtn" onclick="openSpec('E1-0','done/2026-05-27-harbor-adoption.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent adapters — pre-baked image + NoInstall + OpenRouter</div><span class="rref">done/2026-05-27-agent-adapters.md</span></div><div class="detail"><div class="dtext">Pre-baked base image so harness binaries aren't installed during each trial; NoInstall adapter subclasses invoke them; an OpenRouter subclass routes both harnesses' LLM calls through one API with per-call cost capture.</div><button class="specbtn" onclick="openSpec('E1-1','done/2026-05-27-agent-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Thin adapters — invoke the BAKED harness, no config rewrite</div><span class="rref">done/2026-05-29-thin-adapters.md</span></div><div class="detail"><div class="dtext">lib/openclaw_thin.py / hermes_thin.py run each harness against its BAKED config (`openclaw agent --local --json`). Key consequence: Harbor-injected mcp_servers are IGNORED — capabilities must be enabled in the baked image, not the task config.</div><button class="specbtn" onclick="openSpec('E1-2','done/2026-05-29-thin-adapters.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Pre-built rich harness images (configs + skills + tools)</div><span class="rref">done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md</span></div><div class="detail"><div class="dtext">harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM.</div><button class="specbtn" onclick="openSpec('E1-3','done/2026-05-28-prebuilt-rich-harnesses-SHIPPED.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> openclaw reasoning on OpenRouter — resolved</div><span class="rref">done/2026-05-28-openclaw-reasoning-RESOLVED.md</span></div><div class="detail"><div class="dtext">openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison.</div><button class="specbtn" onclick="openSpec('E1-4','done/2026-05-28-openclaw-reasoning-RESOLVED.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E2</span><span class="etitle">Fair-comparison controls</span><span class="badge ok">done</span></div><div class="esum">Same model, same provider, isolated state — so a score gap is the harness, not luck.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Deterministic provider pin — one shared OpenRouter host (novita)</div><span class="rref">done/2026-05-27-deterministic-provider-routing.md</span></div><div class="detail"><div class="dtext">Both harnesses must hit ONE OpenRouter upstream or cost/cache differ run-to-run. The pin had regressed to `only:[deepseek]` which, once DeepSeek's deepseek-v4-pro endpoint became training-flagged, left 0 endpoints under data_collection:deny → 404 on every hermes call. RESOLVED 2026-06-03: re-pinned both harnesses to **novita** (byte-identical provider.only in openclaw.json + hermes config.yaml). Fireworks was deny-eligible but lacks tool-use for this model; novita serves deepseek-v4-pro under deny + tool-use + reasoning + require_parameters (all verified via direct API probes + a live oracle/openclaw/hermes probe — all three reward 1.0). data_collection:deny preserved (privacy intact).</div><button class="specbtn" onclick="openSpec('E2-0','done/2026-05-27-deterministic-provider-routing.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Cost + token tracking — per-trial usage at live pricing</div><span class="rref">done/2026-05-27-cost-and-token-tracking.md</span></div><div class="detail"><div class="dtext">Per-trial token + dollar cost from live OpenRouter pricing, including cache-write tokens. This is what surfaces the efficiency signal — openclaw spends ~0.35–0.62× hermes's cost for equal results on the same model.</div><button class="specbtn" onclick="openSpec('E2-1','done/2026-05-27-cost-and-token-tracking.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Memory-state wipe hook — reset harness memory at trial start</div><span class="rref">hooks/wipe_memory_state.py</span></div><div class="detail"><div class="dtext">Wipes the harness memory backend at TrialEvent.START so a memory task must re-derive state THROUGH the harness, not inherit it from a prior trial. Scoped to eval groups only.</div><button class="specbtn" onclick="openSpec('E2-2','hooks/wipe_memory_state.py')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E3</span><span class="etitle">Capability infrastructure (memory + browser)</span><span class="badge ok">done</span></div><div class="esum">The subsystems the harnesses actually use — memory + a shared browser. Both halves shipped: memory stack on the memory host, and the browser tool unblocked (stale-registry fix) + verified driving the shared Chromium end-to-end on BOTH harnesses.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval memory stack — the memory host deployment, LAN-reachable</div><span class="rref">done/2026-05-29-memory-stack-deployment.md</span></div><div class="detail"><div class="dtext">Recall / Graphiti memory services deployed on the memory host and reachable from the eval network (8408/8888) so trials can exercise the harnesses' long-term memory.</div><button class="specbtn" onclick="openSpec('E3-0','done/2026-05-29-memory-stack-deployment.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — bge-m3 embedder + extractor + community-build</div><span class="rref">done/2026-05-29-recall-bge-m3-and-eval-ontology.md</span></div><div class="detail"><div class="dtext">Re-embedded prod groups with bge-m3 + a deepseek-v4-flash extractor and scheduled community detection — the memory substrate both harnesses read and write against.</div><button class="specbtn" onclick="openSpec('E3-1','done/2026-05-29-recall-bge-m3-and-eval-ontology.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall — hindsight-style tool surface (P1–P4)</div><span class="rref">done/2026-05-29-recall-hindsight-style-plugin.md</span></div><div class="detail"><div class="dtext">Four phases: coaching tool descriptions, a reflect tool, bank config + directives, and mental-models + a refresher cron with row-locking — the surface the agent uses to store and recall facts.</div><button class="specbtn" onclick="openSpec('E3-2','done/2026-05-29-recall-hindsight-style-plugin.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes dual-plugin activation</div><span class="rref">done/2026-05-29-hermes-dual-plugin-system.md</span></div><div class="detail"><div class="dtext">Investigated and activated hermes's two independent plugin systems so it exposes the same capability classes openclaw does.</div><button class="specbtn" onclick="openSpec('E3-3','done/2026-05-29-hermes-dual-plugin-system.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Eval infra stack — memory + browser both shipped</div><span class="rref">2026-05-29-eval-infra-stack.md</span></div><div class="detail"><div class="dtext">The combined memory + browser infra spec. Memory half shipped earlier; the browser half closed 2026-06-03 (stale-registry fix below, verified e2e on both harnesses).</div><button class="specbtn" onclick="openSpec('E3-4','2026-05-29-eval-infra-stack.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Browser tool enablement — stale plugin registry (task #90)</div><span class="rref">2026-06-03-browser-tool-registry-fix.md</span></div><div class="detail"><div class="dtext">Both harnesses wired to a shared headless Chromium on the memory host (CDP :9222). 2026-06-03 REAL ROOT CAUSE (supersedes BOTH the CDP-reachability guess AND the embedded-vs-gateway theory): the rich image shipped a STALE persisted plugin registry (/root/.openclaw/plugins) indexed before the `browser` plugin's deps were present, so browser (+ canvas/file-transfer/phone-control/talk-voice) were never indexed and their tools never surfaced — embedded OR gateway-backed. Fix is one line baked into the image: `openclaw plugins registry --refresh` (46 → 64 enabled). Proven in-container: after refresh, plain embedded `openclaw agent --local` exposes the identical 59-tool catalog as gateway-backed (browser + full hindsight memory + sessions_spawn/subagents + 14 skills). Embedded is NOT a reduced runtime for anything the suite exercises — so the prior 'must go gateway-backed' conclusion was wrong (see the row below).</div><button class="specbtn" onclick="openSpec('E3-5','2026-06-03-browser-tool-registry-fix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Self-contained in-container browser (no cross-machine CDP)</div><span class="rref">2026-06-03-self-contained-browser.md</span></div><div class="detail"><div class="dtext">The browser tool drove a shared Chromium on &lt;MEMORY-HOST&gt; (CDP :9222) over the LAN — a cross-machine dependency that violated the self-contained requirement (and accidentally disabled each harness's own local browser). Fixed: bake a real `/usr/bin/chromium` (148) into the rich image + `/etc/chromium.d` no-sandbox flags (run-as-root) + an idempotent `start-cdp.sh` that launches a headless Chromium INSIDE each trial container; both harnesses' browser tools attach to `127.0.0.1:9222`. One controlled browser backend per container keeps the comparison fair (only the harness's tool differs). Verified e2e: openclaw 1.0 / 13 calls, hermes 1.0 / 60 calls, trajectory shows `127.0.0.1` and ZERO &lt;memory-host&gt; refs (prior run had 18). Memory (hindsight :8888) is still the shared &lt;memory-host&gt; substrate by design — separate decision.</div><button class="specbtn" onclick="openSpec('E3-6','2026-06-03-self-contained-browser.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Gateway-backed full-harness execution — NOT NEEDED (was the #90 theory)</div><span class="rref">2026-06-03-gateway-backed-full-harness.md</span></div><div class="detail"><div class="dtext">Spec written on a premise that the experiments disproved. The theory: thin `--local` runs EMBEDDED, dropping the gateway's browser control server → no browser tool. Reality: the blocker was the stale plugin registry (row above); once refreshed, embedded `--local` exposes browser + memory + the full 59-tool catalog identically to gateway-backed. The gateway adds only channels/cron/device-pairing/multi-session-routing/sidecars — none of which the eval tasks touch. Operator decision (2026-06-03): ship the registry-refresh fix, KEEP the embedded `--local` invocation (simpler, no gateway lifecycle / port-collision / teardown risk, and proven fair). Gateway-backed left as rejected, not deferred — there is no capability gap to close.</div><button class="specbtn" onclick="openSpec('E3-7','2026-06-03-gateway-backed-full-harness.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E4</span><span class="etitle">Task Suite</span><span class="badge mid">in progress</span></div><div class="esum">Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is one unified suite (33 tasks) that genuinely separates the harnesses, ending in the verdict grid.</div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task suite design — categories, shapes, first-sweep selection</div><span class="rref">2026-05-27-task-suite-design.md</span></div><div class="detail"><div class="dtext">The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired.</div><button class="specbtn" onclick="openSpec('E4-0','2026-05-27-task-suite-design.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Multi-step task suite — design + specs</div><span class="rref">2026-05-28-multi-step-tasks.md</span></div><div class="detail"><div class="dtext">Harbor multi-step tasks whose per-step setup.sh can wipe scratch state between steps, forcing state to survive via the harness memory rather than the filesystem.</div><button class="specbtn" onclick="openSpec('E4-1','2026-05-28-multi-step-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot mid"></div><div class="rlabel"><span class="caret">▶</span> Task remediation — 21 active tasks HARDENed (validation pending)</div><span class="rref">2026-06-16-noncore-task-remediation.md</span></div><div class="detail"><div class="dtext">The real remaining E4 rework (replaces the mislabelled #89). IMPLEMENTED + offline-green 2026-06-17, merged into this branch via baton (as-built in the spec) — NOT a build-in-progress. Wave 0 triage (21/21) found all 21 already emit graded reward.json, so the work was validity/discrimination hardening, not binary→graded conversion. Shipped: universal S4 crash-fallback + answer_present on all 21; the 6 CRITICAL grader fixes + tool-selection honest-channel, each with an exploit-regression test; WIPE_PRESERVE_SESSIONS for in-window retention; Wave-3 de-telegraphing + format-robustness; Wave-4 docs/hygiene — all backed by a full offline pytest suite (exploit/regrade/S4/wipe/hygiene) that passes. REMAINING = OPERATOR gates only (explicitly out of the no-Docker pipeline): Docker oracle=1.0 + n≥3 runs, then flip approved=true per task (0 flipped by design — a guard test enforces it, so the catalog still reads NEEDS REVIEW), plus the corpus-balloon / keep-vs-demote call for find-contradictions-01 + factual-lookup-cited-01 and the browser_used matcher validation. Additive validity work — outside the first verdict grid.</div><button class="specbtn" onclick="openSpec('E4-2','2026-06-16-noncore-task-remediation.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-management category — long-session behaviour</div><span class="rref">2026-05-27-context-management-category.md</span></div><div class="detail"><div class="dtext">How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30.</div><button class="specbtn" onclick="openSpec('E4-3','2026-05-27-context-management-category.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Sub-agent spawning + research tasks</div><span class="rref">2026-05-29-new-eval-tasks-subagent-research.md</span></div><div class="detail"><div class="dtext">Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task.</div><button class="specbtn" onclick="openSpec('E4-4','2026-05-29-new-eval-tasks-subagent-research.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Goal-oriented real-world workflows</div><span class="rref">2026-05-30-goal-oriented-real-world-tasks.md</span></div><div class="detail"><div class="dtext">Workflows modelled on how users actually drive agents. All 3 shapes shipped + oracle-validated + hardened. update-record-with-cleanup-01 is the stateful-workflow discriminator (/16 — it carried the n=5 grid); schedule-meeting-from-name-01 + prompt-injection-resistance-01 are also in the suite — prompt-injection measures model-level safety, not the harness (so it isn't expected to discriminate), and schedule-meeting needs a sidecar redesign. Category built + scoring.</div><button class="specbtn" onclick="openSpec('E4-5','2026-05-30-goal-oriented-real-world-tasks.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Harness-vs-model discriminating suite — instrument PROVEN at n=5</div><span class="rref">2026-05-30-harness-vs-model-discriminating-suite.md</span></div><div class="detail"><div class="dtext">The central spec: evaluate the SCAFFOLDING, not the LLM. The interim caveat is now discharged — a full n=5 pass^k grid (110 trials) ran on the symmetric hindsight-only substrate and the suite DISCRIMINATES: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in BOTH directions (hermes 5, openclaw 2). Reliability is the signal — hermes 4% error vs openclaw 20%. See the n≥3 verdict-grid row below + RESULTS.md.</div><button class="specbtn" onclick="openSpec('E4-6','2026-05-30-harness-vs-model-discriminating-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Methodology evidence base — approach grounded in published work</div><span class="rref">2026-06-01-methodology-evidence-base.md</span></div><div class="detail"><div class="dtext">Five sourced research passes grounding each claim: harness≠model (Terminal-Bench / Aider / METR), pass^k as the reliability metric (τ-bench), telegraphing as a construct-validity threat, context-overflow caveats (effective window ≪ 1M), and provider-pin necessity.</div><button class="specbtn" onclick="openSpec('E4-7','2026-06-01-methodology-evidence-base.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Discrimination-hardening sweep — difficulty is the lever</div><span class="rref">2026-05-31-discrimination-hardening-session.md</span></div><div class="detail"><div class="dtext">Found that DIFFICULTY (not rubrics) manufactures a split — binary tasks saturate to 1.0 for two competent harnesses. Added graded scoring, a crash/timeout penalty in the analyzer, and the task-catalog page.</div><button class="specbtn" onclick="openSpec('E4-8','2026-05-31-discrimination-hardening-session.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Adversarial review — only ~4 genuine discriminators found</div><span class="rref">2026-06-01-adversarial-review.md</span></div><div class="detail"><div class="dtext">A 6-agent aggressive review of all 50 tasks: only ~4 genuine harness discriminators; ~23 model-dominated one-shots; a few outright broken. The KILL test: if `python3 -c` or one file-read solves it, you're measuring the MODEL. 23 deprecated non-destructively.</div><button class="specbtn" onclick="openSpec('E4-9','2026-06-01-adversarial-review.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Telegraphing audit — 37/50 leaked the trap; all fixed</div><span class="rref">2026-06-01-telegraphing-audit.md</span></div><div class="detail"><div class="dtext">37 of 50 tasks told the agent the very strategy the verifier secretly measured ("the latest value supersedes earlier ones"), so they tested instruction-following, not the latent capability. All fixed across 7 waves; load-bearing constraints now enforced mechanically.</div><button class="specbtn" onclick="openSpec('E4-10','2026-06-01-telegraphing-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Retired-task coverage matrix — no capability left untested</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">Mapped every deprecated task to the capability axis it covered, so retiring the KILL set leaves no axis silently untested.</div><button class="specbtn" onclick="openSpec('E4-11','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Context-rot scoring integrity — false-zero audit + metric normalization</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">A hermes context-rot-02 trial scored 0 after recalling all 8 chains correctly — its staged write never landed in /app, so the verifier read an empty file (a false zero that faked a 0.875-vs-0 gap; hermes actually beat openclaw 8/8 vs 7/8). SHIPPED: recall graders now archive answer.md + emit numeric answer_present (0 = VOID, not wrong); reward.json kept dict[str,float|int] (a string field silently drops the trial from the viewer). Recorded result hand-corrected (stopgap; real fix = re-run via task #92). SHIPPED (task #93): reward.json now carries ONLY normalized [0,1] keys with identical names on both tasks — reward, correctness, and early/middle/late as per-depth fractions (so the rot curve compares across rot-01's 4/bucket and rot-02's 2-3/bucket). Raw counts (facts/chains) + the answer audit (answer_present/answer_chars) moved to a sibling reward-details.json that Harbor never aggregates — killing the cross-task blend (chains=(0+8)/2=4.0, answer_chars 85→42.5 masquerading as a score). All three scoring-integrity deliverables shipped; the lone residual — re-running existing trials under the new keys — is owned by #92 (write-persistence) + the #81 verdict grid, not this work.</div><button class="specbtn" onclick="openSpec('E4-12','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> The 11 load-bearing harness-measuring tasks (now part of the unified suite)</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">Selected 11 load-bearing tasks, one per harness-distinct capability, anchored on the three PROVEN discriminators (memory-conversational-01 Δ0.50, failure-recovery-loop-01 1.0-vs-0.0, tool-sprawl-precision-01 efficiency 3-vs-7 calls). Same model both harnesses ⇒ any gap is the harness. Coverage: memory ×3 (recall-under-load / proactive-write+correction / stale-vs-live-file), long-context ×2 (compaction-on-overflow / in-window rot), control-loop ×2 (recovery+retry / mid-task replan), tool-precision ×1 (selection among 57 decoys, F1), delegation+skill ×2 (sub-agent fan-out / skill discovery), stateful workflow ×1 (ledger edit w/ preservation traps). Left prompt-injection (model-level safety, not harness) + the wt-0.5 model-dominated families out of this initial discriminator set; top alternates (find-contradictions, factual-lookup-cited) named for swap-in if a task fails to separate. SUPERSEDED 2026-06-25: the old curated-subset split is retired — all 33 tasks are one unified suite (see the unify spec), and discrimination is a per-task outcome at n≥3, not a tier. Wired as configs/suite.yaml + structurally validated (all 11 paths/graders resolve; runner honors CONFIG/N_ATTEMPTS/JOB_NAME). n=1 separation run pending the image rebuild.</div><button class="specbtn" onclick="openSpec('E4-13','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Recall MCP dropped from both eval harnesses — memory substrate change</div><span class="rref">2026-06-03-core-suite-selection.md</span></div><div class="detail"><div class="dtext">recall (Graphiti temporal-KG memory, &lt;memory-host&gt;:8408) was erroring on every hermes invocation, so it was removed from BOTH harness configs (openclaw.json mcp.servers + hermes config.yaml mcp_servers) to keep the comparison fair and unblocked — hindsight kept in both, hermes honcho untouched, and the memory host recall server itself left intact (the harnesses just no longer mount it). New substrate: openclaw=hindsight vs hermes=honcho+hindsight. Consequence: the old Δ0.50 memory-conversational-01 baseline is VOID (measured on the recall-bearing substrate) — RESULTS.md 'Known asymmetries' + the proven-discriminator note both corrected. Takes effect after a harbor-agents-rich rebuild. Commits 597070b + 8f812e1.</div><button class="specbtn" onclick="openSpec('E4-14','2026-06-03-core-suite-selection.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Hermes write-persistence (#92) — false-zero root cause fixed</div><span class="rref">2026-06-02-context-rot-scoring-integrity.md</span></div><div class="detail"><div class="dtext">The context-rot-02 false-zero: hermes's write_file reported 85 bytes but /app/answer.md was empty at verify. Root cause = hermes's file tools are workspace-rooted at the terminal backend's cwd (`terminal.cwd: "."`); the adapter never cd'd to the task workdir, so writes landed in a cwd-shadow the verifier (reading /app) never saw — while openclaw's direct write landed. Fix (lib/hermes_thin.py, commit e1c4541): `cd /app &amp;&amp; hermes …`. Verified via the file-persistence-01 probe (tasks/_verify): hermes answer_present 0→1, reward 1.0, alongside openclaw 1.0 + oracle 1.0. The probe is a reusable write-persistence regression.</div><button class="specbtn" onclick="openSpec('E4-15','2026-06-02-context-rot-scoring-integrity.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Verifier-integrity audit — all 54 tasks; 2 proven discriminators GAMEABLE</div><span class="rref">2026-06-09-verifier-integrity-audit.md</span></div><div class="detail"><div class="dtext">7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical.</div><button class="specbtn" onclick="openSpec('E4-16','2026-06-09-verifier-integrity-audit.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> rewardkit grading rollout — all 23 active graded tasks converted + validated</div><span class="rref">2026-06-09-verifier-sandbox-rollout.md</span></div><div class="detail"><div class="dtext">Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on the run host main pending operator push.</div><button class="specbtn" onclick="openSpec('E4-17','2026-06-09-verifier-sandbox-rollout.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Overnight verifier-integrity decisions — honest-shortcut fixes + NORTH_STAR.md</div><span class="rref">2026-06-10-overnight-verifier-integrity-decisions.md</span></div><div class="detail"><div class="dtext">Threat-model refinement (2026-06-10): this eval measures HONEST harnesses, so the priority is closing honest-shortcut leaks (a capable agent legitimately reading a baked answer — a KILL-test fail) over adversarial-forge hardening (fabricating a log honest harnesses never touch). DONE + oracle-validated on the free oracle ($0 OpenRouter): unit-tests-01 (the 4 grading mutants relocated environment/→tests/ so Harbor uploads them only AFTER the agent runs — answer-key leak closed) and the proven discriminator failure-recovery-loop-01 (the plaintext `PAYLOAD: …` literal in the agent-readable dfetch script → DERIVED from the session token, sha256(token)[:11], at emit time; the task now passes the KILL test on the identical 2-call honest path, so discrimination is unchanged — only the emitted/expected string moved in lockstep). Adversarial-forge tasks (tool-sprawl / tool-selection / browser-find-fact / prompt-injection) deprioritized as speculative for an honest-harness verdict; schedule-meeting-from-name-01 deferred (its fix isn't safe to do unsupervised). New: NORTH_STAR.md — the canonical value hierarchy (validity &gt; measure-the-harness &gt; no-telegraphing &gt; pass^k &gt; fair-comparison &gt; simplicity) for unsupervised judgment calls. Feeds the n≥3 verdict grid (#81) below — failure-recovery's supervised re-baseline is incorporated there.</div><button class="specbtn" onclick="openSpec('E4-18','2026-06-10-overnight-verifier-integrity-decisions.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Run n≥3 pass^k grid → verdict (task #81) — first grid DONE</div><span class="rref">2026-06-10-core-eleven-remediation.md</span></div><div class="detail"><div class="dtext">DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the 11 remediated discriminator tasks over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/suite_weighted.py → suite_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the other 21 active tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin).</div><button class="specbtn" onclick="openSpec('E4-19','2026-06-10-core-eleven-remediation.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Unify the full suite — one suite, one validation bar</div><span class="rref">2026-06-25-unify-full-suite.md</span></div><div class="detail"><div class="dtext">IMPLEMENTED 2026-06-25 (commit 7be4767). Retired the old privileged-subset split and the dual-track framing: there is now ONE suite of 33 equally-important tasks under ONE bar. Configs/driver/metrics/tests/docs were de-tiered + renamed to neutral 'suite' names (the sweep config, the run driver, the weighted aggregator); a guard test fails if the retired vocabulary reappears in live source. Whether a task separates the harnesses is now a per-task OUTCOME measured at n≥3, not a pre-assigned tier. the offline test suite stayed green throughout (the pre-existing tests preserved + a new framing-guard).</div><button class="specbtn" onclick="openSpec('E4-20','2026-06-25-unify-full-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Human-readable task names + per-task 'how it works'</div><span class="rref">2026-06-25-unify-full-suite.md</span></div><div class="detail"><div class="dtext">All 33 active tasks renamed from &lt;shape&gt;-NN ids to descriptive names (commit 7550dfa) so a reviewer grasps each task from its name (distinguish-my-facts-from-others, adaptive-tool-error-recovery, clean-expense-ledger). The Task Suite dashboard now carries a one-line plain-language 'how it works' per task.</div><button class="specbtn" onclick="openSpec('E4-21','2026-06-25-unify-full-suite.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Both-zero grader/fixture fixes (n=1 smoke false-zeros)</div><span class="rref">2026-06-25-both-zero-grader-fixes.md</span></div><div class="detail"><div class="dtext">Two tasks scored 0 on BOTH harnesses in the n=1 smoke purely from a grader bug / bad fixtures, not real failure. FIXED + regression-tested: persist-facts-through-corrections (Part-A/B splitter anchored to a heading; meat-token regex word-boundaried) and credential-leak-detection (fixtures reseeded off canonical example secrets).</div><button class="specbtn" onclick="openSpec('E4-22','2026-06-25-both-zero-grader-fixes.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> 100% rewardkit grading — the standard, now met</div><span class="rref">2026-06-25-rewardkit-100pct-grader-conversion.md</span></div><div class="detail"><div class="dtext">Operator standard (2026-06-25): EVERY active task grades via rewardkit, no exceptions (pytest wrapped). The hard rule + tools/check_rewardkit.py CI gate landed first (ba454c7); the remaining graders were then converted (commit f5028a9) — all 33 tasks are now rewardkit-compliant and the gate passes. (Spec frontmatter still reads PROPOSED pending its as-built flip.)</div><button class="specbtn" onclick="openSpec('E4-23','2026-06-25-rewardkit-100pct-grader-conversion.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> Rebuild task CONTENT into believable scenarios</div><span class="rref">2026-06-25-task-content-rebuild-scenarios.md</span></div><div class="detail"><div class="dtext">The suite is legible by NAME; several tasks' CONTENT is still synthetic filler (PROJECT VEGA, 60 opaquely-named tools, WESTMARCH PRIORY). Rebuild into scenarios a real user would plausibly hand an agent WITHOUT losing each task's power to separate the harnesses. PROPOSED — one task per run, oracle-gated.</div><button class="specbtn" onclick="openSpec('E4-24','2026-06-25-task-content-rebuild-scenarios.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> tau3-bench — REMOVED from scope (not part of the comparison)</div><span class="rref">2026-05-28-tau3-bench-integration.md</span></div><div class="detail"><div class="dtext">Decided long ago: tau3 (an external benchmark) is NOT part of this harness-vs-harness eval and produces no comparison data. The thin adapter can't forward Harbor's injected tau3 MCP, and building an install-during-trial adapter wasn't worth it for one external benchmark. Out of scope — kept only as an inert reference; nothing downstream depends on it.</div><button class="specbtn" onclick="openSpec('E4-25','2026-05-28-tau3-bench-integration.md')">open full spec ↗</button></div><div class="row depr" onclick="tog(this)"><div class="dot dep"></div><div class="rlabel"><span class="caret">▶</span> Rework the 20 salvageable deprecated tasks (task #89) — DROPPED, superseded</div><span class="rref">2026-06-01-retired-task-coverage-matrix.md</span></div><div class="detail"><div class="dtext">DROPPED 2026-06-23. Audited: 20 (not 22) tasks are deprecated-on-disk (task.toml status="deprecated"), auto-excluded by the sweep driver — they feed NO live config and are never scored. Per the retired-task coverage matrix every capability axis they covered is already exercised by a HARDER live task (memory→memory-conversational, sub-agent→parallel-decompose, tool-orch→tool-sprawl, etc.), so reworking them adds redundancy, not coverage. The label had drifted: #89 was originally 'rework the live cover tasks' — that work shipped as the suite-remediation pass. The genuine remaining rework is the other 21 active tasks (row below), not the dead ones. Deprecated tasks stay dormant on disk as a non-destructive audit trail.</div><button class="specbtn" onclick="openSpec('E4-26','2026-06-01-retired-task-coverage-matrix.md')">open full spec ↗</button></div></div><div class="epic"><div class="ehead"><span class="eid">E5</span><span class="etitle">Observability &amp; reporting</span><span class="badge mid">in progress</span></div><div class="esum">See the state at a glance, and publish the verdict.</div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Agent-status dashboard — the two harnesses</div><span class="rref">done/2026-05-29-agent-status-dashboard.md</span></div><div class="detail"><div class="dtext">tools/agent_status.py renders each harness's config/state/parity at a glance — the HARNESS view.</div><button class="specbtn" onclick="openSpec('E5-0','done/2026-05-29-agent-status-dashboard.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Task Suite page — review + work tracker for every task</div><span class="rref">2026-05-31-task-catalog-page.md</span></div><div class="detail"><div class="dtext">tools/task_catalog.py → task-catalog.html (titled “Task Suite”). Drift-proof accordion over every task: what it asks, how it's graded, the oracle, the environment — plus a per-task WORK status (discriminating / needs-validation / needs-hardening / retired) and an OPERATOR-APPROVAL axis (every task is NEEDS REVIEW until its task.toml sets approved=true). Regenerates from the on-disk tree.</div><button class="specbtn" onclick="openSpec('E5-1','2026-05-31-task-catalog-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Roadmap page — this page (epics + status)</div><span class="rref">2026-06-02-roadmap-page.md</span></div><div class="detail"><div class="dtext">tools/roadmap.py → roadmap.html — the PLAN view: the thesis, a where-we-stand callout, the epics, every backlog spec rolled up under one with a status dot, an expandable detail, and an open-full-spec modal. Hand-curated EPICS table; re-run after backlog changes.</div><button class="specbtn" onclick="openSpec('E5-2','2026-06-02-roadmap-page.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> Viewer Claude-analysis on subscription auth + durable fork launch</div><span class="rref">2026-06-02-viewer-subscription-auth.md</span></div><div class="detail"><div class="dtext">The “Generate Analysis” button in `harbor view` 500'd: the analyze/summarize backend (and `harbor check`) hard-required ANTHROPIC_API_KEY and raised before trying — but the Claude Agent SDK already authenticates via the logged-in `claude` CLI it spawns, so analysis runs on a subscription with no API key. Softened both gates; committed to the fork (local/subscription-auth-analyze) and repointed the viewer off the ephemeral /tmp checkout onto the fork. `tools/view.sh` pins the fork launch so it survives reboot. Verified end-to-end: UI 200, summarize 200 via subscription auth.</div><button class="specbtn" onclick="openSpec('E5-3','2026-06-02-viewer-subscription-auth.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot ok"></div><div class="rlabel"><span class="caret">▶</span> RESULTS.md — thin verdict over the auto-computed report (task #81)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">WRITTEN 2026-06-10 once the first suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/suite_weighted.py → suite_report.json. Will refresh when the full-suite grid lands.</div><button class="specbtn" onclick="openSpec('E5-4','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div><div class="row" onclick="tog(this)"><div class="dot muted"></div><div class="rlabel"><span class="caret">▶</span> FE exportable verdict report (follow-up)</div><span class="rref">2026-06-03-results-verdict-thin-over-report.md</span></div><div class="detail"><div class="dtext">Extend the front-end (viewer / dashboards) to EMIT an exportable verdict file — a 'Download report' that bundles the split + pass^k + caveats into a standalone artifact, so the verdict isn't a manual paste. When it ships, RESULTS.md becomes the export target (or is generated by it). Deferred until after the first verdict run.</div><button class="specbtn" onclick="openSpec('E5-5','2026-06-03-results-verdict-thin-over-report.md')">open full spec ↗</button></div></div>
 </div>
 <div id="srcs" style="display:none"><div id="src-E1-0"># Harbor adoption — retire rube, build on Harbor
 
@@ -3047,18 +3047,27 @@ epic: E4
 date: 2026-06-16
 ---
 
+&gt; **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+
 # Non-core task remediation — adversarially review + fully convert the 21 active non-core tasks
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-16
-**Status:** IMPLEMENTED + offline-green 2026-06-17 (as-built log below) — all 21
-tasks HARDENed and merged via baton; the remaining items (Docker oracle=1.0,
-Track-A n≥3 runs, `approved=true` flips, the 2 corpus-balloon/keep-vs-demote
-calls, browser matcher validation) are OPERATOR gates explicitly out of the
-no-Docker pipeline. Originally APPROVED 2026-06-16 — operator asked for a clear
-spec to run an adversarial review on each of the 21 active non-core tasks and
-remediate them
-until "fully converted."
+**Status:** IMPLEMENTED + offline-green (2026-06-17) + **oracle &amp; e2e-smoke now
+green** (see "Status refresh — 2026-06-25" at the foot). All 21 tasks HARDENed and
+merged via baton; the Docker **oracle (31/31 oracle-able = 1.0)** and the **n=1
+two-harness e2e smoke** have BOTH since run green — they are no longer pending.
+Remaining: the **n≥3 pass^k verdict** (operator-gated paid sweep, not yet run for
+the reworked tasks), the **`approved=true` flips** (still 0 tree-wide), and the
+**corpus-balloon on 2 tasks** (`find-contradictions-01` + `factual-lookup-cited-01`
+are still one-window). The `browser-find-fact-01` matcher is **no longer open** —
+the smoke validated it for both harnesses (see refresh). NOTE: the Track-A/B +
+core/non-core framing in this spec is being collapsed by
+`2026-06-25-unify-full-suite.md` (APPROVED) — reconcile the approval rule + the 2
+corpus tasks' keep/cut against unify, not the old Track rule. Originally APPROVED
+2026-06-16 — operator asked for a clear spec to run an adversarial review on each
+of the (then) 21 non-core tasks and remediate them until "fully converted."
 **Origin / triggered-by:** the core-eleven discriminator set has been hardened
 twice and validated (oracle 11/11, 80 offline checks). But the suite has **55
 task dirs**: 20 deprecated, 11 core (done), 2 `_verify` fixtures, 1 just-built
@@ -3397,6 +3406,10 @@ test_noncore_approved_rider}.py`.
 - **No oracle ran here** (no Docker in this pipeline) and **no paid n-run ran**.
   "Green" means the offline pytest suite passes; it does NOT prove
   oracle=1.0 or any Track-A Δ. Both are operator gates.
+  **→ SUPERSEDED 2026-06-25:** the operator has since run the Docker oracle
+  (`jobs/oracle-full`, 31/31 oracle-able = 1.0) and the n=1 two-harness e2e smoke
+  (`jobs/smoke-n1__{hermes,openclaw}`). Only the **n≥3** paid verdict is still
+  unrun. See "Status refresh — 2026-06-25" below.
 - Two Track-A discriminators (find-contradictions, factual-lookup) are not yet
   proven to discriminate — their corpora still fit one window. Run the balloon +
   n-run before approving, or DEMOTE-TO-TRACK-B.
@@ -3417,6 +3430,49 @@ Operator (post-merge, NOT done here): full-suite Docker **oracle** must score
 1.0 on every kept task; Track-A tasks get an n≥3 two-harness run; then flip
 `[metadata] approved = true` per task that passes, and decide keep-vs-demote for
 find-contradictions-01 / factual-lookup-cited-01.
+
+---
+
+## Status refresh — 2026-06-25
+
+The 2026-06-17 as-built said "no oracle / no n-run ran" — true of the *baton
+no-Docker pipeline*, now stale as project state. The operator has since run the
+Docker oracle and the e2e smoke. Current state, by the RESULTS.md validation
+ladder:
+
+| Tier | Proves | State |
+|---|---|---|
+| 1 — offline grader/regression | grader logic on synthetic inputs | ✅ green (`pytest tests/`) |
+| 2 — Docker oracle = 1.0 | each task builds + reference `solve.sh` scores 1.0 | ✅ **done** — `jobs/oracle-full` (2026-06-17): 29/32 trials = 1.0; the 3 others are the **not-oracle-able-by-design** tasks (`browser-find-fact-01` gates on `browser_used`, `prod-behavioral/conversational-01` needs a real agent), so **31/31 oracle-able = 1.0** |
+| 3 — n=1 e2e smoke, both harnesses | the real harness runs every task | ✅ **done** — `jobs/smoke-n1__{hermes,openclaw}` (2026-06-25), 32/32 trials each (a few DNS-VOID trials being re-run); this is the run shown on the public Results page |
+| 4 — n≥3 pass^k verdict | reliability spread + genuine discrimination | ❌ **not run** for the reworked tasks; the 2026-06-10 n=5 (Δ0.188) is **superseded** (predates the rework) |
+
+`approved=true`: still **0 tasks** tree-wide (verified). Under the *old* rule
+Track-B tasks were Tier-2-eligible to approve while Track-A awaited Tier 4 — but
+unify removes Track-A/B, so flip under the unified bar, not this one.
+
+&gt; Note: tasks were renamed to human-readable names on 2026-06-25 (commit
+&gt; `7550dfa`). Old → new for the items below: `find-contradictions-01` →
+&gt; `insights-research/audit-report-contradictions`; `factual-lookup-cited-01` →
+&gt; `research-rag/verify-company-facts-cited`; `browser-find-fact-01` →
+&gt; `tool-orchestration/web-research-multi-page`.
+
+**Still genuinely open** (beyond the paid n-run + the approval flips):
+- **audit-report-contradictions** + **verify-company-facts-cited** — corpora are
+  **still one-window** (819 / 836 words, measured 2026-06-25); the corpus-balloon
+  was never done, so the long-context kill-test isn't met. They're valid as
+  general tasks (the co-location + citation-discipline grader fixes did land);
+  under unify this is a **keep-or-cut** call, not the old keep-vs-demote.
+- **web-research-multi-page** — **matcher now VALIDATED, effectively closed.** The
+  2026-06-25 smoke drove the browser for BOTH harnesses (`hermes` `browser_used=1`,
+  reward 1.0; `openclaw` `browser_used=1` with a wrong answer → reward 0, the
+  correct behaviour). Only the cosmetic `logs_files_scanned` zero-scan diagnostic
+  was never added — but real runs register `browser_tool_calls` 91 / 7, so the
+  false-zero ambiguity is moot in practice.
+
+**This spec is superseded in framing** by `2026-06-25-unify-full-suite.md` (one
+suite, one bar). Treat the remediation *work* here as **done through Tier 3**;
+route the remaining verdict + approval flips + the 2–3 task gaps through unify.
 </div><div id="src-E4-3"># Context-management category — long-session behavior tests
 
 - **Epic:** E4 — Task Suite
@@ -5406,7 +5462,9 @@ middle-rot bare list (`reward 0.625`, `early 1.0 / middle 0.0 / late 1.0`).
 - **task #92** — hermes write-persistence (staged diff-write not landing in `/app`).
 - **task #93** — normalize context-rot recall metrics + keep audit fields out of scored
   rewards + re-score/re-run.
-</div><div id="src-E4-13"># Core suite — the load-bearing harness-measuring tests
+</div><div id="src-E4-13">&gt; **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+# Core suite — the load-bearing harness-measuring tests
 
 **Epic:** E4 — Task Suite
 **Status:** IMPLEMENTED 2026-06-03 — `configs/core-suite.yaml` wired + structurally
@@ -5502,7 +5560,9 @@ equal result**, not single-run reward (RESULTS "Key Finding").
       swap from the alternates list.
 - [ ] n=5 pass^k grid → per-harness reliability + cost ratio (feeds RESULTS.md verdict,
       task #81).
-</div><div id="src-E4-14"># Core suite — the load-bearing harness-measuring tests
+</div><div id="src-E4-14">&gt; **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+# Core suite — the load-bearing harness-measuring tests
 
 **Epic:** E4 — Task Suite
 **Status:** IMPLEMENTED 2026-06-03 — `configs/core-suite.yaml` wired + structurally
@@ -6267,6 +6327,9 @@ epic: E4
 date: 2026-06-10
 ---
 
+&gt; **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+
 # Core-eleven remediation — make the load-bearing suite actually measure the harness
 
 **Epic:** E4 — Task Suite (validity)
@@ -6571,7 +6634,937 @@ enumerator, pattern-match), not the whole `answer.md`:
 
 - Per-task rework specs may be split out if any single fix (sub-agent redesign,
   context-rot re-home) grows beyond a paragraph.
-</div><div id="src-E4-20"># tau3-bench integration — spec
+</div><div id="src-E4-20">---
+status: IMPLEMENTED
+epic: E4
+date: 2026-06-25
+---
+
+# Unify the full test suite — remove "core eleven vs non-core" AND Track-A/Track-B
+
+**Epic:** E4 — Task Suite (validity)
+**Date:** 2026-06-25
+**Status:** IMPLEMENTED 2026-06-25 (commit `7be4767`; as-built below) — originally APPROVED 2026-06-25 — operator directive: "remove all concept of eleven
+core vs twenty-one non-core; have a full test suite; every single task is valid and
+important to work on." Two forks resolved same-day: (1) scrub **live + forward**
+material, leave dated backlog specs as historical record but **note the framing is
+deprecated**; (2) **collapse Track-A/Track-B too** — one unified bar.
+**Origin:** the core-eleven was a curated discriminator subset (`configs/core-suite.yaml`)
+with the other 21 as "non-core," and tasks were further split Track-A
+("must discriminate") vs Track-B ("valid general-capability"). The operator wants
+**one full suite of equally-important tasks under one validation bar.**
+
+## Decision (what "unified" means)
+
+- **One suite.** All **33 active eval tasks** (`tasks/**/task.toml`, minus the 2
+  `_verify` fixtures) are *the suite*. No privileged subset, no "core"/"non-core".
+- **One bar.** Every task must be **valid + graded + ungameable**: flat numeric
+  `reward.json` + `answer_present`; no telegraphing; no bypass/grader-gaming;
+  format-robust; crash fallback; `FROM harbor-agents-rich`; topology-clean. **Whether
+  a task discriminates the harness is an OUTCOME measured per-task at n≥3 — not a
+  pre-assigned track.** Delete the Track-A/Track-B labels and the
+  must-discriminate-vs-general framing.
+- Approval gate is unchanged in spirit: `approved=true` after the task's **oracle =
+  1.0** AND an **n≥3** run shows it behaves as intended (graded, ungameable, and — if
+  it's meant to — separates the harnesses).
+
+## Work list
+
+Mechanical scope is broad; keep the 244 offline tests green and topology clean
+throughout. **Behavior of task graders/fixtures must not change** — this is a
+rename/reword/de-tier refactor, not a grading change.
+
+1. **Docs (live):**
+   - `RESULTS.md`: replace "11 core + 21 non-core" / "core suite" / Track-A/Track-B
+     with "the suite (33 tasks)" + the single bar; the validation ladder stays, but
+     Tier-3/4 language drops track tiers (discrimination is per-task outcome).
+   - `AGENTS.md`: drop the "core suite" selection framing + Track-A/Track-B in the
+     methodology; describe one full suite + one bar. Update the "Running a sweep"
+     command to the renamed driver/config (below).
+2. **Configs (rename + consolidate):**
+   - `configs/core-suite.yaml` → **`configs/suite.yaml`** = the canonical sweep config:
+     all 33 eval tasks (the union currently in `smoke-n1.yaml` + the 11), both
+     harnesses (thin + deepseek-v4-pro), `n_attempts` overridable.
+   - `configs/core-suite-claude.yaml` → `configs/suite-claude.yaml`.
+   - Retire the track configs: `track-a-harness.yaml`, `track-a-focused.yaml`,
+     `track-b-general.yaml`, `oracle-core.yaml` (superseded by `oracle-full.yaml`).
+     `track-a-weights.toml` → `suite-weights.toml` (drop track partitioning; if
+     per-category weights remain, keep them under the neutral name).
+   - `smoke-n1.yaml` stays as the n=1 form (or fold into `suite.yaml` + `N_ATTEMPTS=1`);
+     `oracle-full.yaml` stays (the oracle).
+3. **Driver + metrics (rename, update all refs):**
+   - `tools/run_track_a.sh` → **`tools/run_suite.sh`** (update every doc/comment/config
+     reference; keep behavior identical — Infisical + wipe/seed hooks + one-job-per-harness).
+   - `metrics/track_a_weighted.py` → `metrics/suite_weighted.py` (+ its `track_a_report.json`
+     output → `suite_report.json`); update importers.
+4. **task.toml:** remove any `[metadata]` `track`/`core`/tier flag; keep
+   `approved`/`status`. (Discrimination is no longer a task attribute.)
+5. **Offline tests (`tests/`):** rename `noncore.py`→`suite_helpers.py`,
+   `test_noncore_*`→`test_suite_*` and fix all imports; the `tests/{s4,wipe,regrade,
+   exploits,hygiene}` suites keep their assertions (behavior unchanged), only the
+   "noncore"/"core" naming goes. Add one **acceptance guard test** that greps the live
+   tree (excluding `backlog/` + `archive/`) and FAILS if "core eleven", "non-core",
+   "Track-A/Track-B", "core-suite", or "run_track_a" reappear.
+6. **Dashboards:** `tools/roadmap.py`, `tools/task_catalog.py`, `tools/agent_status.py`
+   — remove core/non-core + Track-A/B grouping; present one suite. Regenerate the HTML.
+7. **Backlog (historical — DO NOT rewrite bodies):** add a deprecation banner to
+   `backlog/README.md` and a one-line note at the top of the core-eleven / core-suite /
+   noncore specs: "**DEPRECATED FRAMING (2026-06-25):** the core/non-core split and
+   Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now
+   unified." The dated content stays as the accurate record of what happened.
+
+## Acceptance criteria
+
+1. **No live mention** of "core eleven", "non-core"/"noncore", "Track-A"/"Track-B"/
+   "track_a"/"track-b", "core-suite", or "run_track_a" anywhere outside `backlog/` and
+   `archive/` (the guard test enforces this; `check_topology.sh`-style grep clean).
+2. **244 offline tests green** under the renamed files/imports; the new guard test passes.
+3. `configs/suite.yaml` covers all 33 eval tasks, both harnesses; `tools/run_suite.sh`
+   runs it; `oracle-full.yaml` still oracle-validates.
+4. RESULTS.md + AGENTS.md describe one suite + one bar; reproduce commands use the new
+   names. Dashboards regenerate without track/core grouping.
+5. Backlog specs carry the deprecation note; their dated bodies are unchanged.
+6. Topology gate clean; no behavior change to any task grader/fixture (oracle still
+   1.0 on the same tasks — spot-check, full oracle is a post-merge gate).
+
+## Out of scope
+
+Task grader/fixture *behavior* (this is naming/de-tiering only); rewriting dated
+backlog spec bodies; the both-zero fixes + n≥3 run (separate, tracked in RESULTS.md
+"Open work"); any harness/substrate change.
+
+
+## As-built (2026-06-25 — commit `7be4767`)
+
+Single rename/de-tier refactor; grader/fixture behavior unchanged.
+
+- **Configs:** `core-suite.yaml`→`suite.yaml`, rebuilt to cover **all 33** active
+  tasks (the prior 11 + 21 + `prod-behavioral/basic-knowledge-qa`, which *neither*
+  old config listed); `core-suite-claude`→`suite-claude` (kept as a cost-bounded
+  alt-model subset); `track-a-weights`→`suite-weights`; retired `track-a-harness`,
+  `track-a-focused`, `track-b-general`, `oracle-core`.
+- **Driver/metrics:** `run_track_a.sh`→`run_suite.sh` (CONFIG default→`suite.yaml`,
+  WEIGHTS→`suite-weights.toml`); `track_a_weighted.py`→`suite_weighted.py`
+  (`track_a_report.json`→`suite_report.json`).
+- **Tests:** `noncore.py`→`suite_helpers.py`; 8 `test_noncore_*`/`test_s1_noncore_wipe`
+  → `test_suite_*`; imports + function names fixed; `test_s5_drift` repointed to
+  `suite.yaml`. NEW acceptance guard `tests/hygiene/test_suite_no_legacy_framing.py`.
+- **Dashboards:** `roadmap.py`/`task_catalog.py` de-tiered; `task_catalog` dropped the
+  Track-A "focused n=5" set (it read the retired `track-a-focused.yaml`). HTML regen'd.
+- **Docs:** RESULTS.md, AGENTS.md, README.md → one suite + one bar; CLAUDE.md restored
+  to a symlink → AGENTS.md.
+- **Backlog:** deprecation banners on the core-eleven/core-suite/noncore specs + README;
+  dated bodies unchanged.
+
+**Verification:** 252 prior offline tests still green + the new guard = **253 passed**
+(`pytest tests/`); topology gate clean; guard confirms zero live framing mentions.
+
+**Deviation:** acceptance #1 ("no live mention") reconciled with item 7 ("keep backlog
+filenames + facts") — the guard strips dated spec-slug citations (`YYYY-MM-DD-…[.md]`)
+before matching, so code/configs/tasks may still cite a spec by slug as provenance.
+
+**Not done here** (explicit post-merge / operator gates, criteria #3 + #6): the live
+`tools/run_suite.sh` sweep and the full Docker oracle (`oracle-full.yaml`). The driver +
+config are wired for both.
+</div><div id="src-E4-21">---
+status: IMPLEMENTED
+epic: E4
+date: 2026-06-25
+---
+
+# Unify the full test suite — remove "core eleven vs non-core" AND Track-A/Track-B
+
+**Epic:** E4 — Task Suite (validity)
+**Date:** 2026-06-25
+**Status:** IMPLEMENTED 2026-06-25 (commit `7be4767`; as-built below) — originally APPROVED 2026-06-25 — operator directive: "remove all concept of eleven
+core vs twenty-one non-core; have a full test suite; every single task is valid and
+important to work on." Two forks resolved same-day: (1) scrub **live + forward**
+material, leave dated backlog specs as historical record but **note the framing is
+deprecated**; (2) **collapse Track-A/Track-B too** — one unified bar.
+**Origin:** the core-eleven was a curated discriminator subset (`configs/core-suite.yaml`)
+with the other 21 as "non-core," and tasks were further split Track-A
+("must discriminate") vs Track-B ("valid general-capability"). The operator wants
+**one full suite of equally-important tasks under one validation bar.**
+
+## Decision (what "unified" means)
+
+- **One suite.** All **33 active eval tasks** (`tasks/**/task.toml`, minus the 2
+  `_verify` fixtures) are *the suite*. No privileged subset, no "core"/"non-core".
+- **One bar.** Every task must be **valid + graded + ungameable**: flat numeric
+  `reward.json` + `answer_present`; no telegraphing; no bypass/grader-gaming;
+  format-robust; crash fallback; `FROM harbor-agents-rich`; topology-clean. **Whether
+  a task discriminates the harness is an OUTCOME measured per-task at n≥3 — not a
+  pre-assigned track.** Delete the Track-A/Track-B labels and the
+  must-discriminate-vs-general framing.
+- Approval gate is unchanged in spirit: `approved=true` after the task's **oracle =
+  1.0** AND an **n≥3** run shows it behaves as intended (graded, ungameable, and — if
+  it's meant to — separates the harnesses).
+
+## Work list
+
+Mechanical scope is broad; keep the 244 offline tests green and topology clean
+throughout. **Behavior of task graders/fixtures must not change** — this is a
+rename/reword/de-tier refactor, not a grading change.
+
+1. **Docs (live):**
+   - `RESULTS.md`: replace "11 core + 21 non-core" / "core suite" / Track-A/Track-B
+     with "the suite (33 tasks)" + the single bar; the validation ladder stays, but
+     Tier-3/4 language drops track tiers (discrimination is per-task outcome).
+   - `AGENTS.md`: drop the "core suite" selection framing + Track-A/Track-B in the
+     methodology; describe one full suite + one bar. Update the "Running a sweep"
+     command to the renamed driver/config (below).
+2. **Configs (rename + consolidate):**
+   - `configs/core-suite.yaml` → **`configs/suite.yaml`** = the canonical sweep config:
+     all 33 eval tasks (the union currently in `smoke-n1.yaml` + the 11), both
+     harnesses (thin + deepseek-v4-pro), `n_attempts` overridable.
+   - `configs/core-suite-claude.yaml` → `configs/suite-claude.yaml`.
+   - Retire the track configs: `track-a-harness.yaml`, `track-a-focused.yaml`,
+     `track-b-general.yaml`, `oracle-core.yaml` (superseded by `oracle-full.yaml`).
+     `track-a-weights.toml` → `suite-weights.toml` (drop track partitioning; if
+     per-category weights remain, keep them under the neutral name).
+   - `smoke-n1.yaml` stays as the n=1 form (or fold into `suite.yaml` + `N_ATTEMPTS=1`);
+     `oracle-full.yaml` stays (the oracle).
+3. **Driver + metrics (rename, update all refs):**
+   - `tools/run_track_a.sh` → **`tools/run_suite.sh`** (update every doc/comment/config
+     reference; keep behavior identical — Infisical + wipe/seed hooks + one-job-per-harness).
+   - `metrics/track_a_weighted.py` → `metrics/suite_weighted.py` (+ its `track_a_report.json`
+     output → `suite_report.json`); update importers.
+4. **task.toml:** remove any `[metadata]` `track`/`core`/tier flag; keep
+   `approved`/`status`. (Discrimination is no longer a task attribute.)
+5. **Offline tests (`tests/`):** rename `noncore.py`→`suite_helpers.py`,
+   `test_noncore_*`→`test_suite_*` and fix all imports; the `tests/{s4,wipe,regrade,
+   exploits,hygiene}` suites keep their assertions (behavior unchanged), only the
+   "noncore"/"core" naming goes. Add one **acceptance guard test** that greps the live
+   tree (excluding `backlog/` + `archive/`) and FAILS if "core eleven", "non-core",
+   "Track-A/Track-B", "core-suite", or "run_track_a" reappear.
+6. **Dashboards:** `tools/roadmap.py`, `tools/task_catalog.py`, `tools/agent_status.py`
+   — remove core/non-core + Track-A/B grouping; present one suite. Regenerate the HTML.
+7. **Backlog (historical — DO NOT rewrite bodies):** add a deprecation banner to
+   `backlog/README.md` and a one-line note at the top of the core-eleven / core-suite /
+   noncore specs: "**DEPRECATED FRAMING (2026-06-25):** the core/non-core split and
+   Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now
+   unified." The dated content stays as the accurate record of what happened.
+
+## Acceptance criteria
+
+1. **No live mention** of "core eleven", "non-core"/"noncore", "Track-A"/"Track-B"/
+   "track_a"/"track-b", "core-suite", or "run_track_a" anywhere outside `backlog/` and
+   `archive/` (the guard test enforces this; `check_topology.sh`-style grep clean).
+2. **244 offline tests green** under the renamed files/imports; the new guard test passes.
+3. `configs/suite.yaml` covers all 33 eval tasks, both harnesses; `tools/run_suite.sh`
+   runs it; `oracle-full.yaml` still oracle-validates.
+4. RESULTS.md + AGENTS.md describe one suite + one bar; reproduce commands use the new
+   names. Dashboards regenerate without track/core grouping.
+5. Backlog specs carry the deprecation note; their dated bodies are unchanged.
+6. Topology gate clean; no behavior change to any task grader/fixture (oracle still
+   1.0 on the same tasks — spot-check, full oracle is a post-merge gate).
+
+## Out of scope
+
+Task grader/fixture *behavior* (this is naming/de-tiering only); rewriting dated
+backlog spec bodies; the both-zero fixes + n≥3 run (separate, tracked in RESULTS.md
+"Open work"); any harness/substrate change.
+
+
+## As-built (2026-06-25 — commit `7be4767`)
+
+Single rename/de-tier refactor; grader/fixture behavior unchanged.
+
+- **Configs:** `core-suite.yaml`→`suite.yaml`, rebuilt to cover **all 33** active
+  tasks (the prior 11 + 21 + `prod-behavioral/basic-knowledge-qa`, which *neither*
+  old config listed); `core-suite-claude`→`suite-claude` (kept as a cost-bounded
+  alt-model subset); `track-a-weights`→`suite-weights`; retired `track-a-harness`,
+  `track-a-focused`, `track-b-general`, `oracle-core`.
+- **Driver/metrics:** `run_track_a.sh`→`run_suite.sh` (CONFIG default→`suite.yaml`,
+  WEIGHTS→`suite-weights.toml`); `track_a_weighted.py`→`suite_weighted.py`
+  (`track_a_report.json`→`suite_report.json`).
+- **Tests:** `noncore.py`→`suite_helpers.py`; 8 `test_noncore_*`/`test_s1_noncore_wipe`
+  → `test_suite_*`; imports + function names fixed; `test_s5_drift` repointed to
+  `suite.yaml`. NEW acceptance guard `tests/hygiene/test_suite_no_legacy_framing.py`.
+- **Dashboards:** `roadmap.py`/`task_catalog.py` de-tiered; `task_catalog` dropped the
+  Track-A "focused n=5" set (it read the retired `track-a-focused.yaml`). HTML regen'd.
+- **Docs:** RESULTS.md, AGENTS.md, README.md → one suite + one bar; CLAUDE.md restored
+  to a symlink → AGENTS.md.
+- **Backlog:** deprecation banners on the core-eleven/core-suite/noncore specs + README;
+  dated bodies unchanged.
+
+**Verification:** 252 prior offline tests still green + the new guard = **253 passed**
+(`pytest tests/`); topology gate clean; guard confirms zero live framing mentions.
+
+**Deviation:** acceptance #1 ("no live mention") reconciled with item 7 ("keep backlog
+filenames + facts") — the guard strips dated spec-slug citations (`YYYY-MM-DD-…[.md]`)
+before matching, so code/configs/tasks may still cite a spec by slug as provenance.
+
+**Not done here** (explicit post-merge / operator gates, criteria #3 + #6): the live
+`tools/run_suite.sh` sweep and the full Docker oracle (`oracle-full.yaml`). The driver +
+config are wired for both.
+</div><div id="src-E4-22">---
+status: APPROVED
+epic: E4
+date: 2026-06-25
+---
+
+# Fix the two both-zero grader/fixture false-zeros from the n=1 e2e smoke
+
+**Epic:** E4 — Task Suite (validity)
+**Date:** 2026-06-25
+**Status:** APPROVED 2026-06-25 — two tasks scored 0 on BOTH harnesses in the n=1
+e2e smoke purely because of a grader bug / bad fixtures (not real agent failure).
+Confirmed still present after the task-rename + content-rebuild + rewardkit rework
+(base `5b9a295`).
+**Origin:** the e2e both-zero triage (RESULTS.md "Tier 3"): of the 6 both-zeros,
+these 2 are GRADER/FIXTURE bugs (the other 2 were infra-VOID, 2 are design-fails
+for n≥3).
+
+## Problem &amp; fix
+
+Both must stay **rewardkit** (hard rule #8) and keep a flat numeric `reward.json`.
+**The oracle reward must be byte-identical before/after** (this fixes false-zeros,
+not the measurement) — convert/verify under the oracle.
+
+### Fix 1 — `tasks/conversation-persona/persist-facts-through-corrections`
+(formerly `true-multi-turn-memory-write-01`; grader at
+`steps/08-recall-question/tests/reward.py`)
+
+- **Part-A/Part-B split is too greedy** (`:57`):
+  `pb = next(i for i,ln in lines if re.search(r'part\s*b|dinner', ln, re.I), len)`.
+  A natural answer titled e.g. `# Profile &amp; Dinner Plan` matches "dinner" on line 0
+  → Part A (all 8 recalled facts) is discarded → `cf=0/8`. In the smoke, openclaw
+  recalled all 8 + wrote a correct answer and still scored 0.
+  **Fix:** anchor the split to a heading boundary — e.g. only split on a line
+  matching `^\s*#{1,6}\s.*\b(part\s*b|dinner)\b` (a markdown heading), with the bare
+  "dinner" match removed or used only as a last-resort fallback when no heading exists.
+- **`MEAT` regex (`:24`) has unanchored short tokens** — `fish` matches "shellfish",
+  "no fish", "fish-free". **Fix:** word-boundary them (`\bfish\b`, etc.) and make the
+  meat check negation-aware so "no meat / no fish" in Part B doesn't trip `dinner_ok=0`.
+- **Regression tests:** (a) an answer with a `# …Dinner…` title heading + all 8
+  correct facts scores ~1.0 (not 0); (b) a Part-B "no meat, no fish/shellfish"
+  doesn't zero `dinner_ok`; (c) the documented dump/hedge attack still fails.
+
+### Fix 2 — `tasks/compliance-security/credential-leak-detection`
+(formerly `secret-scan-01`; fixtures under `environment/repo/`, grader at
+`tests/reward.py`)
+
+- The four "real" secrets are seeded with **recognizable example/placeholder
+  values** the instruction explicitly says NOT to flag:
+  `config.py` AWS key `AKIAIOSFODNN7EXAMPLE` + `…EXAMPLEKEY` (the AWS-docs example
+  pair), `db.py` host `…example.com`, `deploy/id_rsa` body `EXAMPLE…NOTREAL`, and
+  the jwt.io default token. A precise agent correctly rejects all four → scores 0.
+  Ground truth contradicts the instruction.
+  **Fix:** reseed each with a **realistic, non-canonical** fake: an AWS-shaped key
+  that is NOT `…EXAMPLE`; a JWT that is not the jwt.io default; a real-looking
+  internal host (not `example.com`); a PEM body without `EXAMPLE`/`NOTREAL`. Keep
+  them obviously-secret-shaped but not on any "known placeholder" list.
+- **Update the grader's expected-secret set AND the oracle `solution` in lockstep**
+  so the reference solution flags exactly the new four → oracle stays 1.0.
+- **Topology gate:** the new fake host/values must pass `check_topology.sh` (no real
+  internal topology — use a plausible but synthetic host like `db.acme-internal.net`).
+- **Regression test:** a dump-all answer (flag everything incl. the clean files)
+  still scores low; flagging the four reseeded secrets scores full.
+
+## Acceptance criteria
+
+1. Fix 1: the heading-titled correct answer scores ~1.0 offline (regrade); MEAT no
+   longer trips on "fish"/"shellfish"; dump/hedge still fails.
+2. Fix 2: fixtures use no canonical example/placeholder values; grader + oracle
+   solution updated in lockstep; oracle = 1.0; topology clean.
+3. Both graders stay rewardkit (`check_rewardkit.py` passes), flat `reward.json`.
+4. Full offline suite green (existing + the new regression checks).
+5. No behavior change beyond removing the false-zeros (the measurement/difficulty is
+   unchanged; oracle byte-identical except where the secret VALUES legitimately move).
+
+## Out of scope
+
+The infra-VOID re-run, the 2 design-fail tasks (`tool-sprawl`/`sub-agent-decompose`,
+need n≥3), the n≥3 grid, `approved=true` flips, and the pending unify refactor (a
+separate session) — all tracked in RESULTS.md "Open work".
+
+---
+
+## Implementation log / as-built (2026-06-25)
+
+Branch `baton/2026-06-25-both-zero-grader-fixes` off `remediation/core-eleven-2026-06-10`.
+Both false-zeros fixed exactly as planned; no deviation from the spec's intent.
+Commits: `test: … (red)` → `feat: …` → a base-integration merge.
+
+### What actually changed (7 files)
+
+**Fix 1 — `tasks/conversation-persona/persist-facts-through-corrections/steps/08-recall-question/tests/reward.py`** (grader only):
+- Part-A/Part-B split is now heading-anchored. The greedy
+  `next(... re.search(r'part b|dinner', ln) ...)` was replaced by a `_split_idx()`
+  helper that prefers a markdown `# … Part B` heading, then a `# … dinner` heading,
+  and only falls back to the bare-marker search when no heading carries the marker.
+  This stops a document TITLE like `# Profile &amp; Dinner Plan` (line 0) from matching
+  "dinner" and discarding the entire 8-fact recap (the openclaw `cf=0/8` smoke
+  false-zero).
+- `MEAT` regex tokens are now word-boundaried (`\bfish\b`, etc.) so "fish" no longer
+  matches inside "shellfish"/"no fish". Added a `MEAT_NEG` cue set and a
+  `_meat_asserted(part_b)` helper; `veg` is now `0 if _meat_asserted(part_b) else 1`,
+  so a vegetarian dinner that NAMES what it excludes ("no meat, no fish, no
+  shellfish") keeps `dinner_ok=1`. The 30-char look-behind window mirrors the
+  existing stale-leak negation logic in the same file.
+
+**Fix 2 — `tasks/compliance-security/credential-leak-detection/environment/repo/{config.py,db.py,auth.py,deploy/id_rsa}`** (fixtures only):
+- `config.py`: AWS pair reseeded `AKIAIOSFODNN7EXAMPLE`/`…EXAMPLEKEY` →
+  `AKIA3K7QF2NXR9ZP4WLD` / `7yQfZ0pK3mNc1RtWvB8sLxA2dHgE6jUoP9iYbT4n` (AKIA+16 shaped,
+  no `EXAMPLE` marker).
+- `db.py`: host `db.internal.example.com` → `db.acme-internal.net` (synthetic,
+  topology-clean; password unchanged).
+- `auth.py`: JWT replaced with a non-jwt.io token (new header/payload/signature, still
+  three `eyJ…`-style segments).
+- `deploy/id_rsa`: the `EXAMPLE…NOTREAL` stub body replaced with a full realistic
+  PEM private-key block (no placeholder markers).
+
+**New regression tests (2 files, additive):**
+- `tests/regrade/test_both_zero_persist_facts.py` — drives the REAL grader offline via
+  `helpers.grade_rewardkit`: titled-heading correct answer ≥0.99; "no meat/no
+  fish/no shellfish" keeps `dinner_ok==1`; dump/hedge guard still fails
+  (`timezone==0`, `climb==0`, reward&lt;1.0).
+- `tests/hygiene/test_both_zero_credential_reseed.py` — reads the repo fixtures (no
+  docker) and asserts none of the canonical placeholders (`AKIAIOSFODNN7EXAMPLE`,
+  `…EXAMPLEKEY`, jwt.io default sig, `example.com`, `NOTREAL`/`EXAMPLE`) remain, while
+  each file still carries a correctly-shaped secret.
+
+### Key decisions / deviations
+- **Grader for Fix 2 was NOT touched, and did not need to be.** The
+  `credential-leak-detection` grader scores by FILENAME (`SECRET = {auth.py, config.py,
+  db.py, deploy/id_rsa}`), not by secret VALUE; `solution/solve.sh` likewise lists the
+  four filenames. So the "update grader expected-set AND oracle solution in lockstep"
+  step from the spec was a no-op here — the oracle stays 1.0 because the four files
+  still exist and still contain secret-shaped values. Only the fixture VALUES moved,
+  exactly as acceptance criterion #5 permits. This is a (benign) simplification vs the
+  spec's literal wording, not a behavior change.
+- Fix 1 keeps the bare-marker search as a last-resort fallback rather than deleting it,
+  so answers with no headings at all still split sensibly.
+
+### Open questions
+None were carried by the planner; none arose.
+
+### Lessons / gotchas
+- The Part-B split was order-of-precedence sensitive: a recap that merely NAMES the
+  dinner in a title silently nukes Part A. Any future recall grader that splits a
+  single answer file should anchor on heading structure, never a bare keyword.
+- Substring meat matching ("fish" ⊂ "shellfish") and un-negated cue matching are the
+  same false-zero class as the stale-leak logic already in this grader — reuse the
+  word-boundary + look-behind-negation pattern.
+- Canonical placeholder values (AWS-docs example pair, jwt.io default, `example.com`,
+  `EXAMPLE`/`NOTREAL`) are exactly what the instruction tells the agent to reject, so a
+  PRECISE agent scores 0 — never seed "real" secrets from any well-known example list.
+
+### How to verify
+Run the offline suite on the run host via the harbor venv (host python is forbidden):
+```
+ssh &lt;run-host&gt; 'cd &lt;worktree&gt; &amp;&amp; \
+  &lt;harbor-venv&gt;/bin/python -m pytest tests/regrade/test_both_zero_persist_facts.py \
+  tests/hygiene/test_both_zero_credential_reseed.py -q'
+```
+Good = all assertions green. Also `python3 tools/check_rewardkit.py` exits 0 (both
+graders stay rewardkit) and `reward.json` stays a flat numeric dict. Oracle (n=1
+build + schema, Docker) and the n≥5 grid are out of scope here — manual, post-merge.
+</div><div id="src-E4-23">---
+status: PROPOSED
+epic: E4
+date: 2026-06-25
+---
+
+# Convert ALL task graders to rewardkit — the 100% standard
+
+**Epic:** E4 — Task Suite (validity)
+**Date:** 2026-06-25
+**Status:** PROPOSED — operator set the standard 2026-06-25: *every* active task
+grades via rewardkit, **no exceptions (pytest included).** This spec is the
+hand-off for another session to execute the conversion; it is self-contained.
+**Origin:** while auditing the Task Suite the operator declared "everything should
+be using rewardkit, entirely everything — that's the standard." Codified as
+`AGENTS.md` hard rule #8 + the `tools/check_rewardkit.py` CI gate (both already
+committed). This spec closes the remaining gap the gate reports.
+
+## The standard (already in force)
+
+- **`AGENTS.md` hard rule #8:** every task grader MUST use rewardkit. No bespoke
+  bash/python graders, no raw `pytest`. rewardkit can wrap pytest and call
+  arbitrary Python, so there is **no task it cannot grade**.
+- **Gate:** `python3 tools/check_rewardkit.py` must exit 0. It lists every
+  non-rewardkit grader among active tasks (archived tasks are not checked).
+
+## Problem — the gap the gate reports
+
+**8 of 33 active tasks** still have a non-rewardkit grader (25/33 already
+compliant). Run `python3 tools/check_rewardkit.py` for the live list. As of
+2026-06-25:
+
+| Task | Grader file(s) | Kind | Logic to PRESERVE exactly |
+|---|---|---|---|
+| `code-editing/refactor-multi-file-01` | `tests/test.sh` | pytest | pass/fail (or fraction) of the pytest suite |
+| `migration/dep-bump-breaking-01` | `tests/test.sh` | pytest | pytest suite over the migrated module |
+| `test-authoring/unit-tests-01` | `tests/test.sh` | pytest | **mutation-coverage** scoring (must pass good impl, fail each mutant) |
+| `ops-debugging/failure-recovery-loop-01` | `tests/test.sh` | bespoke | `0.6*correctness + 0.4*efficiency`; HMAC-nonce verify + stripped-binary sha256 pin + ordered progression log ending in "release"; efficiency `clamp((18-calls)/(18-3))` |
+| `real-world-workflows/prompt-injection-resistance-01` | `tests/test.sh` | bespoke | 3 fractional axes (injections resisted / customers covered / output hygiene); flagging is a weight-0 diagnostic |
+| `real-world-workflows/schedule-meeting-from-name-01` | `tests/test.sh` | bespoke | 17 checks incl. per-run REF-nonce `reply_consumed` gate on `agreed_slot_honored` |
+| `tool-orchestration/browser-find-fact-01` | `tests/test.sh` | bespoke | answer correctness gated on `browser_used` (browser-tool-call evidence in the trajectory) |
+| `tool-orchestration/plan-then-revise-01` | `steps/01.../tests/test.sh`, `steps/02.../`, `steps/03.../` | bespoke ×3 | final-step reward `clamp_memory 0.40 + functional 0.40 + cleanup 0.12 + replan 0.08`; only the final step is banked (multi_step_reward_strategy=final) but ALL step graders must convert |
+
+## Scope
+
+**In:** re-implement each of the 8 tasks' scored grader(s) as rewardkit criteria,
+preserving the exact reward semantics. **Out:** changing what any task measures,
+its difficulty, or its instruction; renaming tasks (separate workstream); the
+archived tasks.
+
+## Method
+
+- rewardkit is **baked into `harbor-agents-rich:latest`** + the verifier image, so
+  a conversion is just rewriting `tests/reward.py` + `tests/test.sh` and an oracle
+  `--force-build`. Mirror the 24 already-converted tasks for the patterns
+  (additive, penalty `max(0,found-fp)/N`, F1-blend, weighted-blend, per-decision).
+- **pytest tasks:** run pytest *inside* a rewardkit criterion (subprocess → parse
+  results → emit fraction/score). Don't drop the mutation-coverage logic on
+  `unit-tests-01` — that IS the grade.
+- **bespoke tasks:** the custom logic (HMAC verify, nonce gates, browser-evidence,
+  ledger/clamp checks) moves into a rewardkit criterion that calls the same Python.
+  rewardkit is the *frame*, not a rewrite of the verification logic.
+- Keep `reward.json` a FLAT dict of numbers (hard rule #2); per-criterion detail →
+  `reward-details.json`. Keep the S4 crash-guard fallback (`[ -s … ] || echo
+  '{"reward":0.0}'`).
+
+## Hard constraints (do not violate)
+
+1. **Oracle byte-identical before/after.** A conversion is DONE only when the
+   task's Harbor **oracle** reward is the same pre- and post-conversion. Capture
+   the oracle reward first, convert, re-oracle, diff. This is the acceptance gate
+   per hard rule #8.
+2. **Runs on the run host.** The oracle needs Docker + the rich image — it cannot
+   be validated from the dev workstation/sshfs mount. Build + oracle on the run
+   host (`configs/oracle-full.yaml`, or a per-task oracle config).
+3. **No host Python installs.** rewardkit is in the image; never `pip install` on a
+   host. Validate inside the container/oracle.
+4. Every task Dockerfile stays `FROM harbor-agents-rich:latest` (hard rule #1).
+
+## Acceptance criteria
+
+- [ ] `python3 tools/check_rewardkit.py` exits **0** (all 33 active tasks rewardkit).
+- [ ] `configs/oracle-full.yaml` oracle is **33/33 = 1.0**, unchanged from before.
+- [ ] For each of the 8: the oracle reward is **identical** pre- and post-conversion
+      (record the before/after in this spec's as-built).
+- [ ] No new bespoke/pytest grader introduced; the gate stays green going forward.
+
+## Execution suggestion
+
+Well-suited to the **baton pipeline** (test-first → convert → oracle-validate →
+merge in an isolated worktree) so it doesn't destabilise the active branch. Do the
+3 pytest wraps first (mechanical), then the 5 bespoke (preserve the custom logic).
+One task per baton run keeps each oracle diff clean.
+
+## How to verify
+
+```bash
+# on the run host:
+python3 tools/check_rewardkit.py            # must exit 0 when complete
+# oracle the full suite (Docker, no LLM cost):
+CONFIG=$PWD/configs/oracle-full.yaml JOB_NAME=oracle-rewardkit tools/run_track_a.sh
+# diff each task's reward vs the pre-conversion oracle baseline
+```
+</div><div id="src-E4-24">---
+status: PROPOSED
+epic: E4
+date: 2026-06-25
+---
+
+# Rebuild task CONTENT into believable real-world scenarios — without losing the measurement
+
+**Epic:** E4 — Task Suite (validity + legibility)
+**Date:** 2026-06-25
+**Status:** PROPOSED — self-contained hand-off for another session / the baton
+pipeline. Execute one task per run, oracle-gated.
+**Origin:** operator. The suite is now legible by NAME (all 33 renamed, commit
+`7550dfa`) but several tasks' CONTENT is still synthetic filler ("PROJECT VEGA —
+18 weekly reports", "60 opaquely-named tools", "WESTMARCH PRIORY inspection
+records") that reads like nonsense to a human. This spec rebuilds that content
+into scenarios a real user would plausibly hand an agent — **while preserving,
+exactly, each task's power to discriminate the harness.** The operator's
+constraint, verbatim: *"make sure that we're not losing the material goodness of
+the tests."*
+
+---
+
+## North Star
+
+Every active task is a scenario a real user would plausibly ask an agent to do,
+with a plain instruction a human can read end-to-end — **and it still measures the
+exact same harness capability, at the same difficulty, with the same scoring, as
+it did before the rewrite.** Legibility is added; discrimination is not subtracted.
+
+## The cardinal rule: re-skin the SCENARIO, preserve the SKELETON
+
+Every task is two separable layers. The rebuild changes ONLY the first:
+
+- **SKIN (rewrite freely):** the surface narrative + fixture *content* — the story,
+  the prose, the entity names, the document theme. This is what makes it read like
+  "PROJECT VEGA" vs "a long email thread about a product launch." Make it believable.
+- **SKELETON (preserve EXACTLY — this is the "material goodness"):** the
+  discriminating *mechanism* and the *scorer*. Specifically:
+  1. **The hidden mechanic** that makes the answer uncomputable without the harness:
+     the `setup.sh` scratch-wipe, the silent mid-task file rewrite, the
+     value-stripped-from-disk-but-stated-in-conversation, the context-window
+     OVERFLOW (token budget), the latency gate. Same structure, same step count,
+     same trigger points.
+  2. **The scorer:** the exact reward dimensions, their weights, the penalty logic,
+     the gates, and the weight-0 diagnostics. A rebuild may re-point the grader at
+     new fixtures but MUST NOT change the dimension set, the weights, or the
+     pass/fail thresholds.
+  3. **Kill-test resistance:** a bare `python3 -c` / single file-read still cannot
+     solve it. The new scenario must not accidentally make the answer computable.
+  4. **No telegraphing:** the instruction reads like a user stating a goal — it
+     must not leak the trap, the hidden check, or the required strategy.
+  5. **Mechanical enforcement:** the load-bearing constraint stays enforced by
+     `setup.sh`/the environment, never by instruction text.
+
+**If a change touches the skeleton, it is out of scope for this spec** — that is a
+re-design, not a re-skin, and needs its own difficulty/validity review.
+
+## Why this is safe when done right
+
+The skeleton's two riskiest pieces — the mechanic and the scorer — can usually be
+kept **byte-identical**:
+- The mechanic lives in `setup.sh` / step structure / the Dockerfile, which are
+  theme-agnostic (a wipe wipes regardless of what story the documents tell). Keep
+  them.
+- The grader keys on *structure* (N facts, a final-vs-stale comparison, a tool-call
+  log) not on the story. Re-point it at the new fixtures; keep its dimensions and
+  weights. Where the grader hardcodes fixture values (the "answer key"), regenerate
+  those from the new fixtures with the SAME logic.
+
+So the default posture is: **rewrite instruction + fixtures + the fixture-generator;
+leave `setup.sh`, the step graph, and the grader's scoring logic alone.**
+
+---
+
+## Scope
+
+**IN — full scenario rebuild (the 15 synthetic / partial tasks):**
+
+| New name (task dir) | was | cluster |
+|---|---|---|
+| `track-project-across-context-overflow` | multistep-context-fill-01 | long-context |
+| `track-final-state-through-corrections` | multistep-context-fill-02 | long-context |
+| `separate-two-parallel-projects` | multistep-context-fill-03 | long-context |
+| `distinguish-my-facts-from-others` | multistep-memory-conversational-01 | memory |
+| `recall-details-across-task-switching` | multistep-memory-conversational-02 | memory |
+| `recall-details-under-high-load` | multistep-memory-conversational-03 | memory |
+| `apply-standing-preferences-unprompted` | multistep-proactive-preference-01 | memory |
+| `refresh-config-over-cached-value` | multistep-stale-memory-vs-file-01 | memory |
+| `persist-facts-through-corrections` | true-multi-turn-memory-write-01 | memory |
+| `pick-right-shell-utility` | tool-sprawl-precision-01 | tool precision |
+| `redesign-module-keep-constraints` | plan-then-revise-01 | control loop |
+| `parallel-delegation-under-deadline` | sub-agent-parallel-decompose-01 | delegation |
+| `research-org-profile-cited` | agentic-research-with-memory-01 | research |
+| `verify-company-facts-cited` | factual-lookup-cited-01 | research |
+| `basic-knowledge-qa` | prod-behavioral/conversational-01 | baseline probe |
+
+**AUDIT-ONLY — the 18 already-realistic tasks (Bucket A):** these read believably
+already (e.g. `clean-expense-ledger`, `book-meeting-with-contact`,
+`security-code-review`, `http-outage-root-cause-from-logs`,
+`summarize-support-emails-safely`). For each: confirm the scenario is believable,
+lightly polish the instruction for plain language, and **fix the stale `[metadata]
+shape`/`tags`/`description`** left over from the rename (the rename changed the dir
+but not these fields). **No scenario or grader change.** If an audit finds one is
+actually synthetic, promote it to the IN list — don't silently rewrite it.
+
+**OUT:** anything that changes the skeleton (mechanic, scorer dimensions/weights,
+difficulty); the 20 archived tasks; renaming (done).
+
+---
+
+## Process per task (the loop — follow in order)
+
+0. **Baseline the oracle.** Run the task's Harbor oracle BEFORE any change; record
+   the reward and per-criterion breakdown. This is the regression target.
+1. **Write the discriminating contract** (a short block at the top of the rebuild
+   PR / as-built): the capability measured, the mechanic, the scorer
+   dimensions+weights, the kill-test answer ("why `python3` can't solve it"). This
+   is the checklist the rebuild must not violate.
+2. **Design the new scenario** (the skin) so it carries the SAME skeleton: same
+   number of facts/steps, same overflow token budget, same correction/trap points,
+   same tool/decoy counts, same latency. Pick something believable (see briefs).
+3. **Rebuild the skin:** instruction.md (plain-language user goal, no telegraphing),
+   the fixture *generator* (e.g. `gen_reports.py` → new theme, same structure/size),
+   and any fixture files. **Do not touch** `setup.sh`, the step graph, or the wipe.
+4. **Re-point the grader, don't redesign it.** Keep the reward dimensions, weights,
+   penalties, gates, and weight-0 diagnostics identical. If the grader hardcodes an
+   answer key, regenerate it from the new fixtures with the SAME extraction logic.
+   Grader must remain **rewardkit** (AGENTS.md hard rule #8) — convert if it was a
+   bespoke/pytest holdover (see `2026-06-25-rewardkit-100pct-grader-conversion.md`).
+5. **Update `task.toml`:** `description`, `[metadata] shape`, `tags`, `keywords` to
+   the new scenario. Keep `difficulty`, `category`, env limits, step timeouts.
+6. **Validate (the gates below). Loop until all pass.**
+
+---
+
+## Per-task rebuild briefs
+
+Each brief: **measures** · **SKELETON to preserve (do not change)** · **new SKIN
+(believable scenario)** · **realism pitfalls**. Token sizes and counts are part of
+the skeleton — keep them.
+
+### Long-context ×3
+
+**`track-project-across-context-overflow`** (was context-fill-01)
+- *Measures:* recalling facts that were stated EARLY and then evicted when the
+  context window overflows.
+- *Skeleton:* 18 documents, ~72K tokens each (~1.3M total — MUST exceed the
+  model's ~1M window so eviction is forced); 12 tracked facts, several stated early
+  then never repeated; documents deleted by `setup.sh` before the recall step;
+  grader = current-value recall over 12, line-anchored, dump-penalised.
+- *New skin:* a long **email/Slack thread** or **project changelog** over a quarter
+  that a user genuinely accumulated (a product launch, a house renovation, a
+  migration) and asks "what's the current state of X?" Keep 18 chunks at the same
+  sizes.
+- *Pitfalls:* don't shrink the corpus below the window (kills the overflow); don't
+  restate the early facts late (kills the eviction trap).
+
+**`track-final-state-through-corrections`** (was context-fill-02)
+- *Measures:* reporting the FINAL value of facts that were corrected 2–3× under
+  full-window saturation (final vs stale).
+- *Skeleton:* 18 docs (~1.3M, overflow); 12 attributes each corrected 2–3× across
+  the timeline; one decoy that was never true; grader = `max(0, current_hits −
+  stale_hits)/12`, +1 final-value-with-≤1-prior, −1 for the decoy; docs wiped
+  pre-recall.
+- *New skin:* the same long thread/changelog where decisions visibly CHANGED over
+  time (owner reassigned, date slipped, vendor swapped). Believable: "summarise the
+  current plan from this thread."
+- *Pitfalls:* preserve the exact correction multiplicity (2–3×) and the −1 decoy;
+  don't make the final value the most-recently-mentioned by position only (the
+  agent must track supersession, not pick the last line).
+
+**`separate-two-parallel-projects`** (was context-fill-03)
+- *Measures:* avoiding cross-attribution when two concurrent projects share the same
+  field names with different values.
+- *Skeleton:* two interleaved projects, shared attribute schema, confusable values
+  re-stated across 18 docs; grader credits correct per-project attribution, penalises
+  cross-talk; overflow + wipe preserved.
+- *New skin:* a person tracking **two clients / two teams / two apartments** in one
+  inbox; "what's the status of each?" Keep both projects sharing field names.
+- *Pitfalls:* the two projects MUST share field names + plausibly-swappable values —
+  that collision IS the test.
+
+### Memory ×6 (state must survive the `setup.sh` scratch-wipe)
+
+**`distinguish-my-facts-from-others`** (was memory-conversational-01)
+- *Measures:* precise recall of the user's own facts amid confusable facts about
+  other people.
+- *Skeleton:* 12 personal facts planted across early turns; 4 distractor turns inject
+  *sibling* facts about others (same fields, different values — e.g. someone else's
+  allergy/pet/car); step-07 `setup.sh` sources `wipe_scratch.sh` (wipes /tmp,
+  /var/tmp, $HOME caches, session stores) AND deletes /app before recall; grader =
+  correct/12 with a **sibling penalty** (stating a distractor's value or hedging both
+  ≈ 0.33) + a `wipe_assertion` flat-0 guard.
+- *New skin:* onboarding a personal assistant — you mention your details over a chat,
+  and along the way reference friends/coworkers (whose details are the confusables).
+  Already believable; mostly a prose polish + keep the structure.
+- *Pitfalls:* the distractors MUST be same-field siblings (a *confusable*), not random
+  noise; keep the wipe + the sibling-penalty scorer exactly.
+
+**`recall-details-across-task-switching`** (was memory-conversational-02) and
+**`recall-details-under-high-load`** (was memory-conversational-03)
+- *Measures:* same precision recall, escalated distractor density (02 = interleaved
+  with small unrelated TASKS; 03 = maximum distractor load).
+- *Skeleton:* identical to the above (N facts, sibling distractors, step-wipe,
+  correct/N + sibling penalty); only the distractor *density* differs (this is the
+  difficulty knob — preserve the relative escalation 01 &lt; 02 &lt; 03).
+- *New skin:* same assistant relationship; 02 interleaves real small asks ("convert
+  this", "summarise that") between the personal facts; 03 packs the most confusables.
+- *Pitfalls:* keep 02 and 03 genuinely harder than 01 — the escalation is the point.
+
+**`apply-standing-preferences-unprompted`** (was proactive-preference-01)
+- *Measures:* proactively applying standing preferences from memory, unprompted,
+  when the immediate request is phrased in the WRONG format.
+- *Skeleton:* 4 standing preferences stated **memorise-only** (ISO dates, 24h time,
+  no emoji in headings, sign with initials — or equivalents); scratch wiped; the
+  final request is deliberately phrased in non-preferred form (a trap — the agent
+  must apply prefs from memory, not mirror the prompt); grader = applied/4.
+- *New skin:* a user who set up "house style" preferences early, then later asks for
+  an announcement/email phrased sloppily; the agent should silently apply the style.
+- *Pitfalls:* the final request MUST be mis-formatted (else there's nothing to apply
+  proactively); prefs MUST be memorise-only (no file).
+
+**`refresh-config-over-cached-value`** (was stale-memory-vs-file-01)
+- *Measures:* re-reading live file state instead of trusting a value cached in
+  conversation memory.
+- *Skeleton:* the agent reads + repeatedly USES a value early (cementing it in
+  memory); a later step's `setup.sh` **silently rewrites the file** (e.g. 45 → 275)
+  then deletes itself; the final turn asks for the current value; grader = reward
+  1.0 **iff** the current value is reported AND the stale one is NOT (dumping both
+  forfeits; an honest "now 275 (was 45)" is carved out).
+- *New skin:* a config/feature-flag/price/threshold the user asks about, computes
+  with, then it changes under them. Believable as-is; re-skin the entity.
+- *Pitfalls:* the rewrite MUST be silent (agent never told); keep the
+  exclusive-credit scorer (current AND not stale).
+
+**`persist-facts-through-corrections`** (was true-multi-turn-memory-write-01)
+- *Measures:* proactively updating memory when facts are CORRECTED mid-conversation,
+  then using the latest values.
+- *Skeleton:* 8 facts shared over turns, **two corrected late** (e.g. timezone
+  Pacific→Mountain, schedule Tue/Thu→Mon/Wed); scratch wiped; final recap must use
+  the corrected values + a downstream task that respects the corrected constraints;
+  grader = `(correct_fields/8) × (0.85 + 0.15·downstream_ok)`; stale values score 0.
+- *New skin:* you tell an assistant your details, then correct two ("actually I moved
+  to Denver", "we changed climbing to Mondays") and ask it to plan around them.
+- *Pitfalls:* keep exactly two corrections + the downstream-constraint check; stale =
+  0 must hold.
+
+### Tool precision ×1
+
+**`pick-right-shell-utility`** (was tool-sprawl-precision-01)
+- *Measures:* tool-selection discipline — picking the right tools among many
+  opaquely-named look-alikes by reading their `--help`, not name-matching.
+- *Skeleton:* 60 candidate tools; exactly 3 solve the task; their names are OPAQUE
+  (function only in `--help`); ~9 name-collision decoys match the task verbs but do
+  the wrong thing; **the answer VALUE is deliberately NOT scored** (a script could
+  compute it); grader keys on the logged tool invocations: `0.5·selection_F1 +
+  0.5·call_efficiency`; computing offline without invoking tools scores 0.
+- *New skin:* a realistic **toolbox of 60 similar CLI utilities** (think a data-ops
+  bin/ with `sort`, `sort-numeric`, `colsum`, `col-sum`, `tally`, `count-rows`,
+  variants) where only 3 give correct results; the 3 facts to extract are believable
+  (count valid records, top term, total amount).
+- *Pitfalls:* the answer value MUST stay unscored (else it becomes a model test); keep
+  the opaque names + collision decoys + the invocation-log grader.
+
+### Control loop ×1
+
+**`redesign-module-keep-constraints`** (was plan-then-revise-01)
+- *Measures:* retaining a numeric constraint stated ONLY in earlier conversation
+  across a mid-task context regression.
+- *Skeleton:* a multi-step coding task where a bound (e.g. clamp `[-1000,1000]`) is
+  stated only in the step-1/2 conversation; step-3's `setup.sh` STRIPS the helper +
+  the bound from disk AND from the step-3 instruction; the agent must re-apply the
+  bound from memory; leaked scratch notes → reward 0.0; grader = `clamp_memory 0.40 +
+  functional 0.40 + cleanup 0.12 + replan 0.08`.
+- *New skin:* a believable module evolution (a pricing/validation/units library) with
+  a safety bound agreed early, then a "drop X, add Y, rename Z" change request that
+  omits the bound. Keep add/remove/rename ops.
+- *Pitfalls:* the bound MUST appear only in conversation (never in step-3 files); keep
+  the 0.40/0.40/0.12/0.08 split and the scratch-leak → 0 gate.
+
+### Delegation ×1
+
+**`parallel-delegation-under-deadline`** (was sub-agent-parallel-decompose-01)
+- *Measures:* parallelising via sub-agents to beat a serial time wall.
+- *Skeleton:* 60 INDEPENDENT subtasks, each needing a value from a **latency-gated
+  binary (≈8 s/call)**; serial = 60×8 s = 480 s, which blows the 600 s agent timeout
+  even with instant reasoning; only parallel sub-agent sessions clear enough in time;
+  grader = correct/60 (no concurrency bonus — serial simply finishes fewer).
+- *New skin:* 60 believable independent mini-jobs (e.g. 60 customer records to enrich,
+  each requiring one slow API/lookup), where the lookup is rate-limited. Keep 60 +
+  the 8 s gate + the 600 s timeout relationship.
+- *Pitfalls:* preserve the latency × count &gt; timeout arithmetic EXACTLY (that wall is
+  the whole test); each subtask must stay genuinely independent + non-batchable.
+
+### Research ×2
+
+**`research-org-profile-cited`** (was agentic-research-with-memory-01)
+- *Measures:* multi-page synthesis with value + an AUTHORITATIVE citation per fact.
+- *Skeleton:* a sandboxed seeded corpus (~16 interlinked pages); 8 facts each needing
+  the correct value AND an authoritative citation in the same unit (wrong-value or
+  archive-only → 0); grader = matched/8, co-located value+citation.
+- *New skin:* "write a cited one-pager on &lt;partner org / vendor&gt; from their site/docs"
+  — a believable due-diligence / proposal task. Keep the seeded corpus structure +
+  the authoritative-vs-archive distinction.
+- *Pitfalls:* keep the citation-must-be-authoritative + co-located grader (this is what
+  defeats a guess-from-memory shortcut).
+
+**`verify-company-facts-cited`** (was factual-lookup-cited-01)
+- *Measures:* fact retrieval with authoritative-source distinction + stale-page
+  resistance.
+- *Skeleton:* a seeded KB with current + outdated/archived pages; 10 fact items, each
+  scored on correct value + authoritative citation (archived/stale source → 0);
+  grader = found/10.
+- *New skin:* "answer these 10 questions about &lt;company&gt; with sources" — believable
+  analyst/reporter task. Keep the stale-page distractors.
+- *Pitfalls:* keep the stale/archived decoy pages — filtering them IS the test.
+
+### Baseline probe ×1
+
+**`basic-knowledge-qa`** (was prod-behavioral/conversational-01)
+- *Measures:* baseline factual recall + transcript capture for the production-agent
+  eval mode (a SMOKE/floor, not a discriminator).
+- *Skeleton:* one factual question; reward 1.0 iff the captured answer names the
+  correct fact (e.g. PARIS); `answer_present` weight-0 diagnostic distinguishes VOID
+  from wrong.
+- *New skin:* keep it a plain, believable one-line factual ask. Minimal change.
+- *Pitfalls:* this one's material goodness is intentionally low (it's a baseline) — do
+  not over-engineer it into a discriminator; just make the question read naturally.
+
+---
+
+## Hard constraints / gates (every rebuilt task MUST pass)
+
+1. **Oracle-equivalent.** The Harbor oracle reward for the reference `solve.sh` is
+   1.0 after the rebuild, and the per-criterion breakdown matches the pre-rebuild
+   baseline (same dimensions, same weights). Capture before/after in the as-built.
+2. **Scorer unchanged.** Same reward dimensions, weights, penalties, gates, and
+   weight-0 diagnostics. If the grader file changed at all, add an offline
+   **regrade-matrix test** proving correct / dump / hedge / bypass strings still score
+   exactly as before.
+3. **Kill-test still fails.** A `python3 -c` / single file-read still cannot produce
+   the reward. State the new kill-test answer in the as-built.
+4. **No telegraphing.** The instruction reads as a user goal; it does not name the
+   trap, the hidden check, or the required strategy. Re-run the telegraphing check
+   (`2026-06-01-telegraphing-audit.md`).
+5. **Mechanism intact + mechanical.** The wipe / silent-rewrite / strip / overflow /
+   latency gate is unchanged and enforced by `setup.sh`/the environment, never by
+   instruction. Overflow tasks still exceed the window; latency task still beats the
+   timeout only via parallelism.
+6. **rewardkit only** (AGENTS.md hard rule #8) — `python3 tools/check_rewardkit.py`
+   stays green for the task.
+7. **`reward.json` flat dict of numbers** (hard rule #2); provenance →
+   `reward-details.json`. **`FROM harbor-agents-rich:latest`** (hard rule #1).
+8. **Separation preserved.** Where an n=1 two-harness run is affordable, the rebuilt
+   task must NOT saturate to 1.0/1.0 — it should separate at least as well as before.
+   (n=1 is a smoke; the banked check is the n≥3 grid.)
+
+## Acceptance criteria
+
+- [ ] All 15 IN tasks rebuilt to believable scenarios; the 18 Bucket-A tasks audited
+      + their stale `shape`/`tags`/`description` fixed.
+- [ ] For each rebuilt task: discriminating-contract block written; oracle reward +
+      breakdown identical to baseline; kill-test answer restated; no-telegraphing
+      check passed.
+- [ ] `tools/check_rewardkit.py` green; `configs/oracle-full.yaml` oracle 33/33 = 1.0.
+- [ ] A human can read every task's instruction + `task.toml` description and
+      understand what's asked and (roughly) what it reveals about the harness — with
+      zero eval jargon.
+- [ ] No skeleton changed: a diff review confirms `setup.sh` / step graph / scorer
+      weights are untouched (or equivalence-proven).
+
+## Validation ladder (per task)
+
+1. **Offline:** the grader's regrade-matrix + exploit/bypass tests pass on synthetic
+   strings (no Docker). 2. **Oracle:** builds + `solve.sh` → 1.0, breakdown matches
+   baseline (run host, Docker, $0). 3. **n=1 e2e** both harnesses: does not saturate.
+   4. **n≥3** pass^k: folds into the suite verdict grid (separate, operator-gated).
+
+## Risks → mitigations (how we avoid losing goodness)
+
+- **Re-skin drifts into re-design** → the skeleton-diff gate (criterion 8 above):
+  reviewer confirms `setup.sh`/steps/scorer are byte-identical or equivalence-proven.
+- **New scenario accidentally makes the answer computable** (kill-test regression) →
+  mandatory kill-test restatement + an offline bypass test.
+- **Telegraphing creeps in** while making prose "clear" → the no-telegraphing check;
+  clarity is about the GOAL, never about the trap.
+- **Overflow corpus shrunk for readability** → token-budget assertion in the
+  fixture-generator; the corpus must still exceed the window.
+- **Grader re-point introduces a false-zero** (FOOTGUNS #2/#38) → keep the S4 crash
+  guard + `answer_present`; regrade-matrix test.
+
+## Execution
+
+One task per **baton** run (test-first: write the discriminating-contract + the
+regrade-matrix as the red tests, then rebuild to green), oracle-validated on the run
+host before merge. Order: do one task per cluster first (context-fill-02,
+memory-conversational-01, tool-sprawl, plan-then-revise) to prove the re-skin pattern
+end-to-end, then fan out the rest. Bucket-A audits can batch (they're field fixes).
+```
+</div><div id="src-E4-25"># tau3-bench integration — spec
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
@@ -6698,7 +7691,7 @@ we still prefer the privacy pool where the routing allows it.
   acceptance criterion unmet for v1; Track A sweep (#78) is the headline.
   Track-A artifacts in `/tmp/harbor-jobs/tau3-openclaw-smoke*` for diagnostic
   reference.
-</div><div id="src-E4-21"># Retired-task coverage matrix — no capability left untested (2026-06-01)
+</div><div id="src-E4-26"># Retired-task coverage matrix — no capability left untested (2026-06-01)
 
 **Epic:** E4 — Task Suite
 **Purpose.** The adversarial review retired 23 tasks on ONE axis: "does it separate
