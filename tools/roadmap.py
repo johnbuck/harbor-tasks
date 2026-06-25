@@ -191,12 +191,12 @@ SORT_RANK = {"partial": 0, "deprecated": 2, "rejected": 2}
 CSS = """
   body{font:14px/1.6 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}
   a{color:#9db4d6}
-  .nav{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+  .nav{display:flex;gap:10px;align-items:center;margin:0 auto 14px;max-width:1000px}
   .nav a{font-size:13px;text-decoration:none;border:1px solid #2f3645;border-radius:6px;padding:4px 12px;color:#9db4d6}
   .nav a:hover{background:#1c2331}
   .nav a.active{background:#1b2a1f;border-color:#3a5a44;color:#9fe0a5;font-weight:600}
   h1{font-size:18px;margin:0 0 2px} .ts{color:#8a8f98;font-size:12px;margin-bottom:18px}
-  .wrap{max-width:1000px}
+  .wrap{max-width:1000px;margin:0 auto}
   .mono{font-family:ui-monospace,Menlo,monospace}
   .thesis{background:#13182098;border:1px solid #2a3550;border-left:3px solid #5fd0d0;border-radius:10px;
     padding:14px 18px;margin-bottom:20px;font-size:13.5px;line-height:1.6;color:#cdd6e4}

@@ -467,6 +467,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <title>Task Suite</title>
 <style>
   body{{font:14px/1.5 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}}
+  .wrap{{max-width:1200px;margin:0 auto}}
   a{{color:#9db4d6}}
   .nav{{display:flex;gap:10px;align-items:center;margin-bottom:14px}}
   .nav a{{font-size:13px;text-decoration:none;border:1px solid #2f3645;border-radius:6px;padding:4px 12px;color:#9db4d6}}
@@ -542,6 +543,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   #mo .path{{color:#6b7280;font:11px monospace;padding:0 16px 10px}}
   #mo pre{{margin:0;padding:16px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12.5px/1.55 ui-monospace,Menlo,monospace;color:#cdd6e4}}
 </style></head><body>
+<div class="wrap">
 <div class="nav">
   <a href="index.html">Home</a>
   <a href="roadmap.html">Roadmap</a>
@@ -567,7 +569,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <span class="count" id="count"></span>
 </div>
 {sections}
-
+</div>
 <div id="ov" onclick="hideFile()"></div>
 <div id="mo">
   <header><h3 id="mo-name"></h3><span class="x" onclick="hideFile()">&times;</span></header>
