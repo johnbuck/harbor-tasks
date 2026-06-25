@@ -33,8 +33,9 @@ THESIS = (
 # Keep it outcome-oriented: NO eval-internal mechanics, methodology, or
 # agent-facing constraints belong here (those stay out of the public roadmap).
 STATUS = (
-    "The harness comparison runs end-to-end and has produced an initial "
-    "head-to-head verdict; work now focuses on broadening task coverage and validation."
+    "The harness comparison runs end-to-end on one unified 33-task suite and has "
+    "produced an initial head-to-head verdict; work now focuses on validating every "
+    "task and making the scenarios realistic."
 )
 
 # status: done | partial | blocked | todo
@@ -96,7 +97,7 @@ EPICS = [
     {
         "id": "E4", "status": "partial",
         "title": "Task Suite",
-        "summary": "Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is a suite that genuinely separates the harnesses, ending in the verdict grid.",
+        "summary": "Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is one unified suite (33 tasks) that genuinely separates the harnesses, ending in the verdict grid.",
         "specs": [
             # ── authoring: the categories, shapes, and task instances ──
             ("partial", "Task suite design — categories, shapes, first-sweep selection", "2026-05-27-task-suite-design.md",
@@ -144,6 +145,17 @@ EPICS = [
              "Threat-model refinement (2026-06-10): this eval measures HONEST harnesses, so the priority is closing honest-shortcut leaks (a capable agent legitimately reading a baked answer — a KILL-test fail) over adversarial-forge hardening (fabricating a log honest harnesses never touch). DONE + oracle-validated on the free oracle ($0 OpenRouter): unit-tests-01 (the 4 grading mutants relocated environment/→tests/ so Harbor uploads them only AFTER the agent runs — answer-key leak closed) and the proven discriminator failure-recovery-loop-01 (the plaintext `PAYLOAD: …` literal in the agent-readable dfetch script → DERIVED from the session token, sha256(token)[:11], at emit time; the task now passes the KILL test on the identical 2-call honest path, so discrimination is unchanged — only the emitted/expected string moved in lockstep). Adversarial-forge tasks (tool-sprawl / tool-selection / browser-find-fact / prompt-injection) deprioritized as speculative for an honest-harness verdict; schedule-meeting-from-name-01 deferred (its fix isn't safe to do unsupervised). New: NORTH_STAR.md — the canonical value hierarchy (validity > measure-the-harness > no-telegraphing > pass^k > fair-comparison > simplicity) for unsupervised judgment calls. Feeds the n≥3 verdict grid (#81) below — failure-recovery's supervised re-baseline is incorporated there."),
             ("done", "Run n≥3 pass^k grid → verdict (task #81) — first grid DONE", "2026-06-10-core-eleven-remediation.md",
              "DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the 11 remediated discriminator tasks over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/suite_weighted.py → suite_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the other 21 active tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin)."),
+            # ── 2026-06-25 unification + legibility/validity hardening ──
+            ("done", "Unify the full suite — one suite, one validation bar", "2026-06-25-unify-full-suite.md",
+             "IMPLEMENTED 2026-06-25 (commit 7be4767). Retired the old privileged-subset split and the dual-track framing: there is now ONE suite of 33 equally-important tasks under ONE bar. Configs/driver/metrics/tests/docs were de-tiered + renamed to neutral 'suite' names (the sweep config, the run driver, the weighted aggregator); a guard test fails if the retired vocabulary reappears in live source. Whether a task separates the harnesses is now a per-task OUTCOME measured at n≥3, not a pre-assigned tier. 252 prior offline tests still green + the guard = 253."),
+            ("done", "Human-readable task names + per-task 'how it works'", "2026-06-25-unify-full-suite.md",
+             "All 33 active tasks renamed from <shape>-NN ids to descriptive names (commit 7550dfa) so a reviewer grasps each task from its name (distinguish-my-facts-from-others, adaptive-tool-error-recovery, clean-expense-ledger). The Task Suite dashboard now carries a one-line plain-language 'how it works' per task."),
+            ("done", "Both-zero grader/fixture fixes (n=1 smoke false-zeros)", "2026-06-25-both-zero-grader-fixes.md",
+             "Two tasks scored 0 on BOTH harnesses in the n=1 smoke purely from a grader bug / bad fixtures, not real failure. FIXED + regression-tested: persist-facts-through-corrections (Part-A/B splitter anchored to a heading; meat-token regex word-boundaried) and credential-leak-detection (fixtures reseeded off canonical example secrets)."),
+            ("partial", "100% rewardkit grading — the standard", "2026-06-25-rewardkit-100pct-grader-conversion.md",
+             "Operator standard (2026-06-25): EVERY active task grades via rewardkit, no exceptions (pytest wrapped). The hard rule + tools/check_rewardkit.py CI gate are committed (ba454c7); this spec is the hand-off to convert the remaining tasks the gate still reports. PROPOSED."),
+            ("todo", "Rebuild task CONTENT into believable scenarios", "2026-06-25-task-content-rebuild-scenarios.md",
+             "The suite is legible by NAME; several tasks' CONTENT is still synthetic filler (PROJECT VEGA, 60 opaquely-named tools, WESTMARCH PRIORY). Rebuild into scenarios a real user would plausibly hand an agent WITHOUT losing each task's power to separate the harnesses. PROPOSED — one task per run, oracle-gated."),
         ],
     },
     {

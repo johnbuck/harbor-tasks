@@ -25,7 +25,7 @@ harbor-tasks/
 ├── tools/              # sweep drivers + the three status dashboards (below)
 └── tasks/              # Harbor task directories
     └── <category>/
-        └── <shape>-<NN>/
+        └── <task-name>/
             ├── task.toml
             ├── instruction.md
             ├── environment/Dockerfile
@@ -69,11 +69,11 @@ git clone https://github.com/johnbuck/harbor-tasks.git
 cd harbor-tasks
 
 # Single task:
-harbor run --path tasks/code-editing/fix-bug-with-failing-test-01 \
+harbor run --path tasks/code-editing/geometry-polymorphism-refactor \
     --agent openclaw --agent hermes --model anthropic/claude-sonnet-4-5
 
-# Full sweep (once configs/first-sweep.yaml is authored):
-harbor run -c configs/first-sweep.yaml
+# Full suite sweep (both harnesses, same model; via the driver — see AGENTS.md):
+CONFIG=$PWD/configs/suite.yaml tools/run_suite.sh
 
 # View results:
 harbor view ./jobs

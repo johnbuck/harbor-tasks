@@ -13,7 +13,7 @@ upstream (`novita`). Any gap is the **harness**, not the model or load-balancer 
 
 ---
 
-## Validation ladder — where the suite actually stands (2026-06-24)
+## Validation ladder — where the suite actually stands (2026-06-25)
 
 A task is only as trustworthy as the highest tier it has *passed*. Each tier proves
 something the one below cannot. **No task is `approved=true` yet** — approval requires
@@ -21,7 +21,7 @@ Tier 2 (oracle) + Tier 4 (n≥3).
 
 | Tier | What it proves | Status (the suite: 33 tasks) |
 |---|---|---|
-| **1. Offline grader/regression tests** | Grader *logic* scores correct strings up, dump/hedge/bypass strings down — on **synthetic** inputs | ✅ **244 pass** (`pytest tests/`) |
+| **1. Offline grader/regression tests** | Grader *logic* scores correct strings up, dump/hedge/bypass strings down — on **synthetic** inputs | ✅ **253 pass** (`pytest tests/`) |
 | **2. Oracle** | Each task **builds** and its **reference `solve.sh`** scores 1.0 — happy path + plumbing | ✅ **31/31 oracle-able = 1.0** (`configs/oracle-full.yaml`). `browser-find-fact-01` (gates on `browser_used`) and `prod-behavioral/conversational-01` (needs a real agent) are **not oracle-able by design** |
 | **3. Real-agent n=1 e2e smoke** | The **actual harness** runs every task; rough separation + which tasks break live | ✅ **complete** (`configs/smoke-n1.yaml`, both harnesses) — see below. **n=1 is a smoke, not a verdict** |
 | **4. n≥3 `pass^k` verdict** | Reliability spread; tasks that should discriminate genuinely do (a per-task outcome) | ❌ **not run for the current (reworked) tasks.** The 2026-06-10 n=5 (Δ=0.188) is **superseded** — it predates the second-adversarial-pass + rebuild + task remediation that reworked these tasks |
@@ -111,9 +111,10 @@ task catalog reads NEEDS REVIEW until each task clears its gate.
 
 ## Open work (next steps, post-triage 2026-06-25)
 
-1. **Fix 2 false-zeros (cheap, offline):** `true-multi-turn-memory-write` Part-B
-   heading-anchor + MEAT-regex fix; `secret-scan` reseed fixtures with realistic
-   non-canonical secrets. Add a regression check each, re-run their graders offline.
+1. ~~Fix 2 false-zeros~~ **DONE 2026-06-25** (`2026-06-25-both-zero-grader-fixes.md`):
+   `persist-facts-through-corrections` Part-A/B splitter anchored to a heading + meat-token
+   regex word-boundaried; `credential-leak-detection` fixtures reseeded off canonical
+   example secrets. Each fix has an offline regression test.
 2. **Re-run the 2 network-VOID tasks** (`find-contradictions`,
    `agentic-research-with-memory`) — verify `openrouter.ai` DNS on the run host first
    (provider-pin rule); ideally re-run the whole n=1 smoke on a stable network since
@@ -149,3 +150,7 @@ job's rollup is a single harness. Results land in `jobs/` (gitignored). Browse:
   (31/31) + the n=1 e2e smoke (bidirectional separation, ~6 both-zero pending triage);
   corrected the substrate (recall removed, honcho disabled → hindsight-only) and the
   approval state (0 approved; Tier 4 still owed for the current tasks).
+- 2026-06-25 suite UNIFIED — one suite (33 tasks), one bar; the old privileged-subset +
+  dual-track framing retired (spec `2026-06-25-unify-full-suite.md`, commit `7be4767`).
+  Both-zero grader false-zeros fixed; offline tests 244→253. Approval unchanged (0
+  approved; Tier 4 still owed).
