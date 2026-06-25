@@ -2,7 +2,7 @@
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-28
-- **Status:** IN PROGRESS
+- **Status:** IMPLEMENTED (closed 2026-06-25 — see Status notes)
 - **Origin:** Operator — "build out the multistep instructions as we've defined … capture specifications … push up to show the team."
 
 ## Problem
@@ -123,3 +123,5 @@ not affect authoring or oracle validation of these tasks.
   Validated the set via a symlink dir (`/tmp/ms-all`).
 - Remaining: stage the multi-step sweep × openclaw+hermes (gated on the
   openclaw reasoning-passthrough fix); tau3-bench build-validation in progress.
+
+- 2026-06-25: **CLOSED — IMPLEMENTED.** Multi-step is the suite's backbone: 12 of the 33 active tasks use the `steps/` layout — the conversation-persona memory tasks (4–8 steps), the context-management/context-rot tasks (now 18-ingest + recall = 19 steps), and plan-execute → `redesign-module-keep-constraints`. All renamed to human-readable names since; the `scaffold-implement-document` shape was archived (`archive/tasks/building-prototypes/`). All three open items are closed: the openclaw reasoning-passthrough fix RESOLVED (`done/2026-05-28-openclaw-reasoning-RESOLVED.md`), the dedicated multi-step sweep folded into the unified suite (`configs/suite.yaml`), and tau3-bench dropped as out of scope — so the "Known issue affecting RUNS" above is also resolved.
