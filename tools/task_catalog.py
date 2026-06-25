@@ -527,12 +527,10 @@ def render_card(t: dict) -> str:
         <span class="caret">▶</span>
         <span class="tname">{escape(t["dir"])}</span>
         {archived_badge}
-        <span class="badge {dcls}">{escape(diff)}</span>
-        {grade_badge}
         {"".join(head_badges)}
-        {"".join(flags)}
       </div>
       <div class="acc-body">
+        <div class="badges"><span class="badge {dcls}">{escape(diff)}</span> {grade_badge} {"".join(flags)}</div>
         <div class="work-note"><b>Work:</b> {escape(wmeaning)}</div>
         {retired_banner}
         <div class="meta">
@@ -579,6 +577,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .task.open .caret{{transform:rotate(90deg)}}
   .acc-body{{display:none;padding:2px 14px 13px 14px;border-top:1px solid #20242e}}
   .task.open .acc-body{{display:block}}
+  .acc-body .badges{{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0}}
   .work-note{{font-size:12px;color:#c4ccd8;background:#10131a;border:1px solid #222734;border-radius:6px;padding:7px 10px;margin:10px 0 8px}}
   .tname{{font-size:13.5px;font-weight:700;margin-right:auto;font-family:ui-monospace,Menlo,monospace}}
   .meta{{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-bottom:8px}}
