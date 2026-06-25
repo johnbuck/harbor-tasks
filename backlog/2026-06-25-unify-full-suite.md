@@ -1,5 +1,5 @@
 ---
-status: APPROVED
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-25
 ---
@@ -8,7 +8,7 @@ date: 2026-06-25
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-25
-**Status:** APPROVED 2026-06-25 — operator directive: "remove all concept of eleven
+**Status:** IMPLEMENTED 2026-06-25 (commit `7be4767`; as-built below) — originally APPROVED 2026-06-25 — operator directive: "remove all concept of eleven
 core vs twenty-one non-core; have a full test suite; every single task is valid and
 important to work on." Two forks resolved same-day: (1) scrub **live + forward**
 material, leave dated backlog specs as historical record but **note the framing is
@@ -96,3 +96,37 @@ rename/reword/de-tier refactor, not a grading change.
 Task grader/fixture *behavior* (this is naming/de-tiering only); rewriting dated
 backlog spec bodies; the both-zero fixes + n≥3 run (separate, tracked in RESULTS.md
 "Open work"); any harness/substrate change.
+
+
+## As-built (2026-06-25 — commit `7be4767`)
+
+Single rename/de-tier refactor; grader/fixture behavior unchanged.
+
+- **Configs:** `core-suite.yaml`→`suite.yaml`, rebuilt to cover **all 33** active
+  tasks (the prior 11 + 21 + `prod-behavioral/basic-knowledge-qa`, which *neither*
+  old config listed); `core-suite-claude`→`suite-claude` (kept as a cost-bounded
+  alt-model subset); `track-a-weights`→`suite-weights`; retired `track-a-harness`,
+  `track-a-focused`, `track-b-general`, `oracle-core`.
+- **Driver/metrics:** `run_track_a.sh`→`run_suite.sh` (CONFIG default→`suite.yaml`,
+  WEIGHTS→`suite-weights.toml`); `track_a_weighted.py`→`suite_weighted.py`
+  (`track_a_report.json`→`suite_report.json`).
+- **Tests:** `noncore.py`→`suite_helpers.py`; 8 `test_noncore_*`/`test_s1_noncore_wipe`
+  → `test_suite_*`; imports + function names fixed; `test_s5_drift` repointed to
+  `suite.yaml`. NEW acceptance guard `tests/hygiene/test_suite_no_legacy_framing.py`.
+- **Dashboards:** `roadmap.py`/`task_catalog.py` de-tiered; `task_catalog` dropped the
+  Track-A "focused n=5" set (it read the retired `track-a-focused.yaml`). HTML regen'd.
+- **Docs:** RESULTS.md, AGENTS.md, README.md → one suite + one bar; CLAUDE.md restored
+  to a symlink → AGENTS.md.
+- **Backlog:** deprecation banners on the core-eleven/core-suite/noncore specs + README;
+  dated bodies unchanged.
+
+**Verification:** 252 prior offline tests still green + the new guard = **253 passed**
+(`pytest tests/`); topology gate clean; guard confirms zero live framing mentions.
+
+**Deviation:** acceptance #1 ("no live mention") reconciled with item 7 ("keep backlog
+filenames + facts") — the guard strips dated spec-slug citations (`YYYY-MM-DD-…[.md]`)
+before matching, so code/configs/tasks may still cite a spec by slug as provenance.
+
+**Not done here** (explicit post-merge / operator gates, criteria #3 + #6): the live
+`tools/run_suite.sh` sweep and the full Docker oracle (`oracle-full.yaml`). The driver +
+config are wired for both.
