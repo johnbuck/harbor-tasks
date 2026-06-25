@@ -18,7 +18,7 @@
     border-radius:10px;padding:16px 20px;font-size:14px;margin-bottom:38px;color:#e0e6ef}
   .thesis .lbl{display:block;color:var(--green);font-weight:700;font-size:11px;
     text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   @media(max-width:620px){.grid{grid-template-columns:1fr}}
   a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);
     border:1px solid var(--border);border-radius:12px;padding:22px 22px 20px;
@@ -52,6 +52,11 @@
       <div class="t">Task Suite →</div>
       <div class="d">Every eval task (live + archived) with its shape, work-status, and operator-approval state.</div>
       <div class="go">Browse the task suite</div>
+    </a>
+    <a class="card" href="results.html">
+      <div class="t">Results →</div>
+      <div class="d">The head-to-head — how the two harnesses compare on quality, efficiency, and reliability, on the same model under identical conditions.</div>
+      <div class="go">See the comparison</div>
     </a>
   </div>
 
