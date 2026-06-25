@@ -21,8 +21,9 @@ from pathlib import Path
 
 import rewardkit as rk
 
-MEAT = (r'chicken|beef|pork|bacon|sausage|fish|salmon|tuna|shrimp|prawn|lamb|'
-        r'turkey|duck|\bham\b|steak|carnitas|pancetta|prosciutto')
+MEAT = (r'\bchicken\b|\bbeef\b|\bpork\b|\bbacon\b|\bsausage\b|\bfish\b|\bsalmon\b|'
+        r'\btuna\b|\bshrimp\b|\bprawn\b|\blamb\b|\bturkey\b|\bduck\b|\bham\b|'
+        r'\bsteak\b|\bcarnitas\b|\bpancetta\b|\bprosciutto\b')
 
 # Negation / contrast cues that mark a stale value as deliberately excluded.
 NEG_CUE = re.compile(
@@ -30,6 +31,22 @@ NEG_CUE = re.compile(
     r"\bunlike\b|\bwas\b|\bwere\b|previously|formerly|used to|changed from|"
     r"moved from|switched from|\bold\b|\bavoid"
 )
+
+# Meat negation cues: a meat word counts only when it is ASSERTED, not when the
+# dinner names what it excludes ("no meat, no fish, no shellfish" / "without bacon").
+MEAT_NEG = re.compile(
+    r"\bno\b|\bnot\b|n't|\bwithout\b|\bsans\b|\bminus\b|\bhold\b|\bskip\b|"
+    r"\bavoid\b|\bnever\b|\bfree\b|free of|free from|\bexclud|\bomit"
+)
+
+
+def _meat_asserted(part_b: str) -> bool:
+    """True if a meat word appears ASSERTED (present and NOT negated) in Part B."""
+    for m in re.finditer(MEAT, part_b):
+        pre = part_b[max(0, m.start() - 30):m.start()]
+        if not MEAT_NEG.search(pre):
+            return True
+    return False
 
 
 def _stale_leaked(cell: str, pat: str) -> bool:
@@ -52,9 +69,21 @@ def _results(workspace_str: str) -> tuple:
                           "f_climb_days", "f_coffee", "f_daughter")}}.items())
 
     lines = raw.split("\n")
-    # Split Part A (the recap) from Part B (the dinner) on the first Part-B / dinner marker.
-    pb = next((i for i, ln in enumerate(lines)
-               if re.search(r'part\s*b|dinner', ln, re.I)), len(lines))
+    # Split Part A (the recap) from Part B (the dinner). Anchor the split to a
+    # markdown HEADING boundary so a document TITLE that merely names the dinner
+    # ("# Profile & Dinner Plan") doesn't match on line 0 and discard the whole
+    # recap (cf=0). Prefer an explicit "Part B" heading, then a "dinner" heading;
+    # fall back to a bare marker only when no heading carries it.
+    def _split_idx():
+        for i, ln in enumerate(lines):
+            if re.match(r'\s*#{1,6}\s.*part\s*b', ln, re.I):
+                return i
+        for i, ln in enumerate(lines):
+            if re.match(r'\s*#{1,6}\s.*\bdinner\b', ln, re.I):
+                return i
+        return next((i for i, ln in enumerate(lines)
+                     if re.search(r'part\s*b|dinner', ln, re.I)), len(lines))
+    pb = _split_idx()
     part_a = lines[:pb] if pb < len(lines) else lines
     part_b = "\n".join(lines[pb:]).lower() if pb < len(lines) else raw.lower()
 
@@ -88,7 +117,7 @@ def _results(workspace_str: str) -> tuple:
     }
     cf = sum(1 for v in fields.values() if v)
 
-    veg = 0 if re.search(MEAT, part_b) else 1
+    veg = 0 if _meat_asserted(part_b) else 1
     peanut = 1
     if re.search('peanut', part_b):
         if (re.search(r'peanut (sauce|butter|oil|noodle|dressing)', part_b)

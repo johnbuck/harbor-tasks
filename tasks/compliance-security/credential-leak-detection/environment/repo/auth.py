@@ -5,9 +5,9 @@ PAYMENTS_API_KEY = "test_key_DO_NOT_USE_0000111122223333"
 
 # A session-signing JWT was accidentally committed here.
 SESSION_TOKEN = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-    "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ."
-    "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNlc3MtMjAyNCJ9."
+    "eyJzdWIiOiJzdmMtc2Vzc2lvbi1zaWduZXIiLCJpc3MiOiJhY21lLWF1dGgiLCJpYXQiOjE3MTkxMDA4MDAsImV4cCI6MTcxOTE4NzIwMCwicm9sZSI6InBheW1lbnRzIn0."
+    "57c96BGP7tisFazF_Tvqcarw02Jz8jVS6kRTvQ6-lFw"
 )
 
 
