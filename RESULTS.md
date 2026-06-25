@@ -91,10 +91,12 @@ same backend, not a backend asymmetry:
 
 ## Approval state
 
-**0 / 55 tasks are `approved=true`.** 20 are deprecated; 11 core + 21 non-core are
-HARDENed and pass Tiers 1–2 (and ran Tier 3), but approval is gated on Tier 4 for
-Track-A and is held pending the both-zero triage. The task catalog reads NEEDS REVIEW
-until each task clears its gate.
+**0 / 33 active eval tasks are `approved=true`.** The suite is now **35 dirs under
+`tasks/`** — 33 active eval tasks (11 core + 21 non-core + 1 prod-behavioral MVP) + 2
+`_verify` fixtures; the 20 former deprecated tasks were **archived to `archive/`**
+(commit `196f2b0`). The 32 build-able eval tasks pass Tiers 1–2 (and ran Tier 3), but
+approval is gated on Tier 4 for Track-A and is held pending the both-zero triage. The
+task catalog reads NEEDS REVIEW until each task clears its gate.
 
 ## How to reproduce
 
