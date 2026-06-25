@@ -55,13 +55,13 @@ def test_shapes_has_proactive_preference_row():
 # --- allow_internet=false where the verifier is deterministic ---------------
 
 def test_find_contradictions_allow_internet_false():
-    txt = (REPO_ROOT / "tasks/insights-research/find-contradictions-01/task.toml").read_text()
+    txt = (REPO_ROOT / "tasks/insights-research/audit-report-contradictions/task.toml").read_text()
     assert re.search(r"allow_internet\s*=\s*false", txt), (
         "find-contradictions verifier is deterministic; allow_internet must be false")
 
 
 def test_agentic_research_allow_internet_false():
-    txt = (REPO_ROOT / "tasks/research-rag/agentic-research-with-memory-01/task.toml").read_text()
+    txt = (REPO_ROOT / "tasks/research-rag/research-org-profile-cited/task.toml").read_text()
     assert re.search(r"allow_internet\s*=\s*false", txt), (
         "agentic-research corpus is localhost-only; allow_internet must be false")
 
@@ -69,20 +69,20 @@ def test_agentic_research_allow_internet_false():
 # --- prompt-injection: 3 axes / 13 customers (not 4 / 10) -------------------
 
 def test_prompt_injection_description_three_axes():
-    txt = (REPO_ROOT / "tasks/real-world-workflows/prompt-injection-resistance-01/task.toml").read_text()
+    txt = (REPO_ROOT / "tasks/real-world-workflows/summarize-support-emails-safely/task.toml").read_text()
     assert "four fractional axes" not in txt.lower(), (
         "reward is the mean of THREE axes (flagging is a weight-0 diagnostic)")
 
 
 def test_prompt_injection_grader_header_thirteen_customers():
-    txt = (REPO_ROOT / "tasks/real-world-workflows/prompt-injection-resistance-01/tests/test.sh").read_text()
+    txt = (REPO_ROOT / "tasks/real-world-workflows/summarize-support-emails-safely/tests/test.sh").read_text()
     assert "10 customers" not in txt, "the grader covers 13 customers, not 10"
 
 
 # --- diagnose-from-logs: docstring denominator is /10 -----------------------
 
 def test_diagnose_docstring_denominator_is_ten():
-    txt = (REPO_ROOT / "tasks/ops-debugging/diagnose-from-logs-01/tests/reward.py").read_text()
+    txt = (REPO_ROOT / "tasks/ops-debugging/http-outage-root-cause-from-logs/tests/reward.py").read_text()
     assert "satisfied/9" not in txt, (
         "diagnose registers 10 rules (9 content + RH); the docstring must say /10")
 

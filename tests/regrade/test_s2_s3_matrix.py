@@ -15,11 +15,11 @@ import pytest
 
 from helpers import REPO_ROOT, crit, grade_rewardkit
 
-T1_TESTS = REPO_ROOT / "tasks/conversation-persona/multistep-memory-conversational-01/steps/07-recall/tests"
-T2_TESTS = REPO_ROOT / "tasks/conversation-persona/true-multi-turn-memory-write-01/steps/08-recall-question/tests"
-T3_TESTS = REPO_ROOT / "tasks/conversation-persona/multistep-stale-memory-vs-file-01/steps/04-query/tests"
-T4_TESTS = REPO_ROOT / "tasks/context-management/multistep-context-fill-02/steps/19-recall/tests"
-T5_TESTS = REPO_ROOT / "tasks/context-rot/context-rot-02/steps/19-recall/tests"
+T1_TESTS = REPO_ROOT / "tasks/conversation-persona/distinguish-my-facts-from-others/steps/07-recall/tests"
+T2_TESTS = REPO_ROOT / "tasks/conversation-persona/persist-facts-through-corrections/steps/08-recall-question/tests"
+T3_TESTS = REPO_ROOT / "tasks/conversation-persona/refresh-config-over-cached-value/steps/04-query/tests"
+T4_TESTS = REPO_ROOT / "tasks/context-management/track-final-state-through-corrections/steps/19-recall/tests"
+T5_TESTS = REPO_ROOT / "tasks/context-rot/chain-facts-across-survey-depth/steps/19-recall/tests"
 
 
 def _ws(tmp_path, name, filename, text):

@@ -22,11 +22,11 @@ from helpers import REPO_ROOT
 
 # (label, step dir relative to tasks/)
 STEPS = [
-    ("T1", "conversation-persona/multistep-memory-conversational-01/steps/07-recall"),
-    ("T2", "conversation-persona/true-multi-turn-memory-write-01/steps/08-recall-question"),
-    ("T4", "context-management/multistep-context-fill-02/steps/19-recall"),
-    ("T5", "context-rot/context-rot-02/steps/19-recall"),
-    ("T8", "tool-orchestration/plan-then-revise-01/steps/03-revise-and-fix"),
+    ("T1", "conversation-persona/distinguish-my-facts-from-others/steps/07-recall"),
+    ("T2", "conversation-persona/persist-facts-through-corrections/steps/08-recall-question"),
+    ("T4", "context-management/track-final-state-through-corrections/steps/19-recall"),
+    ("T5", "context-rot/chain-facts-across-survey-depth/steps/19-recall"),
+    ("T8", "tool-orchestration/redesign-module-keep-constraints/steps/03-revise-and-fix"),
 ]
 
 

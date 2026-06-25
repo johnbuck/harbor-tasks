@@ -23,19 +23,19 @@ def _line_for(path, needle):
 
 
 def test_core_suite_context_fill_02_denominator_is_12():
-    ln = _line_for(CORE_SUITE, "multistep-context-fill-02")
+    ln = _line_for(CORE_SUITE, "track-final-state-through-corrections")
     assert "/14" not in ln, ln
     assert "/12" in ln, ln
 
 
 def test_core_suite_update_record_denominator_is_16():
-    ln = _line_for(CORE_SUITE, "update-record-with-cleanup-01")
+    ln = _line_for(CORE_SUITE, "clean-expense-ledger")
     assert "/19" not in ln, ln
     assert "/16" in ln, ln
 
 
 def test_core_suite_plan_then_revise_replan_relabelled():
-    ln = _line_for(CORE_SUITE, "plan-then-revise-01")
+    ln = _line_for(CORE_SUITE, "redesign-module-keep-constraints")
     assert "re-plan /8" not in ln, (
         "REPLAN is a 0.08-weight keyword check, not a graded '/8' axis; relabel it"
     )
