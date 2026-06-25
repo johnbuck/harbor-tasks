@@ -14,7 +14,7 @@ import json
 
 from helpers import REPO_ROOT, grade_inprocess
 
-TOOLSEL_REWARD = REPO_ROOT / "tasks/tool-orchestration/tool-selection-01/tests/reward.py"
+TOOLSEL_REWARD = REPO_ROOT / "tasks/tool-orchestration/multi-goal-tool-routing/tests/reward.py"
 
 
 def test_tool_selection_honest_trajectory_scores_full(tmp_path):

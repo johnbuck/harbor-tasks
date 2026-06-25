@@ -28,7 +28,7 @@ from pathlib import Path
 
 from helpers import REPO_ROOT
 
-T11 = REPO_ROOT / "tasks/real-world-workflows/update-record-with-cleanup-01"
+T11 = REPO_ROOT / "tasks/real-world-workflows/clean-expense-ledger"
 GRADE_PY = T11 / "tests" / "grade.py"
 ORIGINAL_CSV = T11 / "tests" / "original.csv"
 TASK_TOML = T11 / "task.toml"

@@ -12,12 +12,12 @@ import shutil
 
 from helpers import REPO_ROOT, crit, grade_inprocess, grade_rewardkit
 
-CFILL01_TESTS = REPO_ROOT / "tasks/context-management/multistep-context-fill-01/steps/19-recall/tests"
-CONV03_TESTS = REPO_ROOT / "tasks/conversation-persona/multistep-memory-conversational-03/steps/07-recall/tests"
-AGENTIC_TESTS = REPO_ROOT / "tasks/research-rag/agentic-research-with-memory-01/tests"
-FACTUAL_TESTS = REPO_ROOT / "tasks/research-rag/factual-lookup-cited-01/tests"
-PANDAS_REWARD = REPO_ROOT / "tasks/data-analytics/pandas-sql-from-nl-01/tests/reward.py"
-PANDAS_ENV = REPO_ROOT / "tasks/data-analytics/pandas-sql-from-nl-01/environment"
+CFILL01_TESTS = REPO_ROOT / "tasks/context-management/track-project-across-context-overflow/steps/19-recall/tests"
+CONV03_TESTS = REPO_ROOT / "tasks/conversation-persona/recall-details-under-high-load/steps/07-recall/tests"
+AGENTIC_TESTS = REPO_ROOT / "tasks/research-rag/research-org-profile-cited/tests"
+FACTUAL_TESTS = REPO_ROOT / "tasks/research-rag/verify-company-facts-cited/tests"
+PANDAS_REWARD = REPO_ROOT / "tasks/data-analytics/analyze-sales-data/tests/reward.py"
+PANDAS_ENV = REPO_ROOT / "tasks/data-analytics/analyze-sales-data/environment"
 
 
 def _ws(tmp_path, name, filename, text):

@@ -17,12 +17,12 @@ import pytest
 
 from helpers import REPO_ROOT, run_shell_grader
 
-T6_GRADER = REPO_ROOT / "tasks/ops-debugging/failure-recovery-loop-01/tests/test.sh"
+T6_GRADER = REPO_ROOT / "tasks/ops-debugging/adaptive-tool-error-recovery/tests/test.sh"
 
 REWARDKIT_GRADERS = {
-    "T1": "tasks/conversation-persona/multistep-memory-conversational-01/steps/07-recall/tests/test.sh",
-    "T7": "tasks/tool-orchestration/tool-sprawl-precision-01/tests/test.sh",
-    "T9": "tasks/skill-agent-authoring/sub-agent-parallel-decompose-01/tests/test.sh",
+    "T1": "tasks/conversation-persona/distinguish-my-facts-from-others/steps/07-recall/tests/test.sh",
+    "T7": "tasks/tool-orchestration/pick-right-shell-utility/tests/test.sh",
+    "T9": "tasks/skill-agent-authoring/parallel-delegation-under-deadline/tests/test.sh",
 }
 
 

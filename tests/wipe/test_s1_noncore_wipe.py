@@ -26,12 +26,12 @@ import pytest
 from helpers import REPO_ROOT
 
 EXTERNAL_MEMORY = [
-    ("conv-02", "conversation-persona/multistep-memory-conversational-02/steps/06-recall"),
-    ("conv-03", "conversation-persona/multistep-memory-conversational-03/steps/07-recall"),
+    ("conv-02", "conversation-persona/recall-details-across-task-switching/steps/06-recall"),
+    ("conv-03", "conversation-persona/recall-details-under-high-load/steps/07-recall"),
 ]
 IN_WINDOW = [
-    ("context-fill-01", "context-management/multistep-context-fill-01/steps/19-recall"),
-    ("context-rot-01", "context-rot/context-rot-01/steps/19-recall"),
+    ("context-fill-01", "context-management/track-project-across-context-overflow/steps/19-recall"),
+    ("context-rot-01", "context-rot/retain-details-across-long-survey/steps/19-recall"),
 ]
 ALL = EXTERNAL_MEMORY + IN_WINDOW
 
