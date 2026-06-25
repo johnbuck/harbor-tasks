@@ -667,7 +667,6 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 {err_html}
 {summary}
 <div class="filterbar">
-  <select id="f-archived"><option value="0" selected>active only</option><option value="">active + archived</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
   <select id="f-tier"><option value="">any progress</option>{tier_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
@@ -717,14 +716,14 @@ function expandAll(on){{
 const F = id => document.getElementById(id);
 function applyFilters(){{
   const cat=F('f-cat').value, tier=F('f-tier').value, diff=F('f-diff').value,
-        arch=F('f-archived').value,
         graded=F('f-graded').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
   document.querySelectorAll('.task').forEach(c=>{{
     let ok=true;
-    if(arch && c.dataset.archived!==arch) ok=false;
+    // archived hidden by default; the progress filter "archived" reveals them
+    if(c.dataset.tier==='retired' && tier!=='retired') ok=false;
     if(cat && c.dataset.cat!==cat) ok=false;
     if(tier && c.dataset.tier!==tier) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
@@ -742,7 +741,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-archived','f-cat','f-tier','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
+['f-cat','f-tier','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>
