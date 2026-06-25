@@ -370,7 +370,8 @@ def render(tasks: list, weights: dict) -> str:
     </div>"""
 
     tier_select = "".join(
-        f'<option value="{k}">{TIER[k][0]}</option>' for k in (TIER_ORDER + ["retired"]))
+        f'<option value="{k}">{TIER[k][0]}</option>'
+        for k in (TIER_ORDER + ["retired"]) if k != "todo")
 
     # Category sections, ordered by weight desc then name.
     cats = sorted({t["category"] for t in real},
