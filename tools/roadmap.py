@@ -48,8 +48,6 @@ EPICS = [
              "harbor-agents-rich:latest bakes the full configs + skills + tooling (jupyter/debugpy) so a trial boots a realistic agent, not a bare CLI. This is the image every task's Dockerfile must FROM."),
             ("done", "openclaw reasoning on OpenRouter — resolved", "done/2026-05-28-openclaw-reasoning-RESOLVED.md",
              "openclaw initially emitted no reasoning over OpenRouter; resolved and verified end-to-end (QuixBugs) so both harnesses genuinely reason on the shared model — a precondition for a fair comparison."),
-            ("deprecated", "Install-during-trial adapter — DEPRECATED 2026-06-02 (was task #84)", "2026-05-28-tau3-bench-integration.md",
-             "Deprecated. The thin adapter runs the BAKED harness and doesn't forward Harbor's injected mcp_servers, so the tau3-runtime MCP never reaches the agent; closing that needs an install-during-trial / MCP-forwarding adapter. Decided not worth building for a single benchmark — tau3 is retained as oracle-only pipeline validation, the live agent-run is out of scope. This was the last open E1 item, so the epic's runtime/adapter foundation is complete."),
         ],
     },
     {
@@ -105,8 +103,8 @@ EPICS = [
              "Two shapes shipped 2026-05-30: a sub-agent fan-out task (N non-batchable prose problems so parallel delegation beats serial, reward = fraction solved) and a research task."),
             ("done", "Goal-oriented real-world workflows", "2026-05-30-goal-oriented-real-world-tasks.md",
              "Workflows modelled on how users actually drive agents. All 3 shapes shipped + oracle-validated + hardened (non-core remediation). Only update-record-with-cleanup-01 is in the core-11 (the stateful-workflow discriminator, /16 — it carried the n=5 grid); schedule-meeting-from-name-01 + prompt-injection-resistance-01 are ACTIVE NON-CORE — prompt-injection is deliberately excluded from the core set (model-level safety, not the harness) and schedule-meeting needs a sidecar redesign before any core promotion. Category built + scoring."),
-            ("done", "tau3-bench integration — oracle shipped; agent-run deprecated", "2026-05-28-tau3-bench-integration.md",
-             "Integrate the tau3 benchmark. The oracle ships and validates the eval pipeline. The live agent-run was DEPRECATED 2026-06-02 — the thin adapter doesn't forward Harbor's injected tau3-runtime MCP, and an install-during-trial adapter isn't worth building for one benchmark (see the E1 adapter row). tau3 is retained as oracle-only; closed as scoped."),
+            ("rejected", "tau3-bench — REMOVED from scope (not part of the comparison)", "2026-05-28-tau3-bench-integration.md",
+             "Decided long ago: tau3 (an external benchmark) is NOT part of this harness-vs-harness eval and produces no comparison data. The thin adapter can't forward Harbor's injected tau3 MCP, and building an install-during-trial adapter wasn't worth it for one external benchmark. Out of scope — kept only as an inert reference; nothing downstream depends on it."),
             # ── discrimination & validity: do the authored tasks actually measure the harness? ──
             ("done", "Harness-vs-model discriminating suite — instrument PROVEN at n=5", "2026-05-30-harness-vs-model-discriminating-suite.md",
              "The core spec: evaluate the SCAFFOLDING, not the LLM. The interim caveat is now discharged — the reworked core-11 ran a full n=5 pass^k grid (110 trials) on the symmetric hindsight-only substrate and the suite DISCRIMINATES: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in BOTH directions (hermes 5, openclaw 2). Reliability is the signal — hermes 4% error vs openclaw 20%. See the n≥3 verdict-grid row below + RESULTS.md."),
