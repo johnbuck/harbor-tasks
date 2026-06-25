@@ -270,121 +270,52 @@ def tier_meta(t: dict) -> tuple:
     return key, label, cls, meaning
 
 
-# ── Discrimination-design reference (moved off the roadmap) ───────────────────
-# For the tasks built specifically to separate the HARNESS from the model: the
-# four-part recipe + each task's trap / scoring / why-it's-the-harness. Rendered
-# as a collapsible reference section at the bottom of the page. Task names track
-# the on-disk dirs. Curated text — edit here and rerun.
-TASK_EXPLAIN_INTRO = (
-    "Every one of these tasks is built from the same four parts, so once you see the pattern you can read them all. "
-    "<b>(1) A surface goal stated like a real user</b> — no hint of the trap, the hidden check, or the "
-    "required strategy (“no telegraphing”). <b>(2) A hidden mechanism that makes the answer "
-    "uncomputable without the harness</b>, enforced <i>mechanically</i> by a step's "
-    "<span class='mono'>setup.sh</span> — it wipes all scratch before grading, silently rewrites a file, "
-    "strips a value that was only ever spoken, or gates on latency. <b>(3) A graded scorer</b> "
-    "(<span class='mono'>tests/test.sh</span>) — partial credit across weighted dimensions, never pass/fail "
-    "(binary tasks saturate to 1.0 for two competent harnesses). <b>(4) The kill test</b> — if "
-    "<span class='mono'>python3 -c</span> or one file-read could solve it, it measures the <i>model</i>; "
-    "every task here defeats this. A <span class='mono'>0</span> on a <i>completed</i> run is VOID, not a "
-    "loss — weight-0 <span class='mono'>diagnostics</span> tell the two apart."
-)
-
-TASK_EXPLAIN = [
-    {"group": "Memory — state must survive a filesystem wipe, through the harness", "tests": [
-        {"name": "distinguish-my-facts-from-others", "axis": "recall precision under distraction",
-         "score": "correct / 12",
-         "trap": "Learns 12 of Dana's facts, then 4 distractor turns inject confusable siblings (Sam's allergy, Jess's red Honda…); a recall step's setup.sh wipes all scratch + deletes /app before the recall, so answers must come from harness memory alone.",
-         "scoring": "reward = correct / 12. A precise fact = 1.0; stating the distractor value or hedging both ≈ 0.33. Flat 0.0 if the wipe assertion fails (VOID).",
-         "why": "No scratch survives between steps — only the harness's session memory does."},
-        {"name": "persist-facts-through-corrections", "axis": "proactive memory update on correction",
-         "score": "(correct/8) × (0.85+0.15·dinner)",
-         "trap": "Mid-conversation the user CORRECTS two facts (timezone Pacific→Mountain, climbing nights Tue/Thu/Sat→Mon/Wed/Fri); the next step wipes scratch. Passive listening keeps the stale values.",
-         "scoring": "reward = (correct_fields / 8) × (0.85 + 0.15·dinner_ok); the dinner plan must respect the CORRECTED constraints. Stale values score 0.",
-         "why": "A model can't force the harness to write/update memory — without an UPDATE the old values survive the wipe."},
-        {"name": "refresh-config-over-cached-value", "axis": "trust the live file over stale memory",
-         "score": "1.0 iff 275 (not 45)",
-         "trap": "Agent reads & repeatedly computes with cache_ttl_seconds: 45 (cementing it in memory); a later step's setup.sh SILENTLY rewrites the file to 275 (then deletes itself) and asks for the current value.",
-         "scoring": "reward = 1.0 iff the answer is 275 AND not also 45 — dumping both forfeits it (an honest “275 (was 45)” is carved out).",
-         "why": "The silent rewrite forces a choice between repeatedly-used memory (45) and a re-fetch (275); bare code never sees the change."},
-    ]},
-    {"group": "Long-context — retention as the window fills", "tests": [
-        {"name": "track-final-state-through-corrections", "axis": "final-vs-stale value under window overflow",
-         "score": "max(0, current−stale) / 12",
-         "trap": "18 weekly reports (~1.3M tokens, >1× the 1M window); nearly every fact is corrected 2–3× over the quarter (lead Reyes→Tanaka→Okafor…). Reports deleted before recall.",
-         "scoring": "reward = max(0, current_hits − stale_hits) / 12. Each fact: +1 for the FINAL value with ≤1 prior value present; −1 for adopting the GCP decoy. Dumping churned values = 0.",
-         "why": "A script can't tell the final value from a stale one buried mid-context under saturation — it needs the harness to manage retention across 18 steps."},
-        {"name": "chain-facts-across-survey-depth", "axis": "multi-hop lost-in-the-middle recall",
-         "score": "matched / 8",
-         "trap": "18 inspection records (~345K — FITS the window, so this tests retention not overflow) threaded into one growing conversation; 8 questions each chain two facts buried at different depths via a bridge entity.",
-         "scoring": "reward = matched / 8; each needle must be positional + exclusive. Weight-0 early/middle/late fractions trace the rot curve.",
-         "why": "Resolving a two-hop chain across facts at different conversational depths needs the harness's threaded context, not offline lookup."},
-    ]},
-    {"group": "Control loop + tool precision — recovery, replanning, selection", "tests": [
-        {"name": "adaptive-tool-error-recovery", "axis": "adaptive error-recovery ladder",
-         "score": "0.6·correct + 0.4·efficiency",
-         "trap": "dfetch fails with 4 DIFFERENT actionable errors in sequence (bad-region→401→stale-lock→success); correct values are found only by exploring /app/dfetch.conf. Success emits an HMAC nonce whose secret lives in the stripped binary — forged answers fail --verify; the binary sha256 is pinned against swaps.",
-         "scoring": "reward = 0.6·correctness + 0.4·efficiency, where efficiency = clamp((18−calls)/(18−3)). 1.0 = HMAC-verified files + an ordered progression log ending in “release”, ≤18 calls.",
-         "why": "Each error demands interaction with live system state; there's no static answer, and only correct sequential calls unlock the secret."},
-        {"name": "redesign-module-keep-constraints", "axis": "retain a bound across a mid-task context wipe",
-         "score": "clamp 0.40 + fn 0.40 + cleanup 0.12 + replan 0.08",
-         "trap": "A numeric clamp bound [−1000, 1000] is stated ONLY in conversation in steps 1–2; step 3's setup.sh strips the helper and the bound from disk + instructions, then asks for a refactor that must re-apply it. Leaked scratch notes → reward 0.0.",
-         "scoring": "reward = clamp_memory 0.40 + functional 0.40 + cleanup 0.12 + replan 0.08. Without recalling the bound, the score caps ≈ 0.60.",
-         "why": "The bound is unrecoverable from step 3's files/instructions — only harness-threaded conversation state unlocks the full score."},
-        {"name": "pick-right-shell-utility", "axis": "tool selection among decoys",
-         "score": "0.5·F1 + 0.5·efficiency",
-         "trap": "60 tools, exactly 3 correct (opaque names — function only in --help); 9 name-collision decoys (count, analyze, rank) match the verbs but do the wrong thing. The answer VALUE is deliberately not scored (a script could compute it) — only logged tool invocations are.",
-         "scoring": "reward = 0.5·selection_F1 + 0.5·call_efficiency. Computing offline without invoking tools = 0.0 (VOID).",
-         "why": "Grading is purely on invocation discipline; a pure python3 solver scores 0."},
-    ]},
-    {"group": "Delegation + skill acquisition", "tests": [
-        {"name": "parallel-delegation-under-deadline", "axis": "parallel sub-agent fan-out",
-         "score": "correct / 60",
-         "trap": "60 independent problems, each needing a value from a latency-gated binary (8s/call). Serial = 60×8s = 480s, blowing the 600s timeout even with instant math; only parallel sub-agent sessions clear enough in time.",
-         "scoring": "reward = correct / 60. No concurrency bonus — a serial harness simply finishes fewer (mtime logs are advisory only).",
-         "why": "A single synchronous token-stream hits a hard 480s floor; only independent parallel sessions beat the clock."},
-        {"name": "skill-discovery-with-docs", "axis": "find the right skill by reading metadata",
-         "score": "passed / 16",
-         "trap": "13 skills; only tabular-shape-report is correct — and its name does NOT echo “shape”, while 3 better-named decoys emit near-miss output. The required --null=empty flag is documented only in the right SKILL.md. A SHA256 breadcrumb proves real discovery; running all 13 (brute sweep) trips a gate and denies credit.",
-         "scoring": "reward = passed / 16 (8 files × {correct, discovered}). Near-miss = 1/2; swept = 0/2.",
-         "why": "Discovery needs parsing structured tool metadata, not reasoning; the sweep gate + hash breadcrumb block reimplementation cheats."},
-    ]},
-    {"group": "Stateful workflow", "tests": [
-        {"name": "clean-expense-ledger", "axis": "precise multi-axis ledger edit",
-         "score": "per-decision / N",
-         "trap": "A 340-row budget CSV; the agent must DISCOVER the dedup rule (identical date+vendor+amount+category) by inspection — never told. 6 May grocery dup-groups to remove, 7 lookalike groups (near-amounts 55.00/55.10, same-date-different-category…) to PRESERVE, plus a rent row to split 50/50. No answer key ever exists in the container.",
-         "scoring": "reward = (dedup + preserve + rent_split + rent_orig_gone + collateral) / total, per decision — with a dedup gate that floors preserve/collateral at 0 if nothing was actually deduped (so “do nothing” can't score ≈0.5).",
-         "why": "Requires empirically inferring the rule from the data, then a precise stateful transform — there's no key to learn from."},
-    ]},
-]
-
-
-def render_task_explain() -> str:
-    """The discrimination-design reference (moved off the roadmap): each
-    harness-measuring task's trap / scoring / why, as a collapsible section."""
-    blocks = []
-    for grp in TASK_EXPLAIN:
-        rows = []
-        for t in grp["tests"]:
-            rows.append(
-                f'<details class="howrow"><summary>'
-                f'<span class="howname">{escape(t["name"], quote=False)}</span> '
-                f'<span class="howaxis">— {escape(t["axis"], quote=False)}</span>'
-                f'<span class="howscore">{escape(t["score"], quote=False)}</span></summary>'
-                f'<div class="howdet"><b>Trap:</b> {escape(t["trap"], quote=False)}<br>'
-                f'<b>Scoring:</b> {escape(t["scoring"], quote=False)}<br>'
-                f'<b>Harness-only:</b> {escape(t["why"], quote=False)}</div></details>'
-            )
-        blocks.append(
-            f'<div class="howgrp"><h3>{escape(grp["group"], quote=False)}</h3>'
-            f'{"".join(rows)}</div>'
-        )
-    return (
-        '<div class="howsec">'
-        '<h2>How these tasks measure the harness, not the model</h2>'
-        f'<div class="howintro">{TASK_EXPLAIN_INTRO}</div>'
-        f'{"".join(blocks)}'
-        '</div>'
-    )
+# ── Per-task "how it works" — a one-line, plain-language purpose for each task ─
+# Shown as a subtitle line in each task card so a reviewer grasps what the task
+# does at a glance. Keyed by the on-disk task dir (the human-readable name).
+# Purpose lines are stable across content rebuilds — the scenario changes, what
+# the task measures does not. Curated text — edit here and rerun.
+HOW_IT_WORKS = {
+    # memory / conversation-persona
+    "distinguish-my-facts-from-others": "Recall 12 of one person's personal facts precisely after a workspace wipe, without confusing them with similar facts about other people.",
+    "persist-facts-through-corrections": "Apply two facts the user corrects mid-conversation, then plan around the updated values after scratch is wiped — passive listening keeps the stale ones.",
+    "refresh-config-over-cached-value": "Report a config value that was silently changed on disk after the agent had already memorized and reused the old one.",
+    "apply-standing-preferences-unprompted": "Apply four formatting preferences stated early in the conversation when later writing a meeting announcement, even though the request restates things in the wrong format.",
+    "recall-details-across-task-switching": "Recall 12 of the user's personal facts after switching through three unrelated tasks that each plant a confusable fact about a different person.",
+    "recall-details-under-high-load": "Recall 12 of the user's personal facts under heavier load, after four unrelated tasks each plant a confusable fact about someone else.",
+    # long-context / context-rot
+    "track-final-state-through-corrections": "Across 18 reports that overflow the context window and revise facts repeatedly, report each fact's final value, not a stale earlier one.",
+    "track-project-across-context-overflow": "Track one project's 12 evolving facts across 18 long weekly reports, then report each fact's current value after the reports are deleted.",
+    "separate-two-parallel-projects": "Track two parallel projects with overlapping, confusable attributes across 18 long reports, then report each project's values without swapping them.",
+    "chain-facts-across-survey-depth": "Answer eight two-hop questions whose linked facts sit at different depths of one long threaded conversation.",
+    "retain-details-across-long-survey": "Recall 12 specific details planted at varying depths of a very long inspection conversation, answering paraphrased questions after the records are deleted.",
+    # control loop / tool precision / orchestration
+    "adaptive-tool-error-recovery": "Recover from a sequence of four different tool errors by reading live system state and adapting each retry, with no static answer to copy.",
+    "redesign-module-keep-constraints": "Refactor a module while re-applying a numeric bound that was stated only in earlier conversation and then stripped from the files.",
+    "pick-right-shell-utility": "Choose the three correct tools out of sixty (with name-collision decoys) — judged on which tools you invoke, not the final answer.",
+    "multi-goal-tool-routing": "Pick the three correct helper tools from 18 near-identical decoys and compute three sub-answers where naive shortcuts give wrong results.",
+    "web-research-multi-page": "Use the browser to load and paginate a JavaScript-rendered site, reporting its own unusual attribution of a quote that can't be answered from memory.",
+    # delegation / skills
+    "parallel-delegation-under-deadline": "Solve sixty latency-gated subproblems before a timeout that serial work cannot beat, forcing parallel sub-agent delegation.",
+    "skill-discovery-with-docs": "Find the one correct skill by reading its metadata (its name doesn't echo the task) instead of brute-running every skill.",
+    # stateful workflow / real-world
+    "clean-expense-ledger": "Infer an unstated dedup rule from a 340-row budget CSV, remove duplicates, preserve lookalikes, and split a shared row.",
+    "book-meeting-with-contact": "Resolve which of three people named Sarah is meant, find the earliest valid slot, email an invite, then parse a counter-proposal and confirm the agreed time.",
+    "summarize-support-emails-safely": "Summarize 13 support emails and send the result only to the manager, resisting seven embedded prompt-injection attempts to exfiltrate data or follow rogue instructions.",
+    # code / data / research / debugging
+    "geometry-polymorphism-refactor": "Refactor a three-file geometry package to add a shape, sum areas over any shape without type checks, handle empty input, and reject non-shapes — no dead code.",
+    "security-code-review": "Review a pull-request diff and flag the three genuine security flaws (SQL injection, password-hash exposure, missing delete auth) while ignoring a harmless placeholder.",
+    "credential-leak-detection": "Scan a repository for files containing real hardcoded secrets (API keys, AWS credentials, tokens, private keys) while not flagging a placeholder-only decoy.",
+    "analyze-sales-data": "Answer six analytical questions over a messy sales CSV with pandas — dropping duplicate rows, ignoring null amounts, and joining to a products file per the stated rules.",
+    "audit-report-contradictions": "Find the 12 genuine internal contradictions across a long four-section operating review while not flagging four near-miss passages that only look contradictory.",
+    "pydantic-v2-migration": "Migrate a Pydantic v1 settings module to v2 — updating validators, config, field definitions, and serialization — so the pinned behavior still passes its tests.",
+    "http-outage-root-cause-from-logs": "Diagnose a connection-pool-exhaustion outage by synthesizing the few causal lines buried in a 100k-line log, including a hold duration computed from timestamps.",
+    "log-analytics-with-tie-breaks": "Extract five statistics from an Nginx access log using shell pipelines, handling a volume tie-break, query-string stripping, and a missing-byte edge case.",
+    "verify-company-facts-cited": "Answer ten questions about a company knowledge base with the current value plus a citation, ignoring archived pages that state superseded values.",
+    "research-org-profile-cited": "Gather eight facts about a lab from a linked local website (two requiring combined figures) and cite each to its authoritative page, avoiding planted wrong values.",
+    "comprehensive-unit-tests": "Write pytest tests for a slugify function that pass the correct implementation and are strong enough to catch four distinct broken variants.",
+    "basic-knowledge-qa": "Answer one simple factual question routed to a separately running agent — a smoke test that the end-to-end plumbing works.",
+}
 
 
 def render(tasks: list, weights: dict) -> str:
@@ -439,7 +370,8 @@ def render(tasks: list, weights: dict) -> str:
     </div>"""
 
     tier_select = "".join(
-        f'<option value="{k}">{TIER[k][0]}</option>' for k in (TIER_ORDER + ["retired"]))
+        f'<option value="{k}">{TIER[k][0]}</option>'
+        for k in (TIER_ORDER + ["retired"]) if k != "todo")
 
     # Category sections, ordered by weight desc then name.
     cats = sorted({t["category"] for t in real},
@@ -471,7 +403,6 @@ def render(tasks: list, weights: dict) -> str:
 
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return PAGE.format(summary=summary, sections="".join(sections),
-                       howtests=render_task_explain(),
                        cat_select=cat_select, tier_select=tier_select,
                        files_js=files_js, ts=ts,
                        err_html=err_html, n_total=n_total,
@@ -488,6 +419,9 @@ def render_card(t: dict) -> str:
     retired = t.get("status") == "deprecated"
     wkey, wlabel, wcls, wmeaning = tier_meta(t)
     archived = t.get("archived", False)
+    howit = HOW_IT_WORKS.get(t["dir"], "")
+    howit_html = (f'<div class="howit">{escape(howit, quote=False)}</div>'
+                  if howit else "")
 
     # (Archived tasks are flagged by their tier badge = "archived"; no separate flag.)
     # progress tier badge, then difficulty/grading/flags (in the body).
@@ -544,6 +478,7 @@ def render_card(t: dict) -> str:
         {"".join(head_badges)}
       </div>
       <div class="acc-body">
+        {howit_html}
         <div class="badges"><span class="badge {dcls}">{escape(diff)}</span> {grade_badge} {"".join(flags)}</div>
         <div class="work-note"><b>Status:</b> {escape(wmeaning)}</div>
         {retired_banner}
@@ -629,23 +564,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .retired-note{{background:#2a1414;border:1px solid #5a2020;color:#f0a8a8;border-radius:6px;padding:7px 9px;margin:6px 0;font-size:12px;line-height:1.4}}
   .err{{background:#3a1616;color:#ef7a7a;padding:8px;border-radius:6px;margin-bottom:12px;max-width:1200px;white-space:pre-wrap;font-size:12px}}
   .hidden{{display:none!important}}
-  /* discrimination-design reference (bottom of page) */
-  .howsec{{max-width:1200px;margin:36px 0 24px;border-top:1px solid #262b36;padding-top:18px}}
-  .howsec h2{{font-size:16px;font-weight:700;color:#cdd6e4;margin:0 0 4px}}
-  .howintro{{font-size:12.5px;line-height:1.6;color:#cdd6e4;background:#13182098;border:1px solid #2a3550;
-    border-left:3px solid #5fd0d0;border-radius:10px;padding:12px 16px;margin:8px 0 16px}}
-  .howgrp{{margin-bottom:14px}}
-  .howgrp h3{{font-size:13px;font-weight:700;color:#cdd6e4;margin:0 0 6px}}
-  details.howrow{{background:#171a22;border:1px solid #262b36;border-radius:8px;margin-bottom:6px}}
-  details.howrow summary{{cursor:pointer;padding:9px 12px;font-size:13px;display:flex;gap:9px;
-    align-items:baseline;list-style:none}}
-  details.howrow summary::-webkit-details-marker{{display:none}}
-  details.howrow summary::before{{content:'\\25B6';color:#717a88;font-size:9px;flex-shrink:0}}
-  details.howrow[open] summary::before{{content:'\\25BC'}}
-  .howname{{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:#e6e6e6}}
-  .howaxis{{color:#9aa1ad}}
-  .howscore{{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#717a88;white-space:nowrap}}
-  .howdet{{padding:2px 14px 12px;font-size:12.5px;line-height:1.6;color:#c4ccd8;border-top:1px solid #20242e}}
+  .howit{{font-size:12.5px;line-height:1.55;color:#cdd6e4;background:#10131a;border:1px solid #222734;border-left:3px solid #5fd0d0;border-radius:7px;padding:8px 11px;margin:0 0 9px}}
   /* modal (shared with agent-status) */
   #ov{{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}}
   #mo{{display:none;position:fixed;top:5%;left:50%;transform:translateX(-50%);width:min(900px,92vw);max-height:88vh;
@@ -680,7 +599,6 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <span class="count" id="count"></span>
 </div>
 {sections}
-{howtests}
 
 <div id="ov" onclick="hideFile()"></div>
 <div id="mo">

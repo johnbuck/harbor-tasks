@@ -67,23 +67,7 @@
   .retired-note{background:#2a1414;border:1px solid #5a2020;color:#f0a8a8;border-radius:6px;padding:7px 9px;margin:6px 0;font-size:12px;line-height:1.4}
   .err{background:#3a1616;color:#ef7a7a;padding:8px;border-radius:6px;margin-bottom:12px;max-width:1200px;white-space:pre-wrap;font-size:12px}
   .hidden{display:none!important}
-  /* discrimination-design reference (bottom of page) */
-  .howsec{max-width:1200px;margin:36px 0 24px;border-top:1px solid #262b36;padding-top:18px}
-  .howsec h2{font-size:16px;font-weight:700;color:#cdd6e4;margin:0 0 4px}
-  .howintro{font-size:12.5px;line-height:1.6;color:#cdd6e4;background:#13182098;border:1px solid #2a3550;
-    border-left:3px solid #5fd0d0;border-radius:10px;padding:12px 16px;margin:8px 0 16px}
-  .howgrp{margin-bottom:14px}
-  .howgrp h3{font-size:13px;font-weight:700;color:#cdd6e4;margin:0 0 6px}
-  details.howrow{background:#171a22;border:1px solid #262b36;border-radius:8px;margin-bottom:6px}
-  details.howrow summary{cursor:pointer;padding:9px 12px;font-size:13px;display:flex;gap:9px;
-    align-items:baseline;list-style:none}
-  details.howrow summary::-webkit-details-marker{display:none}
-  details.howrow summary::before{content:'\25B6';color:#717a88;font-size:9px;flex-shrink:0}
-  details.howrow[open] summary::before{content:'\25BC'}
-  .howname{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:#e6e6e6}
-  .howaxis{color:#9aa1ad}
-  .howscore{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#717a88;white-space:nowrap}
-  .howdet{padding:2px 14px 12px;font-size:12.5px;line-height:1.6;color:#c4ccd8;border-top:1px solid #20242e}
+  .howit{font-size:12.5px;line-height:1.55;color:#cdd6e4;background:#10131a;border:1px solid #222734;border-left:3px solid #5fd0d0;border-radius:7px;padding:8px 11px;margin:0 0 9px}
   /* modal (shared with agent-status) */
   #ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}
   #mo{display:none;position:fixed;top:5%;left:50%;transform:translateX(-50%);width:min(900px,92vw);max-height:88vh;
@@ -99,7 +83,7 @@
   <a href="roadmap.html">Roadmap</a>
 </div>
 <h1>Task Suite — every eval task (active + archived)</h1>
-<div class="ts">generated 2026-06-25 12:30:33 · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
+<div class="ts">generated 2026-06-25 12:50:27 · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
   click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do<br>
   <b>33</b> active tasks + <b>20</b> archived (retired from the active suite, kept in <span class="mono">archive/</span> for reference — flagged, not deleted)</div>
 
@@ -115,7 +99,7 @@
     </div>
 <div class="filterbar">
   <select id="f-cat"><option value="">all categories</option><option value="context-management">context-management</option><option value="real-world-workflows">real-world-workflows</option><option value="skill-agent-authoring">skill-agent-authoring</option><option value="tool-orchestration">tool-orchestration</option><option value="conversation-persona">conversation-persona</option><option value="insights-research">insights-research</option><option value="research-rag">research-rag</option><option value="backup-dr">backup-dr</option><option value="building-prototypes">building-prototypes</option><option value="data-analytics">data-analytics</option><option value="migration">migration</option><option value="ops-debugging">ops-debugging</option><option value="context-rot">context-rot</option><option value="prod-behavioral">prod-behavioral</option><option value="building-designs">building-designs</option><option value="code-editing">code-editing</option><option value="code-spec-review">code-spec-review</option><option value="compliance-security">compliance-security</option><option value="documentation">documentation</option><option value="marketing">marketing</option><option value="test-authoring">test-authoring</option></select>
-  <select id="f-tier"><option value="">any progress</option><option value="todo">to do</option><option value="oracle">oracle ✓</option><option value="smoke">e2e smoke ✓</option><option value="verdict">n≥3 verdict ✓</option><option value="retired">archived</option></select>
+  <select id="f-tier"><option value="">any progress</option><option value="oracle">oracle ✓</option><option value="smoke">e2e smoke ✓</option><option value="verdict">n≥3 verdict ✓</option><option value="retired">archived</option></select>
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
@@ -141,6 +125,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Track two parallel projects with overlapping, confusable attributes across 18 long reports, then report each project's values without swapping them.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">19 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -162,6 +147,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Across 18 reports that overflow the context window and revise facts repeatedly, report each fact's final value, not a stale earlier one.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">19 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -183,6 +169,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Track one project's 12 evolving facts across 18 long weekly reports, then report each fact's current value after the reports are deleted.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">19 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -212,6 +199,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Resolve which of three people named Sarah is meant, find the earliest valid slot, email an invite, then parse a counter-proposal and confirm the agreed time.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -233,6 +221,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Infer an unstated dedup rule from a 340-row budget CSV, remove duplicates, preserve lookalikes, and split a shared row.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -254,6 +243,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Summarize 13 support emails and send the result only to the manager, resisting seven embedded prompt-injection attempts to exfiltrate data or follow rogue instructions.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -283,6 +273,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Solve sixty latency-gated subproblems before a timeout that serial work cannot beat, forcing parallel sub-agent delegation.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -304,6 +295,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Find the one correct skill by reading its metadata (its name doesn't echo the task) instead of brute-running every skill.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -325,6 +317,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Rote 16-file emit from a fully-specified table; fan-out never required or measured.</div>
@@ -354,6 +347,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Pick the three correct helper tools from 18 near-identical decoys and compute three sub-answers where naive shortcuts give wrong results.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -375,6 +369,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Tiny CLI; plan/implement/test is decorative (reward=final); model one-shots; saturates 1.0.</div>
@@ -396,6 +391,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Tiny word-freq CLI; sequential prompting, not orchestration; saturates 1.0.</div>
@@ -417,6 +413,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Tiny temp-converter CLI; pure model coding; saturates 1.0.</div>
@@ -438,6 +435,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Choose the three correct tools out of sixty (with name-collision decoys) — judged on which tools you invoke, not the final answer.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -459,6 +457,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Refactor a module while re-applying a numeric bound that was stated only in earlier conversation and then stripped from the files.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -480,6 +479,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Use the browser to load and paginate a JavaScript-rendered site, reporting its own unusual attribution of a quote that can't be answered from memory.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -509,6 +509,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge ok">easy</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Already model-only: transcript pasted in one prompt; memory path never exercised; 3 facts, no distance.</div>
@@ -530,6 +531,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Apply four formatting preferences stated early in the conversation when later writing a meeting announcement, even though the request restates things in the wrong format.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge step">4 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -551,6 +553,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Recall 12 of one person's personal facts precisely after a workspace wipe, without confusing them with similar facts about other people.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">7 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -572,6 +575,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Apply two facts the user corrects mid-conversation, then plan around the updated values after scratch is wiped — passive listening keeps the stale ones.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">8 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -593,6 +597,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Recall 12 of the user's personal facts after switching through three unrelated tasks that each plant a confusable fact about a different person.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">6 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -614,6 +619,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Recall 12 of the user's personal facts under heavier load, after four unrelated tasks each plant a confusable fact about someone else.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge step">7 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -635,6 +641,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Report a config value that was silently changed on disk after the agent had already memorized and reused the old one.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge step">4 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -664,6 +671,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Find the 12 genuine internal contradictions across a long four-section operating review while not flagging four near-miss passages that only look contradictory.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -693,6 +701,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Gather eight facts about a lab from a linked local website (two requiring combined figures) and cite each to its authoritative page, avoiding planted wrong values.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -714,6 +723,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Answer ten questions about a company knowledge base with the current value plus a citation, ignoring archived pages that state superseded values.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -743,6 +753,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> One-shot runbook; coarse/lenient LLM judge; model-dominated. Move to Track B.</div>
@@ -772,6 +783,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated: fully-specced wc clone; deterministic checks any model one-shots.</div>
@@ -793,6 +805,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Illusory multi-step (reward_strategy=final); ~30-line toy package; no inter-step harness state; saturates 1.0.</div>
@@ -814,6 +827,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Same shell, toy textkit lib; model-dominated one-shot; saturates 1.0.</div>
@@ -835,6 +849,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">3 steps</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Same shell, toy tempconv lib; model-dominated one-shot; saturates 1.0.</div>
@@ -864,6 +879,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Answer six analytical questions over a messy sales CSV with pandas — dropping duplicate rows, ignoring null amounts, and joining to a products file per the stated rules.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -893,6 +909,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Migrate a Pydantic v1 settings module to v2 — updating validators, config, field definitions, and serialization — so the pinned behavior still passes its tests.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -922,6 +939,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Recover from a sequence of four different tool errors by reading live system state and adapting each retry, with no static answer to copy.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge focus">focused n=5</span><span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -943,6 +961,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Diagnose a connection-pool-exhaustion outage by synthesizing the few causal lines buried in a 100k-line log, including a hold duration computed from timestamps.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -964,6 +983,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Extract five statistics from an Nginx access log using shell pipelines, handling a volume tie-break, query-string stripping, and a missing-byte edge case.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge bad">binary</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -993,6 +1013,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Answer eight two-hop questions whose linked facts sit at different depths of one long threaded conversation.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">19 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1014,6 +1035,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Recall 12 specific details planted at varying depths of a very long inspection conversation, answering paraphrased questions after the records are deleted.</div>
         <div class="badges"><span class="badge bad">hard</span> <span class="badge ok">graded</span> <span class="badge step">19 steps</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1043,6 +1065,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Answer one simple factual question routed to a separately running agent — a smoke test that the end-to-end plumbing works.</div>
         <div class="badges"><span class="badge ok">easy</span> <span class="badge bad">binary</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1072,6 +1095,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge bad">binary</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model spec-filling: 16 OpenAPI criteria enumerated in prompt; saturates 1.0 for both.</div>
@@ -1101,6 +1125,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated: implement-a-class with full contract; one-shot, saturates 1.0 for both.</div>
@@ -1122,6 +1147,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated: recursive-descent parser one-shot; saturates 1.0 for both.</div>
@@ -1143,6 +1169,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated one-shot: tiny self-contained function fully specified; both harnesses ace at 1.0. No harness-dependent failure.</div>
@@ -1164,6 +1191,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated one-shot: single tiny function; saturates 1.0 for both harnesses.</div>
@@ -1185,6 +1213,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated one-shot: trivial single-file fix; saturates 1.0 for both.</div>
@@ -1206,6 +1235,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated one-shot: classic merge-intervals; saturates 1.0 for both.</div>
@@ -1227,6 +1257,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-dominated one-shot: canonical flatten; saturates 1.0 for both.</div>
@@ -1248,6 +1279,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Refactor a three-file geometry package to add a shape, sum areas over any shape without type checks, handle empty input, and reject non-shapes — no dead code.</div>
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1277,6 +1309,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Review a pull-request diff and flag the three genuine security flaws (SQL injection, password-hash exposure, missing delete auth) while ignoring a harmless placeholder.</div>
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1306,6 +1339,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Scan a repository for files containing real hardcoded secrets (API keys, AWS credentials, tokens, private keys) while not flagging a placeholder-only decoy.</div>
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1335,6 +1369,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Read-one-file-write-README; deterministic grader saturates 1.0 for both; no harness surface.</div>
@@ -1364,6 +1399,7 @@
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
+        
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Retired from the active suite; kept in archive/ for reference, out of the grid.</div>
         <div class="retired-note"><b>ARCHIVED (out of the active suite — not deleted; in archive/).</b> Model-only deliverable; LLM judge scores artifact quality (= model), no harness spread. Move to Track B.</div>
@@ -1393,6 +1429,7 @@
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
+        <div class="howit">Write pytest tests for a slugify function that pass the correct implementation and are strong enough to catch four distinct broken variants.</div>
         <div class="badges"><span class="badge mid">medium</span> <span class="badge ok">graded</span> <span class="badge muted">1 step</span></div>
         <div class="work-note"><b>Status:</b> Both harnesses ran it end-to-end at n=1 — indicative separation captured.</div>
         
@@ -1408,7 +1445,6 @@
       </div>
     </div></div>
         </section>
-<div class="howsec"><h2>How these tasks measure the harness, not the model</h2><div class="howintro">Every one of these tasks is built from the same four parts, so once you see the pattern you can read them all. <b>(1) A surface goal stated like a real user</b> — no hint of the trap, the hidden check, or the required strategy (“no telegraphing”). <b>(2) A hidden mechanism that makes the answer uncomputable without the harness</b>, enforced <i>mechanically</i> by a step's <span class='mono'>setup.sh</span> — it wipes all scratch before grading, silently rewrites a file, strips a value that was only ever spoken, or gates on latency. <b>(3) A graded scorer</b> (<span class='mono'>tests/test.sh</span>) — partial credit across weighted dimensions, never pass/fail (binary tasks saturate to 1.0 for two competent harnesses). <b>(4) The kill test</b> — if <span class='mono'>python3 -c</span> or one file-read could solve it, it measures the <i>model</i>; every task here defeats this. A <span class='mono'>0</span> on a <i>completed</i> run is VOID, not a loss — weight-0 <span class='mono'>diagnostics</span> tell the two apart.</div><div class="howgrp"><h3>Memory — state must survive a filesystem wipe, through the harness</h3><details class="howrow"><summary><span class="howname">distinguish-my-facts-from-others</span> <span class="howaxis">— recall precision under distraction</span><span class="howscore">correct / 12</span></summary><div class="howdet"><b>Trap:</b> Learns 12 of Dana's facts, then 4 distractor turns inject confusable siblings (Sam's allergy, Jess's red Honda…); a recall step's setup.sh wipes all scratch + deletes /app before the recall, so answers must come from harness memory alone.<br><b>Scoring:</b> reward = correct / 12. A precise fact = 1.0; stating the distractor value or hedging both ≈ 0.33. Flat 0.0 if the wipe assertion fails (VOID).<br><b>Harness-only:</b> No scratch survives between steps — only the harness's session memory does.</div></details><details class="howrow"><summary><span class="howname">persist-facts-through-corrections</span> <span class="howaxis">— proactive memory update on correction</span><span class="howscore">(correct/8) × (0.85+0.15·dinner)</span></summary><div class="howdet"><b>Trap:</b> Mid-conversation the user CORRECTS two facts (timezone Pacific→Mountain, climbing nights Tue/Thu/Sat→Mon/Wed/Fri); the next step wipes scratch. Passive listening keeps the stale values.<br><b>Scoring:</b> reward = (correct_fields / 8) × (0.85 + 0.15·dinner_ok); the dinner plan must respect the CORRECTED constraints. Stale values score 0.<br><b>Harness-only:</b> A model can't force the harness to write/update memory — without an UPDATE the old values survive the wipe.</div></details><details class="howrow"><summary><span class="howname">refresh-config-over-cached-value</span> <span class="howaxis">— trust the live file over stale memory</span><span class="howscore">1.0 iff 275 (not 45)</span></summary><div class="howdet"><b>Trap:</b> Agent reads &amp; repeatedly computes with cache_ttl_seconds: 45 (cementing it in memory); a later step's setup.sh SILENTLY rewrites the file to 275 (then deletes itself) and asks for the current value.<br><b>Scoring:</b> reward = 1.0 iff the answer is 275 AND not also 45 — dumping both forfeits it (an honest “275 (was 45)” is carved out).<br><b>Harness-only:</b> The silent rewrite forces a choice between repeatedly-used memory (45) and a re-fetch (275); bare code never sees the change.</div></details></div><div class="howgrp"><h3>Long-context — retention as the window fills</h3><details class="howrow"><summary><span class="howname">track-final-state-through-corrections</span> <span class="howaxis">— final-vs-stale value under window overflow</span><span class="howscore">max(0, current−stale) / 12</span></summary><div class="howdet"><b>Trap:</b> 18 weekly reports (~1.3M tokens, &gt;1× the 1M window); nearly every fact is corrected 2–3× over the quarter (lead Reyes→Tanaka→Okafor…). Reports deleted before recall.<br><b>Scoring:</b> reward = max(0, current_hits − stale_hits) / 12. Each fact: +1 for the FINAL value with ≤1 prior value present; −1 for adopting the GCP decoy. Dumping churned values = 0.<br><b>Harness-only:</b> A script can't tell the final value from a stale one buried mid-context under saturation — it needs the harness to manage retention across 18 steps.</div></details><details class="howrow"><summary><span class="howname">chain-facts-across-survey-depth</span> <span class="howaxis">— multi-hop lost-in-the-middle recall</span><span class="howscore">matched / 8</span></summary><div class="howdet"><b>Trap:</b> 18 inspection records (~345K — FITS the window, so this tests retention not overflow) threaded into one growing conversation; 8 questions each chain two facts buried at different depths via a bridge entity.<br><b>Scoring:</b> reward = matched / 8; each needle must be positional + exclusive. Weight-0 early/middle/late fractions trace the rot curve.<br><b>Harness-only:</b> Resolving a two-hop chain across facts at different conversational depths needs the harness's threaded context, not offline lookup.</div></details></div><div class="howgrp"><h3>Control loop + tool precision — recovery, replanning, selection</h3><details class="howrow"><summary><span class="howname">adaptive-tool-error-recovery</span> <span class="howaxis">— adaptive error-recovery ladder</span><span class="howscore">0.6·correct + 0.4·efficiency</span></summary><div class="howdet"><b>Trap:</b> dfetch fails with 4 DIFFERENT actionable errors in sequence (bad-region→401→stale-lock→success); correct values are found only by exploring /app/dfetch.conf. Success emits an HMAC nonce whose secret lives in the stripped binary — forged answers fail --verify; the binary sha256 is pinned against swaps.<br><b>Scoring:</b> reward = 0.6·correctness + 0.4·efficiency, where efficiency = clamp((18−calls)/(18−3)). 1.0 = HMAC-verified files + an ordered progression log ending in “release”, ≤18 calls.<br><b>Harness-only:</b> Each error demands interaction with live system state; there's no static answer, and only correct sequential calls unlock the secret.</div></details><details class="howrow"><summary><span class="howname">redesign-module-keep-constraints</span> <span class="howaxis">— retain a bound across a mid-task context wipe</span><span class="howscore">clamp 0.40 + fn 0.40 + cleanup 0.12 + replan 0.08</span></summary><div class="howdet"><b>Trap:</b> A numeric clamp bound [−1000, 1000] is stated ONLY in conversation in steps 1–2; step 3's setup.sh strips the helper and the bound from disk + instructions, then asks for a refactor that must re-apply it. Leaked scratch notes → reward 0.0.<br><b>Scoring:</b> reward = clamp_memory 0.40 + functional 0.40 + cleanup 0.12 + replan 0.08. Without recalling the bound, the score caps ≈ 0.60.<br><b>Harness-only:</b> The bound is unrecoverable from step 3's files/instructions — only harness-threaded conversation state unlocks the full score.</div></details><details class="howrow"><summary><span class="howname">pick-right-shell-utility</span> <span class="howaxis">— tool selection among decoys</span><span class="howscore">0.5·F1 + 0.5·efficiency</span></summary><div class="howdet"><b>Trap:</b> 60 tools, exactly 3 correct (opaque names — function only in --help); 9 name-collision decoys (count, analyze, rank) match the verbs but do the wrong thing. The answer VALUE is deliberately not scored (a script could compute it) — only logged tool invocations are.<br><b>Scoring:</b> reward = 0.5·selection_F1 + 0.5·call_efficiency. Computing offline without invoking tools = 0.0 (VOID).<br><b>Harness-only:</b> Grading is purely on invocation discipline; a pure python3 solver scores 0.</div></details></div><div class="howgrp"><h3>Delegation + skill acquisition</h3><details class="howrow"><summary><span class="howname">parallel-delegation-under-deadline</span> <span class="howaxis">— parallel sub-agent fan-out</span><span class="howscore">correct / 60</span></summary><div class="howdet"><b>Trap:</b> 60 independent problems, each needing a value from a latency-gated binary (8s/call). Serial = 60×8s = 480s, blowing the 600s timeout even with instant math; only parallel sub-agent sessions clear enough in time.<br><b>Scoring:</b> reward = correct / 60. No concurrency bonus — a serial harness simply finishes fewer (mtime logs are advisory only).<br><b>Harness-only:</b> A single synchronous token-stream hits a hard 480s floor; only independent parallel sessions beat the clock.</div></details><details class="howrow"><summary><span class="howname">skill-discovery-with-docs</span> <span class="howaxis">— find the right skill by reading metadata</span><span class="howscore">passed / 16</span></summary><div class="howdet"><b>Trap:</b> 13 skills; only tabular-shape-report is correct — and its name does NOT echo “shape”, while 3 better-named decoys emit near-miss output. The required --null=empty flag is documented only in the right SKILL.md. A SHA256 breadcrumb proves real discovery; running all 13 (brute sweep) trips a gate and denies credit.<br><b>Scoring:</b> reward = passed / 16 (8 files × {correct, discovered}). Near-miss = 1/2; swept = 0/2.<br><b>Harness-only:</b> Discovery needs parsing structured tool metadata, not reasoning; the sweep gate + hash breadcrumb block reimplementation cheats.</div></details></div><div class="howgrp"><h3>Stateful workflow</h3><details class="howrow"><summary><span class="howname">clean-expense-ledger</span> <span class="howaxis">— precise multi-axis ledger edit</span><span class="howscore">per-decision / N</span></summary><div class="howdet"><b>Trap:</b> A 340-row budget CSV; the agent must DISCOVER the dedup rule (identical date+vendor+amount+category) by inspection — never told. 6 May grocery dup-groups to remove, 7 lookalike groups (near-amounts 55.00/55.10, same-date-different-category…) to PRESERVE, plus a rent row to split 50/50. No answer key ever exists in the container.<br><b>Scoring:</b> reward = (dedup + preserve + rent_split + rent_orig_gone + collateral) / total, per decision — with a dedup gate that floors preserve/collateral at 0 if nothing was actually deduped (so “do nothing” can't score ≈0.5).<br><b>Harness-only:</b> Requires empirically inferring the rule from the data, then a precise stateful transform — there's no key to learn from.</div></details></div></div>
 
 <div id="ov" onclick="hideFile()"></div>
 <div id="mo">
