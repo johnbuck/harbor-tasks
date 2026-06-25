@@ -50,8 +50,8 @@ verifier:
   kwargs:
     # The rewardkit grader for the conversational task, on the HOST. Point this at
     # the task's tests dir. The captured transcript is staged as answer_filename.
-    tests_dir: tasks/prod-behavioral/conversational-01/tests
+    tests_dir: tasks/prod-behavioral/basic-knowledge-qa/tests
     answer_filename: answer.md
 
 tasks:
-  - path: tasks/prod-behavioral/conversational-01
+  - path: tasks/prod-behavioral/basic-knowledge-qa

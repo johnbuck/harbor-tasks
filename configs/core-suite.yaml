@@ -1,8 +1,8 @@
 # CORE SUITE — the load-bearing harness-vs-model discrimination set (2026-06-03).
 #
 # 11 tasks, one per harness-distinct capability. NOTE (2026-06-10): the three
-# former "PROVEN" anchors (memory-conversational-01 Δ0.50, failure-recovery-loop-01
-# 1.0-vs-0.0, tool-sprawl-precision-01 3-vs-7) are VOID — Δ0.50 died with the
+# former "PROVEN" anchors (distinguish-my-facts-from-others Δ0.50, adaptive-tool-error-recovery
+# 1.0-vs-0.0, pick-right-shell-utility 3-vs-7) are VOID — Δ0.50 died with the
 # recall-MCP removal; failure-recovery + tool-sprawl were bypassable. All three
 # were REWORKED and their evidence must be RE-EARNED on the new hindsight-only
 # substrate. See backlog/2026-06-10-core-eleven-remediation.md (adversarial review
@@ -38,34 +38,34 @@ datasets:
   # Memory — recall, proactive write+correction, stale-vs-live-file
   - path: tasks/conversation-persona
     task_names:
-      - multistep-memory-conversational-01   # recall under distractor load (grader anchored 2026-06-10; Δ to re-earn)
-      - true-multi-turn-memory-write-01       # proactive write + correction, latest-value /8
-      - multistep-stale-memory-vs-file-01     # stale memory vs re-fetched live file (275 vs 45)
+      - distinguish-my-facts-from-others   # recall under distractor load (grader anchored 2026-06-10; Δ to re-earn)
+      - persist-facts-through-corrections       # proactive write + correction, latest-value /8
+      - refresh-config-over-cached-value     # stale memory vs re-fetched live file (275 vs 45)
 
   # Long-context — compaction on overflow, in-window rot
   - path: tasks/context-management
     task_names:
-      - multistep-context-fill-02             # chunks deleted pre-recall (cheat-proof), graded /12
+      - track-final-state-through-corrections             # chunks deleted pre-recall (cheat-proof), graded /12
   - path: tasks/context-rot
     task_names:
-      - context-rot-02                        # multi-hop lost-in-the-middle; normalized rot curve (#93)
+      - chain-facts-across-survey-depth                        # multi-hop lost-in-the-middle; normalized rot curve (#93)
 
   # Control loop — recovery/retry, replanning
   - path: tasks/ops-debugging
     task_names:
-      - failure-recovery-loop-01              # adaptive recovery (random-nonce rework 2026-06-10; Δ to re-earn)
+      - adaptive-tool-error-recovery              # adaptive recovery (random-nonce rework 2026-06-10; Δ to re-earn)
   - path: tasks/tool-orchestration
     task_names:
-      - tool-sprawl-precision-01              # tool-selection F1 + efficiency (grade-on-selection rework 2026-06-10; Δ to re-earn)
-      - plan-then-revise-01                   # mid-task replanning; clamp-memory 0.40 + functional 0.40 + cleanup 0.12 + replan-keyword 0.08
+      - pick-right-shell-utility              # tool-selection F1 + efficiency (grade-on-selection rework 2026-06-10; Δ to re-earn)
+      - redesign-module-keep-constraints                   # mid-task replanning; clamp-memory 0.40 + functional 0.40 + cleanup 0.12 + replan-keyword 0.08
 
   # Delegation + skill acquisition
   - path: tasks/skill-agent-authoring
     task_names:
-      - sub-agent-parallel-decompose-01       # sub-agent fan-out (60 vs budget), /60
-      - skill-discovery-and-use-01            # discover right skill among decoys, /16
+      - parallel-delegation-under-deadline       # sub-agent fan-out (60 vs budget), /60
+      - skill-discovery-with-docs            # discover right skill among decoys, /16
 
   # Stateful multi-step workflow
   - path: tasks/real-world-workflows
     task_names:
-      - update-record-with-cleanup-01         # ledger dedup + preservation traps, leak-proof, /16
+      - clean-expense-ledger         # ledger dedup + preservation traps, leak-proof, /16

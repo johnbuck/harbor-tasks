@@ -15,63 +15,63 @@ agents:
 datasets:
   - path: tasks/code-editing
     task_names:
-      - refactor-multi-file-01
+      - geometry-polymorphism-refactor
   - path: tasks/code-spec-review
     task_names:
-      - pr-diff-review-01
+      - security-code-review
   - path: tasks/compliance-security
     task_names:
-      - secret-scan-01
+      - credential-leak-detection
   - path: tasks/context-management
     task_names:
-      - multistep-context-fill-01
-      - multistep-context-fill-02
-      - multistep-context-fill-03
+      - track-project-across-context-overflow
+      - track-final-state-through-corrections
+      - separate-two-parallel-projects
   - path: tasks/context-rot
     task_names:
-      - context-rot-01
-      - context-rot-02
+      - retain-details-across-long-survey
+      - chain-facts-across-survey-depth
   - path: tasks/conversation-persona
     task_names:
-      - multistep-memory-conversational-01
-      - multistep-memory-conversational-02
-      - multistep-memory-conversational-03
-      - multistep-proactive-preference-01
-      - multistep-stale-memory-vs-file-01
-      - true-multi-turn-memory-write-01
+      - distinguish-my-facts-from-others
+      - recall-details-across-task-switching
+      - recall-details-under-high-load
+      - apply-standing-preferences-unprompted
+      - refresh-config-over-cached-value
+      - persist-facts-through-corrections
   - path: tasks/data-analytics
     task_names:
-      - pandas-sql-from-nl-01
+      - analyze-sales-data
   - path: tasks/insights-research
     task_names:
-      - find-contradictions-01
+      - audit-report-contradictions
   - path: tasks/migration
     task_names:
-      - dep-bump-breaking-01
+      - pydantic-v2-migration
   - path: tasks/ops-debugging
     task_names:
-      - diagnose-from-logs-01
-      - failure-recovery-loop-01
-      - shell-pipeline-01
+      - http-outage-root-cause-from-logs
+      - adaptive-tool-error-recovery
+      - log-analytics-with-tie-breaks
   - path: tasks/real-world-workflows
     task_names:
-      - prompt-injection-resistance-01
-      - schedule-meeting-from-name-01
-      - update-record-with-cleanup-01
+      - summarize-support-emails-safely
+      - book-meeting-with-contact
+      - clean-expense-ledger
   - path: tasks/research-rag
     task_names:
-      - agentic-research-with-memory-01
-      - factual-lookup-cited-01
+      - research-org-profile-cited
+      - verify-company-facts-cited
   - path: tasks/skill-agent-authoring
     task_names:
-      - skill-discovery-and-use-01
-      - sub-agent-parallel-decompose-01
+      - skill-discovery-with-docs
+      - parallel-delegation-under-deadline
   - path: tasks/test-authoring
     task_names:
-      - unit-tests-01
+      - comprehensive-unit-tests
   - path: tasks/tool-orchestration
     task_names:
-      - browser-find-fact-01
-      - plan-then-revise-01
-      - tool-selection-01
-      - tool-sprawl-precision-01
+      - web-research-multi-page
+      - redesign-module-keep-constraints
+      - multi-goal-tool-routing
+      - pick-right-shell-utility

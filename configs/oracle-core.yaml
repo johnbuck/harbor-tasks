@@ -28,26 +28,26 @@ agents:
 datasets:
   - path: tasks/conversation-persona
     task_names:
-      - multistep-memory-conversational-01
-      - true-multi-turn-memory-write-01
-      - multistep-stale-memory-vs-file-01
+      - distinguish-my-facts-from-others
+      - persist-facts-through-corrections
+      - refresh-config-over-cached-value
   - path: tasks/context-management
     task_names:
-      - multistep-context-fill-02
+      - track-final-state-through-corrections
   - path: tasks/context-rot
     task_names:
-      - context-rot-02
+      - chain-facts-across-survey-depth
   - path: tasks/ops-debugging
     task_names:
-      - failure-recovery-loop-01
+      - adaptive-tool-error-recovery
   - path: tasks/tool-orchestration
     task_names:
-      - tool-sprawl-precision-01
-      - plan-then-revise-01
+      - pick-right-shell-utility
+      - redesign-module-keep-constraints
   - path: tasks/skill-agent-authoring
     task_names:
-      - sub-agent-parallel-decompose-01
-      - skill-discovery-and-use-01
+      - parallel-delegation-under-deadline
+      - skill-discovery-with-docs
   - path: tasks/real-world-workflows
     task_names:
-      - update-record-with-cleanup-01
+      - clean-expense-ledger

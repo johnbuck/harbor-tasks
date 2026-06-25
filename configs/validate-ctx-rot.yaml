@@ -28,5 +28,5 @@ agents:
 datasets:
   - path: tasks/context-rot
     task_names:
-      - context-rot-01
-      - context-rot-02
+      - retain-details-across-long-survey
+      - chain-facts-across-survey-depth

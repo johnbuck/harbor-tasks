@@ -1,0 +1,33 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/pick-right-shell-utility"
+description = "60 candidate shell tools; exactly 3 solve the task but are NAMED OPAQUELY (function only in --help), while 9 name-collision decoys match the task verbs better and do the wrong thing -- so correct selection requires reading descriptions, not name-matching. The answer value is NOT graded (a root agent computes it offline); reward = 0.5*selection_F1 + 0.5*call_efficiency over the agent's invocation log, so wrong tools and over-calling both cost score and computing the value offline gains nothing."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "tool-sprawl", "tool-selection"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "tool-sprawl-precision"
+tags = ["tool-orchestration", "tool-selection", "harness-bound"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

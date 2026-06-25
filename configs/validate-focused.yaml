@@ -15,4 +15,4 @@ agents:
 datasets:
   - path: tasks/conversation-persona
     task_names:
-      - multistep-memory-conversational-01
+      - distinguish-my-facts-from-others

@@ -1,0 +1,36 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/security-code-review"
+description = "Review a PR diff with THREE planted security issues (SQL injection, password-hash exposure, missing-auth delete) and ONE red-herring placeholder; graded deterministically on precision+recall (found - false_positive)/3."
+authors = [{name = "johnbuck"}]
+keywords = ["code-spec-review", "pr-diff-review", "security", "graded"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "medium"
+category = "code-spec-review"
+shape = "pr-diff-review"
+tags = ["code-spec-review", "pr-diff-review", "security", "graded", "deterministic"]
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[verifier.env]
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[solution.env]

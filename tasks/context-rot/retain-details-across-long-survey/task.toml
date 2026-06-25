@@ -1,0 +1,168 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/retain-details-across-long-survey"
+description = 'Context-ROT test (MERIDIAN HALL conservation survey) — the in-window sibling of the context-fill OVERFLOW family. 18 inspection records, ~19K tokens each / ~345K cumulative = ~0.34x the deepseek-v4-pro 1M window, so it sits in the empirical ~300-400K rot zone but does NOT overflow (the harness is never FORCED to compact). It tests whether the harness PROACTIVELY manages context to beat lost-in-the-middle rot. 12 single-statement needles are planted at controlled conversational depth — EARLY (visits 2-6), MIDDLE (visits 8-12, rot-critical), LATE (visits 14-18) — and each recall question PARAPHRASES its needle (orangery->conservatory, balustrade->railing, clock tower->bell tower) so it cannot be keyword-grepped (NoLiMa-style associative recall). Records are DELETED before recall; answers are line-anchored /12; the early/middle/late subscores expose the rot curve (middle<<edges = rot; flat = mitigated). No instruction mentions burial, position, or rot. Oracle=1.0.'
+authors = [{name = "johnbuck"}]
+keywords = ["context-management", "context-rot", "long-context", "multi-step", "lost-in-the-middle"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "context-rot"
+shape = "context-rot"
+tags = ["context-rot", "context-management", "multi-step", "long-context", "lost-in-the-middle", "harness-discriminating"]
+
+
+[environment]
+build_timeout_sec = 900.0
+workdir = "/app"
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "07-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "08-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "09-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "10-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "11-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "12-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "13-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "14-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "15-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "16-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "17-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "18-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "19-recall"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0

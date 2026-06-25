@@ -1,0 +1,37 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/parallel-delegation-under-deadline"
+description = "60 independent PROSE word-problems. Each opens with a quantity and walks through a HETEROGENEOUS event sequence (variable op count 5-8 and random order: add/sub/multiply, plus 1-2 value-dependent branches — parity AND threshold — whose outcome is NEVER asserted, only the rule is stated), salted with DISTRACTOR sentences carrying non-operative numbers and a digit/spelled-out number mix. Answer is a single deterministic integer per file (write to /app/out/NN.txt). reward = correct/60, a NON-CLAMPED base. Delegation is the intended discriminator: there are enough problems that grinding all 60 in one serial token-stream risks not finishing under the 10-min agent budget, whereas a harness that fans out to sub-agents (openclaw sessions_spawn / hermes delegate_task) clears more in time → higher base. NO concurrency bonus and NO mtime-based concurrency score: delegation shows up purely as serial-timeout→fewer-correct→lower-base. Leak-proof: only the prose lands in the agent container (/app/problems); the answer key lives in tests/answers.json + solution/ (never mounted into the agent). Regenerate problems+answers+oracle together via solution/gen.py (seeded). CALIBRATION ASSUMPTION (unconfirmed — no harness run available at authoring time): N=60 at a 600s agent timeout is assumed to straddle the serial/parallel completion threshold for deepseek-v4-pro; N and timeout_sec are the knobs. A real n>=3 run MUST confirm base<1.0 for a serial harness; if both harnesses finish serially (base~1.0 both), raise N. RESIDUAL RISK: arithmetic is individually cheap, so a single in-context pass MIGHT clear all 60 (no fan-out needed) AND a determined agent could attempt a bespoke NL parser. The value-dependent branches + distractors + format mix make a GENERIC regex/one-liner fail (verified: pre-resolved-parity 0/60, naive number-chain 0/60, verb-keyword pipeline 3/60), but a per-format parser is not impossible — though with no answer key the agent cannot validate it. ESCALATION if a run shows a serial or parser bypass: make each item require a tool/file round-trip (e.g. a fact each problem needs is fetched from a per-problem endpoint/file) so per-item latency, not token count, gates serial throughput."
+authors = [{name = "johnbuck"}]
+keywords = ["skill-agent-authoring", "sub-agent", "delegation", "parallel", "graded"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "skill-agent-authoring"
+shape = "sub-agent-parallel-decompose"
+tags = ["skill-agent-authoring", "sub-agent", "delegation", "harness-discriminating"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+# Deliberately tight: 60 multi-step reasoning problems solved one-at-a-time in a
+# single serial token-stream exceed this wall-clock; a harness that fans out to
+# sub-agents (independent token-streams) finishes far more. This 10-minute bound
+# vs. the problem count IS the calibration knob — see task description.
+timeout_sec = 600.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

@@ -1,0 +1,62 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/refresh-config-over-cached-value"
+description = "Stale-memory vs ground-truth: across early turns the agent reads and repeatedly USES a config value (cache_ttl_seconds=45 in /app/config.yaml — it reports it, then computes with it, cementing it in the harness's recall/hindsight memory). A distractor turn adds distance. Before the final question, step 04's setup.sh SILENTLY rewrites the file to cache_ttl_seconds=275 (the agent is never told). The final turn asks for the CURRENT value. reward 1.0 requires reporting the current 275 AND not also echoing the stale 45 (exclusivity — dumping both forfeits the point; an honest 'now 275 (was 45)' update note is carved out). Weight-0 diagnostics ride along: answered_current (275 present), not_stale (did not return 45), file_present. Targets the known failure mode of trusting outdated memory over re-fetching live file state."
+authors = [{name = "johnbuck"}]
+keywords = ["conversation-persona", "memory", "stale-memory", "ground-truth", "multi-step"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "conversation-persona"
+shape = "multistep-stale-memory-vs-file"
+tags = ["conversation-persona", "multi-step", "memory", "stale-memory", "ground-truth", "harness-discriminating"]
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 300.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-introduce"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-use"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-distractor"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-query"
+[steps.agent]
+timeout_sec = 120.0
+[steps.verifier]
+timeout_sec = 30.0

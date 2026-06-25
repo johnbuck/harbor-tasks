@@ -24,6 +24,6 @@ agents:
 datasets:
   - path: tasks/context-management
     task_names:
-      - multistep-context-fill-01
-      - multistep-context-fill-02
-      - multistep-context-fill-03
+      - track-project-across-context-overflow
+      - track-final-state-through-corrections
+      - separate-two-parallel-projects

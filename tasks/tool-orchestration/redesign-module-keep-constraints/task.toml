@@ -1,0 +1,55 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/redesign-module-keep-constraints"
+description = "Agent plans a calculator module (add/multiply/divide/compose) over several steps, building real sunk work: working divide + compose implementations plus a name->function REGISTRY and dispatch layer. A project-wide CLAMP policy ([-1000,1000] via a shared _clamp helper) is fixed at step-1 kickoff. The final step delivers a user 'change of mind': drop divide+compose, add subtract + a name-dispatch apply_op + OP_NAMES. To force genuine revision (not append) the step-3 setup REGRESSES /app/calc.py to a deterministic baseline that still carries divide/compose + the 4-op registry but has the _clamp helper and the bound VALUE STRIPPED, shipping add/multiply/divide un-clamped; the bound is never written to any step-3-readable file. Final grading (weighted, range 0..1): CLAMP MEMORY 0.40 (re-clamp add+multiply+subtract using the recalled bound — the harness-memory discriminator), FUNCTIONAL 0.40, CLEANUP 0.12 (divide/compose removed), REPLAN 0.08 (PLAN.md updated). A harness that rebuilds from the revision message alone ships everything un-clamped (caps near 0.60); one that retained the kickoff bound scores 1.0. THREADING NOTE: this final step must RESUME (not reset) under the shared-conversation runner so the bound flows in via the step-1/2 conversation; the setup deliberately drops no reset sentinel."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "plan-then-revise", "replan"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "plan-then-revise"
+tags = ["tool-orchestration", "plan-revise", "multi-step", "harness-discriminating"]
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-plan-and-implement-add"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-implement-multiply"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-revise-and-fix"
+[steps.agent]
+timeout_sec = 300.0
+[steps.verifier]
+timeout_sec = 30.0

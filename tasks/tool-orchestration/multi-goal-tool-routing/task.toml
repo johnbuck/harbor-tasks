@@ -1,0 +1,33 @@
+schema_version = "1.1"
+
+[task]
+name = "johnbuck/multi-goal-tool-routing"
+description = "18 helper tools with name-adjacent decoy traps; exactly 3 solve the task and each sub-goal has an obvious-but-wrong adjacent tool (lexicographic vs semantic-version max, naive-float vs currency-aware sum, json-array vs jsonl count). Graded reward blends answer correctness (3 sub-answers) with tool-selection precision/recall F1 read from the invocation log. Hardened 2026-06-01: removed the instruction telegraph that handed over the semver answer; data now defeats the naive bypass (events.jsonl interleaves comment/blank/malformed lines so wc/grep overcount; semantic max is 1.10.10 so plain-text sort and a careless reader both miss)."
+authors = [{name = "johnbuck"}]
+keywords = ["tool-orchestration", "tool-selection", "tool-sprawl", "decoys"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "tool-orchestration"
+shape = "tool-selection"
+tags = ["tool-orchestration", "tool-selection", "model-bound"]
+
+[verifier]
+timeout_sec = 60.0
+
+[agent]
+timeout_sec = 300.0
+
+[environment]
+build_timeout_sec = 600.0
+workdir = "/app"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"

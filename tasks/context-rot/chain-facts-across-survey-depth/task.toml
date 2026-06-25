@@ -1,0 +1,168 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/chain-facts-across-survey-depth"
+description = 'Context-ROT, MULTI-HOP variant (WESTMARCH PRIORY). 18 weekly inspection records (~19K tok each, ~345K cumulative, ~0.34x the deepseek-v4-pro 1M window — deep in the ~300-400K rot zone, no overflow) are delivered across 18 ingest steps that THREAD into ONE growing conversation (opt-in /opt/harness/thread-session marker → the thin adapters resume the session each step), so the records genuinely ACCUMULATE in-context. (Prior bug, fixed 2026-06-10 / spec 2026-06-10-core-eleven-remediation D1: without threading each ingest ran FRESH, nothing accumulated, and the task silently degraded to a memory-MCP test.) Each of 8 recall questions CHAINS TWO facts buried at different conversational depths via a bridge entity (anchor: feature->bridge; bridge: bridge->attribute), so a lost-in-the-middle failure on EITHER hop breaks the chain (RULER variable-tracking; NoLiMa paraphrased links). Records wiped before recall → answers must come from in-context retention, not a re-read. Reward = matched/8 (line-anchored, format-robust). EARLY (visits 2-6) / MIDDLE (8-12) / LATE (14-18) depth fractions are DIAGNOSTIC ONLY (weight-0, reward-details.json): a harness may also externalize to its hindsight MCP, so the depth split is an observation, not a load-bearing rot claim. No telegraphing of burial/hops/rot. Oracle=1.0.'
+authors = [{name = "johnbuck"}]
+keywords = ["context-management", "context-rot", "long-context", "multi-step", "multi-hop", "lost-in-the-middle"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "context-rot"
+shape = "context-rot"
+tags = ["context-rot", "context-management", "multi-step", "long-context", "multi-hop", "lost-in-the-middle", "harness-discriminating"]
+
+
+[environment]
+build_timeout_sec = 900.0
+workdir = "/app"
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "07-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "08-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "09-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "10-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "11-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "12-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "13-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "14-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "15-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "16-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "17-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "18-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "19-recall"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0

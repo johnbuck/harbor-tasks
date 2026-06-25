@@ -1,4 +1,4 @@
-# End-to-end proof of browser-find-fact-01 on BOTH harnesses (real n=1 each).
+# End-to-end proof of web-research-multi-page on BOTH harnesses (real n=1 each).
 # Proves the live path: harness browser tool -> shared memory-host Chromium (CDP) ->
 # ProtonVPN exit -> https://quotes.toscrape.com/js/ -> render + paginate ->
 # extract the site's attribution (Jim Henson). The oracle only validated the
@@ -36,4 +36,4 @@ agents:
 
 datasets:
   - path: tasks/tool-orchestration
-    task_names: ["browser-find-fact-01"]
+    task_names: ["web-research-multi-page"]

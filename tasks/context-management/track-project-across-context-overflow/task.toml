@@ -1,0 +1,168 @@
+schema_version = "1.1"
+multi_step_reward_strategy = "final"
+
+[task]
+name = "johnbuck/track-project-across-context-overflow"
+description = 'Context-window SATURATION test (PROJECT HELIOS). 18 weekly status reports, ~72K tokens each / ~1.3M cumulative = ~1.25x the deepseek-v4-pro 1M window, so the window OVERFLOWS before recall. Content is meaningful, evolving project prose (no "filler, ignore it"). The analyst tracks 12 current-state facts across the quarter: STABLE-EARLY facts (kickoff/site/integrator/software, stated once in wk1-8, never repeated) are evicted from a raw window so only a harness that externalises to memory recalls them; UPDATE-TRAP facts (lead/vendor/launch/budget/satellites/ops-center/coolant/retention, corrected in late weeks) probe stale-value surfacing. Reports + notes are DELETED before recall. Graded /12 precision+recall: +1 per correct current value, -1 per stale superseded value, -1 for the DRAFT 2028-Q1 decoy. Oracle=1.0, stale-memory=0.0, partial=0.33.'
+authors = [{name = "johnbuck"}]
+keywords = ["context-management", "long-context", "multi-step", "memory"]
+
+[metadata]
+author_name = "johnbuck"
+difficulty = "hard"
+category = "context-management"
+shape = "multistep-context-fill"
+tags = ["context-management", "multi-step", "long-context", "context-fill", "harness-discriminating"]
+
+
+[environment]
+build_timeout_sec = 900.0
+workdir = "/app"
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
+
+[environment.env]
+OPENROUTER_API_KEY = "${OPENROUTER_API_KEY}"
+
+[agent]
+timeout_sec = 600.0
+
+[verifier]
+timeout_sec = 60.0
+
+[[steps]]
+name = "01-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "02-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "03-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "04-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "05-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "06-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "07-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "08-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "09-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "10-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "11-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "12-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "13-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "14-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "15-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "16-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "17-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "18-ingest"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
+
+[[steps]]
+name = "19-recall"
+[steps.agent]
+timeout_sec = 600.0
+[steps.verifier]
+timeout_sec = 30.0
