@@ -467,7 +467,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <title>Task Suite</title>
 <style>
   body{{font:14px/1.5 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}}
-  .wrap{{max-width:1200px;margin:0 auto}}
+  .wrap{{max-width:1000px;margin:0 auto}}
   a{{color:#9db4d6}}
   .nav{{display:flex;gap:10px;align-items:center;margin-bottom:14px}}
   .nav a{{font-size:13px;text-decoration:none;border:1px solid #2f3645;border-radius:6px;padding:4px 12px;color:#9db4d6}}
