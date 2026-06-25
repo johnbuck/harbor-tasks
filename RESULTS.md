@@ -26,31 +26,42 @@ Tier 2 (Track-B) or Tier 2 + Tier 4 (Track-A).
 | **3. Real-agent n=1 e2e smoke** | The **actual harness** runs every task; rough separation + which tasks break live | ✅ **complete** (`configs/smoke-n1.yaml`, both harnesses) — see below. **n=1 is a smoke, not a verdict** |
 | **4. n≥3 `pass^k` verdict** | Reliability spread; Track-A tasks genuinely discriminate | ❌ **not run for the current (reworked) tasks.** The 2026-06-10 n=5 (Δ=0.188) is **superseded** — it predates the second-adversarial-pass + rebuild + non-core remediation that reworked these tasks |
 
-### Tier 3 — n=1 e2e smoke results (indicative, NOT banked)
+### Tier 3 — n=1 e2e smoke + both-zero triage (done 2026-06-25)
 
-Both harnesses ran all 32 tasks e2e. **The suite separates them, in both directions**
-— the key construct-validity signal (a one-sided result would suggest a confound):
+Both harnesses ran all 32 build-able tasks e2e. The suite separates them in BOTH
+directions (openclaw led failure-recovery / context-fill / update-record / plan-revise /
+proactive-preference; hermes led browser-find-fact / memory-conversational /
+stale-memory; ~8 both-aced at 1.0). **n=1 is a coin-toss, not a verdict — not banked.**
 
-- **openclaw led:** failure-recovery, context-fill-01/02/03, proactive-preference,
-  update-record-with-cleanup, plan-then-revise, pr-diff-review.
-- **hermes led:** browser-find-fact, memory-conversational, stale-memory-vs-file.
-- **both aced (1.0/1.0):** context-rot-01/02, factual-lookup-cited, pandas-sql,
-  prompt-injection-resistance, refactor-multi-file, shell-pipeline, skill-discovery,
-  unit-tests.
+**Both-zero triage** (the 6 tasks that scored ~0 on *both* harnesses):
 
-**Caveats (why these numbers are not the verdict):**
-1. **n=1 is a coin-toss.** A 1.0-vs-0.0 at one sample is not a reliability result;
-   that is precisely what Tier 4 (`pass^k`, n≥3) measures. Numbers are not banked.
-2. **~6 tasks scored ~0 on BOTH harnesses — pending transcript triage** (free, no
-   re-run): `true-multi-turn-memory-write`, `find-contradictions`, `secret-scan`,
-   `tool-sprawl-precision`, `agentic-research-with-memory`, and
-   `sub-agent-parallel-decompose`. Each is one of: a grader too strict for a real
-   agent's phrasing (a false-zero only visible e2e), genuine difficulty, or an infra
-   gap. **`sub-agent-parallel-decompose` is an expected zero** — its in-container
-   latency-gated lookup (T9) is rebuild-deferred and was never built, so a real agent
-   cannot solve it in-container (see `backlog/2026-06-11-core-eleven-rebuild-pass.md`).
-3. Harbor truncates long trial-dir names; a couple of multistep rows are ambiguous in
-   raw dumps (data is intact, naming collides).
+- **INFRA-VOID — re-run, not a loss:** `find-contradictions` and
+  `agentic-research-with-memory` both **crashed on a DNS outage**
+  (`EAI_AGAIN openrouter.ai`) — never reached the model. ⚠️ The smoke ran during
+  **transient network instability**, so *other* n=1 zeros may also be infra artifacts,
+  not real fails — another reason n=1 isn't the verdict.
+- **GRADER/FIXTURE BUG — fix (cheap, offline-verifiable):**
+  - `true-multi-turn-memory-write` — openclaw recalled all 8 facts and wrote a correct
+    answer but scored 0/8: the grader's Part-A/Part-B splitter matches the bare word
+    "dinner" in the answer's title heading → discards Part A
+    (`steps/08-recall-question/tests/reward.py`, the `pb = next(...'part\s*b|dinner'...)`
+    split; plus an unanchored `fish` in the MEAT regex). Fix: anchor the split to a
+    heading. (hermes genuinely failed this one — a real signal, keep.)
+  - `secret-scan` — the seeded "real" secrets use **canonical example values**
+    (`AKIAIOSFODNN7EXAMPLE`, the jwt.io default token, `example.com`) and the
+    instruction says NOT to flag placeholders, so both agents correctly reject all four.
+    Fixtures contradict ground truth. Fix: reseed with realistic non-canonical fakes.
+- **REAL-FAIL / design — no grader fix; judge at n≥3:**
+  - `tool-sprawl-precision` (core-eleven) — incentive inversion: openclaw computed
+    offline (no tool calls), hermes took decoy bait. Floors both at n=1 (a documented
+    design tension); needs n≥3 + possibly the "make offline the longer path" mitigation.
+  - `sub-agent-parallel-decompose` (core-eleven) — **correction to an earlier note:**
+    the latency-gated `cal-lookup` IS built into the image. Both failed to delegate
+    within the 600s budget (hermes timed out, openclaw persisted nothing).
+    `LOOKUP_LATENCY_SEC` is an unvalidated estimate — the deferred D7 n≥3 calibration
+    ("serial must fail / fan-out must fit") is what's owed.
+
+Net: of the 6, **2 are VOID (infra), 2 are real bugs to fix, 2 need n≥3 to judge.**
 
 ---
 
@@ -97,6 +108,21 @@ same backend, not a backend asymmetry:
 (commit `196f2b0`). The 32 build-able eval tasks pass Tiers 1–2 (and ran Tier 3), but
 approval is gated on Tier 4 for Track-A and is held pending the both-zero triage. The
 task catalog reads NEEDS REVIEW until each task clears its gate.
+
+## Open work (next steps, post-triage 2026-06-25)
+
+1. **Fix 2 false-zeros (cheap, offline):** `true-multi-turn-memory-write` Part-B
+   heading-anchor + MEAT-regex fix; `secret-scan` reseed fixtures with realistic
+   non-canonical secrets. Add a regression check each, re-run their graders offline.
+2. **Re-run the 2 network-VOID tasks** (`find-contradictions`,
+   `agentic-research-with-memory`) — verify `openrouter.ai` DNS on the run host first
+   (provider-pin rule); ideally re-run the whole n=1 smoke on a stable network since
+   the outage may have spuriously zeroed others.
+3. **Tier 4 — n≥3 `pass^k` grid on a stable network:** the verdict-bearing run AND the
+   calibration the two design tasks (`tool-sprawl-precision`,
+   `sub-agent-parallel-decompose`) need.
+4. **Flip `approved=true`** per task that then clears its gate (Tier 2 for Track-B;
+   Tier 2 + Tier 4 for Track-A).
 
 ## How to reproduce
 
