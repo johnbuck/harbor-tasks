@@ -234,12 +234,11 @@ def badge(text, cls="muted"):
 # task.toml sets `[metadata] work_status = "..."` explicitly. Order = work queue
 # priority. key -> (label, badge-class, meaning).
 WORK = {
-    "discriminating":   ("discriminating", "disc",    "Tagged as a harness discriminator — an intended instrument. Authoring is done; the actual gap is still pending confirmation in the pass^k grid (gated on the E2 provider-pin + browser fixes)."),
-    "needs-validation": ("needs validation", "mid",   "Graded but NOT tagged as discriminating — run it and prove it separates the harnesses, or sharpen it until it does."),
-    "needs-hardening":  ("needs hardening", "bad",     "Binary / likely BLUNT — make it graded + raise difficulty, or graduate it to a real discriminator."),
+    "needs-validation": ("needs validation", "mid",   "Graded — run it at n≥3 and confirm it separates the harnesses, or sharpen it until it does."),
+    "needs-hardening":  ("needs hardening", "bad",     "Binary / likely BLUNT — make it graded + raise difficulty."),
     "retired":          ("archived", "retired", "Retired from the active suite by the 2026-06-01 adversarial review (model-dominated or redundant — fails the python3-one-liner kill test). Moved to archive/ for reference; excluded from the grid."),
 }
-WORK_ORDER = ["discriminating", "needs-validation", "needs-hardening", "retired"]
+WORK_ORDER = ["needs-validation", "needs-hardening", "retired"]
 
 
 def work_state(t: dict) -> tuple:
@@ -248,8 +247,6 @@ def work_state(t: dict) -> tuple:
         key = "retired"
     elif t.get("work_status_override") in WORK:
         key = t["work_status_override"]
-    elif t.get("discriminating"):
-        key = "discriminating"
     elif t.get("graded"):
         key = "needs-validation"
     else:
@@ -300,7 +297,6 @@ def render(tasks: list, weights: dict) -> str:
       <div class="stat"><b>{n_total}</b><span>tasks</span></div>
       <div class="stat"><b>{n_active}</b><span>active</span></div>
       <div class="stat"><b>{n_archived}</b><span>archived</span></div>
-      <div class="stat work-done"><b>{work_hist['discriminating']}</b><span>discriminating (tagged)</span></div>
       <div class="stat work-todo"><b>{work_hist['needs-validation']}</b><span>needs validation</span></div>
       <div class="stat work-todo"><b>{work_hist['needs-hardening']}</b><span>needs hardening</span></div>
       <div class="stat"><b>{n_cats}</b><span>categories</span></div>
@@ -364,8 +360,6 @@ def render_card(t: dict) -> str:
     # WORK status, then difficulty/grading/flags.
     head_badges = [badge(wlabel, wcls)]
     flags = []
-    if t["discriminating"] and wkey != "discriminating":
-        flags.append(badge("discriminating", "disc"))
     if t["focused"]:
         flags.append(badge("focused n=5", "focus"))
     flags.append(badge(f"{t['n_steps']} steps", "step") if t["multistep"]
@@ -529,7 +523,6 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
-  <label><input type="checkbox" id="f-disc"> discriminating</label>
   <label><input type="checkbox" id="f-focus"> focused set</label>
   <label><input type="checkbox" id="f-multi"> multi-step</label>
   <input type="search" id="f-search" placeholder="search name / shape / description / tags">
@@ -574,7 +567,7 @@ const F = id => document.getElementById(id);
 function applyFilters(){{
   const cat=F('f-cat').value, work=F('f-work').value, diff=F('f-diff').value,
         arch=F('f-archived').value,
-        graded=F('f-graded').checked, disc=F('f-disc').checked,
+        graded=F('f-graded').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
@@ -585,7 +578,6 @@ function applyFilters(){{
     if(work && c.dataset.work!==work) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
     if(graded && c.dataset.graded!=='1') ok=false;
-    if(disc && c.dataset.disc!=='1') ok=false;
     if(focus && c.dataset.focus!=='1') ok=false;
     if(multi && c.dataset.multi!=='1') ok=false;
     if(q && !c.dataset.search.includes(q)) ok=false;
@@ -599,7 +591,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-archived','f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
+['f-archived','f-cat','f-work','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>
