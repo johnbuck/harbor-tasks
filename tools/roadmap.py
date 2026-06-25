@@ -11,7 +11,9 @@ so it works offline). Content is hand-curated — edit the EPICS table below and
     python3 tools/roadmap.py     # writes roadmap.html
 
 Keep it clear and concise. Spec statuses mirror the backlog frontmatter badges.
-Each spec row: (status, label, ref, detail).
+Each spec row: (status, label, ref, detail). Rows display sorted by status —
+in-progress first, deprecated/rejected last, everything else in between; the sort
+is stable, so your curated list order holds within each bucket (see SORT_RANK).
   - ref  = backlog/ file (resolved against repo root and backlog/) or code file,
            or "—" for work with no standalone spec (tracked by task #). When the
            file exists, its full text is embedded and "open full spec" appears.
@@ -134,6 +136,8 @@ EPICS = [
              "7-agent audit of every task's grader for forge surface. HEADLINE: two of the three proven discriminators can be FAKED — failure-recovery-loop-01 (success string baked in an agent-readable script + plantable payload.txt → full reward without the recovery path) and tool-sprawl-precision-01 (tool_f1 read from a chmod-666 log the agent can append to). 11 live gameable tasks (Wave 1), ~21 rewardkit-only modernization, ~21 leave-as-is (code-editing already /opt/canonical tamper-guarded). A gameable discriminator silently invalidates the thesis — validity-critical."),
             ("done", "rewardkit grading rollout — all 23 active graded tasks converted + validated", "2026-06-09-verifier-sandbox-rollout.md",
              "Operator directive: rewardkit is the grading framework — RE-IMPLEMENT bespoke bash/python graders cleanly in it (most of FOOTGUNS is bespoke-grader bugs), keep bespoke only for pytest tasks. rewardkit BAKED into harbor-agents-rich:latest (+ canonical Dockerfile) so shared-mode conversion = just reward.py + test.sh + oracle --force-build. ALL 23 active graded tasks DONE + oracle-validated (verified criterion counts, $0 OpenRouter) across patterns: additive, penalty max(0,found-fp)/N (weight-1 score + weight-0 detail), F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional lost-in-the-middle recall. 12 single-step + 11 multistep (the recall-step reward.py grades; multi_step_reward_strategy=final). #93 context-rot rot-curve fractions + answer_present preserved as weight-0 criteria. Footguns found: zero-arg criteria double-register (#45); vestigial verifier.env breaks grading. Only the 4 pytest tasks stay bespoke (by design). Separate-verifier sandbox (environment_mode=separate, FOOTGUNS #42) used where isolation is needed; isolation alone doesn't fix a forged artifact (#44). 5 commits local on the run host main pending operator push."),
+            ("done", "Overnight verifier-integrity decisions — honest-shortcut fixes + NORTH_STAR.md", "2026-06-10-overnight-verifier-integrity-decisions.md",
+             "Threat-model refinement (2026-06-10): this eval measures HONEST harnesses, so the priority is closing honest-shortcut leaks (a capable agent legitimately reading a baked answer — a KILL-test fail) over adversarial-forge hardening (fabricating a log honest harnesses never touch). DONE + oracle-validated on the free oracle ($0 OpenRouter): unit-tests-01 (the 4 grading mutants relocated environment/→tests/ so Harbor uploads them only AFTER the agent runs — answer-key leak closed) and the proven discriminator failure-recovery-loop-01 (the plaintext `PAYLOAD: …` literal in the agent-readable dfetch script → DERIVED from the session token, sha256(token)[:11], at emit time; the task now passes the KILL test on the identical 2-call honest path, so discrimination is unchanged — only the emitted/expected string moved in lockstep). Adversarial-forge tasks (tool-sprawl / tool-selection / browser-find-fact / prompt-injection) deprioritized as speculative for an honest-harness verdict; schedule-meeting-from-name-01 deferred (its fix isn't safe to do unsupervised). New: NORTH_STAR.md — the canonical value hierarchy (validity > measure-the-harness > no-telegraphing > pass^k > fair-comparison > simplicity) for unsupervised judgment calls. Feeds the n≥3 verdict grid (#81) below — failure-recovery's supervised re-baseline is incorporated there."),
             ("done", "Run n≥3 pass^k grid → verdict (task #81) — core-11 grid DONE", "2026-06-10-core-eleven-remediation.md",
              "DONE 2026-06-10: a full n=5 pass^k grid (110 trials) ran on the REMEDIATED core-11 over the symmetric hindsight-only substrate, after all 5 known bypasses were closed and re-verified live (a second agent re-ran each exploit — 5/5 no longer score). Result: effective Δ=0.188 (meets the 10% bar), leader hermes, all 7 categories split ≥10% in both directions — the three reworked anchors RE-EARNED real splits (ops-debugging Δ+0.33, tool-orchestration Δ+0.15, conversation-persona Δ−0.53). Numbers auto-computed by metrics/track_a_weighted.py → track_a_report.json; verdict written to RESULTS.md (E5). Open follow-on: extend the grid to the 21 active non-core tasks (their hardening has landed — row above; the operator-gated oracle + n-runs are what's pending); re-confirm context-rot (Δ−0.10, thin)."),
         ],
@@ -251,6 +255,10 @@ STATUS_LABEL = {"done": "done", "partial": "in progress", "blocked": "blocked",
                 "todo": "to do", "deprecated": "deprecated", "rejected": "rejected"}
 STATUS_CLASS = {"done": "ok", "partial": "mid", "blocked": "bad",
                 "todo": "muted", "deprecated": "dep", "rejected": "dep"}
+# Display order within an epic: in-progress first, dead (deprecated/rejected) last,
+# everything else (done/blocked/todo) in between. Stable sort, so the curated list
+# order holds within each bucket.
+SORT_RANK = {"partial": 0, "deprecated": 2, "rejected": 2}
 
 CSS = """
   body{font:14px/1.6 system-ui,sans-serif;margin:0;background:#0f1117;color:#e6e6e6;padding:24px}
@@ -296,8 +304,6 @@ CSS = """
     border:1px solid #2f5238;border-radius:6px;padding:4px 11px;cursor:pointer}
   .specbtn:hover{background:#1d3325} .specbtn:disabled{color:#5a6270;background:#191b22;border-color:#262b36;cursor:default}
   .sec{font-size:13px;font-weight:700;color:#cdd6e4;margin:26px 0 10px;border-bottom:1px solid #262b36;padding-bottom:6px}
-  .now{background:#1a1712;border:1px solid #3a2f16;border-left:3px solid #e6c98a;border-radius:10px;
-    padding:13px 18px;font-size:12.8px;line-height:1.6;color:#e8dcc2}
   /* modal */
   #ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50}
   #mo{display:none;position:fixed;top:4%;left:50%;transform:translateX(-50%);width:min(920px,93vw);max-height:90vh;
@@ -354,7 +360,8 @@ def render() -> str:
     cards, sources = [], []
     for e in EPICS:
         rows = []
-        for i, (st, label, ref, detail) in enumerate(e["specs"]):
+        specs = sorted(e["specs"], key=lambda s: SORT_RANK.get(s[0], 1))
+        for i, (st, label, ref, detail) in enumerate(specs):
             sid = f'{e["id"]}-{i}'
             path = resolve(ref)
             if path is not None:
@@ -407,70 +414,7 @@ def render() -> str:
 <h1>Roadmap — harness-vs-model eval, by epic</h1>
 <div class="ts">generated {date.today().isoformat()} · hand-curated from backlog/ · edit tools/roadmap.py to update</div>
 <div class="thesis"><span class="lbl">The thesis</span>{THESIS}</div>
-<div class="sec" style="margin-top:6px">Where we stand right now</div>
-<div class="now"><b>rewardkit grading rollout (2026-06-10) — COMPLETE: all 23 active graded tasks converted + oracle-validated.</b>
-Per operator directive, rewardkit is now the grading framework: bespoke bash/python graders are
-RE-IMPLEMENTED cleanly as rewardkit criteria (most of FOOTGUNS is bespoke-grader bugs). rewardkit is
-<i>baked</i> into <span class="mono">harbor-agents-rich:latest</span>, so a conversion is just
-<span class="mono">reward.py</span> + <span class="mono">test.sh</span> + an oracle
-<span class="mono">--force-build</span>. <b>All 23 active graded tasks done</b> — 12 single-step +
-11 multistep recall (the recall-step <span class="mono">reward.py</span> grades) — spanning
-additive, penalty <span class="mono">max(0,found-fp)/N</span> (weight-1 score + weight-0 detail),
-F1-blend, binary, blend, net-penalty UPDATE-trap, line-anchored cross-talk, and positional
-lost-in-the-middle recall (the #93 rot-curve fractions + <span class="mono">answer_present</span>
-preserved as weight-0 criteria). Each oracle-validated with a verified criterion count, <b>$0
-OpenRouter</b>. Footguns found + documented: zero-arg criteria double-register (#45); a vestigial
-<span class="mono">verifier.env</span> LLM key breaks grading. <b>Keep bespoke:</b> the 4 pytest
-tasks (rewardkit would just wrap pytest). 5 commits sit on the run host <span class="mono">main</span>
-pending the operator's push (no GitHub auth in the non-interactive session).<br><br>
-<b>Verifier-integrity (2026-06-09) — TWO of three proven discriminators were
-GAMEABLE</b> (now fixed). Adopting Harbor's native <span class="mono">environment_mode="separate"</span> verifier
-sandbox (prototyped on skill-discovery; the broken prototype is now fixed + oracle-validated, with
-rewardkit <i>baked</i> into the verifier image — no per-trial PyPI fetch). A 7-agent audit of all 54
-tasks found the headline risk: <span class="mono">failure-recovery-loop-01</span> (success string
-baked in an agent-readable script + plantable <span class="mono">payload.txt</span>) and
-<span class="mono">tool-sprawl-precision-01</span> (<span class="mono">tool_f1</span> read from a
-<span class="mono">chmod-666</span> log) can be FAKED without exercising the measured capability — a
-gameable discriminator silently invalidates the thesis. <b>Key caveat:</b> isolation alone does NOT
-fix a forged artifact (FOOTGUNS #44); each gameable task also needs its grader re-sourced from the
-un-forgeable trajectory or a recomputed read-only input. <b>Threat-model refinement (2026-06-10):</b>
-this eval measures HONEST harnesses, so the real priority is <i>honest shortcut</i> (a capable agent
-reads a baked answer — a KILL-test fail) over <i>adversarial forge</i> (fabricating a log honest
-harnesses never touch). DONE + oracle-validated tonight: <span class="mono">unit-tests-01</span>
-(mutant answer-key relocated env→tests/) and <span class="mono">failure-recovery-loop-01</span>
-(plaintext payload → token-derived; the proven discriminator now passes the KILL test, honest
-behavior unchanged). Adversarial-forge tasks deprioritized (low value for an honest-harness verdict);
-<span class="mono">schedule-meeting</span> deferred (needs a sidecar redesign — see
-backlog/2026-06-10-overnight…). New: <span class="mono">NORTH_STAR.md</span> (canonical value
-hierarchy). <b>Gates the n≥3 verdict (#81)</b> — failure-recovery needs a supervised re-baseline.<br><br>
-<b>#90 (browser) is fixed — and the fix overturned its own spec.</b> Chasing the
-missing <span class="mono">browser</span> tool, the embedded-vs-gateway theory was <i>disproven</i>
-in-container: the real blocker was a <b>stale persisted plugin registry</b> baked into the rich
-image (indexed before the browser plugin's deps existed → browser + canvas/file-transfer/etc.
-never indexed). One line baked into the image — <span class="mono">openclaw plugins registry
---refresh</span> (46 → 64 enabled) — and the <span class="mono">browser</span> tool surfaces.
-Proven: plain embedded <span class="mono">openclaw agent --local</span> then exposes the
-<i>identical</i> 59-tool catalog as gateway-backed (browser + full hindsight memory + sub-agent
-tools + skills). Embedded is NOT a reduced runtime for anything the core-11 exercises, so the
-gateway-backed work is <b>rejected, not deferred</b> — there's no capability gap to close.
-<b>Operator decision (2026-06-03):</b> registry-refresh + keep embedded. <b>Validity caveat:</b>
-prior runs lacked the browser tool, so only <i>browser-dependent</i> tasks need re-baselining —
-the rest of the catalog was always present.<br><br>
-<b>Already done</b> (E2 cleared + scoring solid): both harnesses pinned to <b>novita</b>
-(privacy-intact, deny+tool-use+reasoning); hermes write-persistence (<b>#92</b>) fixed +
-verified; <b>core-11</b> defined; context-rot scoring (<b>#93</b>) fixed; recall removed
-(substrate openclaw=hindsight vs hermes=honcho+hindsight); browser tool (<b>#90</b>) fixed via
-registry refresh. <b>Verdict landed (2026-06-10):</b> the reworked core-11 ran a full n=5
-pass^k grid (110 trials) on the symmetric hindsight-only substrate — <b>the suite discriminates,
-effective Δ=0.188, leader hermes</b> (driven by reliability: hermes 4% vs openclaw 20% error),
-all 7 categories split ≥10% in both directions; written up in RESULTS.md. <b>Non-core hardening
-landed (2026-06-17):</b> the 21 active NON-core tasks were all HARDENed + offline-green and merged
-(<span class="mono">2026-06-16-noncore-task-remediation</span>) — what remains there is
-operator-gated validation (Docker oracle, Track-A n-runs, <span class="mono">approved=true</span>
-flips), not building. <b>Next:</b> run those gates, extend the grid to the non-core tasks, and ship
-the FE-exportable verdict (E5). The old #89 "rework the deprecated tasks" was dropped as redundant —
-every axis they covered is already exercised by a harder live task.</div>
-<div class="sec">Epics</div>
+<div class="sec" style="margin-top:6px">Epics</div>
 {legend}
 {''.join(cards)}
 <div class="sec" style="margin-top:30px">The 11 core tests — how each one measures the harness</div>
