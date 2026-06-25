@@ -660,14 +660,14 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <a href="task-catalog.html" class="active">Task Suite</a>
   <a href="roadmap.html">Roadmap</a>
 </div>
-<h1>Task Suite — every eval task (live + archived)</h1>
+<h1>Task Suite — every eval task (active + archived)</h1>
 <div class="ts">generated {ts} · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
   click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do<br>
-  <b>{n_active}</b> live tasks + <b>{n_archived}</b> archived (retired from the active suite, kept in <span class="mono">archive/</span> for reference — flagged, not deleted)</div>
+  <b>{n_active}</b> active tasks + <b>{n_archived}</b> archived (retired from the active suite, kept in <span class="mono">archive/</span> for reference — flagged, not deleted)</div>
 {err_html}
 {summary}
 <div class="filterbar">
-  <select id="f-archived"><option value="0" selected>live only</option><option value="">live + archived</option><option value="1">archived only</option></select>
+  <select id="f-archived"><option value="0" selected>active only</option><option value="">active + archived</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
   <select id="f-tier"><option value="">any progress</option>{tier_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
