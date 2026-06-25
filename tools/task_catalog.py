@@ -386,7 +386,8 @@ def render_card(t: dict) -> str:
             for sn, snip in t["steps"])
         steps_html = f'<div class="steps">{rows}</div>'
 
-    tags_html = "".join(f'<span class="tag">{escape(x)}</span>' for x in t["tags"])
+    tags_html = "".join(f'<span class="tag">{escape(x)}</span>'
+                        for x in t["tags"] if "discriminat" not in x.lower())
 
     # data-* attributes drive client-side filtering.
     data = (f'data-cat="{escape(t["category"])}" data-diff="{escape(diff)}" '
