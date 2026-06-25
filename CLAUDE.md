@@ -129,6 +129,15 @@ infra/config/scoring change.
 7. **Never grep `.env`/secret files; never put a secret on a command line.** Run
    via Infisical (below). Full rules: the homelab repo's `SECRETS.md`.
 
+8. **Every task grader MUST use rewardkit — no exceptions (pytest included).** No
+   bespoke bash/python graders, no raw `pytest` invocations: re-implement the
+   scoring as rewardkit criteria (rewardkit can wrap pytest and call arbitrary
+   Python, so there is no task it can't grade). Bespoke graders are the #1
+   silently-wrong bug class (most of `FOOTGUNS.md`); one framework kills it. CI
+   check: `python3 tools/check_rewardkit.py` must exit 0. Convert under the oracle
+   — a conversion is only done when the task's oracle reward is byte-identical
+   before and after.
+
 ---
 
 ## Discrimination methodology (the heart of the project)
