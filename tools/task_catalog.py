@@ -363,7 +363,7 @@ def render_card(t: dict) -> str:
     if t["focused"]:
         flags.append(badge("focused n=5", "focus"))
     flags.append(badge(f"{t['n_steps']} steps", "step") if t["multistep"]
-                 else badge("single-step", "muted"))
+                 else badge("1 step", "muted"))
 
     # File chips grouped by kind.
     chip_groups = [("instruction", "instruction"), ("setup", "setup"),
