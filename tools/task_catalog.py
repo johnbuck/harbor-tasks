@@ -29,6 +29,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 TASKS = REPO / "tasks"
+ARCHIVE = REPO / "archive" / "tasks"
 OUT = REPO / "task-catalog.html"
 WEIGHTS_TOML = REPO / "configs" / "track-a-weights.toml"
 FOCUSED_YAML = REPO / "configs" / "track-a-focused.yaml"
@@ -168,51 +169,54 @@ def step_snippets(task_dir: Path) -> list:
 
 def scan_tasks(weights: dict, focused: set) -> list:
     tasks = []
-    for cat_dir in sorted(TASKS.iterdir()):
-        if not cat_dir.is_dir() or cat_dir.name in SKIP_DIRS:
-            continue
-        for task_dir in sorted(cat_dir.iterdir()):
-            toml_path = task_dir / "task.toml"
-            if not (task_dir.is_dir() and toml_path.exists()):
+    # Scan the live suite AND the archive (archived tasks are shown, flagged).
+    roots = [(TASKS, False)]
+    if ARCHIVE.is_dir():
+        roots.append((ARCHIVE, True))
+    for root, archived in roots:
+        for cat_dir in sorted(root.iterdir()):
+            if not cat_dir.is_dir() or cat_dir.name in SKIP_DIRS:
                 continue
-            try:
-                meta = tomllib.loads(toml_path.read_text())
-            except Exception as e:
-                tasks.append({"_error": f"{task_dir.name}: {e}",
-                              "category": cat_dir.name, "name": task_dir.name})
-                continue
-            t = meta.get("task", {}) or {}
-            md = meta.get("metadata", {}) or {}
-            multistep = (task_dir / "steps").is_dir() or bool(meta.get("steps"))
-            steps = step_snippets(task_dir) if multistep else []
-            files, verifiers = collect_files(task_dir, multistep)
-            tags = md.get("tags", []) or []
-            tasks.append({
-                "dir": task_dir.name,
-                "category": md.get("category", cat_dir.name),
-                "name": t.get("name", task_dir.name),
-                "description": t.get("description", ""),
-                "difficulty": md.get("difficulty", "?"),
-                "shape": md.get("shape", ""),
-                "tags": tags,
-                "keywords": t.get("keywords", []) or [],
-                "multistep": multistep,
-                "n_steps": len(steps),
-                "steps": steps,
-                "reward_strategy": meta.get("multi_step_reward_strategy", ""),
-                "weight": weights.get(md.get("category", cat_dir.name), 1.0),
-                "graded": is_graded(verifiers),
-                "discriminating": "harness-discriminating" in tags,
-                "focused": task_dir.name in focused,
-                "status": md.get("status", "active"),
-                "deprecation_reason": md.get("deprecation_reason", ""),
-                "work_status_override": md.get("work_status", ""),
-                # Operator sign-off. A task is approved ONLY if task.toml sets
-                # [metadata] approved = true. Absence ⇒ "needs review" (the
-                # operator hasn't personally vetted it yet).
-                "approved": bool(md.get("approved", False)),
-                "files": files,
-            })
+            for task_dir in sorted(cat_dir.iterdir()):
+                toml_path = task_dir / "task.toml"
+                if not (task_dir.is_dir() and toml_path.exists()):
+                    continue
+                try:
+                    meta = tomllib.loads(toml_path.read_text())
+                except Exception as e:
+                    tasks.append({"_error": f"{task_dir.name}: {e}",
+                                  "category": cat_dir.name, "name": task_dir.name,
+                                  "archived": archived})
+                    continue
+                t = meta.get("task", {}) or {}
+                md = meta.get("metadata", {}) or {}
+                multistep = (task_dir / "steps").is_dir() or bool(meta.get("steps"))
+                steps = step_snippets(task_dir) if multistep else []
+                files, verifiers = collect_files(task_dir, multistep)
+                tags = md.get("tags", []) or []
+                tasks.append({
+                    "dir": task_dir.name,
+                    "category": md.get("category", cat_dir.name),
+                    "name": t.get("name", task_dir.name),
+                    "description": t.get("description", ""),
+                    "difficulty": md.get("difficulty", "?"),
+                    "shape": md.get("shape", ""),
+                    "tags": tags,
+                    "keywords": t.get("keywords", []) or [],
+                    "multistep": multistep,
+                    "n_steps": len(steps),
+                    "steps": steps,
+                    "reward_strategy": meta.get("multi_step_reward_strategy", ""),
+                    "weight": weights.get(md.get("category", cat_dir.name), 1.0),
+                    "graded": is_graded(verifiers),
+                    "discriminating": "harness-discriminating" in tags,
+                    "focused": task_dir.name in focused,
+                    "status": md.get("status", "active"),
+                    "deprecation_reason": md.get("deprecation_reason", ""),
+                    "work_status_override": md.get("work_status", ""),
+                    "archived": archived,
+                    "files": files,
+                })
     return tasks
 
 
@@ -233,7 +237,7 @@ WORK = {
     "discriminating":   ("discriminating", "disc",    "Tagged as a harness discriminator — an intended instrument. Authoring is done; the actual gap is still pending confirmation in the pass^k grid (gated on the E2 provider-pin + browser fixes)."),
     "needs-validation": ("needs validation", "mid",   "Graded but NOT tagged as discriminating — run it and prove it separates the harnesses, or sharpen it until it does."),
     "needs-hardening":  ("needs hardening", "bad",     "Binary / likely BLUNT — make it graded + raise difficulty, or graduate it to a real discriminator."),
-    "retired":          ("retired — rework", "retired", "Deprecated by the adversarial review; pending operator review or rework (task #89) before it can re-enter the grid."),
+    "retired":          ("archived", "retired", "Retired from the active suite by the 2026-06-01 adversarial review (model-dominated or redundant — fails the python3-one-liner kill test). Moved to archive/ for reference; excluded from the grid."),
 }
 WORK_ORDER = ["discriminating", "needs-validation", "needs-hardening", "retired"]
 
@@ -285,8 +289,7 @@ def render(tasks: list, weights: dict) -> str:
     for t in real:
         work_hist[work_state(t)[0]] += 1
     n_todo = work_hist["needs-validation"] + work_hist["needs-hardening"] + work_hist["retired"]
-    n_approved = sum(1 for t in real if t.get("approved"))
-    n_review = n_total - n_approved
+    n_archived = sum(1 for t in real if t.get("archived"))
 
     diff_bits = " · ".join(
         f"{k}: {diff_hist[k]}" for k in sorted(diff_hist, key=lambda d: DIFF_ORDER.get(d, 9))
@@ -295,14 +298,11 @@ def render(tasks: list, weights: dict) -> str:
     summary = f"""
     <div class="summary">
       <div class="stat"><b>{n_total}</b><span>tasks</span></div>
-      <div class="stat work-todo"><b>{n_review}</b><span>NEEDS REVIEW</span></div>
-      <div class="stat work-done"><b>{n_approved}</b><span>approved</span></div>
       <div class="stat"><b>{n_active}</b><span>active</span></div>
+      <div class="stat"><b>{n_archived}</b><span>archived</span></div>
       <div class="stat work-done"><b>{work_hist['discriminating']}</b><span>discriminating (tagged)</span></div>
       <div class="stat work-todo"><b>{work_hist['needs-validation']}</b><span>needs validation</span></div>
       <div class="stat work-todo"><b>{work_hist['needs-hardening']}</b><span>needs hardening</span></div>
-      <div class="stat work-todo"><b>{n_retired}</b><span>retired — rework</span></div>
-      <div class="stat"><b>{n_todo}</b><span>work remaining</span></div>
       <div class="stat"><b>{n_cats}</b><span>categories</span></div>
       <div class="stat"><b>{n_graded}</b><span>graded</span></div>
       <div class="stat"><b>{n_focus}</b><span>focused n=5</span></div>
@@ -344,7 +344,8 @@ def render(tasks: list, weights: dict) -> str:
     return PAGE.format(summary=summary, sections="".join(sections),
                        cat_select=cat_select, work_select=work_select,
                        files_js=files_js, ts=ts,
-                       err_html=err_html, n_total=n_total)
+                       err_html=err_html, n_total=n_total,
+                       n_active=n_active, n_archived=n_archived)
 
 
 def render_card(t: dict) -> str:
@@ -356,12 +357,11 @@ def render_card(t: dict) -> str:
                    else badge("binary", "bad"))
     retired = t.get("status") == "deprecated"
     wkey, wlabel, wcls, wmeaning = work_state(t)
-    approved = t.get("approved", False)
+    archived = t.get("archived", False)
 
-    # Approval is the headline: NEEDS REVIEW until the operator signs off.
-    approval_badge = (badge("approved ✓", "approved") if approved
-                      else badge("NEEDS REVIEW", "review"))
-    # Then WORK status, then difficulty/grading/flags.
+    # Archived tasks (moved out of the live suite) get a clear flag; live ones don't.
+    archived_badge = badge("archived", "review") if archived else ""
+    # WORK status, then difficulty/grading/flags.
     head_badges = [badge(wlabel, wcls)]
     flags = []
     if t["discriminating"] and wkey != "discriminating":
@@ -399,20 +399,21 @@ def render_card(t: dict) -> str:
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
             f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
             f'data-status="{"retired" if retired else "active"}" data-work="{wkey}" '
-            f'data-approved="{int(approved)}" '
+            f'data-archived="{int(archived)}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
 
     retired_banner = ""
     if retired:
-        retired_banner = (f'<div class="retired-note"><b>RETIRED (pending operator review — not deleted).</b> '
-                          f'{escape(t["deprecation_reason"] or "Excluded from the harness-discrimination grid.")}</div>')
+        where = "ARCHIVED" if archived else "RETIRED"
+        retired_banner = (f'<div class="retired-note"><b>{where} (out of the active suite — not deleted; in archive/).</b> '
+                          f'{escape(t["deprecation_reason"] or "Excluded from the harness-discrimination grid; kept for reference.")}</div>')
 
     return f"""
     <div class="task{' task-retired' if retired else ''}" {data}>
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">{escape(t["dir"])}</span>
-        {approval_badge}
+        {archived_badge}
         <span class="badge {dcls}">{escape(diff)}</span>
         {grade_badge}
         {"".join(head_badges)}
@@ -515,14 +516,14 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <a href="task-catalog.html" class="active">Task Suite</a>
   <a href="roadmap.html">Roadmap</a>
 </div>
-<h1>Task Suite — every eval task + its work status</h1>
-<div class="ts">generated {ts} · source: tasks/ + configs/ · re-run tools/task_catalog.py to refresh ·
+<h1>Task Suite — every eval task (live + archived)</h1>
+<div class="ts">generated {ts} · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
   click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do<br>
-  every task is <b>NEEDS REVIEW</b> until the operator signs off — approve one by setting <span class="mono">[metadata] approved = true</span> in its <span class="mono">task.toml</span></div>
+  <b>{n_active}</b> live tasks + <b>{n_archived}</b> archived (retired from the active suite, kept in <span class="mono">archive/</span> for reference — flagged, not deleted)</div>
 {err_html}
 {summary}
 <div class="filterbar">
-  <select id="f-approval"><option value="">any approval</option><option value="0">needs review</option><option value="1">approved</option></select>
+  <select id="f-archived"><option value="">live + archived</option><option value="0">live only</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
   <select id="f-work"><option value="">any work status</option>{work_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
@@ -572,14 +573,14 @@ function expandAll(on){{
 const F = id => document.getElementById(id);
 function applyFilters(){{
   const cat=F('f-cat').value, work=F('f-work').value, diff=F('f-diff').value,
-        approval=F('f-approval').value,
+        arch=F('f-archived').value,
         graded=F('f-graded').checked, disc=F('f-disc').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
   document.querySelectorAll('.task').forEach(c=>{{
     let ok=true;
-    if(approval && c.dataset.approved!==approval) ok=false;
+    if(arch && c.dataset.archived!==arch) ok=false;
     if(cat && c.dataset.cat!==cat) ok=false;
     if(work && c.dataset.work!==work) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
@@ -598,7 +599,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-approval','f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
+['f-archived','f-cat','f-work','f-diff','f-graded','f-disc','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>
