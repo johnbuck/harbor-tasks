@@ -65,9 +65,9 @@ datasets:
       - http-outage-root-cause-from-logs
       - adaptive-tool-error-recovery
       - log-analytics-with-tie-breaks
-  - path: tasks/prod-behavioral
-    task_names:
-      - basic-knowledge-qa
+  # prod-behavioral/basic-knowledge-qa is EXCLUDED from this sweep — it's a
+  # DIFFERENT eval mode (ExternalAgentAdapter via configs/prod-agent-example.yaml,
+  # ships no Dockerfile/test.sh), so it cannot build under this docker suite config.
   - path: tasks/real-world-workflows
     task_names:
       - summarize-support-emails-safely
