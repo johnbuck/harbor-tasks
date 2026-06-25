@@ -2,7 +2,7 @@
 
 - **Epic:** E4 — Task Suite
 - **Date:** 2026-05-27
-- **Status:** IN PROGRESS (living document). As of 2026-06: the suite has grown well past
+- **Status:** IMPLEMENTED — taxonomy + shape framework + multi-axis rewards shipped (the basis of the current suite); the "first sweep = 1 shape/category" SELECTION plan here was superseded by the unified 33-task suite. As of 2026-06: the suite has grown well past
   this early plan — 22 categories / 55 task dirs on disk (the per-section "remaining: only
   code-editing exists" notes below are historical, from 2026-05-27). The taxonomy + shape
   framework here is shipped; new shapes continue to be added via downstream specs.
@@ -123,3 +123,7 @@ PYTHONPATH=$REPO infisical run \
 
 - [[2026-05-27-context-management-category]] — an 18th category (long-session),
   deferred to a second sweep.
+
+## As-built (2026-06-25)
+
+IMPLEMENTED — the taxonomy, shape archetypes, and multi-axis reward design shipped and remain the basis of the suite. SUPERSEDED: the "first sweep = 1 shape/category × ~5 instances → /compare grid" selection plan (acceptance #1–#2) — the suite is now one unified 33-task set under one bar (`2026-06-25-unify-full-suite.md`). The operational quickref above is pre-move/historical (dev-workstation `/tmp/harbor`, Kimi K2.6 / Io Net, `configs/first-real-trial.yaml`, the `fix-bug-*-01` example) — see AGENTS.md "Running a sweep" for the current `tools/run_suite.sh` + deepseek-v4-pro/novita flow.

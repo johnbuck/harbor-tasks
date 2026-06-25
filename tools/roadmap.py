@@ -100,8 +100,8 @@ EPICS = [
         "summary": "Build the tests AND prove they measure the harness, not the model — authoring and validity are one feedback loop, so they're one epic. Author a task, review it, and if it's blunt it routes straight back to re-authoring; the goal is one unified suite (33 tasks) that genuinely separates the harnesses, ending in the verdict grid.",
         "specs": [
             # ── authoring: the categories, shapes, and task instances ──
-            ("partial", "Task suite design — categories, shapes, first-sweep selection", "2026-05-27-task-suite-design.md",
-             "The taxonomy: ~10 categories × shapes and which subset runs in the first sweep. A living document as shapes are added, sharpened, or retired."),
+            ("done", "Task suite design — taxonomy, shapes, reward axes", "2026-05-27-task-suite-design.md",
+             "The taxonomy + shape archetypes + multi-axis reward design the suite is built on — shipped. The original 'first sweep = 1 shape/category' selection plan is superseded by the unified 33-task suite."),
             ("done", "Context-management category — long-session behaviour", "2026-05-27-context-management-category.md",
              "How the agent behaves as its context window fills — eviction, update-churn, cross-talk — sized to overflow the operative window so the harness has to compact/externalise. Promoted out of DEFERRED 2026-05-30."),
             ("done", "Multi-step task suite — design + specs", "2026-05-28-multi-step-tasks.md",
