@@ -11,8 +11,9 @@ shape live in one place. ``shape`` is the grader's reward.json writer:
   reward.json``; the crash fallback is a post-heredoc ``[ -s reward.json ] ||
   echo`` guard and the answer read + weight-0 ``answer_present`` live inline.
 
-The suite-wide direction is "everything rewardkit"; six tasks (the ``heredoc``
-entries below) have not yet been converted and remain heredoc in current reality.
+The suite-wide direction is "everything rewardkit"; as of the 2026-06-25
+conversion pass ALL 21 tasks are rewardkit. The ``heredoc`` shape is retained
+above for the s4 parametrization but currently has no members.
 
 Keys are the CURRENT task identity (the renamed task dir basename); the prior
 ``<shape>-NN`` ids were retired by the 2026-06-16 rename pass. Paths are RELATIVE
@@ -25,7 +26,7 @@ TASKS: dict[str, dict] = {
     "geometry-polymorphism-refactor": dict(
         dir="tasks/code-editing/geometry-polymorphism-refactor",
         grader="tasks/code-editing/geometry-polymorphism-refactor/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/code-editing/geometry-polymorphism-refactor/tests/reward.py", shape="rewardkit"),
     "security-code-review": dict(
         dir="tasks/code-spec-review/security-code-review",
         grader="tasks/code-spec-review/security-code-review/tests/test.sh",
@@ -75,7 +76,7 @@ TASKS: dict[str, dict] = {
     "pydantic-v2-migration": dict(
         dir="tasks/migration/pydantic-v2-migration",
         grader="tasks/migration/pydantic-v2-migration/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/migration/pydantic-v2-migration/tests/reward.py", shape="rewardkit"),
     "http-outage-root-cause-from-logs": dict(
         dir="tasks/ops-debugging/http-outage-root-cause-from-logs",
         grader="tasks/ops-debugging/http-outage-root-cause-from-logs/tests/test.sh",
@@ -87,11 +88,11 @@ TASKS: dict[str, dict] = {
     "summarize-support-emails-safely": dict(
         dir="tasks/real-world-workflows/summarize-support-emails-safely",
         grader="tasks/real-world-workflows/summarize-support-emails-safely/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/real-world-workflows/summarize-support-emails-safely/tests/reward.py", shape="rewardkit"),
     "book-meeting-with-contact": dict(
         dir="tasks/real-world-workflows/book-meeting-with-contact",
         grader="tasks/real-world-workflows/book-meeting-with-contact/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/real-world-workflows/book-meeting-with-contact/tests/reward.py", shape="rewardkit"),
     "research-org-profile-cited": dict(
         dir="tasks/research-rag/research-org-profile-cited",
         grader="tasks/research-rag/research-org-profile-cited/tests/test.sh",
@@ -103,11 +104,11 @@ TASKS: dict[str, dict] = {
     "comprehensive-unit-tests": dict(
         dir="tasks/test-authoring/comprehensive-unit-tests",
         grader="tasks/test-authoring/comprehensive-unit-tests/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/test-authoring/comprehensive-unit-tests/tests/reward/reward.py", shape="rewardkit"),
     "web-research-multi-page": dict(
         dir="tasks/tool-orchestration/web-research-multi-page",
         grader="tasks/tool-orchestration/web-research-multi-page/tests/test.sh",
-        reward=None, shape="heredoc"),
+        reward="tasks/tool-orchestration/web-research-multi-page/tests/reward.py", shape="rewardkit"),
     "multi-goal-tool-routing": dict(
         dir="tasks/tool-orchestration/multi-goal-tool-routing",
         grader="tasks/tool-orchestration/multi-goal-tool-routing/tests/test.sh",
