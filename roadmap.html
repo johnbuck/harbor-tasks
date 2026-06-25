@@ -8436,4 +8436,7 @@ function openSpec(sid,title){var el=document.getElementById('src-'+sid);if(!el)r
   document.getElementById('mo-title').textContent=title;
   document.getElementById('mo-pre').textContent=el.textContent;
   document.getElementById('ov').style.display='block';document.getElementById('mo').style.display='flex';}
-function closeSpec(){
+function closeSpec(){document.getElementById('ov').style.display='none';document.getElementById('mo').style.display='none';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSpec();});
+</script>
+</body></html>
