@@ -169,6 +169,7 @@ def step_snippets(task_dir: Path) -> list:
 
 def scan_tasks(weights: dict, focused: set) -> list:
     tasks = []
+    tier_default, tier_overrides = load_validation()
     # Scan the live suite AND the archive (archived tasks are shown, flagged).
     roots = [(TASKS, False)]
     if ARCHIVE.is_dir():
@@ -213,7 +214,8 @@ def scan_tasks(weights: dict, focused: set) -> list:
                     "focused": task_dir.name in focused,
                     "status": md.get("status", "active"),
                     "deprecation_reason": md.get("deprecation_reason", ""),
-                    "work_status_override": md.get("work_status", ""),
+                    "tier": ("retired" if (archived or md.get("status") == "deprecated")
+                             else tier_overrides.get(task_dir.name, tier_default)),
                     "archived": archived,
                     "files": files,
                 })
@@ -233,25 +235,38 @@ def badge(text, cls="muted"):
 # Derived from existing signals (heuristic, like the graded badge) unless the
 # task.toml sets `[metadata] work_status = "..."` explicitly. Order = work queue
 # priority. key -> (label, badge-class, meaning).
-WORK = {
-    "needs-validation": ("needs validation", "mid",   "Graded — run it at n≥3 and confirm it separates the harnesses, or sharpen it until it does."),
-    "needs-hardening":  ("needs hardening", "bad",     "Binary / likely BLUNT — make it graded + raise difficulty."),
-    "retired":          ("archived", "retired", "Retired from the active suite by the 2026-06-01 adversarial review (model-dominated or redundant — fails the python3-one-liner kill test). Moved to archive/ for reference; excluded from the grid."),
+# Validation-ladder PROGRESS — show the highest tier each task has REACHED, not
+# what it lacks. Tiers climb: todo → oracle → smoke → verdict. Source of truth:
+# configs/validation-status.toml (operator-maintained: a `default` for all active
+# tasks + per-task `[overrides]` as they advance). Mirrors RESULTS.md's ladder.
+TIER_ORDER = ["todo", "oracle", "smoke", "verdict"]
+TIER = {
+    "todo":    ("to do",           "muted",   "Authored + offline grader tests. Not yet run end-to-end."),
+    "oracle":  ("passes oracle ✓", "mid",     "Builds and the reference solve.sh scores 1.0 (Docker oracle, no LLM cost)."),
+    "smoke":   ("e2e smoke ✓",     "ok",      "Both harnesses ran it end-to-end at n=1 — indicative separation captured."),
+    "verdict": ("n≥3 verdict ✓",   "verdict", "Cleared the n≥3 pass^k reliability grid — banked into the comparison."),
+    "retired": ("archived",        "retired", "Retired from the active suite; kept in archive/ for reference, out of the grid."),
 }
-WORK_ORDER = ["needs-validation", "needs-hardening", "retired"]
+TIER_RANK = {k: i for i, k in enumerate(TIER_ORDER)}
 
 
-def work_state(t: dict) -> tuple:
-    """Return (key, label, badge_class, meaning) for a task's work status."""
-    if t.get("status") == "deprecated":
-        key = "retired"
-    elif t.get("work_status_override") in WORK:
-        key = t["work_status_override"]
-    elif t.get("graded"):
-        key = "needs-validation"
-    else:
-        key = "needs-hardening"
-    label, cls, meaning = WORK[key]
+def load_validation() -> tuple:
+    """(default_tier, {dir: tier}) from configs/validation-status.toml."""
+    try:
+        d = tomllib.loads((REPO / "configs" / "validation-status.toml").read_text())
+        default = d.get("default", "todo")
+        overrides = {k: v for k, v in (d.get("overrides") or {}).items()}
+        return (default if default in TIER else "todo"), overrides
+    except Exception:
+        return "todo", {}
+
+
+def tier_meta(t: dict) -> tuple:
+    """Return (key, label, badge_class, meaning) for a task's ladder progress."""
+    key = t.get("tier", "todo")
+    if key not in TIER:
+        key = "todo"
+    label, cls, meaning = TIER[key]
     return key, label, cls, meaning
 
 
@@ -398,12 +413,15 @@ def render(tasks: list, weights: dict) -> str:
     n_retired = sum(1 for t in real if t.get("status") == "deprecated")
     n_active = n_total - n_retired
 
-    # Work breakdown — the granular "what's done vs. what's left" tracker.
-    work_hist = {k: 0 for k in WORK_ORDER}
-    for t in real:
-        work_hist[work_state(t)[0]] += 1
-    n_todo = work_hist["needs-validation"] + work_hist["needs-hardening"] + work_hist["retired"]
-    n_archived = sum(1 for t in real if t.get("archived"))
+    # Validation-ladder PROGRESS — cumulative: reaching a tier implies the ones
+    # below it. Shows how far the suite has CLIMBED, not what it lacks.
+    active = [t for t in real if not t.get("archived")]
+    n_archived = n_total - len(active)
+
+    def reached(tier):
+        r = TIER_RANK[tier]
+        return sum(1 for t in active if TIER_RANK.get(t.get("tier", "todo"), 0) >= r)
+    n_oracle, n_smoke, n_verdict = reached("oracle"), reached("smoke"), reached("verdict")
 
     diff_bits = " · ".join(
         f"{k}: {diff_hist[k]}" for k in sorted(diff_hist, key=lambda d: DIFF_ORDER.get(d, 9))
@@ -411,19 +429,17 @@ def render(tasks: list, weights: dict) -> str:
 
     summary = f"""
     <div class="summary">
-      <div class="stat"><b>{n_total}</b><span>tasks</span></div>
-      <div class="stat"><b>{n_active}</b><span>active</span></div>
+      <div class="stat"><b>{n_active}</b><span>active tasks</span></div>
+      <div class="stat work-done"><b>{n_oracle}</b><span>✓ passes oracle</span></div>
+      <div class="stat work-done"><b>{n_smoke}</b><span>✓ e2e smoke</span></div>
+      <div class="stat"><b>{n_verdict}</b><span>n≥3 verdict</span></div>
       <div class="stat"><b>{n_archived}</b><span>archived</span></div>
-      <div class="stat work-todo"><b>{work_hist['needs-validation']}</b><span>needs validation</span></div>
-      <div class="stat work-todo"><b>{work_hist['needs-hardening']}</b><span>needs hardening</span></div>
       <div class="stat"><b>{n_cats}</b><span>categories</span></div>
-      <div class="stat"><b>{n_graded}</b><span>graded</span></div>
-      <div class="stat"><b>{n_focus}</b><span>focused n=5</span></div>
       <div class="stat wide"><b>difficulty</b><span>{escape(diff_bits)}</span></div>
     </div>"""
 
-    work_select = "".join(
-        f'<option value="{k}">{WORK[k][0]}</option>' for k in WORK_ORDER)
+    tier_select = "".join(
+        f'<option value="{k}">{TIER[k][0]}</option>' for k in (TIER_ORDER + ["retired"]))
 
     # Category sections, ordered by weight desc then name.
     cats = sorted({t["category"] for t in real},
@@ -456,7 +472,7 @@ def render(tasks: list, weights: dict) -> str:
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return PAGE.format(summary=summary, sections="".join(sections),
                        howtests=render_task_explain(),
-                       cat_select=cat_select, work_select=work_select,
+                       cat_select=cat_select, tier_select=tier_select,
                        files_js=files_js, ts=ts,
                        err_html=err_html, n_total=n_total,
                        n_active=n_active, n_archived=n_archived)
@@ -470,7 +486,7 @@ def render_card(t: dict) -> str:
     grade_badge = (badge("graded", "ok") if t["graded"]
                    else badge("binary", "bad"))
     retired = t.get("status") == "deprecated"
-    wkey, wlabel, wcls, wmeaning = work_state(t)
+    wkey, wlabel, wcls, wmeaning = tier_meta(t)
     archived = t.get("archived", False)
 
     # Archived tasks (moved out of the live suite) get a clear flag; live ones don't.
@@ -511,7 +527,7 @@ def render_card(t: dict) -> str:
     data = (f'data-cat="{escape(t["category"])}" data-diff="{escape(diff)}" '
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
             f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
-            f'data-status="{"retired" if retired else "active"}" data-work="{wkey}" '
+            f'data-status="{"retired" if retired else "active"}" data-tier="{wkey}" '
             f'data-archived="{int(archived)}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
 
@@ -531,7 +547,7 @@ def render_card(t: dict) -> str:
       </div>
       <div class="acc-body">
         <div class="badges"><span class="badge {dcls}">{escape(diff)}</span> {grade_badge} {"".join(flags)}</div>
-        <div class="work-note"><b>Work:</b> {escape(wmeaning)}</div>
+        <div class="work-note"><b>Status:</b> {escape(wmeaning)}</div>
         {retired_banner}
         <div class="meta">
           <span class="mono muted">{escape(t["name"])}</span>
@@ -604,6 +620,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   .badge.disc{{background:#2a1f3a;color:#c39ae6}} .badge.focus{{background:#16303a;color:#5fd0d0}}
   .badge.step{{background:#1c2331;color:#9db4d6}}
   .badge.retired{{background:#4a1010;color:#ff9b9b;border:1px solid #7a2222}}
+  .badge.verdict{{background:#13502b;color:#7fe6a0;border:1px solid #2f7a4a;font-weight:700}}
   .badge.review{{background:#3a2a10;color:#f0b860;border:1px solid #6a4a18}}
   .badge.approved{{background:#163a22;color:#5fd07e;border:1px solid #2f5238}}
   .task-retired{{opacity:.66;border-color:#5a2020;background:#1a1212}}
@@ -654,7 +671,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <div class="filterbar">
   <select id="f-archived"><option value="">live + archived</option><option value="0">live only</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option>{cat_select}</select>
-  <select id="f-work"><option value="">any work status</option>{work_select}</select>
+  <select id="f-tier"><option value="">any progress</option>{tier_select}</select>
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
@@ -701,7 +718,7 @@ function expandAll(on){{
 
 const F = id => document.getElementById(id);
 function applyFilters(){{
-  const cat=F('f-cat').value, work=F('f-work').value, diff=F('f-diff').value,
+  const cat=F('f-cat').value, tier=F('f-tier').value, diff=F('f-diff').value,
         arch=F('f-archived').value,
         graded=F('f-graded').checked,
         focus=F('f-focus').checked, multi=F('f-multi').checked,
@@ -711,7 +728,7 @@ function applyFilters(){{
     let ok=true;
     if(arch && c.dataset.archived!==arch) ok=false;
     if(cat && c.dataset.cat!==cat) ok=false;
-    if(work && c.dataset.work!==work) ok=false;
+    if(tier && c.dataset.tier!==tier) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
     if(graded && c.dataset.graded!=='1') ok=false;
     if(focus && c.dataset.focus!=='1') ok=false;
@@ -727,7 +744,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-archived','f-cat','f-work','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
+['f-archived','f-cat','f-tier','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>

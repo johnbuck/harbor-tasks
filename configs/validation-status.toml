@@ -1,0 +1,23 @@
+# Validation-ladder PROGRESS for the Task Suite dashboard.
+#
+# Shows the highest tier each ACTIVE task has REACHED (progress made), not what it
+# lacks. Tiers climb:  todo  ->  oracle  ->  smoke  ->  verdict
+#   todo     authored + offline grader tests; not yet run end-to-end
+#   oracle   builds + reference solve.sh scores 1.0 (Docker oracle, no LLM cost)
+#   smoke    both harnesses ran it end-to-end at n=1 (indicative separation)
+#   verdict  cleared the n>=3 pass^k reliability grid (banked into the comparison)
+#
+# `default` applies to every active task. Add per-task `[overrides]` (by task dir
+# name) as tasks advance or fall behind. Mirrors RESULTS.md's validation ladder
+# (read by tools/task_catalog.py). Archived tasks are shown as "archived",
+# independent of this file.
+#
+# Current state (2026-06-25): the full active suite has passed the Docker oracle
+# AND a two-harness n=1 e2e smoke (see RESULTS.md), so every active task sits at
+# `smoke`. Next milestone: the n>=3 pass^k grid -> bump tasks to `verdict`.
+
+default = "smoke"
+
+[overrides]
+# Per-task tier as the n>=3 grid lands, e.g.:
+# "track-final-state-through-corrections" = "verdict"
