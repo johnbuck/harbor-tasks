@@ -1,5 +1,5 @@
 ---
-status: PROPOSED
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-25
 ---
@@ -8,7 +8,7 @@ date: 2026-06-25
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-25
-**Status:** PROPOSED — operator set the standard 2026-06-25: *every* active task
+**Status:** IMPLEMENTED 2026-06-25 (as-built below) — operator set the standard 2026-06-25: *every* active task
 grades via rewardkit, **no exceptions (pytest included).** This spec is the
 hand-off for another session to execute the conversion; it is self-contained.
 **Origin:** while auditing the Task Suite the operator declared "everything should
@@ -101,3 +101,7 @@ python3 tools/check_rewardkit.py            # must exit 0 when complete
 CONFIG=$PWD/configs/oracle-full.yaml JOB_NAME=oracle-rewardkit tools/run_track_a.sh
 # diff each task's reward vs the pre-conversion oracle baseline
 ```
+
+## As-built (2026-06-25)
+
+IMPLEMENTED — the conversion landed (commit `f5028a9`): all 33 active tasks grade via rewardkit and `python3 tools/check_rewardkit.py` exits 0. The standard's hard rule + CI gate shipped earlier (`ba454c7`); this spec closed the remaining conversions.

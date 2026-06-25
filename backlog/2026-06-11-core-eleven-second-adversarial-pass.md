@@ -1,5 +1,5 @@
 ---
-status: APPROVED
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-11
 ---
@@ -11,7 +11,7 @@ date: 2026-06-11
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-11
-**Status:** APPROVED 2026-06-11 — the three open questions were resolved by the
+**Status:** IMPLEMENTED 2026-06-11 (as-built below) — the three open questions were resolved by the
 operator same-day (wipe + spin-off task; latency-gated round-trip; mechanical
 stale-memory seeding); implementation can start with Wave 1.
 **Origin / triggered-by:** operator asked for a fresh completeness/accuracy review

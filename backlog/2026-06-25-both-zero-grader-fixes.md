@@ -1,5 +1,5 @@
 ---
-status: APPROVED
+status: IMPLEMENTED
 epic: E4
 date: 2026-06-25
 ---
@@ -8,7 +8,7 @@ date: 2026-06-25
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-25
-**Status:** APPROVED 2026-06-25 — two tasks scored 0 on BOTH harnesses in the n=1
+**Status:** IMPLEMENTED 2026-06-25 (as-built below) — two tasks scored 0 on BOTH harnesses in the n=1
 e2e smoke purely because of a grader bug / bad fixtures (not real agent failure).
 Confirmed still present after the task-rename + content-rebuild + rewardkit rework
 (base `5b9a295`).

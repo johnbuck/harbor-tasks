@@ -1,5 +1,5 @@
 ---
-status: APPROVED
+status: IMPLEMENTED
 epic: E3
 date: 2026-06-12
 ---
@@ -8,7 +8,7 @@ date: 2026-06-12
 
 **Epic:** E3 — Eval infra (may warrant its own epic once it grows; tagged E3 for now)
 **Date:** 2026-06-12
-**Status:** APPROVED 2026-06-12 — three design forks resolved by the operator
+**Status:** IMPLEMENTED 2026-06-12 (MVP built+committed 2026-06-15; as-built below) — three design forks resolved by the operator
 same-day (docker-exec reach; configurable memory policy preserve|snapshot|wipe;
 both task shapes). MVP can start.
 **Origin / triggered-by:** operator wants to evaluate REAL production agents (or

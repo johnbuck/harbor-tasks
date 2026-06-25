@@ -2,7 +2,7 @@
 
 - **Epic:** E3 — Capability infrastructure (memory + browser)
 - **Date:** 2026-05-29
-- **Status:** **MEMORY portion SHIPPED 2026-05-29** (see
+- **Status:** **SHIPPED — both halves (memory 2026-05-29 + browser 2026-06-03)** (see
   [`done/2026-05-29-memory-stack-deployment.md`](done/2026-05-29-memory-stack-deployment.md)
   for the as-deployed reality, deploy reproducer, and gotchas captured during
   the rollout). Browser/CDP portion SHIPPED 2026-06-03 — stale-registry refresh + self-contained in-container Chromium (127.0.0.1:9222); see 2026-06-03-browser-tool-registry-fix.md + 2026-06-03-self-contained-browser.md.
