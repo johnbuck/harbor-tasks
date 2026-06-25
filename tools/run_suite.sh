@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Track A sweep driver: loads the YAML, registers the memory-wipe hook, runs
+# Suite sweep driver: loads the YAML, registers the memory-wipe hook, runs
 # the job, then runs the weighted-aggregation post-processor.
 #
 # Spec: backlog/2026-05-30-harness-vs-model-discriminating-suite.md
@@ -14,19 +14,19 @@
 #
 # Usage:
 #   source ~/.config/infisical/infisical-identity.env
-#   tools/run_track_a.sh
+#   tools/run_suite.sh
 
 set -euo pipefail
 
 REPO="${REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 HARBOR="${HARBOR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../harbor" && pwd)}"
-CONFIG="${CONFIG:-${REPO}/configs/track-a-harness.yaml}"
-WEIGHTS="${REPO}/configs/track-a-weights.toml"
+CONFIG="${CONFIG:-${REPO}/configs/suite.yaml}"
+WEIGHTS="${REPO}/configs/suite-weights.toml"
 # Persistent jobs dir on the encrypted /home (327G), NOT /tmp — /tmp is tmpfs
 # (RAM-backed) so runs there are wiped on reboot and cost real money to redo.
 # harbor-tasks/jobs/ is gitignored, so it persists without bloating the repo.
 JOBS_DIR="${JOBS_DIR:-${REPO}/jobs}"
-JOB_NAME="${JOB_NAME:-track-a-$(date +%Y-%m-%d__%H-%M-%S)}"
+JOB_NAME="${JOB_NAME:-suite-$(date +%Y-%m-%d__%H-%M-%S)}"
 
 # Internal endpoints + Infisical coords come from the gitignored configs/local.env
 # (template: configs/local.env.example). Keeps topology out of this public repo.
@@ -107,7 +107,7 @@ async def main() -> int:
             return {k: _expand(x) for k, x in v.items()}
         return v
     raw = _expand(raw)
-    raw["job_name"] = os.environ.get("JOB_NAME", "track-a")
+    raw["job_name"] = os.environ.get("JOB_NAME", "suite")
     # Pin the ABSOLUTE jobs_dir so Harbor writes to the persistent /home dir
     # regardless of CWD (default is CWD-relative "jobs", which caused runs to
     # scatter between /tmp and the repo).
@@ -157,7 +157,7 @@ async def main() -> int:
     # scores and the two jobs compare directly (mixing both agents in one job
     # forces per-task comparison, which defeats the rollup view). One invocation
     # emits `<job_name>__openclaw` and `<job_name>__hermes`.
-    base_job_name = os.environ.get("JOB_NAME", "track-a")
+    base_job_name = os.environ.get("JOB_NAME", "suite")
     agents = raw.pop("agents")
 
     def _label(a):
@@ -194,8 +194,8 @@ PY
 OC_DIR="${JOBS_DIR}/${JOB_NAME}__openclaw"
 HE_DIR="${JOBS_DIR}/${JOB_NAME}__hermes"
 if [[ -d "$OC_DIR" || -d "$HE_DIR" ]]; then
-    echo "computing Track A weighted report (both harness jobs)..." >&2
-    uv run --project "$HARBOR" "${REPO}/metrics/track_a_weighted.py" \
+    echo "computing suite weighted report (both harness jobs)..." >&2
+    uv run --project "$HARBOR" "${REPO}/metrics/suite_weighted.py" \
         --job-dir "$OC_DIR" --job-dir "$HE_DIR" \
         --tasks-root "${REPO}/tasks" \
         --weights "$WEIGHTS"

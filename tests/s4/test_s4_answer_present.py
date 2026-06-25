@@ -17,7 +17,7 @@ import re
 import pytest
 
 from helpers import REPO_ROOT
-from noncore import HEREDOC, REWARDKIT, TASKS
+from suite_helpers import HEREDOC, REWARDKIT, TASKS
 
 # answer_present registered with weight 0 on the same statement.
 _RK_ANSWER_PRESENT = re.compile(

@@ -1,4 +1,4 @@
-"""Hygiene + topology gate for the non-core tasks (criterion 10).
+"""Hygiene + topology gate for the suite tasks (criterion 10).
 
 * No tracked ``__pycache__`` anywhere in the repo.
 * Every one of the 21 ``environment/Dockerfile`` is ``FROM harbor-agents-rich:latest``
@@ -14,7 +14,7 @@ import subprocess
 import pytest
 
 from helpers import REPO_ROOT
-from noncore import TASKS
+from suite_helpers import TASKS
 
 
 def test_no_tracked_pycache():

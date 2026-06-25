@@ -1,3 +1,5 @@
+> **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
 # Core suite — the load-bearing harness-measuring tests
 
 **Epic:** E4 — Task Suite

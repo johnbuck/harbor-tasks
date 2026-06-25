@@ -4,18 +4,27 @@ epic: E4
 date: 2026-06-16
 ---
 
+> **DEPRECATED FRAMING (2026-06-25):** the core/non-core split and Track-A/Track-B are retired — see `2026-06-25-unify-full-suite.md`; the suite is now unified. This dated spec stays as the accurate record of what happened.
+
+
 # Non-core task remediation — adversarially review + fully convert the 21 active non-core tasks
 
 **Epic:** E4 — Task Suite (validity)
 **Date:** 2026-06-16
-**Status:** IMPLEMENTED + offline-green 2026-06-17 (as-built log below) — all 21
-tasks HARDENed and merged via baton; the remaining items (Docker oracle=1.0,
-Track-A n≥3 runs, `approved=true` flips, the 2 corpus-balloon/keep-vs-demote
-calls, browser matcher validation) are OPERATOR gates explicitly out of the
-no-Docker pipeline. Originally APPROVED 2026-06-16 — operator asked for a clear
-spec to run an adversarial review on each of the 21 active non-core tasks and
-remediate them
-until "fully converted."
+**Status:** IMPLEMENTED + offline-green (2026-06-17) + **oracle & e2e-smoke now
+green** (see "Status refresh — 2026-06-25" at the foot). All 21 tasks HARDENed and
+merged via baton; the Docker **oracle (31/31 oracle-able = 1.0)** and the **n=1
+two-harness e2e smoke** have BOTH since run green — they are no longer pending.
+Remaining: the **n≥3 pass^k verdict** (operator-gated paid sweep, not yet run for
+the reworked tasks), the **`approved=true` flips** (still 0 tree-wide), and the
+**corpus-balloon on 2 tasks** (`find-contradictions-01` + `factual-lookup-cited-01`
+are still one-window). The `browser-find-fact-01` matcher is **no longer open** —
+the smoke validated it for both harnesses (see refresh). NOTE: the Track-A/B +
+core/non-core framing in this spec is being collapsed by
+`2026-06-25-unify-full-suite.md` (APPROVED) — reconcile the approval rule + the 2
+corpus tasks' keep/cut against unify, not the old Track rule. Originally APPROVED
+2026-06-16 — operator asked for a clear spec to run an adversarial review on each
+of the (then) 21 non-core tasks and remediate them until "fully converted."
 **Origin / triggered-by:** the core-eleven discriminator set has been hardened
 twice and validated (oracle 11/11, 80 offline checks). But the suite has **55
 task dirs**: 20 deprecated, 11 core (done), 2 `_verify` fixtures, 1 just-built
@@ -354,6 +363,10 @@ test_noncore_approved_rider}.py`.
 - **No oracle ran here** (no Docker in this pipeline) and **no paid n-run ran**.
   "Green" means the offline pytest suite passes; it does NOT prove
   oracle=1.0 or any Track-A Δ. Both are operator gates.
+  **→ SUPERSEDED 2026-06-25:** the operator has since run the Docker oracle
+  (`jobs/oracle-full`, 31/31 oracle-able = 1.0) and the n=1 two-harness e2e smoke
+  (`jobs/smoke-n1__{hermes,openclaw}`). Only the **n≥3** paid verdict is still
+  unrun. See "Status refresh — 2026-06-25" below.
 - Two Track-A discriminators (find-contradictions, factual-lookup) are not yet
   proven to discriminate — their corpora still fit one window. Run the balloon +
   n-run before approving, or DEMOTE-TO-TRACK-B.
@@ -374,3 +387,46 @@ Operator (post-merge, NOT done here): full-suite Docker **oracle** must score
 1.0 on every kept task; Track-A tasks get an n≥3 two-harness run; then flip
 `[metadata] approved = true` per task that passes, and decide keep-vs-demote for
 find-contradictions-01 / factual-lookup-cited-01.
+
+---
+
+## Status refresh — 2026-06-25
+
+The 2026-06-17 as-built said "no oracle / no n-run ran" — true of the *baton
+no-Docker pipeline*, now stale as project state. The operator has since run the
+Docker oracle and the e2e smoke. Current state, by the RESULTS.md validation
+ladder:
+
+| Tier | Proves | State |
+|---|---|---|
+| 1 — offline grader/regression | grader logic on synthetic inputs | ✅ green (`pytest tests/`) |
+| 2 — Docker oracle = 1.0 | each task builds + reference `solve.sh` scores 1.0 | ✅ **done** — `jobs/oracle-full` (2026-06-17): 29/32 trials = 1.0; the 3 others are the **not-oracle-able-by-design** tasks (`browser-find-fact-01` gates on `browser_used`, `prod-behavioral/conversational-01` needs a real agent), so **31/31 oracle-able = 1.0** |
+| 3 — n=1 e2e smoke, both harnesses | the real harness runs every task | ✅ **done** — `jobs/smoke-n1__{hermes,openclaw}` (2026-06-25), 32/32 trials each (a few DNS-VOID trials being re-run); this is the run shown on the public Results page |
+| 4 — n≥3 pass^k verdict | reliability spread + genuine discrimination | ❌ **not run** for the reworked tasks; the 2026-06-10 n=5 (Δ0.188) is **superseded** (predates the rework) |
+
+`approved=true`: still **0 tasks** tree-wide (verified). Under the *old* rule
+Track-B tasks were Tier-2-eligible to approve while Track-A awaited Tier 4 — but
+unify removes Track-A/B, so flip under the unified bar, not this one.
+
+> Note: tasks were renamed to human-readable names on 2026-06-25 (commit
+> `7550dfa`). Old → new for the items below: `find-contradictions-01` →
+> `insights-research/audit-report-contradictions`; `factual-lookup-cited-01` →
+> `research-rag/verify-company-facts-cited`; `browser-find-fact-01` →
+> `tool-orchestration/web-research-multi-page`.
+
+**Still genuinely open** (beyond the paid n-run + the approval flips):
+- **audit-report-contradictions** + **verify-company-facts-cited** — corpora are
+  **still one-window** (819 / 836 words, measured 2026-06-25); the corpus-balloon
+  was never done, so the long-context kill-test isn't met. They're valid as
+  general tasks (the co-location + citation-discipline grader fixes did land);
+  under unify this is a **keep-or-cut** call, not the old keep-vs-demote.
+- **web-research-multi-page** — **matcher now VALIDATED, effectively closed.** The
+  2026-06-25 smoke drove the browser for BOTH harnesses (`hermes` `browser_used=1`,
+  reward 1.0; `openclaw` `browser_used=1` with a wrong answer → reward 0, the
+  correct behaviour). Only the cosmetic `logs_files_scanned` zero-scan diagnostic
+  was never added — but real runs register `browser_tool_calls` 91 / 7, so the
+  false-zero ambiguity is moot in practice.
+
+**This spec is superseded in framing** by `2026-06-25-unify-full-suite.md` (one
+suite, one bar). Treat the remediation *work* here as **done through Tier 3**;
+route the remaining verdict + approval flips + the 2–3 task gaps through unify.

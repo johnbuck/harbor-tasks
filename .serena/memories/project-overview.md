@@ -22,9 +22,9 @@ on the run host**.
   — install-capable / provider-routing variants. The OpenRouter provider pin string
   lives here AND in the two harness configs (keep all in sync).
 - `tools/roadmap.py`, `tools/task_catalog.py`, `tools/agent_status.py` — the three
-  static-HTML dashboard generators. `tools/run_track_a.sh`, `tools/run_tau3.sh`,
+  static-HTML dashboard generators. `tools/run_suite.sh`, `tools/run_tau3.sh`,
   `tools/view.sh` — sweep + viewer drivers.
-- `metrics/` — post-run weighted aggregators (Track-A).
+- `metrics/` — post-run weighted aggregators (the suite).
 - `hooks/` — Harbor TrialEvent hooks (memory-wipe between steps).
 - `tasks/<category>/<shape>-NN/` — each task: `task.toml`, `instruction.md`,
   `environment/Dockerfile`, `tests/test.sh` (+ `steps/` for multi-step).

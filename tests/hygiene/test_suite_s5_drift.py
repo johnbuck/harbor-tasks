@@ -1,4 +1,4 @@
-"""S5 — docs / denominators reconciled for the non-core tasks (criterion 9).
+"""S5 — docs / denominators reconciled for the suite tasks (criterion 9).
 
 SHAPES.md rows and task.toml descriptions must match each grader's REAL
 denominator/axes; the spec table's stale binary/single labels are corrected; and

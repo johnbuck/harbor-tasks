@@ -1,4 +1,4 @@
-# CORE SUITE — ALTERNATE-MODEL axis. Same task set + harnesses as core-suite.yaml;
+# SUITE (alternate-model axis) — a cost-bounded subset of the suite; same harnesses as suite.yaml;
 # the only difference is WHICH model both harnesses run. The validity invariant is
 # unchanged: BOTH harnesses run the SAME model, so any gap is the HARNESS, not the
 # model. The model is a FREE VARIABLE — swap the two model_name values below to any
@@ -14,13 +14,13 @@
 #     thinking surface — confirm with a 1-call smoke after any model/key change.
 #
 # ANTHROPIC_API_KEY is scoped to the Harbor Infisical project (env=prod,
-# path=/proxy/); run_track_a.sh injects it from there alongside the Shared
+# path=/proxy/); run_suite.sh injects it from there alongside the Shared
 # OpenRouter key. Run from the repo root:
 #   source ~/.config/infisical/agent-architect.env
-#   CONFIG=$PWD/configs/core-suite-claude.yaml N_ATTEMPTS=1 \
-#     JOB_NAME=core-suite-alt-n1 tools/run_track_a.sh
+#   CONFIG=$PWD/configs/suite-claude.yaml N_ATTEMPTS=1 \
+#     JOB_NAME=suite-alt-n1 tools/run_suite.sh
 
-job_name: core-suite-claude
+job_name: suite-claude
 
 n_attempts: 1
 

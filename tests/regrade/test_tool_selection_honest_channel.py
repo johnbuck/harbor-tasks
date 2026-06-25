@@ -1,6 +1,6 @@
 """tool-selection-01: an HONEST tool trajectory scores tool_f1=1.0 (criterion 4).
 
-The forge regression (tests/exploits/test_noncore_dump_hedge_forge.py::
+The forge regression (tests/exploits/test_suite_dump_hedge_forge.py::
 test_tool_selection_forged_log_scores_below_full) only patches the agent-writable
 LOG and never exercises the SCORED trusted channel, so it stays green even if that
 channel is permanently broken — e.g. if nothing ever writes /logs/tool-calls.log,

@@ -1,17 +1,29 @@
-# Full-suite n=1 e2e smoke — REAL harness agents (thin adapters, deepseek-v4-pro,
-# same model both harnesses) across every active eval task. Confirms each task
-# runs end-to-end with a real agent and that graders behave live (a real run, not
-# the oracle perfect solution). Precondition for approved=true. Run on the run
-# host via the driver (handles secrets + wipe/seed hooks); see AGENTS.md "Running
-# a sweep":
-#   CONFIG=$PWD/configs/smoke-n1.yaml N_ATTEMPTS=1 JOB_NAME=smoke-n1 tools/run_suite.sh
-job_name: smoke-n1
+# SUITE — the full harness-vs-model eval suite (unified 2026-06-25).
+#
+# All 33 active eval tasks (tasks/**/task.toml minus the 2 _verify fixtures).
+# There is NO privileged subset: ONE suite under ONE validation bar. Whether a
+# given task discriminates the harness is an OUTCOME measured per-task at n>=3,
+# not a pre-assigned tier. See backlog/2026-06-25-unify-full-suite.md.
+#
+# Same model both harnesses (deepseek-v4-pro, reasoning ON) => any gap is the
+# HARNESS, not the model.
+#
+# Run n=1 FIRST to confirm plumbing + that graders behave live, before paying 5x
+# for the pass^k reliability grid:
+#   CONFIG=$PWD/configs/suite.yaml N_ATTEMPTS=1 JOB_NAME=suite-n1 tools/run_suite.sh
+# Then the verdict-bearing reliability grid at n=5:
+#   CONFIG=$PWD/configs/suite.yaml N_ATTEMPTS=5 JOB_NAME=suite-n5 tools/run_suite.sh
+
+job_name: suite
+
 n_attempts: 1
+
 agents:
   - import_path: lib.openclaw_thin:OpenClawThin
     model_name: xrouter/deepseek/deepseek-v4-pro
   - import_path: lib.hermes_thin:HermesThin
     model_name: deepseek/deepseek-v4-pro
+
 datasets:
   - path: tasks/code-editing
     task_names:
@@ -25,7 +37,7 @@ datasets:
   - path: tasks/context-management
     task_names:
       - track-project-across-context-overflow
-      - track-final-state-through-corrections
+      - track-final-state-through-corrections   # chunks deleted pre-recall (cheat-proof), graded /12
       - separate-two-parallel-projects
   - path: tasks/context-rot
     task_names:
@@ -53,11 +65,14 @@ datasets:
       - http-outage-root-cause-from-logs
       - adaptive-tool-error-recovery
       - log-analytics-with-tie-breaks
+  - path: tasks/prod-behavioral
+    task_names:
+      - basic-knowledge-qa
   - path: tasks/real-world-workflows
     task_names:
       - summarize-support-emails-safely
       - book-meeting-with-contact
-      - clean-expense-ledger
+      - clean-expense-ledger         # ledger dedup + preservation traps, leak-proof, /16
   - path: tasks/research-rag
     task_names:
       - research-org-profile-cited
@@ -72,6 +87,6 @@ datasets:
   - path: tasks/tool-orchestration
     task_names:
       - web-research-multi-page
-      - redesign-module-keep-constraints
+      - redesign-module-keep-constraints                   # mid-task replanning; clamp-memory 0.40 + functional 0.40 + cleanup 0.12 + replan-keyword 0.08
       - multi-goal-tool-routing
       - pick-right-shell-utility

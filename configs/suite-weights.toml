@@ -1,9 +1,9 @@
-# Track A — per-category weights for the harness-vs-model discriminating sweep.
+# Suite — per-category weights for the harness-vs-model sweep.
 #
 # Spec: backlog/2026-05-30-harness-vs-model-discriminating-suite.md
-# Consumed by: metrics/track_a_weighted.py
+# Consumed by: metrics/suite_weighted.py
 #
-# Weights are operator-judgment initial values. After the first Track A sweep
+# Weights are operator-judgment initial values. After the first suite sweep
 # produces real data, refit from observed score variance (down-weight categories
 # that produced no harness split, up-weight ones that did).
 #
@@ -22,7 +22,7 @@
 "data-analytics"         = 1.5   # MIXED — tool + analysis
 "migration"              = 1.5   # MIXED — multi-step
 "backup-dr"              = 1.5   # MIXED — runbook execution
-"code-editing"           = 0.5   # WEAK — model-dominated; keep for Track B
+"code-editing"           = 0.5   # WEAK — model-dominated; still in the suite
 "marketing"              = 0.5   # WEAK
 "documentation"          = 0.5   # WEAK
 "code-spec-review"       = 0.5   # WEAK

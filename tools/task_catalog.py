@@ -31,8 +31,7 @@ REPO = Path(__file__).resolve().parent.parent
 TASKS = REPO / "tasks"
 ARCHIVE = REPO / "archive" / "tasks"
 OUT = REPO / "task-catalog.html"
-WEIGHTS_TOML = REPO / "configs" / "track-a-weights.toml"
-FOCUSED_YAML = REPO / "configs" / "track-a-focused.yaml"
+WEIGHTS_TOML = REPO / "configs" / "suite-weights.toml"
 MAX = 80000  # per-file embed cap (matches agent_status.py)
 
 # Skip non-task scaffolding directories under tasks/.
@@ -40,39 +39,12 @@ SKIP_DIRS = {"_verify"}
 
 
 def load_weights() -> dict:
-    """category -> weight, from configs/track-a-weights.toml (default 1.0)."""
+    """category -> weight, from configs/suite-weights.toml (default 1.0)."""
     try:
         data = tomllib.loads(WEIGHTS_TOML.read_text())
         return {k: float(v) for k, v in (data.get("weights") or {}).items()}
     except Exception:
         return {}
-
-
-def load_focused_names() -> set:
-    """Task names listed in configs/track-a-focused.yaml `task_names:` blocks.
-
-    Parsed with a tiny line scanner (no pyyaml dependency) — the file is a flat
-    list of `- name` entries under `task_names:` keys.
-    """
-    names = set()
-    try:
-        capturing = False
-        for line in FOCUSED_YAML.read_text().splitlines():
-            s = line.strip()
-            if s == "task_names:":
-                capturing = True
-                continue
-            if capturing:
-                # A task name is a bare list item with no colon (a mapping like
-                # `- path: ...` is NOT a name and ends the block).
-                m = re.match(r"-\s+([\w./-]+)\s*$", s)
-                if m:
-                    names.add(m.group(1))
-                else:
-                    capturing = False
-    except Exception:
-        pass
-    return names
 
 
 def read_file(path: Path) -> str:
@@ -167,7 +139,7 @@ def step_snippets(task_dir: Path) -> list:
     return out
 
 
-def scan_tasks(weights: dict, focused: set) -> list:
+def scan_tasks(weights: dict) -> list:
     tasks = []
     tier_default, tier_overrides = load_validation()
     # Scan the live suite AND the archive (archived tasks are shown, flagged).
@@ -211,7 +183,6 @@ def scan_tasks(weights: dict, focused: set) -> list:
                     "weight": weights.get(md.get("category", cat_dir.name), 1.0),
                     "graded": is_graded(verifiers),
                     "discriminating": "harness-discriminating" in tags,
-                    "focused": task_dir.name in focused,
                     "status": md.get("status", "active"),
                     "deprecation_reason": md.get("deprecation_reason", ""),
                     "tier": ("retired" if (archived or md.get("status") == "deprecated")
@@ -340,7 +311,6 @@ def render(tasks: list, weights: dict) -> str:
     n_multi = sum(1 for t in real if t["multistep"])
     n_graded = sum(1 for t in real if t["graded"])
     n_disc = sum(1 for t in real if t["discriminating"])
-    n_focus = sum(1 for t in real if t["focused"])
     n_retired = sum(1 for t in real if t.get("status") == "deprecated")
     n_active = n_total - n_retired
 
@@ -427,8 +397,6 @@ def render_card(t: dict) -> str:
     # progress tier badge, then difficulty/grading/flags (in the body).
     head_badges = [badge(wlabel, wcls)]
     flags = []
-    if t["focused"]:
-        flags.append(badge("focused n=5", "focus"))
     flags.append(badge(f"{t['n_steps']} steps", "step") if t["multistep"]
                  else badge("1 step", "muted"))
 
@@ -459,7 +427,7 @@ def render_card(t: dict) -> str:
     # data-* attributes drive client-side filtering.
     data = (f'data-cat="{escape(t["category"])}" data-diff="{escape(diff)}" '
             f'data-graded="{int(t["graded"])}" data-disc="{int(t["discriminating"])}" '
-            f'data-focus="{int(t["focused"])}" data-multi="{int(t["multistep"])}" '
+            f'data-multi="{int(t["multistep"])}" '
             f'data-status="{"retired" if retired else "active"}" data-tier="{wkey}" '
             f'data-archived="{int(archived)}" '
             f'data-search="{escape((t["name"] + " " + t["dir"] + " " + t["shape"] + " " + t["description"] + " " + " ".join(t["tags"])).lower())}"')
@@ -575,9 +543,10 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   #mo pre{{margin:0;padding:16px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12.5px/1.55 ui-monospace,Menlo,monospace;color:#cdd6e4}}
 </style></head><body>
 <div class="nav">
-  <a href="agent-status.html">Agent status</a>
-  <a href="task-catalog.html" class="active">Task Suite</a>
+  <a href="index.html">Home</a>
   <a href="roadmap.html">Roadmap</a>
+  <a href="task-catalog.html" class="active">Task Suite</a>
+  <a href="results.html">Results</a>
 </div>
 <h1>Task Suite — every eval task (active + archived)</h1>
 <div class="ts">generated {ts} · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
@@ -591,7 +560,6 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
-  <label><input type="checkbox" id="f-focus"> focused set</label>
   <label><input type="checkbox" id="f-multi"> multi-step</label>
   <input type="search" id="f-search" placeholder="search name / shape / description / tags">
   <button class="toolbtn" onclick="expandAll(1)">expand all</button>
@@ -635,7 +603,7 @@ const F = id => document.getElementById(id);
 function applyFilters(){{
   const cat=F('f-cat').value, tier=F('f-tier').value, diff=F('f-diff').value,
         graded=F('f-graded').checked,
-        focus=F('f-focus').checked, multi=F('f-multi').checked,
+        multi=F('f-multi').checked,
         q=F('f-search').value.trim().toLowerCase();
   let shown=0;
   document.querySelectorAll('.task').forEach(c=>{{
@@ -646,7 +614,6 @@ function applyFilters(){{
     if(tier && c.dataset.tier!==tier) ok=false;
     if(diff && c.dataset.diff!==diff) ok=false;
     if(graded && c.dataset.graded!=='1') ok=false;
-    if(focus && c.dataset.focus!=='1') ok=false;
     if(multi && c.dataset.multi!=='1') ok=false;
     if(q && !c.dataset.search.includes(q)) ok=false;
     c.classList.toggle('hidden', !ok);
@@ -659,7 +626,7 @@ function applyFilters(){{
   }});
   F('count').textContent = shown+' / '+TOTAL+' shown';
 }}
-['f-cat','f-tier','f-diff','f-graded','f-focus','f-multi','f-search'].forEach(
+['f-cat','f-tier','f-diff','f-graded','f-multi','f-search'].forEach(
   id=>{{const el=F(id); el.addEventListener('input',applyFilters); el.addEventListener('change',applyFilters);}});
 applyFilters();
 </script>
@@ -672,8 +639,7 @@ def main():
     args = ap.parse_args()
 
     weights = load_weights()
-    focused = load_focused_names()
-    tasks = scan_tasks(weights, focused)
+    tasks = scan_tasks(weights)
     OUT.write_text(render(tasks, weights))
     n = len([t for t in tasks if "_error" not in t])
     print(f"wrote {OUT} ({n} tasks)")

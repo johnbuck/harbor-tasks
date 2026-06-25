@@ -1,4 +1,4 @@
-"""Track A post-run analyzer: weighted aggregate + harness SPLIT + pass^k.
+"""Suite post-run analyzer: weighted aggregate + harness SPLIT + pass^k.
 
 WHY NOT A MetricType.UV_SCRIPT?
 Harbor's metric API receives `list[RewardDict | None]` — just the rewards, no
@@ -24,16 +24,16 @@ clears the ≥10% bar reliably under pass^k. This analyzer computes:
 Read flow:
   jobs/<job>/<trial>/result.json      → agent_info.name + task_name + rewards
   tasks/<cat>/<name>/task.toml        → [metadata].category + .difficulty
-  configs/track-a-weights.toml        → per-category weight multipliers
+  configs/suite-weights.toml        → per-category weight multipliers
 
 Write flow:
-  jobs/<job>/track_a_report.json      → {agents, split, per_task_discrimination}
+  jobs/<job>/suite_report.json      → {agents, split, per_task_discrimination}
 
 USAGE:
-  uv run metrics/track_a_weighted.py \
-      --job-dir /tmp/harbor-jobs/track-a-sweep-1 \
+  uv run metrics/suite_weighted.py \
+      --job-dir /tmp/harbor-jobs/suite-sweep-1 \
       --tasks-root <repo>/tasks \
-      --weights configs/track-a-weights.toml [--pass-threshold 1.0]
+      --weights configs/suite-weights.toml [--pass-threshold 1.0]
 """
 
 from __future__ import annotations
@@ -472,11 +472,11 @@ def main() -> int:
     p.add_argument("--weights", required=True, type=Path)
     p.add_argument("--pass-threshold", type=float, default=DEFAULT_PASS_THRESHOLD)
     p.add_argument("--out", type=Path, default=None,
-                   help="output JSON; default: <first-job-dir>/track_a_report.json")
+                   help="output JSON; default: <first-job-dir>/suite_report.json")
     args = p.parse_args()
 
     report = analyze(args.job_dir, args.tasks_root, args.weights, args.pass_threshold)
-    out = args.out or (args.job_dir[0] / "track_a_report.json")
+    out = args.out or (args.job_dir[0] / "suite_report.json")
     out.write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
     _print_summary(report)
