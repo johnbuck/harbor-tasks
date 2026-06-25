@@ -99,14 +99,14 @@
   <a href="roadmap.html">Roadmap</a>
 </div>
 <h1>Task Suite — every eval task (live + archived)</h1>
-<div class="ts">generated 2026-06-25 11:56:54 · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
+<div class="ts">generated 2026-06-25 12:22:51 · source: tasks/ + archive/ + configs/ · re-run tools/task_catalog.py to refresh ·
   click a row to expand: what it asks, how it's graded, the oracle, the environment, and the work left to do<br>
   <b>33</b> live tasks + <b>20</b> archived (retired from the active suite, kept in <span class="mono">archive/</span> for reference — flagged, not deleted)</div>
 
 
     <div class="summary">
       <div class="stat"><b>33</b><span>active tasks</span></div>
-      <div class="stat work-done"><b>33</b><span>✓ passes oracle</span></div>
+      <div class="stat work-done"><b>33</b><span>✓ oracle</span></div>
       <div class="stat work-done"><b>33</b><span>✓ e2e smoke</span></div>
       <div class="stat"><b>0</b><span>n≥3 verdict</span></div>
       <div class="stat"><b>20</b><span>archived</span></div>
@@ -114,9 +114,9 @@
       <div class="stat wide"><b>difficulty</b><span>easy: 2 · medium: 15 · hard: 36</span></div>
     </div>
 <div class="filterbar">
-  <select id="f-archived"><option value="">live + archived</option><option value="0">live only</option><option value="1">archived only</option></select>
+  <select id="f-archived"><option value="0" selected>live only</option><option value="">live + archived</option><option value="1">archived only</option></select>
   <select id="f-cat"><option value="">all categories</option><option value="context-management">context-management</option><option value="real-world-workflows">real-world-workflows</option><option value="skill-agent-authoring">skill-agent-authoring</option><option value="tool-orchestration">tool-orchestration</option><option value="conversation-persona">conversation-persona</option><option value="insights-research">insights-research</option><option value="research-rag">research-rag</option><option value="backup-dr">backup-dr</option><option value="building-prototypes">building-prototypes</option><option value="data-analytics">data-analytics</option><option value="migration">migration</option><option value="ops-debugging">ops-debugging</option><option value="context-rot">context-rot</option><option value="prod-behavioral">prod-behavioral</option><option value="building-designs">building-designs</option><option value="code-editing">code-editing</option><option value="code-spec-review">code-spec-review</option><option value="compliance-security">compliance-security</option><option value="documentation">documentation</option><option value="marketing">marketing</option><option value="test-authoring">test-authoring</option></select>
-  <select id="f-tier"><option value="">any progress</option><option value="todo">to do</option><option value="oracle">passes oracle ✓</option><option value="smoke">e2e smoke ✓</option><option value="verdict">n≥3 verdict ✓</option><option value="retired">archived</option></select>
+  <select id="f-tier"><option value="">any progress</option><option value="todo">to do</option><option value="oracle">oracle ✓</option><option value="smoke">e2e smoke ✓</option><option value="verdict">n≥3 verdict ✓</option><option value="retired">archived</option></select>
   <select id="f-diff"><option value="">any difficulty</option>
     <option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option></select>
   <label><input type="checkbox" id="f-graded"> graded only</label>
@@ -139,7 +139,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">separate-two-parallel-projects</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -161,7 +160,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">track-final-state-through-corrections</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -183,7 +181,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">track-project-across-context-overflow</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -213,7 +210,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">book-meeting-with-contact</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -235,7 +231,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">clean-expense-ledger</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -257,7 +252,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">summarize-support-emails-safely</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -287,7 +281,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">parallel-delegation-under-deadline</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -309,7 +302,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">skill-discovery-with-docs</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -331,7 +323,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">sub-agent-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -361,7 +352,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multi-goal-tool-routing</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -383,7 +373,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-plan-execute-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -405,7 +394,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-plan-execute-02</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -427,7 +415,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-plan-execute-03</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -449,7 +436,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">pick-right-shell-utility</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -471,7 +457,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">redesign-module-keep-constraints</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -493,7 +478,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">web-research-multi-page</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -523,7 +507,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">remember-facts-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -545,7 +528,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">apply-standing-preferences-unprompted</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -567,7 +549,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">distinguish-my-facts-from-others</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -589,7 +570,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">persist-facts-through-corrections</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -611,7 +591,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">recall-details-across-task-switching</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -633,7 +612,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">recall-details-under-high-load</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -655,7 +633,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">refresh-config-over-cached-value</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -685,7 +662,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">audit-report-contradictions</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -715,7 +691,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">research-org-profile-cited</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -737,7 +712,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">verify-company-facts-cited</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -767,7 +741,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">restore-runbook-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -797,7 +770,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">cli-tool-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -819,7 +791,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-scaffold-implement-document-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -841,7 +812,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-scaffold-implement-document-02</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -863,7 +833,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">multistep-scaffold-implement-document-03</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -893,7 +862,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">analyze-sales-data</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -923,7 +891,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">pydantic-v2-migration</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -953,7 +920,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">adaptive-tool-error-recovery</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -975,7 +941,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">http-outage-root-cause-from-logs</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -997,7 +962,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">log-analytics-with-tie-breaks</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1027,7 +991,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">chain-facts-across-survey-depth</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1049,7 +1012,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">retain-details-across-long-survey</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1079,7 +1041,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">basic-knowledge-qa</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1109,7 +1070,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">api-contract-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1139,7 +1099,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">add-feature-with-tests-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1161,7 +1120,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">add-feature-with-tests-02</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1183,7 +1141,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">fix-bug-with-failing-test-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1205,7 +1162,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">fix-bug-with-failing-test-02</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1227,7 +1183,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">fix-bug-with-failing-test-03</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1249,7 +1204,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">fix-bug-with-failing-test-04</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1271,7 +1225,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">fix-bug-with-failing-test-05</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1293,7 +1246,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">geometry-polymorphism-refactor</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1323,7 +1275,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">security-code-review</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1353,7 +1304,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">credential-leak-detection</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
@@ -1383,7 +1333,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">readme-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1413,7 +1362,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">email-copy-01</span>
-        <span class="badge review">archived</span>
         <span class="badge retired">archived</span>
       </div>
       <div class="acc-body">
@@ -1443,7 +1391,6 @@
       <div class="acc-head" onclick="toggleAcc(this)">
         <span class="caret">▶</span>
         <span class="tname">comprehensive-unit-tests</span>
-        
         <span class="badge ok">e2e smoke ✓</span>
       </div>
       <div class="acc-body">
