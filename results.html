@@ -70,9 +70,6 @@ h1{font-size:18px;margin:0 0 2px}
 .vmeet{font:700 10.5px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:20px}
 .vmeet.ok{background:#163a22;color:#5fd07e}
 .vmeet.no{background:#222734;color:#9aa1ad}
-.verdline{font-size:13px;line-height:1.6;color:#c4ccd8;background:#10131a;border:1px solid #222734;
-  border-left:3px solid #5fd0d0;border-radius:8px;padding:11px 14px;margin-bottom:18px}
-.verdline b{color:#e6e6e6}
 
 .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
 @media(max-width:780px){.pillars{grid-template-columns:1fr}.versus{grid-template-columns:1fr 90px 1fr}}
@@ -153,8 +150,7 @@ h1{font-size:18px;margin:0 0 2px}
 <button class="runtab" data-run="r1" onclick="showRun('r1')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core verdict<span class="rchip dep">Superseded</span></span><span class="rm">n=5 &middot; 11 tasks &middot; 2026-06-10</span></button>
 <button class="runtab" data-run="r2" onclick="showRun('r2')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core smoke<span class="rchip dep">Superseded</span></span><span class="rm">n=1 &middot; 11 tasks &middot; 2026-06-10</span></button></div>
 
-  <div class="ds" id="r0"><div class="rbanner info"><b>Latest run</b> &middot; n=1 smoke across 32 tasks (2026-06-22). A single attempt per task &mdash; a preliminary plumbing read, <b>not a reliability verdict</b>. No task is approved yet, and a few trials hit a transient outage and are being re-run.</div>
-<div class="versus">
+  <div class="ds" id="r0"><div class="versus">
   <div class="vcol he lo">
     <div class="vname">hermes</div><div class="vscore">0.47</div>
     <div class="vbar"><i style="width:47%"></i></div>
@@ -169,7 +165,7 @@ h1{font-size:18px;margin:0 0 2px}
     <div class="vbar"><i style="width:62%"></i></div><div class="vtag leader oc">leads</div>
   </div>
 </div>
-<div class="verdline">Single-attempt read: Across 32 tasks, <b>openclaw</b> leads the weighted quality score 0.62 to 0.47 — a 0.15 gap that clears the 10% bar — this run separates the two harnesses on the same model.</div>
+<div class="rbanner info"><b>Latest run</b> &middot; n=1 smoke, 32 tasks (2026-06-22). <b>openclaw</b> leads the weighted quality score 0.62 to 0.47 — a 0.15 gap that clears the 10% bar, separating the two harnesses on the same model. A single attempt per task, though — a preliminary plumbing read, <b>not a reliability verdict</b>; no task is approved yet, and a few trials hit a transient outage and are being re-run.</div>
 <div class="pillars">
   <div class="pill oc">
     <div class="pk">Quality</div>
@@ -355,8 +351,7 @@ h1{font-size:18px;margin:0 0 2px}
   <div class="relbar"><i style="width:46.88%;background:#5fd07e" title="clean 15"></i><i style="width:15.62%;background:#e6c98a" title="partial 5"></i><i style="width:6.25%;background:#7f9fc8" title="timeout 2"></i><i style="width:21.88%;background:#ef7a7a" title="fail 7"></i><i style="width:9.38%;background:#b5403f" title="crash 3"></i></div>
   <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 15</span><span><i class="rdot" style="background:#e6c98a"></i>partial 5</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 2</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 7</span><span><i class="rdot" style="background:#b5403f"></i>crash 3</span></div>
 </div></div></div>
-<div class="ds hidden" id="r1"><div class="rbanner dep"><b>Superseded</b> &middot; 2026-06-10. This run predates the task rework (second adversarial pass + rebuild), so it no longer reflects the current suite. Kept here for history &mdash; not the current state.</div>
-<div class="versus">
+<div class="ds hidden" id="r1"><div class="versus">
   <div class="vcol he win">
     <div class="vname">hermes</div><div class="vscore">0.63</div>
     <div class="vbar"><i style="width:63%"></i></div><div class="vtag leader he">leads</div>
@@ -371,7 +366,7 @@ h1{font-size:18px;margin:0 0 2px}
     <div class="vbar"><i style="width:44%"></i></div>
   </div>
 </div>
-<div class="verdline">Across 11 tasks, <b>hermes</b> leads the weighted quality score 0.63 to 0.44 — a 0.19 gap that clears the 10% bar — this run separates the two harnesses on the same model.</div>
+<div class="rbanner dep"><b>Superseded</b> &middot; 2026-06-10. hermes led the weighted quality score 0.63 to 0.44 — a 0.19 gap that clears the 10% bar, separating the two harnesses on the same model. This run predates the task rework (second adversarial pass + rebuild), so it no longer reflects the current suite — kept for history, not the current state.</div>
 <div class="pillars">
   <div class="pill">
     <div class="pk">Quality</div>
@@ -477,8 +472,7 @@ h1{font-size:18px;margin:0 0 2px}
   <div class="relbar"><i style="width:34.55%;background:#5fd07e" title="clean 19"></i><i style="width:12.73%;background:#e6c98a" title="partial 7"></i><i style="width:10.91%;background:#7f9fc8" title="timeout 6"></i><i style="width:32.73%;background:#ef7a7a" title="fail 18"></i><i style="width:9.09%;background:#b5403f" title="crash 5"></i></div>
   <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 19</span><span><i class="rdot" style="background:#e6c98a"></i>partial 7</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 6</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 18</span><span><i class="rdot" style="background:#b5403f"></i>crash 5</span></div>
 </div></div></div>
-<div class="ds hidden" id="r2"><div class="rbanner dep"><b>Superseded</b> &middot; 2026-06-10. This run predates the task rework (second adversarial pass + rebuild), so it no longer reflects the current suite. Kept here for history &mdash; not the current state.</div>
-<div class="versus">
+<div class="ds hidden" id="r2"><div class="versus">
   <div class="vcol he win">
     <div class="vname">hermes</div><div class="vscore">0.70</div>
     <div class="vbar"><i style="width:70%"></i></div><div class="vtag leader he">leads</div>
@@ -493,7 +487,7 @@ h1{font-size:18px;margin:0 0 2px}
     <div class="vbar"><i style="width:56%"></i></div>
   </div>
 </div>
-<div class="verdline">Single-attempt read: Across 11 tasks, <b>hermes</b> leads the weighted quality score 0.70 to 0.56 — a 0.14 gap that clears the 10% bar — this run separates the two harnesses on the same model.</div>
+<div class="rbanner dep"><b>Superseded</b> &middot; 2026-06-10. hermes led the weighted quality score 0.70 to 0.56 — a 0.14 gap that clears the 10% bar, separating the two harnesses on the same model. This run predates the task rework (second adversarial pass + rebuild), so it no longer reflects the current suite — kept for history, not the current state.</div>
 <div class="pillars">
   <div class="pill">
     <div class="pk">Quality</div>
