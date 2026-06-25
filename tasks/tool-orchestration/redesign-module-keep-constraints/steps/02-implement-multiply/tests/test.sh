@@ -1,19 +1,10 @@
 #!/bin/bash
+# Graded verifier (rewardkit): reward = correctness (1 iff calc.py imports and all
+# step-2 asserts pass), carried by the weight-1 `score` criterion. rewardkit baked
+# in the base image.
+set -u
 mkdir -p /logs/verifier
-ok=0
-python3 -c "
-import sys; sys.path.insert(0, '/app')
-from calc import add, multiply, divide, compose, dispatch, REGISTRY
-assert add(2, 3) == 5
-assert multiply(4, 5) == 20
-assert multiply(0, 99) == 0
-assert multiply(50, 50) == 1000   # clamp policy still applied
-assert divide(10, 2) == 5
-assert compose('add', 'multiply', 2, 3, 4) == 20
-assert dispatch('multiply', 4, 5) == 20
-assert set(REGISTRY) >= {'add', 'multiply', 'divide', 'compose'}
-print('OK')
-" >/dev/null 2>&1 && ok=1
-cat > /logs/verifier/reward.json <<EOF
-{"reward": ${ok}, "correctness": ${ok}}
-EOF
+# Crash guard: a rewardkit exception that writes no reward.json makes Harbor
+# silently DROP the trial (FOOTGUNS #2). Guarantee a flat numeric reward.json.
+rewardkit /tests --workspace /app --output /logs/verifier/reward.json \
+    || echo '{"reward": 0.0}' > /logs/verifier/reward.json
