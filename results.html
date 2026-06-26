@@ -146,147 +146,148 @@ h1{font-size:18px;margin:0 0 2px}
   <div class="ts">generated 2026-06-25 &middot; <b>openclaw</b> vs <b>hermes</b> on the same frontier model &middot; pick a run to compare &middot; edit tools/results.py to refresh</div>
 
   <div class="swlbl">View</div>
-  <div class="runsel"><button class="runtab active" data-run="agg" onclick="showRun('agg')"><span class="rl"><i class="rdot" style="background:#9b8cff"></i>Aggregated<span class="rchip muted">all runs</span></span><span class="rm">3 runs &middot; 196 trials</span></button>
-<button class="runtab" data-run="r0" onclick="showRun('r0')"><span class="rl"><i class="rdot" style="background:#5fd07e"></i>Full-suite smoke<span class="rchip ok">Latest</span></span><span class="rm">n=1 &middot; 32 tasks &middot; 2026-06-22</span></button>
-<button class="runtab" data-run="r1" onclick="showRun('r1')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core verdict<span class="rchip dep">Superseded</span></span><span class="rm">n=5 &middot; 11 tasks &middot; 2026-06-10</span></button>
-<button class="runtab" data-run="r2" onclick="showRun('r2')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core smoke<span class="rchip dep">Superseded</span></span><span class="rm">n=1 &middot; 11 tasks &middot; 2026-06-10</span></button></div>
+  <div class="runsel"><button class="runtab active" data-run="agg" onclick="showRun('agg')"><span class="rl"><i class="rdot" style="background:#9b8cff"></i>Aggregated<span class="rchip muted">all runs</span></span><span class="rm">4 runs &middot; 260 trials</span></button>
+<button class="runtab" data-run="r0" onclick="showRun('r0')"><span class="rl"><i class="rdot" style="background:#5fd07e"></i>Unified suite smoke<span class="rchip ok">Latest</span></span><span class="rm">n=1 &middot; 32 tasks &middot; 2026-06-25</span></button>
+<button class="runtab" data-run="r1" onclick="showRun('r1')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Full-suite smoke<span class="rchip dep">Superseded</span></span><span class="rm">n=1 &middot; 32 tasks &middot; 2026-06-22</span></button>
+<button class="runtab" data-run="r2" onclick="showRun('r2')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core verdict<span class="rchip dep">Superseded</span></span><span class="rm">n=5 &middot; 11 tasks &middot; 2026-06-10</span></button>
+<button class="runtab" data-run="r3" onclick="showRun('r3')"><span class="rl"><i class="rdot" style="background:#c98a5f"></i>Core smoke<span class="rchip dep">Superseded</span></span><span class="rm">n=1 &middot; 11 tasks &middot; 2026-06-10</span></button></div>
 
   <div class="ds" id="agg"><div class="versus">
   <div class="vcol he win">
-    <div class="vname">hermes</div><div class="vscore">0.60</div>
-    <div class="vbar"><i style="width:60%"></i></div><div class="vtag leader he">leads</div>
+    <div class="vname">hermes</div><div class="vscore">0.59</div>
+    <div class="vbar"><i style="width:59%"></i></div><div class="vtag leader he">leads</div>
   </div>
   <div class="vmid">
     <div class="vvs">vs</div>
-    <div class="vgap"><span>&#916;</span> 0.06</div>
+    <div class="vgap"><span>&#916;</span> 0.03</div>
     <div class="vmeet no">within noise</div>
   </div>
   <div class="vcol oc lo">
-    <div class="vname">openclaw</div><div class="vscore">0.54</div>
-    <div class="vbar"><i style="width:54%"></i></div>
+    <div class="vname">openclaw</div><div class="vscore">0.56</div>
+    <div class="vbar"><i style="width:56%"></i></div>
   </div>
 </div>
-<div class="rbanner info"><b>Aggregated across 3 runs</b> &middot; 196 total trials. Mean weighted quality <b>hermes</b> 0.60 vs 0.54. Reliability below <b>sums raw trial outcomes</b> across every run (a clean aggregate); quality, pass^k and efficiency are per-run <b>means</b> &mdash; 2 of them superseded (older task sets), so this is the cross-run picture, <b>not a finalized verdict</b>. The per-run tabs hold each run&rsquo;s true status.</div>
+<div class="rbanner info"><b>Aggregated across 4 runs</b> &middot; 260 total trials. Mean weighted quality <b>hermes</b> 0.59 vs 0.56. Reliability below <b>sums raw trial outcomes</b> across every run (a clean aggregate); quality, pass^k and efficiency are per-run <b>means</b> &mdash; 3 of them superseded (older task sets), so this is the cross-run picture, <b>not a finalized verdict</b>. The per-run tabs hold each run&rsquo;s true status.</div>
 <div class="pillars">
   <div class="pill">
     <div class="pk">Quality</div>
-    <div class="pv">+0.06<span class="u">gap</span></div>
+    <div class="pv">+0.03<span class="u">gap</span></div>
     <div class="pl">hermes ahead &middot; inside the 10% noise band</div>
-    <div class="ps">Passing <b>every</b> attempt on a task: hermes 37%, openclaw 31%. Consistency, not a lucky single run.</div>
+    <div class="ps">Passing <b>every</b> attempt on a task: hermes 39%, openclaw 37%. Consistency, not a lucky single run.</div>
   </div>
   <div class="pill">
     <div class="pk">Efficiency</div>
-    <div class="pv">5.0<span class="u">&times; cost/task</span></div>
+    <div class="pv">4.4<span class="u">&times; cost/task</span></div>
     <div class="pl">hermes ahead on cost</div>
-    <div class="ps">Same model, same work — <b>openclaw</b> spends 5.0&times; as much per task. It even runs on fewer raw tokens (45% of hermes's), so the gap is how the harness <b>reuses context</b>, not the model.</div>
+    <div class="ps">Same model, same work — <b>openclaw</b> spends 4.4&times; as much per task. It even runs on fewer raw tokens (44% of hermes's), so the gap is how the harness <b>reuses context</b>, not the model.</div>
   </div>
   <div class="pill">
     <div class="pk">Reliability</div>
-    <div class="pv">60%<span class="u">vs 55% errors</span></div>
+    <div class="pv">56%<span class="u">vs 55% errors</span></div>
     <div class="pl">hermes ahead &middot; fewer failures</div>
-    <div class="ps">Crash rate hermes 2% vs openclaw 8%; overall error rate
-      55% vs 60%. Lower is more trustworthy unattended.</div>
+    <div class="ps">Crash rate hermes 3% vs openclaw 8%; overall error rate
+      55% vs 56%. Lower is more trustworthy unattended.</div>
   </div>
 </div>
 <div class="sec">By category <span class="muted">— mean weighted quality across runs, sorted by gap</span></div>
 <div class="cats"><div class="catrow gap">
-  <div class="cattop"><span class="catnm">migration</span>
-    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+1.00 openclaw</span></div>
-  <div class="hh">
-    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
-    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
-  </div>
-</div>
-<div class="catrow gap">
-  <div class="cattop"><span class="catnm">code-spec-review</span>
-    <span class="catw">weight 0.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.33 openclaw</span></div>
-  <div class="hh">
-    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:67%"></i></div><span class="hhval">0.67</span></div>
-    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
-  </div>
-</div>
-<div class="catrow gap">
-  <div class="cattop"><span class="catnm">skill-agent-authoring</span>
-    <span class="catw">weight 3.0</span><span class="gaptag">clear gap</span><span class="dchip he">+0.28 hermes</span></div>
-  <div class="hh">
-    <div class="hhrow he"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:82%"></i></div><span class="hhval">0.82</span></div>
-    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:53%"></i></div><span class="hhval">0.53</span></div>
-  </div>
-</div>
-<div class="catrow gap">
   <div class="cattop"><span class="catnm">ops-debugging</span>
-    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.23 openclaw</span></div>
-  <div class="hh">
-    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:71%"></i></div><span class="hhval">0.71</span></div>
-    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:94%"></i></div><span class="hhval">0.94</span></div>
-  </div>
-</div>
-<div class="catrow gap">
-  <div class="cattop"><span class="catnm">context-rot</span>
-    <span class="catw">weight 1.0</span><span class="gaptag">clear gap</span><span class="dchip he">+0.12 hermes</span></div>
-  <div class="hh">
-    <div class="hhrow he"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
-    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:88%"></i></div><span class="hhval">0.88</span></div>
-  </div>
-</div>
-<div class="catrow gap">
-  <div class="cattop"><span class="catnm">conversation-persona</span>
-    <span class="catw">weight 2.0</span><span class="gaptag">clear gap</span><span class="dchip he">+0.11 hermes</span></div>
-  <div class="hh">
-    <div class="hhrow he"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
-    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:39%"></i></div><span class="hhval">0.39</span></div>
-  </div>
-</div>
-<div class="catrow">
-  <div class="cattop"><span class="catnm">real-world-workflows</span>
-    <span class="catw">weight 3.0</span><span class="dchip oc">+0.04 openclaw</span></div>
+    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.25 openclaw</span></div>
   <div class="hh">
     <div class="hhrow he lo"><span class="hhlbl">hermes</span>
       <div class="hbar he"><i style="width:68%"></i></div><span class="hhval">0.68</span></div>
     <div class="hhrow oc"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:72%"></i></div><span class="hhval">0.72</span></div>
+      <div class="hbar oc"><i style="width:93%"></i></div><span class="hhval">0.93</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">migration</span>
+    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.25 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:25%"></i></div><span class="hhval">0.25</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">code-spec-review</span>
+    <span class="catw">weight 0.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.17 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:83%"></i></div><span class="hhval">0.83</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">compliance-security</span>
+    <span class="catw">weight 0.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.12 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:38%"></i></div><span class="hhval">0.38</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
   </div>
 </div>
 <div class="catrow">
-  <div class="cattop"><span class="catnm">context-management</span>
-    <span class="catw">weight 3.0</span><span class="dchip he">+0.03 hermes</span></div>
+  <div class="cattop"><span class="catnm">context-rot</span>
+    <span class="catw">weight 1.0</span><span class="dchip he">+0.09 hermes</span></div>
   <div class="hh">
     <div class="hhrow he"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:42%"></i></div><span class="hhval">0.42</span></div>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
     <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:39%"></i></div><span class="hhval">0.39</span></div>
+      <div class="hbar oc"><i style="width:91%"></i></div><span class="hhval">0.91</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">skill-agent-authoring</span>
+    <span class="catw">weight 3.0</span><span class="dchip he">+0.09 hermes</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:61%"></i></div><span class="hhval">0.61</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:52%"></i></div><span class="hhval">0.53</span></div>
   </div>
 </div>
 <div class="catrow">
   <div class="cattop"><span class="catnm">tool-orchestration</span>
-    <span class="catw">weight 3.0</span><span class="dchip oc">+0.00 openclaw</span></div>
+    <span class="catw">weight 3.0</span><span class="dchip he">+0.06 hermes</span></div>
   <div class="hh">
-    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:46%"></i></div><span class="hhval">0.46</span></div>
-    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:46%"></i></div><span class="hhval">0.46</span></div>
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:44%"></i></div><span class="hhval">0.44</span></div>
   </div>
 </div>
 <div class="catrow">
-  <div class="cattop"><span class="catnm">insights-research</span>
-    <span class="catw">weight 2.0</span><span class="dchip tie">even</span></div>
+  <div class="cattop"><span class="catnm">conversation-persona</span>
+    <span class="catw">weight 2.0</span><span class="dchip he">+0.04 hermes</span></div>
   <div class="hh">
     <div class="hhrow he"><span class="hhlbl">hermes</span>
-      <div class="hbar he"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+      <div class="hbar he"><i style="width:54%"></i></div><span class="hhval">0.54</span></div>
     <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
-      <div class="hbar oc"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">real-world-workflows</span>
+    <span class="catw">weight 3.0</span><span class="dchip oc">+0.02 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:72%"></i></div><span class="hhval">0.72</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:74%"></i></div><span class="hhval">0.74</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">context-management</span>
+    <span class="catw">weight 3.0</span><span class="dchip oc">+0.02 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:40%"></i></div><span class="hhval">0.40</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:42%"></i></div><span class="hhval">0.42</span></div>
   </div>
 </div>
 <div class="catrow">
@@ -320,8 +321,8 @@ h1{font-size:18px;margin:0 0 2px}
   </div>
 </div>
 <div class="catrow">
-  <div class="cattop"><span class="catnm">compliance-security</span>
-    <span class="catw">weight 0.5</span><span class="dchip tie">even</span></div>
+  <div class="cattop"><span class="catnm">insights-research</span>
+    <span class="catw">weight 2.0</span><span class="dchip tie">even</span></div>
   <div class="hh">
     <div class="hhrow he"><span class="hhlbl">hermes</span>
       <div class="hbar he"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
@@ -338,21 +339,222 @@ h1{font-size:18px;margin:0 0 2px}
     <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
       <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
   </div>
-</div></div><div class="catnote"><b>6 of 15 categories</b> show a clear gap (&ge;10%) — evidence the suite can separate harnesses, the precondition for any &ldquo;they&rsquo;re equivalent&rdquo; claim. Bars are weighted quality (0&ndash;1) on the same model.</div>
+</div></div><div class="catnote"><b>4 of 15 categories</b> show a clear gap (&ge;10%) — evidence the suite can separate harnesses, the precondition for any &ldquo;they&rsquo;re equivalent&rdquo; claim. Bars are weighted quality (0&ndash;1) on the same model.</div>
 <div class="sec">Reliability <span class="muted">— trial outcomes summed across all runs</span></div>
 <div class="relgrid"><div class="relcard he">
   <div class="relhead"><span class="relname">hermes</span>
-    <span class="reltri"><b>44/98</b> clean &middot; 55% error</span></div>
-  <div class="relbar"><i style="width:44.90%;background:#5fd07e" title="clean 44"></i><i style="width:27.55%;background:#e6c98a" title="partial 27"></i><i style="width:5.10%;background:#7f9fc8" title="timeout 5"></i><i style="width:20.41%;background:#ef7a7a" title="fail 20"></i><i style="width:2.04%;background:#b5403f" title="crash 2"></i></div>
-  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 44</span><span><i class="rdot" style="background:#e6c98a"></i>partial 27</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 5</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 20</span><span><i class="rdot" style="background:#b5403f"></i>crash 2</span></div>
+    <span class="reltri"><b>59/130</b> clean &middot; 55% error</span></div>
+  <div class="relbar"><i style="width:45.38%;background:#5fd07e" title="clean 59"></i><i style="width:26.15%;background:#e6c98a" title="partial 34"></i><i style="width:6.92%;background:#7f9fc8" title="timeout 9"></i><i style="width:18.46%;background:#ef7a7a" title="fail 24"></i><i style="width:3.08%;background:#b5403f" title="crash 4"></i></div>
+  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 59</span><span><i class="rdot" style="background:#e6c98a"></i>partial 34</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 9</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 24</span><span><i class="rdot" style="background:#b5403f"></i>crash 4</span></div>
 </div>
 <div class="relcard oc">
   <div class="relhead"><span class="relname">openclaw</span>
-    <span class="reltri"><b>39/98</b> clean &middot; 60% error</span></div>
-  <div class="relbar"><i style="width:39.80%;background:#5fd07e" title="clean 39"></i><i style="width:15.31%;background:#e6c98a" title="partial 15"></i><i style="width:9.18%;background:#7f9fc8" title="timeout 9"></i><i style="width:27.55%;background:#ef7a7a" title="fail 27"></i><i style="width:8.16%;background:#b5403f" title="crash 8"></i></div>
-  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 39</span><span><i class="rdot" style="background:#e6c98a"></i>partial 15</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 9</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 27</span><span><i class="rdot" style="background:#b5403f"></i>crash 8</span></div>
+    <span class="reltri"><b>57/130</b> clean &middot; 56% error</span></div>
+  <div class="relbar"><i style="width:43.85%;background:#5fd07e" title="clean 57"></i><i style="width:16.15%;background:#e6c98a" title="partial 21"></i><i style="width:7.69%;background:#7f9fc8" title="timeout 10"></i><i style="width:24.62%;background:#ef7a7a" title="fail 32"></i><i style="width:7.69%;background:#b5403f" title="crash 10"></i></div>
+  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 57</span><span><i class="rdot" style="background:#e6c98a"></i>partial 21</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 10</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 32</span><span><i class="rdot" style="background:#b5403f"></i>crash 10</span></div>
 </div></div></div>
 <div class="ds hidden" id="r0"><div class="versus">
+  <div class="vcol he lo">
+    <div class="vname">hermes</div><div class="vscore">0.56</div>
+    <div class="vbar"><i style="width:56%"></i></div>
+  </div>
+  <div class="vmid">
+    <div class="vvs">vs</div>
+    <div class="vgap"><span>&#916;</span> 0.06</div>
+    <div class="vmeet no">within noise</div>
+  </div>
+  <div class="vcol oc win">
+    <div class="vname">openclaw</div><div class="vscore">0.62</div>
+    <div class="vbar"><i style="width:62%"></i></div><div class="vtag leader oc">leads</div>
+  </div>
+</div>
+<div class="rbanner info"><b>Latest run</b> &middot; n=1 smoke, 32 tasks (2026-06-25). <b>openclaw</b> leads the weighted quality score 0.62 to 0.56 — a 0.06 gap inside the 10% noise band — no decisive split. A single attempt per task, though — a preliminary plumbing read, <b>not a reliability verdict</b>; no task is approved yet, and a few trials hit a transient outage and are being re-run.</div>
+<div class="pillars">
+  <div class="pill oc">
+    <div class="pk">Quality</div>
+    <div class="pv">+0.06<span class="u">gap</span></div>
+    <div class="pl">openclaw ahead &middot; inside the 10% noise band</div>
+    <div class="ps">Single attempt per task — a plumbing read, not a reliability verdict.</div>
+  </div>
+  <div class="pill">
+    <div class="pk">Efficiency</div>
+    <div class="pv">2.5<span class="u">&times; cost/task</span></div>
+    <div class="pl">hermes ahead on cost</div>
+    <div class="ps">Same model, same work — <b>openclaw</b> spends 2.5&times; as much per task. It even runs on fewer raw tokens (43% of hermes's), so the gap is how the harness <b>reuses context</b>, not the model.</div>
+  </div>
+  <div class="pill oc">
+    <div class="pk">Reliability</div>
+    <div class="pv">19%<span class="u">vs 9% errors</span></div>
+    <div class="pl">openclaw ahead &middot; fewer failures</div>
+    <div class="ps">Crash rate hermes 6% vs openclaw 6%; overall error rate
+      19% vs 9%. Lower is more trustworthy unattended.</div>
+  </div>
+</div>
+<div class="sec">By category <span class="muted">— weighted quality, sorted by gap</span></div>
+<div class="cats"><div class="catrow gap">
+  <div class="cattop"><span class="catnm">migration</span>
+    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip he">+0.50 hermes</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">skill-agent-authoring</span>
+    <span class="catw">weight 3.0</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.50 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">ops-debugging</span>
+    <span class="catw">weight 1.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.32 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:57%"></i></div><span class="hhval">0.57</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:89%"></i></div><span class="hhval">0.89</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">compliance-security</span>
+    <span class="catw">weight 0.5</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.25 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:75%"></i></div><span class="hhval">0.75</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">tool-orchestration</span>
+    <span class="catw">weight 3.0</span><span class="gaptag">clear gap</span><span class="dchip he">+0.25 hermes</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:62%"></i></div><span class="hhval">0.62</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:38%"></i></div><span class="hhval">0.38</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">conversation-persona</span>
+    <span class="catw">weight 2.0</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.17 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:67%"></i></div><span class="hhval">0.67</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:83%"></i></div><span class="hhval">0.83</span></div>
+  </div>
+</div>
+<div class="catrow gap">
+  <div class="cattop"><span class="catnm">context-management</span>
+    <span class="catw">weight 3.0</span><span class="gaptag">clear gap</span><span class="dchip oc">+0.17 openclaw</span></div>
+  <div class="hh">
+    <div class="hhrow he lo"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:33%"></i></div><span class="hhval">0.33</span></div>
+    <div class="hhrow oc"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">real-world-workflows</span>
+    <span class="catw">weight 3.0</span><span class="dchip he">+0.02 hermes</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:84%"></i></div><span class="hhval">0.84</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:81%"></i></div><span class="hhval">0.81</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">data-analytics</span>
+    <span class="catw">weight 1.5</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">code-spec-review</span>
+    <span class="catw">weight 0.5</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">test-authoring</span>
+    <span class="catw">weight 0.5</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">code-editing</span>
+    <span class="catw">weight 0.5</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">insights-research</span>
+    <span class="catw">weight 2.0</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:0%"></i></div><span class="hhval">0.00</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">research-rag</span>
+    <span class="catw">weight 2.0</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:50%"></i></div><span class="hhval">0.50</span></div>
+  </div>
+</div>
+<div class="catrow">
+  <div class="cattop"><span class="catnm">context-rot</span>
+    <span class="catw">weight 1.0</span><span class="dchip tie">even</span></div>
+  <div class="hh">
+    <div class="hhrow he"><span class="hhlbl">hermes</span>
+      <div class="hbar he"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+    <div class="hhrow oc lo"><span class="hhlbl">openclaw</span>
+      <div class="hbar oc"><i style="width:100%"></i></div><span class="hhval">1.00</span></div>
+  </div>
+</div></div><div class="catnote"><b>7 of 15 categories</b> show a clear gap (&ge;10%) — evidence the suite can separate harnesses, the precondition for any &ldquo;they&rsquo;re equivalent&rdquo; claim. Bars are weighted quality (0&ndash;1) on the same model.</div>
+<div class="sec">Reliability <span class="muted">— trial outcomes across all attempts</span></div>
+<div class="relgrid"><div class="relcard he">
+  <div class="relhead"><span class="relname">hermes</span>
+    <span class="reltri"><b>15/32</b> clean &middot; 19% error</span></div>
+  <div class="relbar"><i style="width:46.88%;background:#5fd07e" title="clean 15"></i><i style="width:21.88%;background:#e6c98a" title="partial 7"></i><i style="width:12.50%;background:#7f9fc8" title="timeout 4"></i><i style="width:12.50%;background:#ef7a7a" title="fail 4"></i><i style="width:6.25%;background:#b5403f" title="crash 2"></i></div>
+  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 15</span><span><i class="rdot" style="background:#e6c98a"></i>partial 7</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 4</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 4</span><span><i class="rdot" style="background:#b5403f"></i>crash 2</span></div>
+</div>
+<div class="relcard oc">
+  <div class="relhead"><span class="relname">openclaw</span>
+    <span class="reltri"><b>18/32</b> clean &middot; 9% error</span></div>
+  <div class="relbar"><i style="width:56.25%;background:#5fd07e" title="clean 18"></i><i style="width:18.75%;background:#e6c98a" title="partial 6"></i><i style="width:3.12%;background:#7f9fc8" title="timeout 1"></i><i style="width:15.62%;background:#ef7a7a" title="fail 5"></i><i style="width:6.25%;background:#b5403f" title="crash 2"></i></div>
+  <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 18</span><span><i class="rdot" style="background:#e6c98a"></i>partial 6</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 1</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 5</span><span><i class="rdot" style="background:#b5403f"></i>crash 2</span></div>
+</div></div></div>
+<div class="ds hidden" id="r1"><div class="versus">
   <div class="vcol he lo">
     <div class="vname">hermes</div><div class="vscore">0.47</div>
     <div class="vbar"><i style="width:47%"></i></div>
@@ -367,7 +569,7 @@ h1{font-size:18px;margin:0 0 2px}
     <div class="vbar"><i style="width:62%"></i></div><div class="vtag leader oc">leads</div>
   </div>
 </div>
-<div class="rbanner info"><b>Latest run</b> &middot; n=1 smoke, 32 tasks (2026-06-22). <b>openclaw</b> leads the weighted quality score 0.62 to 0.47 — a 0.15 gap that clears the 10% bar, separating the two harnesses on the same model. A single attempt per task, though — a preliminary plumbing read, <b>not a reliability verdict</b>; no task is approved yet, and a few trials hit a transient outage and are being re-run.</div>
+<div class="rbanner dep"><b>Superseded</b> &middot; 2026-06-22. openclaw led the weighted quality score 0.62 to 0.47 — a 0.15 gap that clears the 10% bar, separating the two harnesses on the same model. This run predates the task rework (second adversarial pass + rebuild), so it no longer reflects the current suite — kept for history, not the current state.</div>
 <div class="pillars">
   <div class="pill oc">
     <div class="pk">Quality</div>
@@ -553,7 +755,7 @@ h1{font-size:18px;margin:0 0 2px}
   <div class="relbar"><i style="width:46.88%;background:#5fd07e" title="clean 15"></i><i style="width:15.62%;background:#e6c98a" title="partial 5"></i><i style="width:6.25%;background:#7f9fc8" title="timeout 2"></i><i style="width:21.88%;background:#ef7a7a" title="fail 7"></i><i style="width:9.38%;background:#b5403f" title="crash 3"></i></div>
   <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 15</span><span><i class="rdot" style="background:#e6c98a"></i>partial 5</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 2</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 7</span><span><i class="rdot" style="background:#b5403f"></i>crash 3</span></div>
 </div></div></div>
-<div class="ds hidden" id="r1"><div class="versus">
+<div class="ds hidden" id="r2"><div class="versus">
   <div class="vcol he win">
     <div class="vname">hermes</div><div class="vscore">0.63</div>
     <div class="vbar"><i style="width:63%"></i></div><div class="vtag leader he">leads</div>
@@ -674,7 +876,7 @@ h1{font-size:18px;margin:0 0 2px}
   <div class="relbar"><i style="width:34.55%;background:#5fd07e" title="clean 19"></i><i style="width:12.73%;background:#e6c98a" title="partial 7"></i><i style="width:10.91%;background:#7f9fc8" title="timeout 6"></i><i style="width:32.73%;background:#ef7a7a" title="fail 18"></i><i style="width:9.09%;background:#b5403f" title="crash 5"></i></div>
   <div class="relleg"><span><i class="rdot" style="background:#5fd07e"></i>clean 19</span><span><i class="rdot" style="background:#e6c98a"></i>partial 7</span><span><i class="rdot" style="background:#7f9fc8"></i>timeout 6</span><span><i class="rdot" style="background:#ef7a7a"></i>fail 18</span><span><i class="rdot" style="background:#b5403f"></i>crash 5</span></div>
 </div></div></div>
-<div class="ds hidden" id="r2"><div class="versus">
+<div class="ds hidden" id="r3"><div class="versus">
   <div class="vcol he win">
     <div class="vname">hermes</div><div class="vscore">0.70</div>
     <div class="vbar"><i style="width:70%"></i></div><div class="vtag leader he">leads</div>
