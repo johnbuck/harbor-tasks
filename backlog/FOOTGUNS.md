@@ -965,3 +965,45 @@ and exits non-zero on any hit (printing the offending lines) — exactly like th
 (#35). Run it before any commit/push. Its patterns are shape-obfuscated so the
 gate never flags its own source; add new patterns the same way. Full plan +
 the pending scrub of pre-existing leaks: `backlog/2026-06-12-topology-scrub.md`.
+
+---
+
+## 47. Concurrent trial containers trip the LAN resolver's rate limit → `getaddrinfo EAI_AGAIN` (DNS-VOID crashes)
+
+**Symptom:** during a multi-trial sweep a few trials crash
+(`NonZeroAgentExitCodeError`, or `AgentTimeoutError` when DNS retries eat the
+clock); the agent log shows `[provider-transport-fetch] … code=EAI_AGAIN …
+getaddrinfo EAI_AGAIN openrouter.ai` (and the memory-MCP `fetch failed` in the
+same window — the whole container briefly can't resolve anything). No reward is
+written → it counts as a crash. In suite-n1 (n=1, 4-wide) it hit 2 of 32 tasks
+**on BOTH harnesses, the same two** — the heaviest research tasks that make the
+most API calls.
+
+**Real cause:** trial containers resolve **directly against the LAN Pi-hole with
+no caching**, and every concurrent container NATs to the run host's single LAN
+IP. A 4-wide sweep of high-thinking agents each re-resolving `openrouter.ai` per
+connection looks to Pi-hole like ONE client firing thousands of identical
+queries/min → trips its per-client rate limit → `REFUSED`/`SERVFAIL` → glibc
+returns `EAI_AGAIN`.
+
+**NOT a verdict bug:** the failures are **symmetric** (both harnesses, same
+tasks), so they don't bias the openclaw-vs-hermes delta — a residual VOID is just
+excluded. The fix is about wasted spend + coverage, not validity.
+
+**Fix (host DNS cache; keeps Pi-hole authoritative):** put the host's
+systemd-resolved cache between containers and Pi-hole so repeats are served
+locally and Pi-hole sees ~one query per name per TTL:
+- `resolved.conf.d` drop-in `DNSStubListenerExtra=<docker0-gw>` + `Cache=yes` →
+  `systemctl restart systemd-resolved` (exposes the cache on the docker0 gateway;
+  does NOT touch Docker).
+- `/etc/docker/daemon.json` `"dns": ["<docker0-gw>", "<pihole-secondary>"]`
+  (cache first, Pi-hole secondary as a direct fallback) → `systemctl restart
+  docker`.
+
+Verify with a concurrency hammer (N containers × M rapid `getaddrinfo`):
+pre-fix the burst throws `EAI_AGAIN`, post-fix `TOTAL_FAILS=0` (validated 8×200=
+1600 lookups, 0 fails). Apply + probe scripts live in the gitignored `jobs/`
+(`_dns_cache_fix.sh`, `_dns_hammer*.{sh,py}`). **`systemctl restart docker` needs
+root and bounces EVERY container on the host** (shared box — 15 unrelated
+services here) — get an OK + restore non-auto-restart containers after. No-sudo
+mitigation (not a cache): `N_CONCURRENT=2 tools/run_suite.sh` halves the burst.

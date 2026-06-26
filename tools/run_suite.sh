@@ -117,6 +117,13 @@ async def main() -> int:
     # editing the config — avoids leaving a stale n=1 in the committed YAML.
     if os.environ.get("N_ATTEMPTS"):
         raw["n_attempts"] = int(os.environ["N_ATTEMPTS"])
+    # N_CONCURRENT env overrides n_concurrent_trials (the DNS/Docker burst width).
+    # Concurrent trial containers all NAT to the run host's single client IP, so a
+    # wide burst trips Pi-hole's per-client rate limit -> getaddrinfo EAI_AGAIN
+    # (seen as crash-VOIDs in suite-n1). Lowering it (e.g. 2) keeps the burst under
+    # the limit without a host-side DNS cache. Default Harbor concurrency is 4.
+    if os.environ.get("N_CONCURRENT"):
+        raw["n_concurrent_trials"] = int(os.environ["N_CONCURRENT"])
 
     # EXCLUDE status="deprecated" tasks. Harbor selects local tasks by directory
     # path and does NOT read the task.toml [metadata] status, so a category-path
