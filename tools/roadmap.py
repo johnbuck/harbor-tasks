@@ -175,6 +175,8 @@ EPICS = [
              "WRITTEN 2026-06-10 once the first suite grid ran. RESULTS.md is the THIN layer no automated report can produce: the plain-English verdict (the suite discriminates, effective Δ=0.188, leader hermes, driven by reliability — hermes 4% vs openclaw 20% error), the construct-validity caveats (honcho asymmetry, recall-removed, n=1-is-a-coin-toss, false-zero/VOID traps), and the reproduction command — embedding the auto-computed split block, never a hand-typed table; numbers stay owned by metrics/suite_weighted.py → suite_report.json. Will refresh when the full-suite grid lands."),
             ("done", "FE exportable verdict report (follow-up)", "2026-06-03-results-verdict-thin-over-report.md",
              "DONE — realized by the multi-run head-to-head results page (tools/results.py → results.html), published on the gh-pages site: it bundles each curated run's split + status into a standalone, shareable artifact (the verdict as a live page, not a manual paste)."),
+            ("done", "Results page — head-to-head browser (per-run + aggregated)", "2026-06-25-results-aggregated-tab.md",
+             "tools/results.py → results.html (published on gh-pages): a public openclaw-vs-hermes browser. A run switcher shows each curated sweep's head-to-head with its true status (Latest / Superseded), and an Aggregated tab gives the cross-run picture — reliability summed across runs, quality/efficiency averaged, honestly labeled as not-a-verdict. Same model both harnesses, relative efficiency only, topology-clean."),
         ],
     },
 ]
